@@ -1,0 +1,24 @@
+<html>
+  <head>
+    <!-- load CPU instruction set -->
+    <script type="text/javascript" src="src/cpus/8086.js"></script>
+    
+    <!-- load emu core -->
+    <script type="text/javascript" src="src/bios.js"></script>
+    <script type="text/javascript" src="src/cpu.js"></script>
+    <script type="text/javascript" src="src/gfx.js"></script>
+    <script type="text/javascript" src="src/input.js"></script>
+    <script type="text/javascript" src="src/storage.js"></script>
+    <script type="text/javascript" src="src/emu.js"></script>
+  </head>
+  <body>
+  
+    <input type="file" id="files" name="files"/>
+    <output id="list"></output>
+    <div id="test"></div>
+    <button type="button" onclick='cpu.run();'>run</button>
+    <button type="button" onclick='cpu.pause();'>pause</button>
+    <button type="button" onclick='cpu.halt();'>halt</button>
+    <button type="button" onclick='cpu.step();'>step</button>
+  </body>
+</html>
