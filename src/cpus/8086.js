@@ -803,11 +803,21 @@ var cpu8086 = {
             case 0x74:
                 if (this._regFlags & this.FLAG_ZF_MASK)
                 {
-                    // It looks like doing it this way is wrong
-                    // this._regIP = this._memoryV[this._regIP + 1];
+                    // The jump address a signed (twos complement) offset from the current location.
+                    var offset = this._memoryV[this._regIP + 1];
 
-                    // Is this right??? TODO: check the correctness of this
-                    this._regIP += (this._memoryV[this._regIP + 1] + 2);
+                    // One-byte twos-complement conversion
+                    offset = (offset < 0) ? (-1 * (offset >> 7)) * (~offset + 1) : offset;
+
+                    // If we're going forward we must skip the last byte of this instruction
+                    if (offset > 0)
+                    {
+                        this._regIP += (offset + 2);
+                    }
+                    else
+                    {
+                        this._regIP += offset;
+                    }
                 }
                 else
                 {
@@ -997,6 +1007,7 @@ var cpu8086 = {
         if (flagsToSet & this.FLAG_CF_MASK)
         {
             if (operand1 < operand2) this._regFlags |= this.FLAG_CF_MASK;
+            else this._regFlags &= ~this.FLAG_CF_MASK;
         }
 
         // Parity Flag (PF)
@@ -1013,6 +1024,7 @@ var cpu8086 = {
         if (flagsToSet & this.FLAG_AF_MASK)
         {
             if ((operand1 & 0x0F) < (operand2 & 0x0F)) this._regFlags |= this.FLAG_AF_MASK;
+            else this._regFlags &= ~this.FLAG_AF_MASK;
         }
 
         // Zero Flag (ZF)
@@ -1021,6 +1033,7 @@ var cpu8086 = {
         if (flagsToSet & this.FLAG_ZF_MASK)
         {
             if (0 === result) this._regFlags |= this.FLAG_ZF_MASK;
+            else this._regFlags &= ~this.FLAG_ZF_MASK;
         }
 
         // Sign Flag (SF)
@@ -1029,6 +1042,7 @@ var cpu8086 = {
         if (flagsToSet & this.FLAG_SF_MASK)
         {
             if (result < 0) this._regFlags |= this.FLAG_SF_MASK;
+            else this._regFlags &= ~this.FLAG_SF_MASK;
         }
 
         // Trap Flag (TF)
@@ -1074,30 +1088,9 @@ var cpu8086 = {
             if ( 1 === (operand1 >> shift) && 1 === (operand2 >> shift) && 0 === (result >> shift) ||
                 0 === (operand1 >> shift) && 0 === (operand2 >> shift) && 1 === (result >> shift))
                 this._regFlags = this._regFlags | this.FLAG_OF_MASK;
+            else this._regFlags &= ~this.FLAG_OF_MASK;
         }
     },
-
-//     _op_CMP : function (v1, v2)
-//    {
-//        // this is two-byte (word) subtraction
-//        var valResult = v1 - v2;
-//
-//        // TODO: Generalize this
-//        // Set flags
-//        if (v1 < v2) this._regFlags = this._regFlags | this.FLAG_CF_MASK;                   // Set CF
-//        this._regFlags = this._regFlags | (valResult & 0x01);                               // Set PF
-//        if ((v1 & 0x0F) < (v2 & 0x0F)) this._regFlags = this._regFlags | this.FLAG_AF_MASK; // Set AF
-//        if (0 === valResult) this._regFlags = this._regFlags | this.FLAG_ZF_MASK;           // Set ZF
-//        if (valResult < 0) this._regFlags = this._regFlags | this.FLAG_SF_MASK;             // Set SF
-//        // Don't set trap flag (TF)
-//        // Don't set interupt flag (IF)
-//        // Don't set direction flag (DF)
-//
-//        // Set OF
-//        if ( 1 === (v1 >> 15) && 1 === (v2 >> 15) && 0 === (valResult >> 15) ||
-//             0 === (v1 >> 15) && 0 === (v2 >> 15) && 1 === (valResult >> 15))
-//            this._regFlags = this._regFlags | this.FLAG_OF_MASK;
-//    },
 
     _bundleRegisters : function ()
     {

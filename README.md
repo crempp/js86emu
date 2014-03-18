@@ -25,3 +25,5 @@ References
 * [Intel 80x86 Assembly Language OpCodes](http://www.mathemainzel.info/files/x86asmref.html)
 * [Online Disassembler](http://www.onlinedisassembler.com/odaweb/)
 * [Wikipedia article on the 8086](http://en.wikipedia.org/wiki/8086)
+* [8086 Opcode Map](http://www.mlsite.net/8086/)
+* [The Instruction Set of 8086](http://www.ing.unlp.edu.ar/electrotecnia/arcom1/UNDERSTANDING8085_8086_cap14_Instruccion_set.pdf)
