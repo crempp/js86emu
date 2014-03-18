@@ -5,7 +5,7 @@
     <ignored path="jsemu.iws" />
     <ignored path=".idea/workspace.xml" />
     <file path="/storage.js" changelist="3e7816f8-74f0-496c-908d-dd2456fb3c5f" time="1395013293806" ignored="false" />
-    <file path="/cpu.js" changelist="3e7816f8-74f0-496c-908d-dd2456fb3c5f" time="1394993110540" ignored="false" />
+    <file path="/cpu.js" changelist="3e7816f8-74f0-496c-908d-dd2456fb3c5f" time="1395102758087" ignored="false" />
     <file path="/8086.js" changelist="3e7816f8-74f0-496c-908d-dd2456fb3c5f" time="1395100866005" ignored="false" />
     <file path="/emu.js" changelist="3e7816f8-74f0-496c-908d-dd2456fb3c5f" time="1394991859047" ignored="false" />
     <file path="/index.html" changelist="3e7816f8-74f0-496c-908d-dd2456fb3c5f" time="1395101589104" ignored="false" />
@@ -36,19 +36,19 @@
     <splitter split-orientation="horizontal" split-proportion="0.62164664">
       <split-first>
         <leaf>
-          <file leaf-file-name="emu.js" pinned="false" current="false" current-in-tab="false">
+          <file leaf-file-name="emu.js" pinned="false" current="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/src/emu.js">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="27" column="20" selection-start="569" selection-end="569" vertical-scroll-proportion="-16.2">
+                <state line="27" column="4" selection-start="553" selection-end="553" vertical-scroll-proportion="0.45531198">
                   <folding />
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="gfx.js" pinned="false" current="true" current-in-tab="true">
+          <file leaf-file-name="gfx.js" pinned="false" current="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/gfx.js">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="83" column="0" selection-start="2299" selection-end="2299" vertical-scroll-proportion="0.19417475">
+                <state line="83" column="0" selection-start="2299" selection-end="2299" vertical-scroll-proportion="0.0">
                   <folding />
                 </state>
               </provider>
@@ -67,19 +67,10 @@
       </split-first>
       <split-second>
         <leaf>
-          <file leaf-file-name="style.css" pinned="false" current="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/style.css">
-              <provider selected="true" editor-type-id="text-editor">
-                <state line="72" column="6" selection-start="1244" selection-end="1244" vertical-scroll-proportion="0.46601942">
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="cpu.js" pinned="false" current="false" current-in-tab="false">
+          <file leaf-file-name="cpu.js" pinned="false" current="true" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/src/cpu.js">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="90" column="5" selection-start="1755" selection-end="1755" vertical-scroll-proportion="0.0">
+                <state line="8" column="21" selection-start="153" selection-end="153" vertical-scroll-proportion="0.19417475">
                   <folding />
                 </state>
               </provider>
@@ -116,11 +107,11 @@
         <option value="$PROJECT_DIR$/src/gfx.js" />
         <option value="$PROJECT_DIR$/src/emu.js" />
         <option value="$PROJECT_DIR$/src/storage.js" />
-        <option value="$PROJECT_DIR$/src/cpu.js" />
         <option value="$PROJECT_DIR$/src/cpus/8086.js" />
         <option value="$PROJECT_DIR$/src/gui.js" />
         <option value="$PROJECT_DIR$/index.html" />
         <option value="$PROJECT_DIR$/style.css" />
+        <option value="$PROJECT_DIR$/src/cpu.js" />
       </list>
     </option>
   </component>
@@ -386,13 +377,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/cpu.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="90" column="5" selection-start="1755" selection-end="1755" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/cpus/8086.js">
       <provider selected="true" editor-type-id="text-editor">
         <state line="432" column="33" selection-start="14424" selection-end="14424" vertical-scroll-proportion="0.0">
@@ -425,16 +409,23 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/emu.js">
+    <entry file="file://$PROJECT_DIR$/src/gfx.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="27" column="20" selection-start="569" selection-end="569" vertical-scroll-proportion="-16.2">
+        <state line="83" column="0" selection-start="2299" selection-end="2299" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/gfx.js">
+    <entry file="file://$PROJECT_DIR$/src/emu.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="83" column="0" selection-start="2299" selection-end="2299" vertical-scroll-proportion="0.19417475">
+        <state line="27" column="4" selection-start="553" selection-end="553" vertical-scroll-proportion="0.45531198">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cpu.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="8" column="21" selection-start="153" selection-end="153" vertical-scroll-proportion="0.19417475">
           <folding />
         </state>
       </provider>

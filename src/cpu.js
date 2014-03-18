@@ -6,7 +6,7 @@ var cpu = {
     _debugFlag : false,
 
     // Should this be on or off to begin?
-    _drawFlag : true,
+    _drawFlag : false,
 
     initialize : function ()
     {
