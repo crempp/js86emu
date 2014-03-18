@@ -7,6 +7,7 @@ The plan is to emulate multiple x86 chips along with auxilary hardware such as
 Harddisk controllers, BIOS and graphics.
 
 Currently
+
 *  35 instructions decoded and mostly working
 *  Basic (non-segmented) memory
 *  Basic debugging (gotta have this)
