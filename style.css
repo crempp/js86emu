@@ -67,12 +67,20 @@ html,body{
     padding: 5px;
 }
 
+#debug {
+    height: 150px;
+}
+#debug fieldset {
+    height: 100%;
+}
+
 #debug-decode {
     display: inline-block;
     vertical-align: top;
     font-family: 'Ubuntu Mono', sans-serif;
     font-size: 11px;
     width: 187px;
+    height: 100%;
 }
 
 #debug-decode .debug-title {
@@ -131,6 +139,7 @@ html,body{
     font-family: 'Ubuntu Mono', sans-serif;
     font-size: 11px;
     width: 253px;
+    height: 100%;
 }
 
 #debug-registers .debug-title {
@@ -153,10 +162,11 @@ html,body{
 
 #debug-memory {
     display: inline-block;
-    
+
     font-family: 'Ubuntu Mono', sans-serif;
     font-size: 11px;
     width: 253px;
+    height: 100%;
 }
 
 .button.active {
