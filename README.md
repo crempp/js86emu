@@ -8,7 +8,7 @@ Harddisk controllers, BIOS and graphics.
 
 Currently
 
-*  35 instructions decoded and mostly working
+*  41 instructions decoded and mostly working
 *  Basic (non-segmented) memory
 *  Basic debugging (gotta have this)
 

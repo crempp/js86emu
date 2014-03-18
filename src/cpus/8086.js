@@ -229,6 +229,37 @@ var cpu8086 = {
                 console.log("Two-byte opcode - not supported! [" + opcode_byte_2.toString(16) + "]");
                 break;
 
+
+            /**
+             * Instruction : CLC
+             * Meaning     : Clear Carry flag.
+             * Notes       :
+             */
+            case 0xF8:
+                this._regFlags &= ~this.FLAG_CF_MASK;
+                this._regIP += 1;
+                break;
+
+            /**
+             * Instruction : CLI
+             * Meaning     : Clear Interrupt flag.
+             * Notes       :
+             */
+            case 0xFA:
+                this._regFlags &= ~this.FLAG_IF_MASK;
+                this._regIP += 1;
+                break;
+
+            /**
+             * Instruction : CLD
+             * Meaning     : Clear Direction flag.
+             * Notes       :
+             */
+            case 0xFC:
+                this._regFlags &= ~this.FLAG_DF_MASK;
+                this._regIP += 1;
+                break;
+
             /**
              * Instruction : DEC
              * Meaning     : Decrement by 1
@@ -756,6 +787,35 @@ var cpu8086 = {
                 this._regIP += 3;
                 break;
 
+            /**
+             * Instruction : STC
+             * Meaning     : Set Carry flag.
+             * Notes       :
+             */
+            case 0xF9:
+                this._regFlags |= this.FLAG_CF_MASK;
+                this._regIP += 1;
+                break;
+
+            /**
+             * Instruction : STI
+             * Meaning     : Set Interrupt flag.
+             * Notes       :
+             */
+            case 0xFB:
+                this._regFlags |= this.FLAG_IF_MASK;
+                this._regIP += 1;
+                break;
+
+            /**
+             * Instruction : STD
+             * Meaning     : Set Direction flag.
+             * Notes       :
+             */
+            case 0xFD:
+                this._regFlags |= this.FLAG_DF_MASK;
+                this._regIP += 1;
+                break;
 
             default :
                 console.log("Unknown opcode!");
