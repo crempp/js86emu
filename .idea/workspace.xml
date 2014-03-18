@@ -4,11 +4,17 @@
     <list default="true" id="3e7816f8-74f0-496c-908d-dd2456fb3c5f" name="Default" comment="" />
     <ignored path="jsemu.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/storage.js" changelist="3e7816f8-74f0-496c-908d-dd2456fb3c5f" time="1394850918893" ignored="false" />
-    <file path="/cpu.js" changelist="3e7816f8-74f0-496c-908d-dd2456fb3c5f" time="1394905177129" ignored="false" />
-    <file path="/8086.js" changelist="3e7816f8-74f0-496c-908d-dd2456fb3c5f" time="1394905318469" ignored="false" />
-    <file path="/emu.js" changelist="3e7816f8-74f0-496c-908d-dd2456fb3c5f" time="1394905037063" ignored="false" />
-    <file path="/index.html" changelist="3e7816f8-74f0-496c-908d-dd2456fb3c5f" time="1394905149378" ignored="false" />
+    <file path="/storage.js" changelist="3e7816f8-74f0-496c-908d-dd2456fb3c5f" time="1395013293806" ignored="false" />
+    <file path="/cpu.js" changelist="3e7816f8-74f0-496c-908d-dd2456fb3c5f" time="1394993110540" ignored="false" />
+    <file path="/8086.js" changelist="3e7816f8-74f0-496c-908d-dd2456fb3c5f" time="1395100866005" ignored="false" />
+    <file path="/emu.js" changelist="3e7816f8-74f0-496c-908d-dd2456fb3c5f" time="1394991859047" ignored="false" />
+    <file path="/index.html" changelist="3e7816f8-74f0-496c-908d-dd2456fb3c5f" time="1395101589104" ignored="false" />
+    <file path="/.gitignore" changelist="3e7816f8-74f0-496c-908d-dd2456fb3c5f" time="1394943648016" ignored="false" />
+    <file path="/README.md" changelist="3e7816f8-74f0-496c-908d-dd2456fb3c5f" time="1394989943416" ignored="false" />
+    <file path="/style.css" changelist="3e7816f8-74f0-496c-908d-dd2456fb3c5f" time="1395101858934" ignored="false" />
+    <file path="/gfx.js" changelist="3e7816f8-74f0-496c-908d-dd2456fb3c5f" time="1395005078289" ignored="false" />
+    <file path="/a.dummy" changelist="3e7816f8-74f0-496c-908d-dd2456fb3c5f" time="1395013103556" ignored="false" />
+    <file path="/gui.js" changelist="3e7816f8-74f0-496c-908d-dd2456fb3c5f" time="1395100947223" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,65 +33,83 @@
     <favorites_list name="jsemu" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file leaf-file-name="8086.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/cpus/8086.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="74" column="6" selection-start="1993" selection-end="1993" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="README.md" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/README.md">
-          <provider editor-type-id="MarkdownPreviewEditor">
-            <state />
-          </provider>
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="5" column="0" selection-start="61" selection-end="61" vertical-scroll-proportion="0.12335526">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="index.html" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/index.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="21" column="52" selection-start="900" selection-end="900" vertical-scroll-proportion="-13.125">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="emu.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/emu.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="19" column="23" selection-start="349" selection-end="349" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="storage.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/storage.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="14" column="0" selection-start="408" selection-end="408" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="cpu.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/cpu.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="71" column="19" selection-start="1317" selection-end="1317" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <splitter split-orientation="horizontal" split-proportion="0.62164664">
+      <split-first>
+        <leaf>
+          <file leaf-file-name="emu.js" pinned="false" current="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/src/emu.js">
+              <provider selected="true" editor-type-id="text-editor">
+                <state line="27" column="20" selection-start="569" selection-end="569" vertical-scroll-proportion="-16.2">
+                  <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="gui.js" pinned="false" current="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/src/gui.js">
+              <provider selected="true" editor-type-id="text-editor">
+                <state line="22" column="33" selection-start="474" selection-end="474" vertical-scroll-proportion="0.3446602">
+                  <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="gfx.js" pinned="false" current="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/src/gfx.js">
+              <provider selected="true" editor-type-id="text-editor">
+                <state line="103" column="37" selection-start="3086" selection-end="3086" vertical-scroll-proportion="0.0">
+                  <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="8086.js" pinned="false" current="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/src/cpus/8086.js">
+              <provider selected="true" editor-type-id="text-editor">
+                <state line="432" column="33" selection-start="14424" selection-end="14424" vertical-scroll-proportion="0.0">
+                  <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+        </leaf>
+      </split-first>
+      <split-second>
+        <leaf>
+          <file leaf-file-name="style.css" pinned="false" current="true" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/style.css">
+              <provider selected="true" editor-type-id="text-editor">
+                <state line="155" column="4" selection-start="3259" selection-end="3259" vertical-scroll-proportion="0.684466">
+                  <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="cpu.js" pinned="false" current="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/src/cpu.js">
+              <provider selected="true" editor-type-id="text-editor">
+                <state line="90" column="5" selection-start="1755" selection-end="1755" vertical-scroll-proportion="0.0">
+                  <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="index.html" pinned="false" current="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/index.html">
+              <provider selected="true" editor-type-id="text-editor">
+                <state line="133" column="16" selection-start="5436" selection-end="5436" vertical-scroll-proportion="-6.625">
+                  <folding>
+                    <element signature="n#style#0;n#div#0;n#fieldset#1;n#div#1;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+                    <element signature="n#style#0;n#div#0;n#div#1;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+                    <element signature="n#style#0;n#div#3;n#div#0;n#div#1;n#body#0;n#html#0;n#!!top" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+        </leaf>
+      </split-second>
+    </splitter>
   </component>
   <component name="FindManager">
     <FindUsagesManager>
@@ -95,20 +119,23 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/src/storage.js" />
-        <option value="$PROJECT_DIR$/src/gfx.js" />
         <option value="$PROJECT_DIR$/src/input.js" />
+        <option value="$PROJECT_DIR$/.gitignore" />
+        <option value="$PROJECT_DIR$/README.md" />
+        <option value="$PROJECT_DIR$/src/gfx.js" />
         <option value="$PROJECT_DIR$/src/emu.js" />
-        <option value="$PROJECT_DIR$/index.html" />
+        <option value="$PROJECT_DIR$/src/storage.js" />
         <option value="$PROJECT_DIR$/src/cpu.js" />
         <option value="$PROJECT_DIR$/src/cpus/8086.js" />
-        <option value="$PROJECT_DIR$/README.md" />
+        <option value="$PROJECT_DIR$/src/gui.js" />
+        <option value="$PROJECT_DIR$/index.html" />
+        <option value="$PROJECT_DIR$/style.css" />
       </list>
     </option>
   </component>
   <component name="PhpWorkspaceProjectConfiguration" backward_compatibility_performed="true" />
   <component name="ProjectFrameBounds">
-    <option name="x" value="48" />
+    <option name="x" value="2608" />
     <option name="y" value="-4" />
     <option name="width" value="1233" />
     <option name="height" value="805" />
@@ -190,6 +217,38 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="jsemu" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="jsemu" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="lib" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="jsemu" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="jsemu" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="assets" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="img" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
     </panes>
@@ -222,23 +281,23 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="48" y="-4" width="1233" height="805" extended-state="6" />
+    <frame x="2608" y="-4" width="1233" height="805" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32876712" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.15358649" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.08776371" sideWeight="0.6712329" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32876712" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -312,44 +371,23 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="1" column="2" selection-start="10" selection-end="10" vertical-scroll-proportion="0.02377179">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/gfx.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="17" column="10" selection-start="317" selection-end="317" vertical-scroll-proportion="0.4028436">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/emu.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="19" column="23" selection-start="349" selection-end="349" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="21" column="52" selection-start="900" selection-end="900" vertical-scroll-proportion="-13.125">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/cpu.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="71" column="19" selection-start="1317" selection-end="1317" vertical-scroll-proportion="0.0">
+        <state line="103" column="37" selection-start="3086" selection-end="3086" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/storage.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="14" column="0" selection-start="408" selection-end="408" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/cpus/8086.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="74" column="6" selection-start="1993" selection-end="1993" vertical-scroll-proportion="0.0">
+        <state line="8" column="76" selection-start="274" selection-end="274" vertical-scroll-proportion="-4.8">
           <folding />
         </state>
       </provider>
@@ -359,7 +397,53 @@
         <state />
       </provider>
       <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="0" selection-start="61" selection-end="61" vertical-scroll-proportion="0.12335526">
+        <state line="9" column="17" selection-start="491" selection-end="491" vertical-scroll-proportion="0.23601398">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cpu.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="90" column="5" selection-start="1755" selection-end="1755" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/emu.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="27" column="20" selection-start="569" selection-end="569" vertical-scroll-proportion="-16.2">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cpus/8086.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="432" column="33" selection-start="14424" selection-end="14424" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/gui.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="22" column="33" selection-start="474" selection-end="474" vertical-scroll-proportion="0.3446602">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="133" column="16" selection-start="5436" selection-end="5436" vertical-scroll-proportion="-6.625">
+          <folding>
+            <element signature="n#style#0;n#div#0;n#fieldset#1;n#div#1;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#1;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#3;n#div#0;n#div#1;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/style.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="155" column="4" selection-start="3259" selection-end="3259" vertical-scroll-proportion="0.684466">
           <folding />
         </state>
       </provider>

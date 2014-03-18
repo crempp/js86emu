@@ -6,25 +6,25 @@ var cpu8086 = {
     halt     : false,
     
     // Main Registers
-    _regAH : 0x00, _regAL : 0x00, // primary accumulator
-    _regBH : 0x00, _regBL : 0x00, // base, accumulator
-    _regCH : 0x00, _regCL : 0x00, // counter, accumulator
-    _regDH : 0x00, _regDL : 0x00, // accumulator, other functions
+    _regAH : null, _regAL : null, // primary accumulator
+    _regBH : null, _regBL : null, // base, accumulator
+    _regCH : null, _regCL : null, // counter, accumulator
+    _regDH : null, _regDL : null, // accumulator, other functions
     
     // Index registers
-    _regSI : 0x0000, // Source Index
-    _regDI : 0x0000, // Destination Index
-    _regBP : 0x0000, // Base Pointer
-    _regSP : 0xFFFE, // Stack Pointer
+    _regSI : null, // Source Index
+    _regDI : null, // Destination Index
+    _regBP : null, // Base Pointer
+    _regSP : null, // Stack Pointer
     
     // Program counter
-    _regIP : 0x0000, // Instruction Pointer
+    _regIP : null, // Instruction Pointer
     
     // Segment registers
-    _regCS : 0x0000, // Code Segment
-    _regDS : 0x0000, // Data Segment
-    _regES : 0x0000, // ExtraSegment
-    _regSS : 0x0000, // Stack Segment
+    _regCS : null, // Code Segment
+    _regDS : null, // Data Segment
+    _regES : null, // ExtraSegment
+    _regSS : null, // Stack Segment
     
     // Status register
     // MASK   BIT  Flag   NAME
@@ -43,7 +43,7 @@ var cpu8086 = {
     // 0x1000 12,13 1,1   I/O privilege level (286+ only) always 1 on 8086 and 186
     // 0x2000 14  1       Nested task flag (286+ only) always 1 on 8086 and 186
     // 0x4000 15  1       on 8086 and 186, should be 0 above  Reserved
-    _regFlags : 0xF000,
+    _regFlags : null,
 
     FLAG_CF_MASK : 0x0001,
     FLAG_PF_MASK : 0x0004,
@@ -166,7 +166,10 @@ var cpu8086 = {
         this._regSI = 0x0000;
         this._regDI = 0x0000;
         this._regBP = 0x0000;
-        this._regSP = 0xFFFE;
+
+        // Not sure what this should be, codegolf only works if it's 0x100
+        //this._regSP = 0xFFFE;
+        this._regSP = 0x0100;
 
         // Program counter
         this._regIP = 0x0000;
@@ -213,7 +216,7 @@ var cpu8086 = {
                 rm     : (addressing_byte & 0x07)
         };
 
-        if (cpu.isDebug()) cpu.printOpcodeDebug(opcode_byte, addressing_byte, opcode);
+        if (cpu.isDebug()) gui.displayDecode(opcode_byte, addressing_byte, opcode);
 
         //====Execute Opcode====
         switch (opcode_byte)
@@ -232,7 +235,11 @@ var cpu8086 = {
             case 0x74:
                 if (this._regFlags & this.FLAG_ZF_MASK)
                 {
-                    this._regIP = this._memoryV[this._regIP + 1];
+                    // It looks like doing it this way is wrong
+                    // this._regIP = this._memoryV[this._regIP + 1];
+
+                    // Is this right??? TODO: check the correctness of this
+                    this._regIP += (this._memoryV[this._regIP + 1] + 2);
                 }
                 else
                 {
@@ -274,7 +281,7 @@ var cpu8086 = {
                      * Opcode      : 0x81
                      */
                     case 7 :
-                        valDst = this._getRegValueForOp(opcode.w, opcode.reg);
+                        valDst = this._getRegValueForOp(opcode.w, opcode.rm);
                         valSrc = ((this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2]);
 
                         this._op_CMP(valDst, valSrc);
@@ -286,6 +293,7 @@ var cpu8086 = {
                         console.log("Invalid opcode!");
                 }
                 break;
+
             /**
              * Instruction : HLT
              * Meaning     : Halt the System
@@ -295,20 +303,135 @@ var cpu8086 = {
             case 0xF4:
                 this.halt = true;
                 break;
+
+            /**
+             * Instruction : MOV
+             * Meaning     : Copy operand2 to operand1.
+             * Notes       : This instruction has no addressing byte
+             * Opcode      : 0xBC
+             * Length      : 2-6 bytes
+             * Cycles      :
+             *   The MOV instruction cannot:
+             *    - set the value of the CS and IP registers.
+             *    - copy value of one segment register to another segment
+             *      register (should copy to general register first).
+             *    - copy immediate value to segment register (should copy to
+             *      general register first).
+             */
+            // Move ?????
+            case 0x88:
+                console.log("Opcode not implemented!");
+                break;
+            case 0x89:
+                console.log("Opcode not implemented!");
+                break;
+            case 0x8A:
+                console.log("Opcode not implemented!");
+                break;
+            case 0x8B:
+                console.log("Opcode not implemented!");
+                break;
+            case 0x8C:
+                console.log("Opcode not implemented!");
+                break;
+            case 0x8E:
+                console.log("Opcode not implemented!");
+                break;
+            // Move with displacement ???
+            case 0xA0:
+                console.log("Opcode not implemented!");
+                break;
+            case 0xA1:
+                console.log("Opcode not implemented!");
+                break;
+            case 0xA2:
+                console.log("Opcode not implemented!");
+                break;
+            case 0xA3:
+                console.log("Opcode not implemented!");
+                break;
+            // Move Immediate byte into register (e.g, MOV AL Ib)
+            case 0xB0:
+                this._regAL = this._memoryV[this._regIP + 1];
+                this._regIP += 2;
+                break;
+            case 0xB1:
+                this._regCL = this._memoryV[this._regIP + 1];
+                this._regIP += 2;
+                break;
+            case 0xB2:
+                this._regDL = this._memoryV[this._regIP + 1];
+                this._regIP += 2;
+                break;
+            case 0xB3:
+                this._regBL = this._memoryV[this._regIP + 1];
+                this._regIP += 2;
+                break;
+            case 0xB4:
+                this._regAH = this._memoryV[this._regIP + 1];
+                this._regIP += 2;
+                break;
+            case 0xB5:
+                this._regCH = this._memoryV[this._regIP + 1];
+                this._regIP += 2;
+                break;
+            case 0xB6:
+                this._regDH = this._memoryV[this._regIP + 1];
+                this._regIP += 2;
+                break;
+            case 0xB7:
+                this._regBH = this._memoryV[this._regIP + 1];
+                this._regIP += 2;
+                break;
+            // Move Immediate word into register (e.g, MOV AX Ib)
+            case 0xB8:
+                this._regAH = this._memoryV[this._regIP + 2];
+                this._regAL = this._memoryV[this._regIP + 1];
+                this._regIP += 3;
+                break;
+            case 0xB9:
+                this._regCH = this._memoryV[this._regIP + 2];
+                this._regCL = this._memoryV[this._regIP + 1];
+                this._regIP += 3;
+                break;
+            case 0xBA:
+                this._regDH = this._memoryV[this._regIP + 2];
+                this._regDL = this._memoryV[this._regIP + 1];
+                this._regIP += 3;
+                break;
+            case 0xBB:
+                console.log("HI");
+                this._regBH = this._memoryV[this._regIP + 2];
+                this._regBL = this._memoryV[this._regIP + 1];
+                this._regIP += 3;
+                break;
+            case 0xBC:
+                this._regSP = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+                this._regIP += 3;
+                break;
+            case 0xBD:
+                this._regBP = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+                this._regIP += 3;
+                break;
+            case 0xBE:
+                this._regSI = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+                this._regIP += 3;
+                break;
+            case 0xBF:
+                this._regDI = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+                this._regIP += 3;
+                break;
+
+
             default :
                 console.log("Unknown opcode!");
         }
 
         // Update timers
 
-
-        console.log(
-            "--------------------------------------------------------------------[registers]\n" +
-            "  AX: 0x" + ((this._regAH << 8) | this._regAL).toString(16) + "  BX: 0x" + ((this._regBH << 8) | this._regBL).toString(16) + "  CX: 0x" + ((this._regCH << 8) | this._regCL).toString(16) + "  DX: 0x" + ((this._regDH << 8) | this._regDL).toString(16) + "\n" +
-            "  SI: 0x" + this._regSI.toString(16) + "  DI: 0x" + this._regDI.toString(16) + "  BP: 0x" + this._regBP.toString(16) + "  SP: 0x" + this._regSP.toString(16) + "\n" +
-            "  CS: 0x" + this._regCS.toString(16) + "  DS: 0x" + this._regDS.toString(16) + "  ES: 0x" + this._regES.toString(16) + "  SS: 0x" + this._regSS.toString(16) + "\n" +
-            "  IP: 0x" + this._regIP + "  FLAGS : 0x" + this._regFlags.toString(16) + " [" + this._regFlags.toString(2) + "]"
-        );
+        // Debug
+        console.log(this._regIP);
+        gui.displayRegisters(this._bundleRegisters());
     },
 
      _op_CMP : function (v1, v2)
@@ -316,10 +439,7 @@ var cpu8086 = {
         // this is two-byte (word) subtraction
         var valResult = v1 - v2;
 
-        console.log("v1=" + v1.toString(16));
-        console.log("v2=" + v2.toString(16));
-        console.log("valResult=" + valResult.toString(16));
-
+        // TODO: Generalize this
         // Set flags
         if (v1 < v2) this._regFlags = this._regFlags | this.FLAG_CF_MASK;                   // Set CF
         this._regFlags = this._regFlags | (valResult & 0x01);                               // Set PF
@@ -334,6 +454,34 @@ var cpu8086 = {
         if ( 1 === (v1 >> 15) && 1 === (v2 >> 15) && 0 === (valResult >> 15) ||
              0 === (v1 >> 15) && 0 === (v2 >> 15) && 1 === (valResult >> 15))
             this._regFlags = this._regFlags | this.FLAG_OF_MASK;
+    },
+
+    _bundleRegisters : function ()
+    {
+        return {
+            AX : ((this._regAH << 8) | this._regAL),
+            AH : this._regAH,
+            AL : this._regAL,
+            BX : ((this._regBH << 8) | this._regBL),
+            BH : this._regBH,
+            BL : this._regBL,
+            CX : ((this._regCH << 8) | this._regCL),
+            CH : this._regCH,
+            CL : this._regCL,
+            DX : ((this._regDH << 8) | this._regDL),
+            DH : this._regDH,
+            DL : this._regDL,
+            SI : this._regSI,
+            DI : this._regDI,
+            BP : this._regBP,
+            SP : this._regSP,
+            CS : this._regCS,
+            DS : this._regDS,
+            ES : this._regES,
+            SS : this._regSS,
+            IP : this._regIP,
+            FLAGS : this._regFlags
+        };
     }
 }
 

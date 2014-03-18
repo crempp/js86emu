@@ -1,9 +1,12 @@
 var storage = {
     handleSelectedDiskImg : function (evt)
     {
+        console.log("HERE");
     
         var file = evt.target.files[0]; // FileList object
         var reader = new FileReader();
+
+        document.getElementById("file_chooser_output").innerHTML = file.name;
 
         reader.onload = function(e) {
             cpu.loadBinary(0x00, reader.result);

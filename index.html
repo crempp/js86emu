@@ -1,8 +1,19 @@
 <html>
   <head>
+    <link rel="stylesheet" href="style.css">
+
+    <link href='http://fonts.googleapis.com/css?family=Gafata|Orbitron:400,700|Ubuntu+Mono' rel='stylesheet' type='text/css'>
+
+    <!-- Libraries -->
+    <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+    <script type="text/javascript" src="lib/glfx.js"></script>
+
     <!-- load CPU instruction set -->
     <script type="text/javascript" src="src/cpus/8086.js"></script>
-    
+
+    <script type="text/javascript" src="src/gui.js"></script>
+
     <!-- load emu core -->
     <script type="text/javascript" src="src/bios.js"></script>
     <script type="text/javascript" src="src/cpu.js"></script>
@@ -12,13 +23,235 @@
     <script type="text/javascript" src="src/emu.js"></script>
   </head>
   <body>
+
+    <header><h1>js86emu</h1></header>
+
+    <div class="row">
+        <div id="display">
+            <!-- set to Hercules resolution x2 -->
+            <canvas id='gfx-port' width="640" height="400"></canvas>
+        </div>
+
+        <div id="controls">
+            <fieldset>
+                <legend>settings</legend>
+
+                <table>
+                    <tr>
+                        <td><label for="emuCPU">CPU</label></td>
+                        <td>
+                            <select class="input" name="emuCPU" id="emuCPU">
+                                <option value="8086" selected>8086</option>
+                                <option value="186">186</option>
+                                <option value="286">286</option>
+                                <option value="386">386</option>
+                            </select>
+                        </td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td><label for="emuBIOS">BIOS</label></td>
+                        <td>
+                            <select class="input" name="emuBIOS" id="emuBIOS">
+                                <option value="none" selected>-none-</option>
+                            </select>
+                        </td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td><label for="emuHD">HD</label></td>
+                        <td>
+                            <select class="input" name="emuHD" id="emuHD">
+                                <option value="none" selected>-none-</option>
+                            </select>
+                        </td>
+                        <td>
+                            <div class="fa fa-file-o file_chooser">
+                                <input type="file" class="file-chooser-input" id="hd-file" name="hd-file"/>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><label for="emuFloppy">Floppy</label></td>
+                        <td>
+                            <select class="input" name="emuFloppy" id="emuFloppy">
+                                <option value="none">-none-</option>
+                                <option value="1.44" selected>1.44</option>
+                            </select>
+                        </td>
+                        <td>
+                            <div class="fa fa-file-o file_chooser">
+                                <input type="file" class="file-chooser-input" id="files" name="files"/>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><output id="file_chooser_output"></output></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td><label for="emuGfx">Gfx</label></td>
+                        <td>
+                            <select class="input" name="emuGfx" id="emuGfx">
+                                <option value="none">-none-</option>
+                            </select>
+                        </td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td><label for="emuInput">Input</label></td>
+                        <td>
+                            <select class="input" name="emuInput" id="emuInput">
+                                <option value="none">-none-</option>
+                            </select>
+                        </td>
+                        <td></td>
+                    </tr>
+                </table>
+            </fieldset>
+
+            <fieldset>
+                <legend>controls</legend>
+
+                <span id="runbutton" class="fa fa-play fa-lg button" onclick='gui.handleRun();'></span>
+                <span id="pausebutton" class="fa fa-pause fa-lg button" onclick='gui.handlePause();'></span>
+                <span id="haltbutton" class="fa fa-stop fa-lg button" onclick='gui.handleHalt();'></span>
+                <span id="stepbutton" class="fa fa-forward fa-lg button" onclick='gui.handleStep();'></span>
+                <div style='clear: both;'></div>
+            </fieldset>
+
+            <div style='clear: both;'></div>
+
+        </div>
+    </div>
+
+    <div class="">
+        <div id="debug">
+            <div id="debug-decode">
+                <fieldset>
+                    <legend>[decode]</legend>
+                        <table id="debug-decode-instruction">
+                            <tr>
+                                <td class='debug-title'>instruction</td>
+                                <td id="debug-decode-instruction-val"></td>
+                            </tr>
+                        </table>
+                        <table>
+                            <tr>
+                                <th>opcode byte</th>
+                                <th>opcode</th>
+                                <th>d</th>
+                                <th>w</th>
+                            </tr>
+                            <tr>
+                                <td id="debug-decode-opbyte-val"></td>
+                                <td id="debug-decode-opcode-val"></td>
+                                <td id="debug-decode-d-val"></td>
+                                <td id="debug-decode-w-val"></td>
+                            </tr>
+                        </table>
+                        <table>
+                            <tr>
+                                <th>address byte</th>
+                                <th>mod</th>
+                                <th>reg</th>
+                                <th>r/m</th>
+                            </tr>
+                            <tr>
+                                <td id="debug-decode-addrbyte-val"></td>
+                                <td id="debug-decode-mod-val"></td>
+                                <td id="debug-decode-reg-val"></td>
+                                <td id="debug-decode-rm-val"></td>
+                            </tr>
+                        </table>
+                </fieldset>
+            </div>
+            <div id="debug-registers">
+                <fieldset>
+                    <legend>[registers]</legend>
+                    <table id="debug-registers-table">
+                        <tr>
+                            <td class='debug-title'>AX</td>
+                            <td id="debug-registers-AX-val"></td>
+
+                            <td class='debug-title'>BX</td>
+                            <td id="debug-registers-BX-val"></td>
+
+                            <td class='debug-title'>CX</td>
+                            <td id="debug-registers-CX-val"></td>
+
+                            <td class='debug-title'>DX</td>
+                            <td id="debug-registers-DX-val"></td>
+                        </tr>
+                        <tr>
+                            <td class='debug-title'>SI</td>
+                            <td id="debug-registers-SI-val"></td>
+
+                            <td class='debug-title'>DI</td>
+                            <td id="debug-registers-DI-val"></td>
+
+                            <td class='debug-title'>BP</td>
+                            <td id="debug-registers-BP-val"></td>
+
+                            <td class='debug-title'>SP</td>
+                            <td id="debug-registers-SP-val"></td>
+                        </tr>
+                        <tr>
+                            <td class='debug-title'>CS</td>
+                            <td id="debug-registers-CS-val"></td>
+
+                            <td class='debug-title'>DS</td>
+                            <td id="debug-registers-DS-val"></td>
+
+                            <td class='debug-title'>ES</td>
+                            <td id="debug-registers-ES-val"></td>
+
+                            <td class='debug-title'>SS</td>
+                            <td id="debug-registers-SS-val"></td>
+                        </tr>
+                        <tr>
+                            <td class='debug-title'>IP</td>
+                            <td id="debug-registers-IP-val"></td>
+
+                            <td class='debug-title'></td>
+                            <td></td>
+
+                            <td class='debug-title'></td>
+                            <td></td>
+
+                            <td class='debug-title'></td>
+                            <td></td>
+                        </tr>
+                    </table>
+                    <table>
+                        <tr>
+                            <td class='debug-title'>FLAGS</td>
+                            <td class='debug-title'>----ODITSZ-A-P-C</td>
+                        </tr>
+                        <tr>
+                            <td id="debug-registers-FLAGHEX-val"></td>
+                            <td id="debug-registers-FLAGBIN-val"></td>
+                        </tr>
+                    </table>
+                </fieldset>
+            </div>
+            <div id="debug-memory">
+                <fieldset>
+                    <legend>[memory]</legend>
+                    nothing to see here... move along
+                </fieldset>
+            </div>
+            <div style="display: inline-block;"></div>
+        </div>
+
+    </div>
   
-    <input type="file" id="files" name="files"/>
-    <output id="list"></output>
-    <div id="test"></div>
-    <button type="button" onclick='cpu.run();'>run</button>
-    <button type="button" onclick='cpu.pause();'>pause</button>
-    <button type="button" onclick='cpu.halt();'>halt</button>
-    <button type="button" onclick='cpu.step();'>step</button>
+
   </body>
 </html>
