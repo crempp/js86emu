@@ -330,7 +330,7 @@ var cpu8086 = {
                 var result = regX - 1;
                 this._regBH = (result & 0xFF00) >> 8;
                 this._regBL = (result & 0x00FF);
-                
+
                 this._setFlags(
                     regX,
                     1,
