@@ -1,4 +1,16 @@
+=js86emu=
 
+x86 emulator written in Javascript.
+
+The plan is to emulate multiple x86 chips along with auxilary hardware such as
+Harddisk controllers, BIOS and graphics.
+
+Currently
+* 35 instructions decoded and mostly working
+* Basic (non-segmented) memory
+* Basic debugging (gotta have this)
+
+We'll see how far I get :)
 
 
 ==References==

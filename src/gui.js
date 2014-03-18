@@ -20,7 +20,6 @@ var gui = {
 
     displayDecode : function (opcode_byte, addressing_byte, opcode) {
         var decodedInst = oplist.retrieveCode(opcode_byte);
-        console.log(opcode_byte);
         if (this._debugToConsole)
         {
             console.log("" +
@@ -51,7 +50,6 @@ var gui = {
 
     displayRegisters : function (regObj)
     {
-        //console.log(regObj);
         if (this._debugToConsole)
         {
             console.log(

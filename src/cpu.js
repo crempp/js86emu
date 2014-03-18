@@ -21,7 +21,6 @@ var cpu = {
     // Emulation loop
     run : function ()
     {
-        console.log("run");
         for(;;)
         {
             if (window[this._cpuModel].halt) break;

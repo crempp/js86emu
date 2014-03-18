@@ -221,16 +221,344 @@ var cpu8086 = {
         //====Execute Opcode====
         switch (opcode_byte)
         {
+            /**
+             * Two-byte instructions
+             */
             case 0x0F :
                 var opcode_byte_2 = this._memoryV[this._regIP + 1];
                 console.log("Two-byte opcode - not supported! [" + opcode_byte_2.toString(16) + "]");
                 break;
 
             /**
+             * Instruction : DEC
+             * Meaning     : Decrement by 1
+             * Notes       :
+             */
+            case 0x48 :
+                var regX = ((this._regAH << 8) | this._regAL);
+                var result = regX - 1;
+                this._regAH = (result & 0xFF00) >> 8;
+                this._regAL = (result & 0x00FF);
+
+                this._setFlags(
+                    regX,
+                    1,
+                    result,
+                    (   this.FLAG_ZF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_AF_MASK),
+                    'w');
+
+                this._regIP += 1;
+
+                break;
+            case 0x49 :
+                var regX = ((this._regCH << 8) | this._regCL);
+                var result = regX - 1;
+                this._regCH = (result & 0xFF00) >> 8;
+                this._regCL = (result & 0x00FF);
+
+                this._setFlags(
+                    regX,
+                    1,
+                    result,
+                    (   this.FLAG_ZF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_AF_MASK),
+                    'w');
+
+                this._regIP += 1;
+
+                break;
+            case 0x4A :
+                var regX = ((this._regDH << 8) | this._regDL);
+                var result = regX - 1;
+                this._regDH = (result & 0xFF00) >> 8;
+                this._regDL = (result & 0x00FF);
+
+                this._setFlags(
+                    regX,
+                    1,
+                    result,
+                    (   this.FLAG_ZF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_AF_MASK),
+                    'w');
+
+                this._regIP += 1;
+
+                break;
+            case 0x4B :
+                var regX = ((this._regBH << 8) | this._regBL);
+                var result = regX - 1;
+                this._regBH = (result & 0xFF00) >> 8;
+                this._regBL = (result & 0x00FF);
+
+                this._regIP += 1;
+
+                this._setFlags(
+                    regX,
+                    1,
+                    result,
+                    (   this.FLAG_ZF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_AF_MASK),
+                    'w');
+
+                this._regIP += 1;
+
+                break;
+            case 0x4C :
+                var regX = this._regSP;
+                var result = regX - 1;
+                this._regSP = result;
+
+                this._setFlags(
+                    regX,
+                    1,
+                    result,
+                    (   this.FLAG_ZF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_AF_MASK),
+                    'w');
+
+                this._regIP += 1;
+
+                break;
+            case 0x4D :
+                var regX = this._regBP;
+                var result = regX - 1;
+                this._regBP = result;
+
+                this._setFlags(
+                    regX,
+                    1,
+                    result,
+                    (   this.FLAG_ZF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_AF_MASK),
+                    'w');
+
+                this._regIP += 1;
+
+                break;
+            case 0x4E :
+                var regX = this._regSI;
+                var result = regX - 1;
+                this._regSI = result;
+
+                this._setFlags(
+                    regX,
+                    1,
+                    result,
+                    (   this.FLAG_ZF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_AF_MASK),
+                    'w');
+
+                this._regIP += 1;
+
+                break;
+            case 0x4F :
+                var regX = this._regDI;
+                var result = regX - 1;
+                this._regDI = result;
+
+                this._setFlags(
+                    regX,
+                    1,
+                    result,
+                    (   this.FLAG_ZF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_AF_MASK),
+                    'w');
+
+                this._regIP += 1;
+
+                break;
+
+            /**
+             * Instruction : INC
+             * Meaning     : Increment by 1
+             * Notes       :
+             */
+            case 0x40 :
+                var regX = ((this._regAH << 8) | this._regAL);
+                var result = regX + 1;
+                this._regAH = (result & 0xFF00) >> 8;
+                this._regAL = (result & 0x00FF);
+
+                this._setFlags(
+                    regX,
+                    1,
+                    result,
+                    (   this.FLAG_ZF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_AF_MASK),
+                    'w');
+
+                this._regIP += 1;
+
+                break;
+            case 0x41 :
+                var regX = ((this._regCH << 8) | this._regCL);
+                var result = regX + 1;
+                this._regCH = (result & 0xFF00) >> 8;
+                this._regCL = (result & 0x00FF);
+
+                this._setFlags(
+                    regX,
+                    1,
+                    result,
+                    (   this.FLAG_ZF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_AF_MASK),
+                    'w');
+
+                this._regIP += 1;
+
+                break;
+            case 0x42 :
+                var regX = ((this._regDH << 8) | this._regDL);
+                var result = regX + 1;
+                this._regDH = (result & 0xFF00) >> 8;
+                this._regDL = (result & 0x00FF);
+
+                this._setFlags(
+                    regX,
+                    1,
+                    result,
+                    (   this.FLAG_ZF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_AF_MASK),
+                    'w');
+
+                this._regIP += 1;
+
+                break;
+            case 0x43 :
+                var regX = ((this._regBH << 8) | this._regBL);
+                var result = regX + 1;
+                this._regBH = (result & 0xFF00) >> 8;
+                this._regBL = (result & 0x00FF);
+
+                this._setFlags(
+                    regX,
+                    1,
+                    result,
+                    (   this.FLAG_ZF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_AF_MASK),
+                    'w');
+
+                this._regIP += 1;
+
+                break;
+            case 0x44 :
+                var regX = this._regSP;
+                var result = regX + 1;
+                this._regSP = result;
+
+                this._setFlags(
+                    regX,
+                    1,
+                    result,
+                    (   this.FLAG_ZF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_AF_MASK),
+                    'w');
+
+                this._regIP += 1;
+
+                break;
+            case 0x45 :
+                var regX = this._regBP;
+                var result = regX + 1;
+                this._regBP = result;
+
+                this._setFlags(
+                    regX,
+                    1,
+                    result,
+                    (   this.FLAG_ZF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_AF_MASK),
+                    'w');
+
+                this._regIP += 1;
+
+                break;
+            case 0x46 :
+                var regX = this._regSI;
+                var result = regX + 1;
+                this._regSI = result;
+
+                this._setFlags(
+                    regX,
+                    1,
+                    result,
+                    (   this.FLAG_ZF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_AF_MASK),
+                    'w');
+
+                this._regIP += 1;
+
+                break;
+            case 0x47 :
+                var regX = this._regDI;
+                var result = regX + 1;
+                this._regDI = result;
+
+                this._setFlags(
+                    regX,
+                    1,
+                    result,
+                    (   this.FLAG_ZF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_AF_MASK),
+                    'w');
+
+                this._regIP += 1;
+
+                break;
+
+            /**
              * Instruction : JZ
              * Meaning     : Short Jump if Zero (equal).
              * Notes       : Set by CMP, SUB, ADD, TEST, AND, OR, XOR instructions.
-             * Opcode      : 0x74
              */
             case 0x74:
                 if (this._regFlags & this.FLAG_ZF_MASK)
@@ -251,10 +579,8 @@ var cpu8086 = {
              * Instruction : GRP1
              * Meaning     : Group Opcode 1
              * Notes       :
-             * Opcode      :
              */
             case 0x81:
-                // Do stuff
                 switch (opcode.reg) {
                     case 1 :
                         console.log("Opcode not implemented!");
@@ -284,7 +610,18 @@ var cpu8086 = {
                         valDst = this._getRegValueForOp(opcode.w, opcode.rm);
                         valSrc = ((this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2]);
 
-                        this._op_CMP(valDst, valSrc);
+                        valResult = valDst - valSrc;
+                        this._setFlags(
+                            valDst,
+                            valSrc,
+                            valResult,
+                            ( this.FLAG_CF_MASK |
+                              this.FLAG_ZF_MASK |
+                              this.FLAG_SF_MASK |
+                              this.FLAG_OF_MASK |
+                              this.FLAG_PF_MASK |
+                              this.FLAG_AF_MASK),
+                            'w');
 
                         this._regIP += 4;
 
@@ -298,7 +635,6 @@ var cpu8086 = {
              * Instruction : HLT
              * Meaning     : Halt the System
              * Notes       :
-             * Opcode      : 0xF4
              */
             case 0xF4:
                 this.halt = true;
@@ -308,7 +644,6 @@ var cpu8086 = {
              * Instruction : MOV
              * Meaning     : Copy operand2 to operand1.
              * Notes       : This instruction has no addressing byte
-             * Opcode      : 0xBC
              * Length      : 2-6 bytes
              * Cycles      :
              *   The MOV instruction cannot:
@@ -400,7 +735,6 @@ var cpu8086 = {
                 this._regIP += 3;
                 break;
             case 0xBB:
-                console.log("HI");
                 this._regBH = this._memoryV[this._regIP + 2];
                 this._regBL = this._memoryV[this._regIP + 1];
                 this._regIP += 3;
@@ -430,31 +764,134 @@ var cpu8086 = {
         // Update timers
 
         // Debug
-        console.log(this._regIP);
         gui.displayRegisters(this._bundleRegisters());
     },
 
-     _op_CMP : function (v1, v2)
+    /**
+     * Generic method to set flags for give operands and result
+     *
+     * TODO: I think this only works for subtraction, verify for other operations
+     *
+     * @param operand1
+     * @param operand2
+     * @param result
+     * @param flagsToSet
+     * @param size (only used for OF)
+     * @private
+     */
+    _setFlags : function (operand1, operand2, result, flagsToSet, size)
     {
-        // this is two-byte (word) subtraction
-        var valResult = v1 - v2;
+        // Set defaults
+        size = size || 'b';
+        flagsToSet = 0xFFFF;
 
-        // TODO: Generalize this
-        // Set flags
-        if (v1 < v2) this._regFlags = this._regFlags | this.FLAG_CF_MASK;                   // Set CF
-        this._regFlags = this._regFlags | (valResult & 0x01);                               // Set PF
-        if ((v1 & 0x0F) < (v2 & 0x0F)) this._regFlags = this._regFlags | this.FLAG_AF_MASK; // Set AF
-        if (0 === valResult) this._regFlags = this._regFlags | this.FLAG_ZF_MASK;           // Set ZF
-        if (valResult < 0) this._regFlags = this._regFlags | this.FLAG_SF_MASK;             // Set SF
-        // Don't set trap flag (TF)
-        // Don't set interupt flag (IF)
-        // Don't set direction flag (DF)
+        // Carry Flag (CF)
+        // Indicates when an arithmetic carry or borrow has been generated
+        // out of the most significant ALU bit position
+        if (flagsToSet & this.FLAG_CF_MASK)
+        {
+            if (operand1 < operand2) this._regFlags |= this.FLAG_CF_MASK;
+        }
 
-        // Set OF
-        if ( 1 === (v1 >> 15) && 1 === (v2 >> 15) && 0 === (valResult >> 15) ||
-             0 === (v1 >> 15) && 0 === (v2 >> 15) && 1 === (valResult >> 15))
-            this._regFlags = this._regFlags | this.FLAG_OF_MASK;
+        // Parity Flag (PF)
+        // Indicates if the number of set bits is odd or even in the binary
+        // representation of the result of the last operation
+        if (flagsToSet & this.FLAG_PF_MASK)
+        {
+            this._regFlags = this._regFlags | (result & 0x01);
+        }
+
+        // Adjust Flag (AF)
+        // Indicate when an arithmetic carry or borrow has been generated out
+        // of the 4 least significant bits.
+        if (flagsToSet & this.FLAG_AF_MASK)
+        {
+            if ((operand1 & 0x0F) < (operand2 & 0x0F)) this._regFlags |= this.FLAG_AF_MASK;
+        }
+
+        // Zero Flag (ZF)
+        // Indicates when the result of an arithmetic operation, including
+        // bitwise logical instructions is zero, and reset otherwise.
+        if (flagsToSet & this.FLAG_ZF_MASK)
+        {
+            if (0 === result) this._regFlags |= this.FLAG_ZF_MASK;
+        }
+
+        // Sign Flag (SF)
+        // Indicate whether the result of the last mathematical operation
+        // resulted in a value whose most significant bit was set
+        if (flagsToSet & this.FLAG_SF_MASK)
+        {
+            if (result < 0) this._regFlags |= this.FLAG_SF_MASK;
+        }
+
+        // Trap Flag (TF)
+        // If the trap flag is set, the 8086 will automatically do a type-1
+        // interrupt after each instruction executes. When the 8086 does a
+        // type-1 interrupt, it pushes the flag register on the stack.
+        if (flagsToSet & this.FLAG_TF_MASK)
+        {
+            this._regFlags |= this.FLAG_TF_MASK;
+        }
+
+        // Interrupt Flag (IF)
+        // If the flag is set to 1, maskable hardware interrupts will be
+        // handled. If cleared (set to 0), such interrupts will be ignored.
+        // IF does not affect the handling of non-maskable interrupts or
+        // software interrupts generated by the INT instruction.
+        if (flagsToSet & this.FLAG_IF_MASK)
+        {
+            this._regFlags |= this.FLAG_IF_MASK;
+        }
+
+        // Direction Flag (DF)
+        // Controls the left-to-right or right-to-left direction of string
+        // processing. When it is set to 0 (using the clear-direction-flag
+        // instruction CLD),[3] it means that instructions that autoincrement
+        // the source index and destination index (like MOVS) will increase
+        // both of them. In case it is set to 1 (using the set-direction-flag
+        // instruction STD),the instruction will decrease them.
+        if (flagsToSet & this.FLAG_DF_MASK)
+        {
+            this._regFlags |= this.FLAG_DF_MASK;
+        }
+
+        // Overflow Flag (OF)
+        // Indicates when an arithmetic overflow has occurred in an operation,
+        // indicating that the signed two's-complement result would not fit in
+        // the number of bits used for the operation (the ALU width).
+        if (flagsToSet & this.FLAG_DF_MASK)
+        {
+            var shift;
+            if ('w' === size) shift = 15; else shift = 7;
+
+            if ( 1 === (operand1 >> shift) && 1 === (operand2 >> shift) && 0 === (result >> shift) ||
+                0 === (operand1 >> shift) && 0 === (operand2 >> shift) && 1 === (result >> shift))
+                this._regFlags = this._regFlags | this.FLAG_OF_MASK;
+        }
     },
+
+//     _op_CMP : function (v1, v2)
+//    {
+//        // this is two-byte (word) subtraction
+//        var valResult = v1 - v2;
+//
+//        // TODO: Generalize this
+//        // Set flags
+//        if (v1 < v2) this._regFlags = this._regFlags | this.FLAG_CF_MASK;                   // Set CF
+//        this._regFlags = this._regFlags | (valResult & 0x01);                               // Set PF
+//        if ((v1 & 0x0F) < (v2 & 0x0F)) this._regFlags = this._regFlags | this.FLAG_AF_MASK; // Set AF
+//        if (0 === valResult) this._regFlags = this._regFlags | this.FLAG_ZF_MASK;           // Set ZF
+//        if (valResult < 0) this._regFlags = this._regFlags | this.FLAG_SF_MASK;             // Set SF
+//        // Don't set trap flag (TF)
+//        // Don't set interupt flag (IF)
+//        // Don't set direction flag (DF)
+//
+//        // Set OF
+//        if ( 1 === (v1 >> 15) && 1 === (v2 >> 15) && 0 === (valResult >> 15) ||
+//             0 === (v1 >> 15) && 0 === (v2 >> 15) && 1 === (valResult >> 15))
+//            this._regFlags = this._regFlags | this.FLAG_OF_MASK;
+//    },
 
     _bundleRegisters : function ()
     {
