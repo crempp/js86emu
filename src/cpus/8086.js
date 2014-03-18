@@ -423,6 +423,217 @@ var cpu8086 = {
                 break;
 
             /**
+             * Instruction : GRP1
+             * Meaning     : Group Opcode 1
+             * Notes       :
+             */
+            case 0x80:
+                switch (opcode.reg) {
+                    case 1 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    case 2 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    case 3 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    case 4 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    case 5 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    case 6 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    /**
+                     * Instruction : CMP
+                     * Meaning     : Compare
+                     * Notes       :
+                     */
+                    case 7 :
+                        valDst = this._getRegValueForOp(opcode.w, opcode.rm);
+                        valSrc = ((this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2]);
+
+                        valResult = valDst - valSrc;
+                        this._setFlags(
+                            valDst,
+                            valSrc,
+                            valResult,
+                            (   this.FLAG_CF_MASK |
+                                this.FLAG_ZF_MASK |
+                                this.FLAG_SF_MASK |
+                                this.FLAG_OF_MASK |
+                                this.FLAG_PF_MASK |
+                                this.FLAG_AF_MASK),
+                            'w');
+
+                        this._regIP += 3;
+
+                        break;
+                    default :
+                        console.log("Invalid opcode!");
+                }
+                break
+            case 0x81:
+                switch (opcode.reg) {
+                    case 1 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    case 2 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    case 3 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    case 4 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    case 5 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    case 6 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    /**
+                     * Instruction : CMP
+                     * Meaning     : Compare
+                     * Notes       :
+                     */
+                    case 7 :
+                        valDst = this._getRegValueForOp(opcode.w, opcode.rm);
+                        valSrc = ((this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2]);
+
+                        valResult = valDst - valSrc;
+                        this._setFlags(
+                            valDst,
+                            valSrc,
+                            valResult,
+                            (   this.FLAG_CF_MASK |
+                                this.FLAG_ZF_MASK |
+                                this.FLAG_SF_MASK |
+                                this.FLAG_OF_MASK |
+                                this.FLAG_PF_MASK |
+                                this.FLAG_AF_MASK),
+                            'w');
+
+                        this._regIP += 4;
+
+                        break;
+                    default :
+                        console.log("Invalid opcode!");
+                }
+                break;
+            case 0x82:
+                switch (opcode.reg) {
+                    case 1 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    case 2 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    case 3 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    case 4 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    case 5 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    case 6 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    /**
+                     * Instruction : CMP
+                     * Meaning     : Compare
+                     * Notes       :
+                     */
+                    case 7 :
+                        valDst = this._getRegValueForOp(opcode.w, opcode.rm);
+                        valSrc = this._memoryV[this._regIP + 2];
+
+                        valResult = valDst - valSrc;
+                        this._setFlags(
+                            valDst,
+                            valSrc,
+                            valResult,
+                            (   this.FLAG_CF_MASK |
+                                this.FLAG_ZF_MASK |
+                                this.FLAG_SF_MASK |
+                                this.FLAG_OF_MASK |
+                                this.FLAG_PF_MASK |
+                                this.FLAG_AF_MASK),
+                            'w');
+
+                        this._regIP += 3;
+
+                        break;
+                    default :
+                        console.log("Invalid opcode!");
+                }
+                break
+            case 0x83:
+                switch (opcode.reg) {
+                    case 1 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    case 2 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    case 3 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    case 4 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    case 5 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    case 6 :
+                        console.log("Opcode not implemented!");
+                        break;
+                    /**
+                     * Instruction : CMP
+                     * Meaning     : Compare
+                     * Notes       :
+                     */
+                    case 7 :
+                        valDst = this._getRegValueForOp(opcode.w, opcode.rm);
+                        valSrc = this._memoryV[this._regIP + 2];
+
+                        valResult = valDst - valSrc;
+                        this._setFlags(
+                            valDst,
+                            valSrc,
+                            valResult,
+                            (   this.FLAG_CF_MASK |
+                                this.FLAG_ZF_MASK |
+                                this.FLAG_SF_MASK |
+                                this.FLAG_OF_MASK |
+                                this.FLAG_PF_MASK |
+                                this.FLAG_AF_MASK),
+                            'w');
+
+                        this._regIP += 3;
+
+                        break;
+                    default :
+                        console.log("Invalid opcode!");
+                }
+                break
+
+            /**
+             * Instruction : HLT
+             * Meaning     : Halt the System
+             * Notes       :
+             */
+            case 0xF4:
+                this.halt = true;
+                break;
+
+            /**
              * Instruction : INC
              * Meaning     : Increment by 1
              * Notes       :
@@ -604,70 +815,7 @@ var cpu8086 = {
                 }
                 break;
 
-            /**
-             * Instruction : GRP1
-             * Meaning     : Group Opcode 1
-             * Notes       :
-             */
-            case 0x81:
-                switch (opcode.reg) {
-                    case 1 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    case 2 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    case 3 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    case 4 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    case 5 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    case 6 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    /**
-                     * Instruction : CMP
-                     * Meaning     : Compare
-                     * Notes       :
-                     * Opcode      : 0x81
-                     */
-                    case 7 :
-                        valDst = this._getRegValueForOp(opcode.w, opcode.rm);
-                        valSrc = ((this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2]);
 
-                        valResult = valDst - valSrc;
-                        this._setFlags(
-                            valDst,
-                            valSrc,
-                            valResult,
-                            ( this.FLAG_CF_MASK |
-                              this.FLAG_ZF_MASK |
-                              this.FLAG_SF_MASK |
-                              this.FLAG_OF_MASK |
-                              this.FLAG_PF_MASK |
-                              this.FLAG_AF_MASK),
-                            'w');
-
-                        this._regIP += 4;
-
-                        break;
-                    default :
-                        console.log("Invalid opcode!");
-                }
-                break;
-
-            /**
-             * Instruction : HLT
-             * Meaning     : Halt the System
-             * Notes       :
-             */
-            case 0xF4:
-                this.halt = true;
-                break;
 
             /**
              * Instruction : MOV
