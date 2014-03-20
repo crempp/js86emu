@@ -3,7 +3,12 @@ var gui = {
 
     handleRun : function () {
         cpu.run();
-        $("").addClass('active');
+        //$("").addClass('active');
+    },
+
+    handleReset : function () {
+        cpu.reset();
+        //$("").addClass('active');
     },
 
     handleHalt : function () {

@@ -70,28 +70,64 @@ var cpu8086 = {
         {
             switch (reg)
             {
-                case 0: return this._regAL;
-                case 1: return this._regCL;
-                case 2: return this._regDL;
-                case 3: return this._regBL;
-                case 4: return this._regAH;
-                case 5: return this._regBH;
-                case 6: return this._regCH;
-                case 7: return this._regDH;
+                case 0:
+                    if (cpu.isDebug()) console.log("Using register AL (byte)");
+                    return this._regAL;
+                case 1:
+                    if (cpu.isDebug()) console.log("Using register CL (byte)");
+                    return this._regCL;
+                case 2:
+                    if (cpu.isDebug()) console.log("Using register DL (byte)");
+                    return this._regDL;
+                case 3:
+                    if (cpu.isDebug()) console.log("Using register BL (byte)");
+                    return this._regBL;
+                case 4:
+                    if (cpu.isDebug()) console.log("Using register AH (byte)");
+                    return this._regAH;
+                case 5:
+                    if (cpu.isDebug()) console.log("Using register BH (byte)");
+                    return this._regBH;
+                case 6:
+                    if (cpu.isDebug()) console.log("Using register CH (byte)");
+                    return this._regCH;
+                case 7:
+                    if (cpu.isDebug()) console.log("Using register DH (byte)");
+                    return this._regDH;
+                default:
+                    throw "Invalid reg table lookup parameters";
             }
         }
         else if (1 === w)
         {
             switch (reg)
             {
-                case 0: return ((this._regAH << 8) | this._regAL);
-                case 1: return ((this._regCH << 8) | this._regCL);
-                case 2: return ((this._regDH << 8) | this._regDL);
-                case 3: return ((this._regBH << 8) | this._regBL);
-                case 4: return this._regSP;
-                case 5: return this._regBP;
-                case 6: return this._regSI;
-                case 7: return this._regDI;
+                case 0:
+                    if (cpu.isDebug()) console.log("Using register AX (word)");
+                    return ((this._regAH << 8) | this._regAL);
+                case 1:
+                    if (cpu.isDebug()) console.log("Using register CX (word)");
+                    return ((this._regCH << 8) | this._regCL);
+                case 2:
+                    if (cpu.isDebug()) console.log("Using register DX (word)");
+                    return ((this._regDH << 8) | this._regDL);
+                case 3:
+                    if (cpu.isDebug()) console.log("Using register BX (word)");
+                    return ((this._regBH << 8) | this._regBL);
+                case 4:
+                    if (cpu.isDebug()) console.log("Using register SP (word)");
+                    return this._regSP;
+                case 5:
+                    if (cpu.isDebug()) console.log("Using register BP (word)");
+                    return this._regBP;
+                case 6:
+                    if (cpu.isDebug()) console.log("Using register SI (word)");
+                    return this._regSI;
+                case 7:
+                    if (cpu.isDebug()) console.log("Using register DI (word)");
+                    return this._regDI;
+                default:
+                    throw "Invalid reg table lookup parameters";
             }
         }
         else
@@ -116,28 +152,28 @@ var cpu8086 = {
         {
             switch (reg)
             {
-                case 0: this._regAL = value;
-                case 1: this._regCL = value;
-                case 2: this._regDL = value;
-                case 3: this._regBL = value;
-                case 4: this._regAH = value;
-                case 5: this._regBH = value;
-                case 6: this._regCH = value;
-                case 7: this._regDH = value;
+                case 0: this._regAL = value; break;
+                case 1: this._regCL = value; break;
+                case 2: this._regDL = value; break;
+                case 3: this._regBL = value; break;
+                case 4: this._regAH = value; break;
+                case 5: this._regBH = value; break;
+                case 6: this._regCH = value; break;
+                case 7: this._regDH = value; break;
             }
         }
         else if (1 === w)
         {
             switch (reg)
             {
-                case 0: this._regAH = (value >>> 8); this._regAL = (value & 0xFF);
-                case 1: this._regCH = (value >>> 8); this._regCL = (value & 0xFF);
-                case 2: this._regDH = (value >>> 8); this._regDL = (value & 0xFF);
-                case 3: this._regBH = (value >>> 8); this._regBL = (value & 0xFF);
-                case 4: this._regSP = value;
-                case 5: this._regBP = value;
-                case 6: this._regSI = value;
-                case 7: this._regDI = value;
+                case 0: this._regAH = (value >>> 8); this._regAL = (value & 0xFF); break;
+                case 1: this._regCH = (value >>> 8); this._regCL = (value & 0xFF); break;
+                case 2: this._regDH = (value >>> 8); this._regDL = (value & 0xFF); break;
+                case 3: this._regBH = (value >>> 8); this._regBL = (value & 0xFF); break;
+                case 4: this._regSP = value; break;
+                case 5: this._regBP = value; break;
+                case 6: this._regSI = value; break;
+                case 7: this._regDI = value; break;
             }
         }
         else
@@ -199,7 +235,7 @@ var cpu8086 = {
         // Some common variables
         var valSrc, valDst, valResult;
 
-        var flag = 0x00;
+        //var flag = 0x00;
 
         // Fetch Opcode
         var opcode_byte     = this._memoryV[this._regIP];
@@ -428,55 +464,40 @@ var cpu8086 = {
              * Notes       :
              */
             case 0x80:
-                switch (opcode.reg) {
-                    case 1 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    case 2 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    case 3 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    case 4 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    case 5 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    case 6 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    /**
-                     * Instruction : CMP
-                     * Meaning     : Compare
-                     * Notes       :
-                     */
-                    case 7 :
-                        valDst = this._getRegValueForOp(opcode.w, opcode.rm);
-                        valSrc = ((this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2]);
-
-                        valResult = valDst - valSrc;
-                        this._setFlags(
-                            valDst,
-                            valSrc,
-                            valResult,
-                            (   this.FLAG_CF_MASK |
-                                this.FLAG_ZF_MASK |
-                                this.FLAG_SF_MASK |
-                                this.FLAG_OF_MASK |
-                                this.FLAG_PF_MASK |
-                                this.FLAG_AF_MASK),
-                            'w');
-
-                        this._regIP += 3;
-
-                        break;
-                    default :
-                        console.log("Invalid opcode!");
-                }
-                break
             case 0x81:
+            case 0x82:
+            case 0x83:
+
+                valDst = this._getRegValueForOp(opcode.w, opcode.rm);
+
+                if (0x80 === opcode_byte)
+                {
+                    valSrc = ((this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2]);
+
+                    this._regIP += 3;
+                }
+                else if (0x81 === opcode_byte)
+                {
+                    valSrc = ((this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2]);
+
+                    this._regIP += 4;
+                }
+                else if (0x82 === opcode_byte)
+                {
+                    valSrc = ((this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2]);
+
+                    this._regIP += 4;
+                }
+                else if (0x83 === opcode_byte)
+                {
+                    valSrc = this._memoryV[this._regIP + 2];
+
+                    // Sign extend to word
+                    if ( 1 === ( (valSrc & 0x80) >> 7)) valSrc = 0xFF00 | valSrc;
+
+                    this._regIP += 3;
+                }
+
                 switch (opcode.reg) {
                     case 1 :
                         console.log("Opcode not implemented!");
@@ -502,10 +523,8 @@ var cpu8086 = {
                      * Notes       :
                      */
                     case 7 :
-                        valDst = this._getRegValueForOp(opcode.w, opcode.rm);
-                        valSrc = ((this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2]);
-
                         valResult = valDst - valSrc;
+
                         this._setFlags(
                             valDst,
                             valSrc,
@@ -517,112 +536,12 @@ var cpu8086 = {
                                 this.FLAG_PF_MASK |
                                 this.FLAG_AF_MASK),
                             'w');
-
-                        this._regIP += 4;
 
                         break;
                     default :
                         console.log("Invalid opcode!");
                 }
                 break;
-            case 0x82:
-                switch (opcode.reg) {
-                    case 1 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    case 2 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    case 3 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    case 4 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    case 5 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    case 6 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    /**
-                     * Instruction : CMP
-                     * Meaning     : Compare
-                     * Notes       :
-                     */
-                    case 7 :
-                        valDst = this._getRegValueForOp(opcode.w, opcode.rm);
-                        valSrc = this._memoryV[this._regIP + 2];
-
-                        valResult = valDst - valSrc;
-                        this._setFlags(
-                            valDst,
-                            valSrc,
-                            valResult,
-                            (   this.FLAG_CF_MASK |
-                                this.FLAG_ZF_MASK |
-                                this.FLAG_SF_MASK |
-                                this.FLAG_OF_MASK |
-                                this.FLAG_PF_MASK |
-                                this.FLAG_AF_MASK),
-                            'w');
-
-                        this._regIP += 3;
-
-                        break;
-                    default :
-                        console.log("Invalid opcode!");
-                }
-                break
-            case 0x83:
-                switch (opcode.reg) {
-                    case 1 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    case 2 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    case 3 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    case 4 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    case 5 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    case 6 :
-                        console.log("Opcode not implemented!");
-                        break;
-                    /**
-                     * Instruction : CMP
-                     * Meaning     : Compare
-                     * Notes       :
-                     */
-                    case 7 :
-                        valDst = this._getRegValueForOp(opcode.w, opcode.rm);
-                        valSrc = this._memoryV[this._regIP + 2];
-
-                        valResult = valDst - valSrc;
-                        this._setFlags(
-                            valDst,
-                            valSrc,
-                            valResult,
-                            (   this.FLAG_CF_MASK |
-                                this.FLAG_ZF_MASK |
-                                this.FLAG_SF_MASK |
-                                this.FLAG_OF_MASK |
-                                this.FLAG_PF_MASK |
-                                this.FLAG_AF_MASK),
-                            'w');
-
-                        this._regIP += 3;
-
-                        break;
-                    default :
-                        console.log("Invalid opcode!");
-                }
-                break
 
             /**
              * Instruction : HLT
@@ -796,28 +715,14 @@ var cpu8086 = {
                 break;
 
             /**
-             * Instruction : JZ
-             * Meaning     : Short Jump if Zero (equal).
-             * Notes       : Set by CMP, SUB, ADD, TEST, AND, OR, XOR instructions.
+             * Instruction : JO
+             * Meaning     : Short Jump on overflow
+             * Notes       :
              */
-            case 0x74:
-                if (this._regFlags & this.FLAG_ZF_MASK)
+            case 0x70:
+                if ( 1 === (this._regFlags & this.FLAG_OF_MASK) )
                 {
-                    // The jump address a signed (twos complement) offset from the current location.
-                    var offset = this._memoryV[this._regIP + 1];
-
-                    // One-byte twos-complement conversion
-                    offset = (offset < 0) ? (-1 * (offset >> 7)) * (~offset + 1) : offset;
-
-                    // If we're going forward we must skip the last byte of this instruction
-                    if (offset > 0)
-                    {
-                        this._regIP += (offset + 2);
-                    }
-                    else
-                    {
-                        this._regIP += offset;
-                    }
+                    this._shortJump();
                 }
                 else
                 {
@@ -825,7 +730,248 @@ var cpu8086 = {
                 }
                 break;
 
+            /**
+             * Instruction : JNO
+             * Meaning     : Short Jump if Not Overflow.
+             * Notes       :
+             */
+            case 0x71:
+                if ( 0 === (this._regFlags & this.FLAG_OF_MASK) )
+                {
+                    this._shortJump();
+                }
+                else
+                {
+                    this._regIP += 2;
+                }
+                break;
 
+            /**
+             * Instruction : JB / JNAE
+             * Meaning     : Short Jump Below / Short Jump Above or Equal.
+             * Notes       :
+             */
+            case 0x72:
+                if ( 1 === (this._regFlags & this.FLAG_CF_MASK) )
+                {
+                    this._shortJump();
+                }
+                else
+                {
+                    this._regIP += 2;
+                }
+                break;
+
+            /**
+             * Instruction : JNB / JAE
+             * Meaning     : Short Jump on Not Below / Short Jump Above or Equal.
+             * Notes       :
+             */
+            case 0x73:
+                if ( 0 === (this._regFlags & this.FLAG_CF_MASK) )
+                {
+                    this._shortJump();
+                }
+                else
+                {
+                    this._regIP += 2;
+                }
+                break;
+
+            /**
+             * Instruction : JZ / JE
+             * Meaning     : Short Jump if Zero (equal).
+             * Notes       : TESTED!
+             */
+            case 0x74:
+                if ( 1 <= (this._regFlags & this.FLAG_ZF_MASK) )
+                {
+                    this._shortJump();
+                }
+                else
+                {
+                    this._regIP += 2;
+                }
+                break;
+
+            /**
+             * Instruction : JNZ / JNE
+             * Meaning     : Short Jump Not Zero / Short Jump Not Equal.
+             * Notes       :
+             */
+            case 0x75:
+                if (0 === (this._regFlags & this.FLAG_ZF_MASK))
+                {
+                    this._shortJump();
+                }
+                else
+                {
+                    this._regIP += 2;
+                }
+                break;
+
+            /**
+             * Instruction : JBE / JNA
+             * Meaning     : Short Jump Below or Equal / Short Jump Not Above.
+             * Notes       :
+             */
+            case 0x76:
+                if ( 1 === (this._regFlags & this.FLAG_CF_MASK) ||
+                     1 === (this._regFlags & this.FLAG_ZF_MASK) )
+                {
+                    this._shortJump();
+                }
+                else
+                {
+                    this._regIP += 2;
+                }
+                break;
+
+            /**
+             * Instruction : JA / JNBE
+             * Meaning     : Short Jump Below or Equal / Short Jump Not Above.
+             * Notes       :
+             */
+            case 0x77:
+                if ( !(this._regFlags & this.FLAG_CF_MASK) & !(this._regFlags & this.FLAG_ZF_MASK) )
+                {
+                    this._shortJump();
+                }
+                else
+                {
+                    this._regIP += 2;
+                }
+                break;
+
+            /**
+             * Instruction : JS
+             * Meaning     : Short Jump Signed
+             * Notes       :
+             */
+            case 0x78:
+                if ( this._regFlags & this.FLAG_SF_MASK)
+                {
+                    this._shortJump();
+                }
+                else
+                {
+                    this._regIP += 2;
+                }
+                break;
+
+            /**
+             * Instruction : JNS
+             * Meaning     : Short Jump Not Signed
+             * Notes       :
+             */
+            case 0x79:
+                if ( !( this._regFlags & this.FLAG_SF_MASK) )
+                {
+                    this._shortJump();
+                }
+                else
+                {
+                    this._regIP += 2;
+                }
+                break;
+
+            /**
+             * Instruction : JPE / JP
+             * Meaning     : Short Jump on Parity Even / Short Jump on Parity
+             * Notes       :
+             */
+            case 0x7A:
+                if ( this._regFlags & this.FLAG_PF_MASK)
+                {
+                    this._shortJump();
+                }
+                else
+                {
+                    this._regIP += 2;
+                }
+                break;
+
+            /**
+             * Instruction : JPO / JNP
+             * Meaning     : Short Jump on Parity Odd / Short Jump Not Parity
+             * Notes       :
+             */
+            case 0x7B:
+                if ( !( this._regFlags & this.FLAG_PF_MASK) )
+                {
+                    this._shortJump();
+                }
+                else
+                {
+                    this._regIP += 2;
+                }
+                break;
+
+            /**
+             * Instruction : JL / JNGE
+             * Meaning     : Short Jump Less / Short Jump Not Greater or Equal
+             * Notes       :
+             */
+            case 0x7C:
+                if ( this._regFlags & this.FLAG_SF_MASK !== this._regFlags & this.FLAG_OF_MASK )
+                {
+                    this._shortJump();
+                }
+                else
+                {
+                    this._regIP += 2;
+                }
+                break;
+
+            /**
+             * Instruction : JGE / JNL
+             * Meaning     : Short Jump Greater or Equal / Short Jump Not Less
+             * Notes       :
+             */
+            case 0x7D:
+                if ( this._regFlags & this.FLAG_SF_MASK === this._regFlags & this.FLAG_OF_MASK )
+                {
+                    this._shortJump();
+                }
+                else
+                {
+                    this._regIP += 2;
+                }
+                break;
+
+            /**
+             * Instruction : JLE / JNG
+             * Meaning     : Short Jump Less or Equal / Short Jump Not Greater
+             * Notes       :
+             */
+            case 0x7E:
+                if ( this._regFlags & this.FLAG_ZF_MASK ||
+                    (this._regFlags & this.FLAG_SF_MASK !== this._regFlags & this.FLAG_OF_MASK ) )
+                {
+                    this._shortJump();
+                }
+                else
+                {
+                    this._regIP += 2;
+                }
+                break;
+
+            /**
+             * Instruction : JG / JNLE
+             * Meaning     : Short Jump Greater / Short Jump Not Less or Equal
+             * Notes       :
+             */
+            case 0x7F:
+                if ( !(this._regFlags & this.FLAG_ZF_MASK) ||
+                    (this._regFlags & this.FLAG_SF_MASK === this._regFlags & this.FLAG_OF_MASK ) )
+                {
+                    this._shortJump();
+                }
+                else
+                {
+                    this._regIP += 2;
+                }
+                break;
 
             /**
              * Instruction : MOV
@@ -984,6 +1130,23 @@ var cpu8086 = {
     },
 
     /**
+     * Execute Short Jump (one-byte address)
+     * @private
+     */
+    _shortJump : function ()
+    {
+        // The jump address a signed (twos complement) offset from the current location.
+        var offset = this._memoryV[this._regIP + 1];
+
+        // One-byte twos-complement conversion
+        // It seems Javascript does not do ~ (bitwise not) correctly
+        offset = ((offset >> 7) === 1) ? (-1 * (offset >> 7)) * ((offset ^ 0xFF) + 1) : offset;
+
+        // We must skip the last byte of this instruction
+        this._regIP += (offset + 2);
+    },
+
+    /**
      * Generic method to set flags for give operands and result
      *
      * TODO: I think this only works for subtraction, verify for other operations
@@ -999,7 +1162,6 @@ var cpu8086 = {
     {
         // Set defaults
         size = size || 'b';
-        flagsToSet = 0xFFFF;
 
         // Carry Flag (CF)
         // Indicates when an arithmetic carry or borrow has been generated
