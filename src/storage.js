@@ -9,7 +9,8 @@ var storage = {
         document.getElementById("file_chooser_output").innerHTML = file.name;
 
         reader.onload = function(e) {
-            cpu.loadBinary(0x00, reader.result);
+            //cpu.loadBinary(0x0110, reader.result);
+            cpu.loadBinary(0xF000, reader.result);
         };
 
         reader.onerror = function(event) {

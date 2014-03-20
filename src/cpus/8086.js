@@ -182,6 +182,45 @@ var cpu8086 = {
         }
     },
 
+    /**
+     * Reset the CPU state
+     *
+     * TODO: Verify this information
+     * The video RAM starts at address 8000h,
+     *
+     * (from http://www.cpu-world.com/Arch/8086.html)
+     *
+     * Program memory - program can be located anywhere in memory. Jump and
+     * call instructions can be used for short jumps within currently selected
+     * 64 KB code segment, as well as for far jumps anywhere within 1 MB of
+     * memory. All conditional jump instructions can be used to jump within
+     * approximately +127 - -127 bytes from current instruction.
+     *
+     * Data memory - the 8086 processor can access data in any one out of 4
+     * available segments, which limits the size of accessible memory to 256 KB
+     * (if all four segments point to different 64 KB blocks). Accessing data
+     * from the Data, Code, Stack or Extra segments can be usually done by
+     * prefixing instructions with the DS:, CS:, SS: or ES: (some registers and
+     * instructions by default may use the ES or SS segments instead of DS
+     * segment).
+     *
+     * Word data can be located at odd or even byte boundaries. The processor
+     * uses two memory accesses to read 16-bit word located at odd byte
+     * boundaries. Reading word data from even byte boundaries requires only
+     * one memory access.
+     *
+     * Stack memory can be placed anywhere in memory. The stack can be located
+     * at odd memory addresses, but it is not recommended for performance
+     * reasons (see "Data Memory" above).
+     *
+     * Reserved locations:
+     *
+     * 0000h - 03FFh are reserved for interrupt vectors. Each interrupt vector
+     * is a 32-bit pointer in format segment:offset.
+     *
+     * FFFF0h - FFFFFh - after RESET the processor always starts program
+     * execution at the FFFF0h address.
+     */
     reset : function ()
     {
         console.log("initialize");
@@ -208,7 +247,8 @@ var cpu8086 = {
         this._regSP = 0x0100;
 
         // Program counter
-        this._regIP = 0x0000;
+        //this._regIP = 0x0110;
+        this._regIP = 0xF000;
 
         // Segment registers
         this._regCS = 0x0000;
@@ -265,6 +305,20 @@ var cpu8086 = {
                 console.log("Two-byte opcode - not supported! [" + opcode_byte_2.toString(16) + "]");
                 break;
 
+            /**
+             * Instruction : Call
+             * Meaning     : Transfers control to procedure, return address is
+                            (IP) is pushed to stack.
+             * Notes       :
+             */
+            case 0xE8:
+                // Push return address
+                this._push(this._regIP);
+
+                // Jump to procedure
+                this._regIP += ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]) + 3;
+
+                break;
 
             /**
              * Instruction : CLC
@@ -1090,6 +1144,122 @@ var cpu8086 = {
                 break;
 
             /**
+             * Instruction : POP
+             * Meaning     : Get 16 bit value from the stack.
+             * Notes       :
+             */
+            case 0x07:
+                this._regES = this._pop();
+                this._regIP += 1;
+                break;
+            case 0x17:
+                this._regSS = this._pop();
+                this._regIP += 1;
+                break;
+            case 0x1F:
+                this._regDS = this._pop();
+                this._regIP += 1;
+                break;
+            case 0x58:
+                var result = this._pop();
+                this._regAH = (result & 0xFF00) >> 8;
+                this._regAL = (result & 0x00FF);
+                this._regIP += 1;
+                break;
+            case 0x59:
+                var result = this._pop();
+                this._regCH = (result & 0xFF00) >> 8;
+                this._regCL = (result & 0x00FF);
+                this._regIP += 1;
+                break;
+            case 0x5A:
+                var result = this._pop();
+                this._regDH = (result & 0xFF00) >> 8;
+                this._regDL = (result & 0x00FF);
+                this._regIP += 1;
+                break;
+            case 0x5B:
+                var result = this._pop();
+                this._regBH = (result & 0xFF00) >> 8;
+                this._regBL = (result & 0x00FF);
+                this._regIP += 1;
+                break;
+            case 0x5C:
+                this._regSP = this._pop();
+                this._regIP += 1;
+                break;
+            case 0x5D:
+                this._regBP = this._pop();
+                this._regIP += 1;
+                break;
+            case 0x5E:
+                this._regSI = this._pop();
+                this._regIP += 1;
+                break;
+            case 0x5F:
+                this._regDI = this._pop();
+                this._regIP += 1;
+                break;
+            case 0x8F:
+                // This one isn't as easy
+                console.log("Opcode not implemented!");
+                break;
+
+            /**
+             * Instruction : PUSH
+             * Meaning     : Store 16 bit value in the stack.
+             * Notes       :
+             */
+            case 0x06:
+                this._push(this._regES);
+                this._regIP += 1;
+                break;
+            case 0x0E:
+                this._push(this._regCS);
+                this._regIP += 1;
+                break;
+            case 0x16:
+                this._push(this._regSS);
+                this._regIP += 1;
+                break;
+            case 0x1E:
+                this._push(this._regDS);
+                this._regIP += 1;
+                break;
+            case 0x50:
+                this._push(((this._regAH << 8) | this._regAL));
+                this._regIP += 1;
+                break;
+            case 0x51:
+                this._push(((this._regCH << 8) | this._regCL));
+                this._regIP += 1;
+                break;
+            case 0x52:
+                this._push(((this._regDH << 8) | this._regDL));
+                this._regIP += 1;
+                break;
+            case 0x53:
+                this._push(((this._regBH << 8) | this._regBL));
+                this._regIP += 1;
+                break;
+            case 0x54:
+                this._push(this._regSP);
+                this._regIP += 1;
+                break;
+            case 0x55:
+                this._push(this._regBP);
+                this._regIP += 1;
+                break;
+            case 0x56:
+                this._push(this._regSI);
+                this._regIP += 1;
+                break;
+            case 0x57:
+                this._push(this._regDI);
+                this._regIP += 1;
+                break;
+
+            /**
              * Instruction : STC
              * Meaning     : Set Carry flag.
              * Notes       :
@@ -1127,6 +1297,24 @@ var cpu8086 = {
 
         // Debug
         gui.displayRegisters(this._bundleRegisters());
+    },
+
+    _push : function (value)
+    {
+        // Update stack pointer
+        this._regSP -= 2;
+
+        this._memory[this._regSP]     = (value & 0x00FF);
+        this._memory[this._regSP + 1] = (value >> 8);
+    },
+
+    _pop : function ()
+    {
+        var value = ((this._memoryV[this._regSP + 1] << 8) | this._memoryV[this._regSP]);
+
+        this._regSP += 2;
+
+        return value;
     },
 
     /**
