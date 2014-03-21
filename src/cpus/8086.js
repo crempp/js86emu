@@ -136,6 +136,68 @@ var cpu8086 = {
         }
     },
 
+    _getRMValueForOp : function (mod, rm, operandValue)
+    {
+        if (0 === mod)
+        {
+            switch (rm)
+            {
+                case 1 :
+                    console.error("RM Lookup not implemented for these parameters");
+                    break;
+                case 2 :
+                    console.error("RM Lookup not implemented for these parameters");
+                    break;
+                case 3 :
+                    console.error("RM Lookup not implemented for these parameters");
+                    break;
+                case 4 :
+                    console.error("RM Lookup not implemented for these parameters");
+                    break;
+                case 5 :
+                    console.error("RM Lookup not implemented for these parameters");
+                    break;
+                case 6 :
+                    console.error("RM Lookup not implemented for these parameters");
+                    break;
+                case 7 :
+                    if (cpu.isDebug()) console.log("Using register SP (word)");
+                    break;
+            }
+        }
+        else if (1 === mod)
+        {
+            switch (rm)
+            {
+                case 1 :
+                    console.error("RM Lookup not implemented for these parameters");
+                    break;
+                case 2 :
+                    console.error("RM Lookup not implemented for these parameters");
+                    break;
+                case 3 :
+                    console.error("RM Lookup not implemented for these parameters");
+                    break;
+                case 4 :
+                    console.error("RM Lookup not implemented for these parameters");
+                    break;
+                case 5 :
+                    console.error("RM Lookup not implemented for these parameters");
+                    break;
+                case 6 :
+                    console.error("RM Lookup not implemented for these parameters");
+                    break;
+                case 7 :
+                    console.error("RM Lookup not implemented for these parameters");
+                    break;
+            }
+        }
+        else
+        {
+            throw "Invalid r/m table lookup parameters";
+        }
+    },
+
     /**
      * Looks up the correct register to use based on the w and reg
      * values in the opcode.
@@ -302,7 +364,7 @@ var cpu8086 = {
              */
             case 0x0F :
                 var opcode_byte_2 = this._memoryV[this._regIP + 1];
-                console.log("Two-byte opcode - not supported! [" + opcode_byte_2.toString(16) + "]");
+                console.error("Two-byte opcode - not supported! [" + opcode_byte_2.toString(16) + "]");
                 break;
 
             /**
@@ -554,22 +616,22 @@ var cpu8086 = {
 
                 switch (opcode.reg) {
                     case 1 :
-                        console.log("Opcode not implemented!");
+                        console.error("Opcode not implemented!");
                         break;
                     case 2 :
-                        console.log("Opcode not implemented!");
+                        console.error("Opcode not implemented!");
                         break;
                     case 3 :
-                        console.log("Opcode not implemented!");
+                        console.error("Opcode not implemented!");
                         break;
                     case 4 :
-                        console.log("Opcode not implemented!");
+                        console.error("Opcode not implemented!");
                         break;
                     case 5 :
-                        console.log("Opcode not implemented!");
+                        console.error("Opcode not implemented!");
                         break;
                     case 6 :
-                        console.log("Opcode not implemented!");
+                        console.error("Opcode not implemented!");
                         break;
                     /**
                      * Instruction : CMP
@@ -593,7 +655,7 @@ var cpu8086 = {
 
                         break;
                     default :
-                        console.log("Invalid opcode!");
+                        console.error("Invalid opcode!");
                 }
                 break;
 
@@ -1042,35 +1104,40 @@ var cpu8086 = {
              */
             // Move ?????
             case 0x88:
-                console.log("Opcode not implemented!");
+                console.error("Opcode not implemented!");
                 break;
             case 0x89:
-                console.log("Opcode not implemented!");
+                console.error("Opcode not implemented!");
                 break;
             case 0x8A:
-                console.log("Opcode not implemented!");
+                console.error("Opcode not implemented!");
                 break;
             case 0x8B:
-                console.log("Opcode not implemented!");
+                var value = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+
+                this._setRegValueForOp(opcode.w, opcode.reg, value);
+
+                this._regIP += 4;
+
                 break;
             case 0x8C:
-                console.log("Opcode not implemented!");
+                console.error("Opcode not implemented!");
                 break;
             case 0x8E:
-                console.log("Opcode not implemented!");
+                console.error("Opcode not implemented!");
                 break;
             // Move with displacement ???
             case 0xA0:
-                console.log("Opcode not implemented!");
+                console.error("Opcode not implemented!");
                 break;
             case 0xA1:
-                console.log("Opcode not implemented!");
+                console.error("Opcode not implemented!");
                 break;
             case 0xA2:
-                console.log("Opcode not implemented!");
+                console.error("Opcode not implemented!");
                 break;
             case 0xA3:
-                console.log("Opcode not implemented!");
+                console.error("Opcode not implemented!");
                 break;
             // Move Immediate byte into register (e.g, MOV AL Ib)
             case 0xB0:
@@ -1202,7 +1269,7 @@ var cpu8086 = {
                 break;
             case 0x8F:
                 // This one isn't as easy
-                console.log("Opcode not implemented!");
+                console.error("Opcode not implemented!");
                 break;
 
             /**
@@ -1290,7 +1357,7 @@ var cpu8086 = {
                 break;
 
             default :
-                console.log("Unknown opcode!");
+                console.error("Unknown opcode!");
         }
 
         // Update timers

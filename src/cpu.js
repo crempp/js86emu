@@ -27,6 +27,13 @@ var cpu = {
 
             if (!this._cpuPaused)
             {
+                // Debug
+                if (this._debugFlag)
+                {
+                    gui.centerMemoryDisplay(this.getIP());
+                    gui.displayMemory();
+                }
+
                 // Emulate one cycle
                 this._emulateCycle();
 
@@ -38,12 +45,20 @@ var cpu = {
                 input.setKeys();
 
                 // Debug
-                if (this._debugFlag) break;
+                if (this._debugFlag)
+                {
+                    break;
+                }
 
                 // TODO: set drawflag appropriately
                 this._drawFlag = true;
             }
         }
+    },
+
+    getIP : function()
+    {
+        return window[this._cpuModel]._regIP;
     },
     
     loadBinary : function (addr, blob)
@@ -82,6 +97,16 @@ var cpu = {
     isDebug : function ()
     {
         return this._debugFlag;
+    },
+
+    getMem8 : function(addr8)
+    {
+        return window[this._cpuModel]._memoryV[addr8];
+    },
+    getMem16 : function(addr16)
+    {
+//        ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+//        return window[this._cpuModel]._memoryV[addr16];
     },
     
     _emulateCycle : function ()

@@ -48,16 +48,16 @@ var gfx = {
         }
 
         // Setup glfx.js
-        this._canvas.parentNode.insertBefore(this._glcanvas, this._canvas);
-        this._canvas.style.display = 'none';
-        this._glcanvas.className = this._canvas.className;
-        this._glcanvas.id = this._canvas.id;
-        this._canvas.id = 'old_' + this._canvas.id;
+//        this._canvas.parentNode.insertBefore(this._glcanvas, this._canvas);
+//        this._canvas.style.display = 'none';
+//        this._glcanvas.className = this._canvas.className;
+//        this._glcanvas.id = this._canvas.id;
+//        this._canvas.id = 'old_' + this._canvas.id;
 
         // Setup FX
-        this.fxData["fakecrt"]    = this._fx_FakeCRT_init();
-        this.fxData["fakestatic"] = this._fx_FakeStatic_init();
-        this.fxData["fakeglow"]   = this._fx_FakeGlow_init();
+//        this.fxData["fakecrt"]    = this._fx_FakeCRT_init();
+//        this.fxData["fakestatic"] = this._fx_FakeStatic_init();
+//        this.fxData["fakeglow"]   = this._fx_FakeGlow_init();
     },
 
     drawGraphics : function()
@@ -101,7 +101,7 @@ var gfx = {
 
         // Draw to canvas
         //this._glcanvas.draw(this._frameImg);
-        this._glcanvas.draw(imageData);
+//        this._glcanvas.draw(imageData);
 
         // Run FX
         //this._fx_FakeCRT_draw();
@@ -109,7 +109,7 @@ var gfx = {
         //this._fx_FakeGlow_draw();
 
         // Update canvas
-        this._glcanvas.update();
+//        this._glcanvas.update();
     },
 
     /**
