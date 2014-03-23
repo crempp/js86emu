@@ -137,7 +137,7 @@ var cpu8086 = {
 
     _getRMValueForOp : function (opcode, operandValue)
     {
-        var addr, val;
+        var addr;
         if (0 === opcode.mod)
         {
             switch (opcode.rm)
@@ -191,34 +191,42 @@ var cpu8086 = {
                 case 0 :
                     // [BX + SI]
                     console.error("RM Lookup not implemented for these parameters");
+                    return 0;
                     break;
                 case 1 :
                     // [BX + DI]
                     console.error("RM Lookup not implemented for these parameters");
+                    return 0;
                     break;
                 case 2 :
                     // [BP + SI]
                     console.error("RM Lookup not implemented for these parameters");
+                    return 0;
                     break;
                 case 3 :
                     // [BP + DI]
                     console.error("RM Lookup not implemented for these parameters");
+                    return 0;
                     break;
                 case 4 :
                     // [SI]
                     console.error("RM Lookup not implemented for these parameters");
+                    return 0;
                     break;
                 case 5 :
                     // [DI]
                     console.error("RM Lookup not implemented for these parameters");
+                    return 0;
                     break;
                 case 6 :
                     // [BP]
                     console.error("RM Lookup not implemented for these parameters");
+                    return 0;
                     break;
                 case 7 :
                     // [BX]
                     console.error("RM Lookup not implemented for these parameters");
+                    return 0;
                     break;
             }
         }
@@ -226,6 +234,7 @@ var cpu8086 = {
         {
             throw "Invalid r/m table lookup parameters";
         }
+        return 0;
     },
 
     /**
@@ -475,34 +484,42 @@ var cpu8086 = {
                 case 0 :
                     // [BX + SI]
                     console.error("RM Lookup not implemented for these parameters");
+                    return 0;
                     break;
                 case 1 :
                     // [BX + DI]
                     console.error("RM Lookup not implemented for these parameters");
+                    return 0;
                     break;
                 case 2 :
                     // [BP + SI]
                     console.error("RM Lookup not implemented for these parameters");
+                    return 0;
                     break;
                 case 3 :
                     // [BP + DI]
                     console.error("RM Lookup not implemented for these parameters");
+                    return 0;
                     break;
                 case 4 :
                     // [SI]
                     console.error("RM Lookup not implemented for these parameters");
+                    return 0;
                     break;
                 case 5 :
                     // [DI]
                     console.error("RM Lookup not implemented for these parameters");
+                    return 0;
                     break;
                 case 6 :
                     // [BP]
-                    if (cpu.isDebug()) console.log("Using register SP (word)");
+                    console.error("RM Lookup not implemented for these parameters");
+                    return 0;
                     break;
                 case 7 :
                     // [BX]
-                    if (cpu.isDebug()) console.log("Using register SP (word)");
+                    console.error("RM Lookup not implemented for these parameters");
+                    return 0;
                     break;
             }
         }
@@ -510,6 +527,7 @@ var cpu8086 = {
         {
             throw "Invalid r/m table lookup parameters";
         }
+        return 0;
     },
 
     /**
@@ -609,9 +627,7 @@ var cpu8086 = {
     emulateCycle : function ()
     {
         // Some common variables
-        var valSrc, valDst, valResult;
-
-        //var flag = 0x00;
+        var valSrc, valDst, valResult, regX;
 
         // Fetch Opcode
         var opcode_byte     = this._memoryV[this._regIP];
@@ -692,15 +708,15 @@ var cpu8086 = {
              * Notes       :
              */
             case 0x48 :
-                var regX = ((this._regAH << 8) | this._regAL);
-                var result = regX - 1;
-                this._regAH = (result & 0xFF00) >> 8;
-                this._regAL = (result & 0x00FF);
+                regX = ((this._regAH << 8) | this._regAL);
+                valResult = regX - 1;
+                this._regAH = (valResult & 0xFF00) >> 8;
+                this._regAL = (valResult & 0x00FF);
 
                 this._setFlags(
                     regX,
                     1,
-                    result,
+                    valResult,
                     (   this.FLAG_ZF_MASK |
                         this.FLAG_SF_MASK |
                         this.FLAG_OF_MASK |
@@ -712,15 +728,15 @@ var cpu8086 = {
 
                 break;
             case 0x49 :
-                var regX = ((this._regCH << 8) | this._regCL);
-                var result = regX - 1;
-                this._regCH = (result & 0xFF00) >> 8;
-                this._regCL = (result & 0x00FF);
+                regX = ((this._regCH << 8) | this._regCL);
+                valResult = regX - 1;
+                this._regCH = (valResult & 0xFF00) >> 8;
+                this._regCL = (valResult & 0x00FF);
 
                 this._setFlags(
                     regX,
                     1,
-                    result,
+                    valResult,
                     (   this.FLAG_ZF_MASK |
                         this.FLAG_SF_MASK |
                         this.FLAG_OF_MASK |
@@ -732,15 +748,15 @@ var cpu8086 = {
 
                 break;
             case 0x4A :
-                var regX = ((this._regDH << 8) | this._regDL);
-                var result = regX - 1;
-                this._regDH = (result & 0xFF00) >> 8;
-                this._regDL = (result & 0x00FF);
+                regX = ((this._regDH << 8) | this._regDL);
+                valResult = regX - 1;
+                this._regDH = (valResult & 0xFF00) >> 8;
+                this._regDL = (valResult & 0x00FF);
 
                 this._setFlags(
                     regX,
                     1,
-                    result,
+                    valResult,
                     (   this.FLAG_ZF_MASK |
                         this.FLAG_SF_MASK |
                         this.FLAG_OF_MASK |
@@ -752,15 +768,15 @@ var cpu8086 = {
 
                 break;
             case 0x4B :
-                var regX = ((this._regBH << 8) | this._regBL);
-                var result = regX - 1;
-                this._regBH = (result & 0xFF00) >> 8;
-                this._regBL = (result & 0x00FF);
+                regX = ((this._regBH << 8) | this._regBL);
+                valResult = regX - 1;
+                this._regBH = (valResult & 0xFF00) >> 8;
+                this._regBL = (valResult & 0x00FF);
 
                 this._setFlags(
                     regX,
                     1,
-                    result,
+                    valResult,
                     (   this.FLAG_ZF_MASK |
                         this.FLAG_SF_MASK |
                         this.FLAG_OF_MASK |
@@ -772,14 +788,14 @@ var cpu8086 = {
 
                 break;
             case 0x4C :
-                var regX = this._regSP;
-                var result = regX - 1;
-                this._regSP = result;
+                regX = this._regSP;
+                valResult = regX - 1;
+                this._regSP = valResult;
 
                 this._setFlags(
                     regX,
                     1,
-                    result,
+                    valResult,
                     (   this.FLAG_ZF_MASK |
                         this.FLAG_SF_MASK |
                         this.FLAG_OF_MASK |
@@ -791,14 +807,14 @@ var cpu8086 = {
 
                 break;
             case 0x4D :
-                var regX = this._regBP;
-                var result = regX - 1;
-                this._regBP = result;
+                regX = this._regBP;
+                valResult = regX - 1;
+                this._regBP = valResult;
 
                 this._setFlags(
                     regX,
                     1,
-                    result,
+                    valResult,
                     (   this.FLAG_ZF_MASK |
                         this.FLAG_SF_MASK |
                         this.FLAG_OF_MASK |
@@ -810,14 +826,14 @@ var cpu8086 = {
 
                 break;
             case 0x4E :
-                var regX = this._regSI;
-                var result = regX - 1;
-                this._regSI = result;
+                regX = this._regSI;
+                valResult = regX - 1;
+                this._regSI = valResult;
 
                 this._setFlags(
                     regX,
                     1,
-                    result,
+                    valResult,
                     (   this.FLAG_ZF_MASK |
                         this.FLAG_SF_MASK |
                         this.FLAG_OF_MASK |
@@ -829,14 +845,14 @@ var cpu8086 = {
 
                 break;
             case 0x4F :
-                var regX = this._regDI;
-                var result = regX - 1;
-                this._regDI = result;
+                regX = this._regDI;
+                valResult = regX - 1;
+                this._regDI = valResult;
 
                 this._setFlags(
                     regX,
                     1,
-                    result,
+                    valResult,
                     (   this.FLAG_ZF_MASK |
                         this.FLAG_SF_MASK |
                         this.FLAG_OF_MASK |
@@ -949,15 +965,15 @@ var cpu8086 = {
              * Notes       :
              */
             case 0x40 :
-                var regX = ((this._regAH << 8) | this._regAL);
-                var result = (regX + 1) & 0xFFFF; // Clamp to word
-                this._regAH = (result & 0xFF00) >> 8;
-                this._regAL = (result & 0x00FF);
+                regX = ((this._regAH << 8) | this._regAL);
+                valResult = (regX + 1) & 0xFFFF; // Clamp to word
+                this._regAH = (valResult & 0xFF00) >> 8;
+                this._regAL = (valResult & 0x00FF);
 
                 this._setFlags(
                     regX,
                     1,
-                    result,
+                    valResult,
                     (   this.FLAG_ZF_MASK |
                         this.FLAG_SF_MASK |
                         this.FLAG_OF_MASK |
@@ -969,15 +985,15 @@ var cpu8086 = {
 
                 break;
             case 0x41 :
-                var regX = ((this._regCH << 8) | this._regCL);
-                var result = (regX + 1) & 0xFFFF; // Clamp to word
-                this._regCH = (result & 0xFF00) >> 8;
-                this._regCL = (result & 0x00FF);
+                regX = ((this._regCH << 8) | this._regCL);
+                valResult = (regX + 1) & 0xFFFF; // Clamp to word
+                this._regCH = (valResult & 0xFF00) >> 8;
+                this._regCL = (valResult & 0x00FF);
 
                 this._setFlags(
                     regX,
                     1,
-                    result,
+                    valResult,
                     (   this.FLAG_ZF_MASK |
                         this.FLAG_SF_MASK |
                         this.FLAG_OF_MASK |
@@ -989,15 +1005,15 @@ var cpu8086 = {
 
                 break;
             case 0x42 :
-                var regX = ((this._regDH << 8) | this._regDL);
-                var result = (regX + 1) & 0xFFFF; // Clamp to word
-                this._regDH = (result & 0xFF00) >> 8;
-                this._regDL = (result & 0x00FF);
+                regX = ((this._regDH << 8) | this._regDL);
+                valResult = (regX + 1) & 0xFFFF; // Clamp to word
+                this._regDH = (valResult & 0xFF00) >> 8;
+                this._regDL = (valResult & 0x00FF);
 
                 this._setFlags(
                     regX,
                     1,
-                    result,
+                    valResult,
                     (   this.FLAG_ZF_MASK |
                         this.FLAG_SF_MASK |
                         this.FLAG_OF_MASK |
@@ -1009,15 +1025,15 @@ var cpu8086 = {
 
                 break;
             case 0x43 :
-                var regX = ((this._regBH << 8) | this._regBL);
-                var result = (regX + 1) & 0xFFFF; // Clamp to word
-                this._regBH = (result & 0xFF00) >> 8;
-                this._regBL = (result & 0x00FF);
+                regX = ((this._regBH << 8) | this._regBL);
+                valResult = (regX + 1) & 0xFFFF; // Clamp to word
+                this._regBH = (valResult & 0xFF00) >> 8;
+                this._regBL = (valResult & 0x00FF);
 
                 this._setFlags(
                     regX,
                     1,
-                    result,
+                    valResult,
                     (   this.FLAG_ZF_MASK |
                         this.FLAG_SF_MASK |
                         this.FLAG_OF_MASK |
@@ -1029,14 +1045,14 @@ var cpu8086 = {
 
                 break;
             case 0x44 :
-                var regX = this._regSP;
-                var result = (regX + 1) & 0xFFFF; // Clamp to word
-                this._regSP = result;
+                regX = this._regSP;
+                valResult = (regX + 1) & 0xFFFF; // Clamp to word
+                this._regSP = valResult;
 
                 this._setFlags(
                     regX,
                     1,
-                    result,
+                    valResult,
                     (   this.FLAG_ZF_MASK |
                         this.FLAG_SF_MASK |
                         this.FLAG_OF_MASK |
@@ -1048,14 +1064,14 @@ var cpu8086 = {
 
                 break;
             case 0x45 :
-                var regX = this._regBP;
-                var result = (regX + 1) & 0xFFFF; // Clamp to word
-                this._regBP = result;
+                regX = this._regBP;
+                valResult = (regX + 1) & 0xFFFF; // Clamp to word
+                this._regBP = valResult;
 
                 this._setFlags(
                     regX,
                     1,
-                    result,
+                    valResult,
                     (   this.FLAG_ZF_MASK |
                         this.FLAG_SF_MASK |
                         this.FLAG_OF_MASK |
@@ -1067,14 +1083,14 @@ var cpu8086 = {
 
                 break;
             case 0x46 :
-                var regX = this._regSI;
-                var result = (regX + 1) & 0xFFFF; // Clamp to word
-                this._regSI = result;
+                regX = this._regSI;
+                valResult = (regX + 1) & 0xFFFF; // Clamp to word
+                this._regSI = valResult;
 
                 this._setFlags(
                     regX,
                     1,
-                    result,
+                    valResult,
                     (   this.FLAG_ZF_MASK |
                         this.FLAG_SF_MASK |
                         this.FLAG_OF_MASK |
@@ -1086,14 +1102,14 @@ var cpu8086 = {
 
                 break;
             case 0x47 :
-                var regX = this._regDI;
-                var result = (regX + 1) & 0xFFFF; // Clamp to word
-                this._regDI = result;
+                regX = this._regDI;
+                valResult = (regX + 1) & 0xFFFF; // Clamp to word
+                this._regDI = valResult;
 
                 this._setFlags(
                     regX,
                     1,
-                    result,
+                    valResult,
                     (   this.FLAG_ZF_MASK |
                         this.FLAG_SF_MASK |
                         this.FLAG_OF_MASK |
@@ -1504,27 +1520,27 @@ var cpu8086 = {
                 this._regIP += 1;
                 break;
             case 0x58:
-                var result = this._pop();
-                this._regAH = (result & 0xFF00) >> 8;
-                this._regAL = (result & 0x00FF);
+                valResult = this._pop();
+                this._regAH = (valResult & 0xFF00) >> 8;
+                this._regAL = (valResult & 0x00FF);
                 this._regIP += 1;
                 break;
             case 0x59:
-                var result = this._pop();
-                this._regCH = (result & 0xFF00) >> 8;
-                this._regCL = (result & 0x00FF);
+                valResult = this._pop();
+                this._regCH = (valResult & 0xFF00) >> 8;
+                this._regCL = (valResult & 0x00FF);
                 this._regIP += 1;
                 break;
             case 0x5A:
-                var result = this._pop();
-                this._regDH = (result & 0xFF00) >> 8;
-                this._regDL = (result & 0x00FF);
+                valResult = this._pop();
+                this._regDH = (valResult & 0xFF00) >> 8;
+                this._regDL = (valResult & 0x00FF);
                 this._regIP += 1;
                 break;
             case 0x5B:
-                var result = this._pop();
-                this._regBH = (result & 0xFF00) >> 8;
-                this._regBL = (result & 0x00FF);
+                valResult = this._pop();
+                this._regBH = (valResult & 0xFF00) >> 8;
+                this._regBL = (valResult & 0x00FF);
                 this._regIP += 1;
                 break;
             case 0x5C:
@@ -1609,6 +1625,7 @@ var cpu8086 = {
              */
             case 0xC2:
                 console.error("Unknown opcode!");
+                break;
             case 0xC3:
                 this._regIP = (this._pop() + 3);
                 break;
@@ -1672,7 +1689,7 @@ var cpu8086 = {
         // Zero the memory locations on the stack.
         // This isn't necessary but helps with debugging
         this._memoryV[this._regSP]     = 0;
-        this._memoryV[this._regSP + 1] - 0;
+        this._memoryV[this._regSP + 1] = 0;
 
 
         this._regSP += 2;
@@ -1832,7 +1849,7 @@ var cpu8086 = {
             FLAGS : this._regFlags
         };
     }
-}
+};
 
 var oplist = {
     retrieveCode : function (op)
@@ -2066,4 +2083,4 @@ var oplist = {
     "0xFD" : "STD",
     "0xFE" : "GRP4 Eb",
     "0xFF" : "GRP5 Ev"
-}
+};
