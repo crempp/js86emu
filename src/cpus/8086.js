@@ -61,14 +61,13 @@ var cpu8086 = {
      *
      * Returns the value from the register
      *
-     * @param w
-     * @param reg
+     * @param opcode
      * @private
      */
-    _getRegValueForOp : function (w, reg) {
-        if (0 === w)
+    _getRegValueForOp : function (opcode) {
+        if (0 === opcode.w)
         {
-            switch (reg)
+            switch (opcode.reg)
             {
                 case 0:
                     if (cpu.isDebug()) console.log("Using register AL (byte)");
@@ -98,9 +97,9 @@ var cpu8086 = {
                     throw "Invalid reg table lookup parameters";
             }
         }
-        else if (1 === w)
+        else if (1 === opcode.w)
         {
-            switch (reg)
+            switch (opcode.reg)
             {
                 case 0:
                     if (cpu.isDebug()) console.log("Using register AX (word)");
@@ -136,59 +135,82 @@ var cpu8086 = {
         }
     },
 
-    _getRMValueForOp : function (mod, rm, operandValue)
+    _getRMValueForOp : function (opcode, operandValue)
     {
-        if (0 === mod)
+        if (0 === opcode.mod)
         {
-            switch (rm)
+            switch (opcode.rm)
             {
+                case 0 :
+                    // [BX + SI]
+                    console.error("RM Lookup not implemented for these parameters");
+                    break;
                 case 1 :
+                    // [BX + DI]
                     console.error("RM Lookup not implemented for these parameters");
                     break;
                 case 2 :
+                    // [BP + SI]
                     console.error("RM Lookup not implemented for these parameters");
                     break;
                 case 3 :
+                    // [BP + DI]
                     console.error("RM Lookup not implemented for these parameters");
                     break;
                 case 4 :
+                    // [SI]
                     console.error("RM Lookup not implemented for these parameters");
                     break;
                 case 5 :
+                    // [DI]
                     console.error("RM Lookup not implemented for these parameters");
                     break;
                 case 6 :
-                    console.error("RM Lookup not implemented for these parameters");
+                    // Drc't Add
+                    if (cpu.isDebug()) console.log("Using register SP (word)");
                     break;
                 case 7 :
+                    // [BX]
                     if (cpu.isDebug()) console.log("Using register SP (word)");
                     break;
             }
         }
-        else if (1 === mod)
+        else if (1 === opcode.mod || 2 == opcode.mod)
         {
-            switch (rm)
+            // Add DISP to register specified
+            switch (opcode.rm)
             {
+                case 0 :
+                    // [BX + SI]
+                    console.error("RM Lookup not implemented for these parameters");
+                    break;
                 case 1 :
+                    // [BX + DI]
                     console.error("RM Lookup not implemented for these parameters");
                     break;
                 case 2 :
+                    // [BP + SI]
                     console.error("RM Lookup not implemented for these parameters");
                     break;
                 case 3 :
+                    // [BP + DI]
                     console.error("RM Lookup not implemented for these parameters");
                     break;
                 case 4 :
+                    // [SI]
                     console.error("RM Lookup not implemented for these parameters");
                     break;
                 case 5 :
+                    // [DI]
                     console.error("RM Lookup not implemented for these parameters");
                     break;
                 case 6 :
-                    console.error("RM Lookup not implemented for these parameters");
+                    // [BP]
+                    if (cpu.isDebug()) console.log("Using register SP (word)");
                     break;
                 case 7 :
-                    console.error("RM Lookup not implemented for these parameters");
+                    // [BX]
+                    if (cpu.isDebug()) console.log("Using register SP (word)");
                     break;
             }
         }
@@ -204,15 +226,14 @@ var cpu8086 = {
      *
      * Sets the register to the given value
      *
-     * @param w
-     * @param reg
+     * @param opcode
      * @param value
      * @private
      */
-    _setRegValueForOp : function (w, reg, value) {
-        if (0 === w)
+    _setRegValueForOp : function (opcode, value) {
+        if (0 === opcode.w)
         {
-            switch (reg)
+            switch (opcode.reg)
             {
                 case 0: this._regAL = value; break;
                 case 1: this._regCL = value; break;
@@ -224,9 +245,9 @@ var cpu8086 = {
                 case 7: this._regDH = value; break;
             }
         }
-        else if (1 === w)
+        else if (1 === opcode.w)
         {
-            switch (reg)
+            switch (opcode.reg)
             {
                 case 0: this._regAH = (value >>> 8); this._regAL = (value & 0xFF); break;
                 case 1: this._regCH = (value >>> 8); this._regCL = (value & 0xFF); break;
@@ -241,6 +262,245 @@ var cpu8086 = {
         else
         {
             throw "Invalid reg table lookup parameters";
+        }
+    },
+
+    _setRMValueForOp : function (opcode)
+    {
+        var addr, val;
+
+        if (0 === opcode.mod)
+        {
+            switch (opcode.rm)
+            {
+                case 0 :
+                    // [BX + SI]
+                    addr = ( ((this._regBH << 8) | this._regBL) + this._regSI );
+
+                    if (0 === opcode.d) // Dest specified by REG field
+                    {
+                        // Logic for Byte and Word sizes are the same
+                        this._setRegValueForOp(opcode, addr);
+                    }
+                    else // Dest specified by R/M field
+                    {
+                        val = this._getRegValueForOp(opcode);
+                        if (0 === opcode.w) // Byte
+                        {
+                            this._memoryV[addr] = (val & 0x00FF);
+                        }
+                        else // Word
+                        {
+                            this._memoryV[addr]     = ((val >> 8) & 0x00FF);
+                            this._memoryV[addr + 1] = (val & 0x00FF);
+                        }
+                    }
+                    return 2;
+                    break;
+                case 1 :
+                    // [BX + DI]
+                    addr = ( ((this._regBH << 8) | this._regBL) + this._regDI );
+
+                    if (0 === opcode.d) // Dest specified by REG field
+                    {
+                        // Logic for Byte and Word sizes are the same
+                        this._setRegValueForOp(opcode, addr);
+                    }
+                    else // Dest specified by R/M field
+                    {
+                        val = this._getRegValueForOp(opcode);
+                        if (0 === opcode.w) // Byte
+                        {
+                            this._memoryV[addr] = (val & 0x00FF);
+                        }
+                        else // Word
+                        {
+                            this._memoryV[addr]     = ((val >> 8) & 0x00FF);
+                            this._memoryV[addr + 1] = (val & 0x00FF);
+                        }
+                    }
+                    return 2;
+                    break;
+                case 2 :
+                    // [BP + SI]
+                    addr = ( this._regBP + this._regSI );
+
+                    if (0 === opcode.d) // Dest specified by REG field
+                    {
+                        // Logic for Byte and Word sizes are the same
+                        this._setRegValueForOp(opcode, addr);
+                    }
+                    else // Dest specified by R/M field
+                    {
+                        val = this._getRegValueForOp(opcode);
+                        if (0 === opcode.w) // Byte
+                        {
+                            this._memoryV[addr] = (val & 0x00FF);
+                        }
+                        else // Word
+                        {
+                            this._memoryV[addr]     = ((val >> 8) & 0x00FF);
+                            this._memoryV[addr + 1] = (val & 0x00FF);
+                        }
+                    }
+                    return 2;
+                    break;
+                case 3 :
+                    // [BP + DI]
+                    addr = ( this._regBP + this._regDI );
+
+                    if (0 === opcode.d) // Dest specified by REG field
+                    {
+                        // Logic for Byte and Word sizes are the same
+                        this._setRegValueForOp(opcode, addr);
+                    }
+                    else // Dest specified by R/M field
+                    {
+                        val = this._getRegValueForOp(opcode);
+                        if (0 === opcode.w) // Byte
+                        {
+                            this._memoryV[addr] = (val & 0x00FF);
+                        }
+                        else // Word
+                        {
+                            this._memoryV[addr]     = ((val >> 8) & 0x00FF);
+                            this._memoryV[addr + 1] = (val & 0x00FF);
+                        }
+                    }
+                    return 2;
+                    break;
+                case 4 :
+                    // [SI]
+                    addr = ( this._regSI );
+
+                    if (0 === opcode.d) // Dest specified by REG field
+                    {
+                        // Logic for Byte and Word sizes are the same
+                        this._setRegValueForOp(opcode, addr);
+                    }
+                    else // Dest specified by R/M field
+                    {
+                        val = this._getRegValueForOp(opcode);
+                        if (0 === opcode.w) // Byte
+                        {
+                            this._memoryV[addr] = (val & 0x00FF);
+                        }
+                        else // Word
+                        {
+                            this._memoryV[addr]     = ((val >> 8) & 0x00FF);
+                            this._memoryV[addr + 1] = (val & 0x00FF);
+                        }
+                    }
+                    return 2;
+                    break;
+                case 5 :
+                    // [DI]
+                    addr = ( this._regDI );
+
+                    if (0 === opcode.d) // Dest specified by REG field
+                    {
+                        // Logic for Byte and Word sizes are the same
+                        this._setRegValueForOp(opcode, addr);
+                    }
+                    else // Dest specified by R/M field
+                    {
+                        val = this._getRegValueForOp(opcode);
+                        if (0 === opcode.w) // Byte
+                        {
+                            this._memoryV[addr] = (val & 0x00FF);
+                        }
+                        else // Word
+                        {
+                            this._memoryV[addr]     = ((val >> 8) & 0x00FF);
+                            this._memoryV[addr + 1] = (val & 0x00FF);
+                        }
+                    }
+                    return 2;
+                    break;
+                case 6 :
+                    // Drc't Add
+                    val = this._getRegValueForOp(opcode);
+
+                    if (0 === opcode.w) // Byte
+                    {
+                        this._memoryV[addr] = (val & 0x00FF);
+                        return 3;
+                    }
+                    else // Word
+                    {
+                        this._memoryV[addr]     = ((val >> 8) & 0x00FF);
+                        this._memoryV[addr + 1] = (val & 0x00FF);
+                        return 4;
+                    }
+                    break;
+                case 7 :
+                    // [BX]
+                    addr = ( (this._regBH << 8) | this._regBL );
+
+                    if (0 === opcode.d) // Dest specified by REG field
+                    {
+                        // Logic for Byte and Word sizes are the same
+                        this._setRegValueForOp(opcode, addr);
+                    }
+                    else // Dest specified by R/M field
+                    {
+                        val = this._getRegValueForOp(opcode);
+                        if (0 === opcode.w) // Byte
+                        {
+                            this._memoryV[addr] = (val & 0x00FF);
+                        }
+                        else // Word
+                        {
+                            this._memoryV[addr]     = ((val >> 8) & 0x00FF);
+                            this._memoryV[addr + 1] = (val & 0x00FF);
+                        }
+                    }
+                    return 2;
+                    break;
+            }
+        }
+        else if (1 === opcode.mod || 2 == opcode.mod)
+        {
+            // Add DISP to register specified
+            switch (opcode.rm)
+            {
+                case 0 :
+                    // [BX + SI]
+                    console.error("RM Lookup not implemented for these parameters");
+                    break;
+                case 1 :
+                    // [BX + DI]
+                    console.error("RM Lookup not implemented for these parameters");
+                    break;
+                case 2 :
+                    // [BP + SI]
+                    console.error("RM Lookup not implemented for these parameters");
+                    break;
+                case 3 :
+                    // [BP + DI]
+                    console.error("RM Lookup not implemented for these parameters");
+                    break;
+                case 4 :
+                    // [SI]
+                    console.error("RM Lookup not implemented for these parameters");
+                    break;
+                case 5 :
+                    // [DI]
+                    console.error("RM Lookup not implemented for these parameters");
+                    break;
+                case 6 :
+                    // [BP]
+                    if (cpu.isDebug()) console.log("Using register SP (word)");
+                    break;
+                case 7 :
+                    // [BX]
+                    if (cpu.isDebug()) console.log("Using register SP (word)");
+                    break;
+            }
+        }
+        else
+        {
+            throw "Invalid r/m table lookup parameters";
         }
     },
 
@@ -583,8 +843,9 @@ var cpu8086 = {
             case 0x81:
             case 0x82:
             case 0x83:
-
-                valDst = this._getRegValueForOp(opcode.w, opcode.rm);
+                // Group opcodes use R/M to determine register (REG is used to determine
+                // instruction)
+                valDst = this._getRegValueForOp({w:opcode.w, d:opcode.d, reg:opcode.rm, rm:opcode.rm});
 
                 if (0x80 === opcode_byte)
                 {
@@ -1102,23 +1363,23 @@ var cpu8086 = {
              *    - copy immediate value to segment register (should copy to
              *      general register first).
              */
-            // Move ?????
             case 0x88:
-                console.error("Opcode not implemented!");
+                this._regIP += this._setRMValueForOp(opcode);
                 break;
             case 0x89:
-                console.error("Opcode not implemented!");
+                this._regIP += this._setRMValueForOp(opcode);
                 break;
             case 0x8A:
-                console.error("Opcode not implemented!");
+                this._regIP += this._setRegValueForOp(opcode,
+                    (this._memoryV[this._regIP + 1])
+                );
+                this._regIP += 3;
                 break;
             case 0x8B:
-                var value = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
-
-                this._setRegValueForOp(opcode.w, opcode.reg, value);
-
+                this._setRegValueForOp(opcode,
+                    ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1])
+                );
                 this._regIP += 4;
-
                 break;
             case 0x8C:
                 console.error("Opcode not implemented!");

@@ -116,9 +116,10 @@ var gui = {
         // Start (2 * 4) bytes before IP
         var currAddr8 = this._memCenter - (2 * 4);
 
+        var currIP = cpu.getIP();
+
         for (var i = 0; i < 5; i++)
         {
-            console.log(i, currAddr8.toString(16), currIP.toString(16));
             var rangeStart = "--",
                 rangeEnd = "--",
                 v1 = "--",
