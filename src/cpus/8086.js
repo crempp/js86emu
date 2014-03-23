@@ -138,6 +138,8 @@ var cpu8086 = {
     _getRMValueForOp : function (opcode, operandValue)
     {
         var addr;
+
+        // Use R/M Table 1 with no displacement
         if (0 === opcode.mod)
         {
             switch (opcode.rm)
@@ -183,6 +185,7 @@ var cpu8086 = {
                     break;
             }
         }
+        // Use R/M Table 2 with 8-bit signed displacement
         else if (1 === opcode.mod || 2 == opcode.mod)
         {
             // Add DISP to register specified
@@ -229,6 +232,13 @@ var cpu8086 = {
                     return 0;
                     break;
             }
+        }
+        // R/M bits refer to REG tables
+        else if (3 === opcode.mod)
+        {
+            // Modifiy opcode object so reg is now rm. This way we can use existing
+            // _getRegValueForOp() method
+            return this._getRegValueForOp({w:opcode.w, d:opcode.d, reg:opcode.rm, rm:opcode.rm});
         }
         else
         {
@@ -282,7 +292,7 @@ var cpu8086 = {
         }
     },
 
-    _setRMValueForOp : function (opcode)
+    _setRMValueForOp : function (opcode, value)
     {
         var addr, val;
 
@@ -301,7 +311,7 @@ var cpu8086 = {
                     }
                     else // Dest specified by R/M field
                     {
-                        val = this._getRegValueForOp(opcode);
+                        val = value || this._getRegValueForOp(opcode);
                         if (0 === opcode.w) // Byte
                         {
                             this._memoryV[addr] = (val & 0x00FF);
@@ -325,7 +335,7 @@ var cpu8086 = {
 //                    }
 //                    else // Dest specified by R/M field
 //                    {
-                        val = this._getRegValueForOp(opcode);
+                        val = value || this._getRegValueForOp(opcode);
                         if (0 === opcode.w) // Byte
                         {
                             this._memoryV[addr] = (val & 0x00FF);
@@ -349,7 +359,7 @@ var cpu8086 = {
                     }
                     else // Dest specified by R/M field
                     {
-                        val = this._getRegValueForOp(opcode);
+                        val = value || this._getRegValueForOp(opcode);
                         if (0 === opcode.w) // Byte
                         {
                             this._memoryV[addr] = (val & 0x00FF);
@@ -373,7 +383,7 @@ var cpu8086 = {
                     }
                     else // Dest specified by R/M field
                     {
-                        val = this._getRegValueForOp(opcode);
+                        val = value || this._getRegValueForOp(opcode);
                         if (0 === opcode.w) // Byte
                         {
                             this._memoryV[addr] = (val & 0x00FF);
@@ -397,7 +407,7 @@ var cpu8086 = {
                     }
                     else // Dest specified by R/M field
                     {
-                        val = this._getRegValueForOp(opcode);
+                        val = value || this._getRegValueForOp(opcode);
                         if (0 === opcode.w) // Byte
                         {
                             this._memoryV[addr] = (val & 0x00FF);
@@ -421,7 +431,7 @@ var cpu8086 = {
                     }
                     else // Dest specified by R/M field
                     {
-                        val = this._getRegValueForOp(opcode);
+                        val = value || this._getRegValueForOp(opcode);
                         if (0 === opcode.w) // Byte
                         {
                             this._memoryV[addr] = (val & 0x00FF);
@@ -436,7 +446,7 @@ var cpu8086 = {
                     break;
                 case 6 :
                     // Drc't Add
-                    val = this._getRegValueForOp(opcode);
+                    val = value || this._getRegValueForOp(opcode);
 
                     if (0 === opcode.w) // Byte
                     {
@@ -461,7 +471,7 @@ var cpu8086 = {
                     }
                     else // Dest specified by R/M field
                     {
-                        val = this._getRegValueForOp(opcode);
+                        val = value || this._getRegValueForOp(opcode);
                         if (0 === opcode.w) // Byte
                         {
                             this._memoryV[addr] = (val & 0x00FF);
@@ -522,6 +532,16 @@ var cpu8086 = {
                     return 0;
                     break;
             }
+        }
+        // R/M bits refer to REG tables
+        else if (3 === opcode.mod)
+        {
+            // Modifiy opcode object so reg is now rm. This way we can use existing
+            // _getRegValueForOp() method
+            return this._setRegValueForOp(
+                {w:opcode.w, d:opcode.d, reg:opcode.rm, rm:opcode.rm},
+                value
+            );
         }
         else
         {
@@ -1658,6 +1678,139 @@ var cpu8086 = {
                 this._regFlags |= this.FLAG_DF_MASK;
                 this._regIP += 1;
                 break;
+
+            /**
+             * Instruction : XOR
+             * Meaning     : Set Direction flag.
+             * Notes       :
+             */
+            case 0x30:
+                valDst = this._getRMValueForOp(opcode);
+                valSrc = this._getRegValueForOp(opcode);
+
+                valResult = valDst ^ valSrc;
+                this._setRMValueForOp(opcode, valResult);
+
+                this._setFlags(
+                    valDst,
+                    valSrc,
+                    valResult,
+                    (   this.FLAG_CF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_ZF_MASK),
+                    'b');
+
+                this._regIP += 2;
+
+                break;
+            case 0x31:
+                valDst = this._getRMValueForOp(opcode);
+                valSrc = this._getRegValueForOp(opcode);
+
+                valResult = valDst ^ valSrc;
+                this._setRMValueForOp(opcode, valResult);
+
+                this._setFlags(
+                    valDst,
+                    valSrc,
+                    valResult,
+                    (   this.FLAG_CF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_ZF_MASK),
+                    'w');
+
+                this._regIP += 2;
+
+                break;
+            case 0x32:
+                valDst = this._getRegValueForOp(opcode);
+                valSrc = this._getRMValueForOp(opcode);
+
+                valResult = valDst ^ valSrc;
+                this._setRegValueForOp(opcode, valResult);
+
+                this._setFlags(
+                    valDst,
+                    valSrc,
+                    valResult,
+                    (   this.FLAG_CF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_ZF_MASK),
+                    'b');
+
+                this._regIP += 2;
+
+                break;
+            case 0x33:
+                valDst = this._getRegValueForOp(opcode);
+                valSrc = this._getRMValueForOp(opcode);
+
+                valResult = valDst ^ valSrc;
+                this._setRegValueForOp(opcode, valResult);
+
+                this._setFlags(
+                    valDst,
+                    valSrc,
+                    valResult,
+                    (   this.FLAG_CF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_ZF_MASK),
+                    'w');
+
+                this._regIP += 2;
+
+                break;
+            case 0x34:
+                valDst = this._regAL;
+                valSrc = this._memoryV[this._regIP + 1];
+
+                valResult = valDst ^ valSrc;
+                this._regAL = valResult;
+
+                this._setFlags(
+                    valDst,
+                    valSrc,
+                    valResult,
+                    (   this.FLAG_CF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_ZF_MASK),
+                    'b');
+
+                this._regIP += 2;
+
+                break;
+            case 0x35:
+                valDst = ( (this._regAH << 8) | this._regAL );
+                valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+
+                valResult = valDst ^ valSrc;
+                this._regAL = valResult;
+
+                this._setFlags(
+                    valDst,
+                    valSrc,
+                    valResult,
+                    (   this.FLAG_CF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_ZF_MASK),
+                    'w');
+
+                this._regIP += 3;
+
+                break;
+
 
             default :
                 console.error("Unknown opcode!");
