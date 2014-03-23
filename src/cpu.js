@@ -8,9 +8,12 @@ var cpu = {
     // Should this be on or off to begin?
     _drawFlag : false,
 
+    _cycles : 0,
+
     initialize : function ()
     {
         window[this._cpuModel].initialize();
+        this._cycles = 0;
     },
 
     boot : function (img)
@@ -37,9 +40,16 @@ var cpu = {
                 // Emulate one cycle
                 this._emulateCycle();
 
+                this._cycles++;
+
+                if (0 === this._cycles % 100) this._drawFlag = true;
+
                 // If the draw flag is set, update the screen
                 if(this._drawFlag)
+                {
                     gfx.drawGraphics();
+                    this._drawFlag = false;
+                }
 
                 // Store key press state (Press and Release)
                 input.setKeys();

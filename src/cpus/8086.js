@@ -137,41 +137,49 @@ var cpu8086 = {
 
     _getRMValueForOp : function (opcode, operandValue)
     {
+        var addr, val;
         if (0 === opcode.mod)
         {
             switch (opcode.rm)
             {
                 case 0 :
                     // [BX + SI]
-                    console.error("RM Lookup not implemented for these parameters");
+                    addr = ( ((this._regBH << 8) | this._regBL) + this._regSI );
+                    return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                     break;
                 case 1 :
                     // [BX + DI]
-                    console.error("RM Lookup not implemented for these parameters");
+                    addr = ( ((this._regBH << 8) | this._regBL) + this._regDI );
+                    return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                     break;
                 case 2 :
                     // [BP + SI]
-                    console.error("RM Lookup not implemented for these parameters");
+                    addr = ( this._regBP + this._regSI );
+                    return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                     break;
                 case 3 :
                     // [BP + DI]
-                    console.error("RM Lookup not implemented for these parameters");
+                    addr = ( this._regBP + this._regDI );
+                    return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                     break;
                 case 4 :
                     // [SI]
-                    console.error("RM Lookup not implemented for these parameters");
+                    addr = ( this._regSI );
+                    return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                     break;
                 case 5 :
                     // [DI]
-                    console.error("RM Lookup not implemented for these parameters");
+                    addr = ( this._regDI );
+                    return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                     break;
                 case 6 :
                     // Drc't Add
-                    if (cpu.isDebug()) console.log("Using register SP (word)");
+                    return ((this._memoryV[operandValue + 1] << 8) | this._memoryV[operandValue]);
                     break;
                 case 7 :
                     // [BX]
-                    if (cpu.isDebug()) console.log("Using register SP (word)");
+                    addr = ( (this._regBH << 8) | this._regBL );
+                    return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                     break;
             }
         }
@@ -206,11 +214,11 @@ var cpu8086 = {
                     break;
                 case 6 :
                     // [BP]
-                    if (cpu.isDebug()) console.log("Using register SP (word)");
+                    console.error("RM Lookup not implemented for these parameters");
                     break;
                 case 7 :
                     // [BX]
-                    if (cpu.isDebug()) console.log("Using register SP (word)");
+                    console.error("RM Lookup not implemented for these parameters");
                     break;
             }
         }
@@ -301,13 +309,13 @@ var cpu8086 = {
                     // [BX + DI]
                     addr = ( ((this._regBH << 8) | this._regBL) + this._regDI );
 
-                    if (0 === opcode.d) // Dest specified by REG field
-                    {
-                        // Logic for Byte and Word sizes are the same
-                        this._setRegValueForOp(opcode, addr);
-                    }
-                    else // Dest specified by R/M field
-                    {
+//                    if (0 === opcode.d) // Dest specified by REG field
+//                    {
+//                        // Logic for Byte and Word sizes are the same
+//                        this._setRegValueForOp(opcode, addr);
+//                    }
+//                    else // Dest specified by R/M field
+//                    {
                         val = this._getRegValueForOp(opcode);
                         if (0 === opcode.w) // Byte
                         {
@@ -318,7 +326,7 @@ var cpu8086 = {
                             this._memoryV[addr]     = ((val >> 8) & 0x00FF);
                             this._memoryV[addr + 1] = (val & 0x00FF);
                         }
-                    }
+//                    }
                     return 2;
                     break;
                 case 2 :
@@ -554,6 +562,12 @@ var cpu8086 = {
 
         this._memory  = new ArrayBuffer(1048576); // 1,048,576 bytes (1MB)
         this._memoryV = new Uint8Array(this._memory);
+
+        // Zero memory
+        for (var i = 0; i < this._memoryV.length; i++)
+        {
+            this._memoryV[i] = 0;
+        }
 
         // Main Registers
         this._regAH = 0x00; this._regAL = 0x00;
@@ -936,7 +950,7 @@ var cpu8086 = {
              */
             case 0x40 :
                 var regX = ((this._regAH << 8) | this._regAL);
-                var result = regX + 1;
+                var result = (regX + 1) & 0xFFFF; // Clamp to word
                 this._regAH = (result & 0xFF00) >> 8;
                 this._regAL = (result & 0x00FF);
 
@@ -956,7 +970,7 @@ var cpu8086 = {
                 break;
             case 0x41 :
                 var regX = ((this._regCH << 8) | this._regCL);
-                var result = regX + 1;
+                var result = (regX + 1) & 0xFFFF; // Clamp to word
                 this._regCH = (result & 0xFF00) >> 8;
                 this._regCL = (result & 0x00FF);
 
@@ -976,7 +990,7 @@ var cpu8086 = {
                 break;
             case 0x42 :
                 var regX = ((this._regDH << 8) | this._regDL);
-                var result = regX + 1;
+                var result = (regX + 1) & 0xFFFF; // Clamp to word
                 this._regDH = (result & 0xFF00) >> 8;
                 this._regDL = (result & 0x00FF);
 
@@ -996,7 +1010,7 @@ var cpu8086 = {
                 break;
             case 0x43 :
                 var regX = ((this._regBH << 8) | this._regBL);
-                var result = regX + 1;
+                var result = (regX + 1) & 0xFFFF; // Clamp to word
                 this._regBH = (result & 0xFF00) >> 8;
                 this._regBL = (result & 0x00FF);
 
@@ -1016,7 +1030,7 @@ var cpu8086 = {
                 break;
             case 0x44 :
                 var regX = this._regSP;
-                var result = regX + 1;
+                var result = (regX + 1) & 0xFFFF; // Clamp to word
                 this._regSP = result;
 
                 this._setFlags(
@@ -1035,7 +1049,7 @@ var cpu8086 = {
                 break;
             case 0x45 :
                 var regX = this._regBP;
-                var result = regX + 1;
+                var result = (regX + 1) & 0xFFFF; // Clamp to word
                 this._regBP = result;
 
                 this._setFlags(
@@ -1054,7 +1068,7 @@ var cpu8086 = {
                 break;
             case 0x46 :
                 var regX = this._regSI;
-                var result = regX + 1;
+                var result = (regX + 1) & 0xFFFF; // Clamp to word
                 this._regSI = result;
 
                 this._setFlags(
@@ -1073,7 +1087,7 @@ var cpu8086 = {
                 break;
             case 0x47 :
                 var regX = this._regDI;
-                var result = regX + 1;
+                var result = (regX + 1) & 0xFFFF; // Clamp to word
                 this._regDI = result;
 
                 this._setFlags(
@@ -1376,9 +1390,10 @@ var cpu8086 = {
                 this._regIP += 3;
                 break;
             case 0x8B:
-                this._setRegValueForOp(opcode,
+                var val = this._getRMValueForOp(opcode,
                     ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1])
                 );
+                this._setRegValueForOp(opcode, val);
                 this._regIP += 4;
                 break;
             case 0x8C:
@@ -1588,6 +1603,16 @@ var cpu8086 = {
                 break;
 
             /**
+             * Instruction : RET
+             * Meaning     : Return From Procedure.
+             * Notes       :
+             */
+            case 0xC2:
+                console.error("Unknown opcode!");
+            case 0xC3:
+                this._regIP = (this._pop() + 3);
+                break;
+            /**
              * Instruction : STC
              * Meaning     : Set Carry flag.
              * Notes       :
@@ -1629,16 +1654,26 @@ var cpu8086 = {
 
     _push : function (value)
     {
+        console.log("Pushing ", value.toString(16), " to ", this._regSP.toString(16));
+        console.log("  before", this._memoryV[this._regSP].toString(16));
         // Update stack pointer
         this._regSP -= 2;
 
-        this._memory[this._regSP]     = (value & 0x00FF);
-        this._memory[this._regSP + 1] = (value >> 8);
+        this._memoryV[this._regSP]     = (value & 0x00FF);
+        this._memoryV[this._regSP + 1] = (value >> 8);
+        console.log("  after", this._memoryV[this._regSP].toString(16));
     },
 
     _pop : function ()
     {
+        // Get the value from the stack
         var value = ((this._memoryV[this._regSP + 1] << 8) | this._memoryV[this._regSP]);
+
+        // Zero the memory locations on the stack.
+        // This isn't necessary but helps with debugging
+        this._memoryV[this._regSP]     = 0;
+        this._memoryV[this._regSP + 1] - 0;
+
 
         this._regSP += 2;
 
