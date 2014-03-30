@@ -8,9 +8,11 @@ Harddisk controllers, BIOS and graphics.
 
 Currently
 
-*  45 instructions decoded and mostly working
+*  ~98 instructions decoded and mostly working
 *  Basic (non-segmented) memory
 *  Basic debugging (gotta have this)
+*  Code Page 437 font set loads dynamically from a bitmap representation
+*  Text mode (80x25) video
 
 We'll see how far I get :)
 

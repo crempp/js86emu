@@ -19,6 +19,7 @@ var cpu = {
     boot : function ()
     {
         console.log("booting system...");
+        gfx.drawGraphics();
     },
 
     // Emulation loop

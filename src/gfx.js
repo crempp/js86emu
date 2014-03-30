@@ -31,7 +31,7 @@ var gfx = {
         "FakeGlow"   : false
     },
     
-    setupGraphics : function (canvas)
+    setupGraphics : function (canvas, cb)
     {
         console.log("setupGraphics");
 
@@ -64,7 +64,7 @@ var gfx = {
 
         // Load font
         console.log("  loading font table...");
-        this.loadFont("mda_cp_437");
+        this.loadFont("mda_cp_437", cb);
 
         // Setup FX
         console.log("  setting up effects...");
@@ -152,8 +152,9 @@ var gfx = {
      * Load the font file and build the font table
      *
      * @param font
+     * @param cb
      */
-    loadFont : function (font)
+    loadFont : function (font, cb)
     {
         var canvas = document.getElementById('font-table');
         var context = canvas.getContext('2d');
@@ -166,6 +167,7 @@ var gfx = {
         imageObj.onload = function() {
             context.drawImage(this, 0, 0);
             _this.buildFontTable(context.getImageData(0, 0, this.width, this.height));
+            cb();
         };
 
         imageObj.src = path;

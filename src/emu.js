@@ -31,14 +31,18 @@ function main ()
     cpu.reset();
     
     // Set up render system and register input callbacks
-    gfx.setupGraphics(document.getElementById('gfx-port'));
-    input.setupInput();
+    gfx.setupGraphics(document.getElementById('gfx-port'),
+        function () {
+            input.setupInput();
 
-    // ... storage init??
-    storage.load();
+            // ... storage init??
+            storage.load();
 
-    // Boot the CPU
-    cpu.boot();
+            // Boot the CPU
+            cpu.boot();
 
-    //animloop();
+            //animloop();
+        }
+    );
+
 }
