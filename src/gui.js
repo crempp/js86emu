@@ -3,6 +3,20 @@ var gui = {
 
     _memCenter : 0,
 
+    initialize : function ()
+    {
+        var el = document.getElementById('files')
+
+        if (el)
+        {
+            el.addEventListener('change', storage.handleSelectedDiskImg, false);
+        }
+        else
+        {
+            console.error("Missing page component 'files'");
+        }
+    },
+
     handleRun : function () {
         cpu.run();
         //$("").addClass('active');
@@ -98,6 +112,12 @@ var gui = {
 
         this.centerMemoryDisplay(addr);
         this.displayMemory();
+    },
+
+    handleVidTest : function ()
+    {
+        gfx.debugVideoTestPattern();
+        gfx.drawGraphics();
     },
 
     centerMemoryDisplay : function (center)

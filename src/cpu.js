@@ -16,9 +16,9 @@ var cpu = {
         this._cycles = 0;
     },
 
-    boot : function (img)
+    boot : function ()
     {
-        console.log("boot");
+        console.log("booting system...");
     },
 
     // Emulation loop
@@ -109,10 +109,21 @@ var cpu = {
         return this._debugFlag;
     },
 
+    setMemoryBlock : function (memoryBlob, offset)
+    {
+        window[this._cpuModel]._memoryV.set(memoryBlob, offset);
+    },
+
+    getMemoryBlock : function (start, size)
+    {
+        return window[this._cpuModel]._memoryV.subarray(start, start + size);
+    },
+
     getMem8 : function(addr8)
     {
         return window[this._cpuModel]._memoryV[addr8];
     },
+
     getMem16 : function(addr16)
     {
 //        ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);

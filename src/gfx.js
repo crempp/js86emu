@@ -6,110 +6,257 @@ var gfx = {
 
     fxData : {},
 
-    _w: 64,
-    _h: 32,
+    // Sizes
+    _fontWidth       : null,
+    _fontHeight      : null,
+    _screenWidth     : null,
+    _screenHeight    : null,
+    _textModeColumns : null,
+    _textModeRows    : null,
 
-    _gfxMem  : null,
-    _gfxMemV : null,
-    _gfxMemD : null,
+    _font_path : "bin/fonts/",
+    _fonts : {},
+
+    // Graphics memory - still needed???
+    _gfxMemStart : 0x8000,
+    _gfxMemSize  : 4 * 1024, // 4k
 
     _frameImg : null,
 
     _hasData : false,
+
+    _fx : {
+        "FakeCRT"    : false,
+        "FakeStatic" : false,
+        "FakeGlow"   : false
+    },
     
     setupGraphics : function (canvas)
     {
         console.log("setupGraphics");
 
+        // The following lines should be moved into the graphics card class since their card dependant
+        this._fontWidth       = 9;
+        this._fontHeight      = 14;
+        this._screenWidth     = 720;
+        this._screenHeight    = 350;
+        this._textModeColumns = 80;
+        this._textModeRows    = 25;
+
         this._canvas = canvas;
 
-        // Try to create a WebGL canvas (will fail if WebGL isn't supported)
-        try
-        {
-            this._glcanvas = fx.canvas();
-        }
-        catch (e)
-        {
-            alert ("WebGL not supported");
-            return;
-        }
+        // Setup size
+        this._canvas.width = this._screenWidth;
+        this._canvas.height = this._screenHeight;
 
         this._canvasCTX2D = this._canvas.getContext('2d');
 
         // Reset graphics memory
-        this._gfxMem  = new ArrayBuffer(this._w * this._h);
-        this._gfxMemV = new Uint8ClampedArray(this._gfxMem);
-        this._gfxMemD = new Uint32Array(this._gfxMem);
-        //this._gfxMemV = new Uint8ClampedArray(this._w * this._h);
-
-        for (var i = 0; i <= (this._w * this._h); i++)
+        // TODO: Find the default attribute value
+        console.log("  clearing video memory...");
+        var gfxMem = new Uint8Array(this._gfxMemSize);
+        for (var i = 0; i <= this._gfxMemSize; i += 2)
         {
-            this._gfxMemV[i] = 0;
+            gfxMem[i]     = 0x00; // Character code
+            gfxMem[i + 1] = 0x02; // Attribute
         }
+        cpu.setMemoryBlock(gfxMem, this._gfxMemStart);
 
-        // Setup glfx.js
-//        this._canvas.parentNode.insertBefore(this._glcanvas, this._canvas);
-//        this._canvas.style.display = 'none';
-//        this._glcanvas.className = this._canvas.className;
-//        this._glcanvas.id = this._canvas.id;
-//        this._canvas.id = 'old_' + this._canvas.id;
+        // Load font
+        console.log("  loading font table...");
+        this.loadFont("mda_cp_437");
 
         // Setup FX
-//        this.fxData["fakecrt"]    = this._fx_FakeCRT_init();
-//        this.fxData["fakestatic"] = this._fx_FakeStatic_init();
-//        this.fxData["fakeglow"]   = this._fx_FakeGlow_init();
+        console.log("  setting up effects...");
+        for (var fx in this._fx)
+        {
+            if (this._fx[fx])
+            {
+                this.fxData[fx] = this["_fx_" + fx + "_init"]();
+            }
+            else
+            {
+                this.fxData[fx] = null;
+            }
+        }
     },
 
+    /**
+     * Draw the data in graphics memory
+     *
+     * Currently only text mode
+     */
     drawGraphics : function()
     {
-        if (this._hasData)
-        {
-            // draw gfx data
-        }
-        else
-        {
-            var imageData = this._canvasCTX2D.getImageData(0, 0, this._w, this._h);
+        console.log("drawGraphics");
 
-            for (var y = 0; y < this._h; ++y) {
-                for (var x = 0; x < this._w; ++x) {
-                    var value = x * y & 0xff;
-                    this._gfxMemD[y * this._w + x] =
-                            (255   << 24) |    // alpha
-                            (value << 16) |    // blue
-                            (value <<  8) |    // green
-                            value;             // red
+        // Get the graphics memory from system memory
+        var gfxMem = cpu.getMemoryBlock(this._gfxMemStart, this._gfxMemSize);
+
+        // Get the canvas data
+        var imageData = this._canvasCTX2D.getImageData(0, 0, this._screenWidth, this._screenHeight);
+
+        // Variable access optimizations
+        var tmr = this._textModeRows,
+            tmc = this._textModeColumns;
+
+        for ( var r = 0; r < this._textModeRows; r++)
+        {
+            for ( var c = 0; c < this._textModeColumns; c++)
+            {
+                var memoryOffset = ( (r * this._textModeColumns) + c ) * 2;
+
+                var glyph = this._fonts[gfxMem[memoryOffset]],
+                    attr  = gfxMem[memoryOffset + 1];
+
+                //console.log("off = ", memoryOffset, " val=(", gfxMem[memoryOffset], ",", gfxMem[memoryOffset + 1], ")");
+
+                // Now loop through the pixels of the font
+                for ( var fy = 0; fy < this._fontHeight; fy++)
+                {
+                    // Build an array for this row of the font
+                    //var glyphRow = new Uint8Array(this._fontWidth);
+                    var glyphRow = glyph[fy];
+
+                    for ( var fx = 0; fx < this._fontWidth; fx++)
+                    {
+                        // Calculate the memory offset
+                        var canvasOffset = ( ((r * this._fontHeight) + fy) * imageData.width + ((c * this._fontWidth) + fx) ) * 4;
+
+                        //var value = fx * fy & 0xff;
+                        var value = (0xFF === glyphRow[fx]) ? 0xAA : 0x00;
+
+                        //imageData.data[canvasOffset] = glyphRow[fx];
+                        imageData.data[canvasOffset]     = value; // Red
+                        imageData.data[canvasOffset + 1] = value; // Blue
+                        imageData.data[canvasOffset + 2] = value; // Green
+                        imageData.data[canvasOffset + 3] = 255;   // Alpha
+                    }
                 }
             }
-            imageData.data.set(this._gfxMemV);
-
-            //this._canvasCTX2D.putImageData(imageData, 0, 0);
-
-            // Put static in mem for cool fx :)
-//            for (var i = 0; i <= (this._w * this._h); i++)
-//            {
-//                this._gfxMemV[i] = (0 === Math.floor(Math.random() * (2))) ? 0x00 : 0xFF ;
-//                //this._gfxMemV[i] = 0xFF;
-//                console.log(this._gfxMemV[i]);
-//            }
-//            console.log(this._gfxMemV);
         }
 
-        // Render gfx memory to bitmap
-//        this._frameImg = new Image();
-//        var base64Data = btoa(String.fromCharCode.apply(null, this._gfxMemV));
-//        this._frameImg.src = 'data:image/png;base64,' + base64Data;
-
-        // Draw to canvas
-        //this._glcanvas.draw(this._frameImg);
-//        this._glcanvas.draw(imageData);
-
         // Run FX
-        //this._fx_FakeCRT_draw();
-        //this._fx_FakeStatic_draw();
-        //this._fx_FakeGlow_draw();
+        for (var fx in this._fx)
+        {
+            if (this._fx[fx])
+            {
+                imageData = this["_fx" + fx + "_draw"](imageData);
+            }
+        }
 
-        // Update canvas
-//        this._glcanvas.update();
+        this._canvasCTX2D.putImageData(imageData, 0, 0);
+    },
+
+    /**
+     * Load the font file and build the font table
+     *
+     * @param font
+     */
+    loadFont : function (font)
+    {
+        var canvas = document.getElementById('font-table');
+        var context = canvas.getContext('2d');
+
+        var path = this._font_path + font + ".png";
+
+        // load image from data url
+        var imageObj = new Image();
+        var _this = this;
+        imageObj.onload = function() {
+            context.drawImage(this, 0, 0);
+            _this.buildFontTable(context.getImageData(0, 0, this.width, this.height));
+        };
+
+        imageObj.src = path;
+    },
+
+    /**
+     * Build the font table for the adapter
+     * @param context
+     */
+    buildFontTable : function (imageData)
+    {
+        var fontCounter = 0,
+            fontsAcross = (imageData.width / this._fontWidth),
+            fontsDown   = (imageData.height / this._fontHeight);
+
+        for ( var y = 0; y < fontsDown; y++)
+        {
+            for ( var x = 0; x < fontsAcross; x++)
+            {
+                var glyph = [];
+
+                // Now loop through the pixels of the font
+                for ( var fy = 0; fy < this._fontHeight; fy++)
+                {
+                    // Build an array for this row of the font
+                    var glyphRow = new Uint8Array(this._fontWidth);
+
+                    for ( var fx = 0; fx < this._fontWidth; fx++)
+                    {
+                        // Calculate the memory offset
+                        var glyphOffset = ( ((y * this._fontHeight) + fy) * imageData.width + ((x * this._fontWidth) + fx) ) * 4;
+
+                        // The font files should be black & white so we just need
+                        // to check of one channel has a non-zero value
+                        if (imageData.data[glyphOffset] !== 0)
+                        {
+                            glyphRow[fx] = 0;
+                        }
+                        else
+                        {
+                            glyphRow[fx] = 255;
+                        }
+                    }
+                    glyph[fy] = glyphRow;
+                }
+
+                this._fonts[fontCounter] = glyph
+                fontCounter++;
+            }
+        }
+    },
+
+    /**
+     * Print a character from the font table out to the console.
+     *
+     * @param char
+     */
+    debugPrintChar : function (char)
+    {
+        // see http://www.ascii-codes.com/
+        for (var i = 0; i < this._fonts[char].length; i++)
+        {
+            row = "";
+            for (var j = 0; j < this._fonts[char][i].length; j++)
+            {
+                if (0 === this._fonts[char][i][j])
+                {
+                    row += String.fromCharCode(0x2588);
+                }
+                else
+                {
+                    row += String.fromCharCode(0x00B7);
+                }
+            }
+            console.log(row);
+        }
+    },
+
+    /**
+     * Fill the graphics memory with a debug pattern
+     */
+    debugVideoTestPattern : function () {
+        var gfxMem = new Uint8Array(this._gfxMemSize);
+        var charCounter = 0;
+        var attrCounter = 0;
+        for (var i = 0; i <= this._gfxMemSize; i += 2)
+        {
+            gfxMem[i]     = charCounter++ % 0xFF; // Character code
+            gfxMem[i + 1] = attrCounter++ % 0xFF; // Attribute
+        }
+        cpu.setMemoryBlock(gfxMem, this._gfxMemStart);
     },
 
     /**

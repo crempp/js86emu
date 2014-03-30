@@ -1,6 +1,6 @@
 var input = {
     setupInput : function () {
-        console.log("setupInput");
+        console.log("initializing input...");
     },
     
     setKeys : function ()

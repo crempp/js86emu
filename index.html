@@ -121,6 +121,8 @@
                 <span id="pausebutton" class="fa fa-pause fa-lg button" onclick='gui.handlePause();'></span>
                 <span id="haltbutton" class="fa fa-stop fa-lg button" onclick='gui.handleHalt();'></span>
                 <span id="stepbutton" class="fa fa-forward fa-lg button" onclick='gui.handleStep();'></span>
+
+                <span id="vidtestbutton" class="button" onclick='gui.handleVidTest();'>Test Vid</span>
                 <div style='clear: both;'></div>
             </fieldset>
 
@@ -265,6 +267,10 @@
             <div style="display: inline-block;"></div>
         </div>
 
+    </div>
+
+    <div id="offscreen">
+        <canvas id='font-table' width="288" height="112"></canvas>
     </div>
 
     <!--<script>-->

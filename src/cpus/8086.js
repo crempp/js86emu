@@ -591,7 +591,7 @@ var cpu8086 = {
      */
     reset : function ()
     {
-        console.log("initialize");
+        console.log("initializing 8086 CPU...");
 
         this.halt = false;
 

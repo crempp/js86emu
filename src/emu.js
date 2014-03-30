@@ -21,25 +21,24 @@ function animloop(){
  */
 function main () 
 {
-    // Setup the page
-    setup();
+    // Setup the gui
+    gui.initialize();
+
+    // Enable debugging
+    cpu.toggleDebug();
+
+    // Initialize the CPU
+    cpu.reset();
     
     // Set up render system and register input callbacks
     gfx.setupGraphics(document.getElementById('gfx-port'));
     input.setupInput();
 
-    // Initialize the Chip8 system and load the game into the memory  
-    cpu.reset();
+    // ... storage init??
     storage.load();
+
+    // Boot the CPU
     cpu.boot();
 
     //animloop();
-
-    // Enable debugging
-    cpu.toggleDebug();
-}
-
-function setup ()
-{
-    document.getElementById('files').addEventListener('change', storage.handleSelectedDiskImg, false);
 }
