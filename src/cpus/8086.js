@@ -924,6 +924,112 @@ var cpu8086 = {
                 break;
 
             /**
+             * Instruction : CMP
+             * Meaning     :
+             * Notes       :
+             */
+            case 0x38:
+                valDst = this._getRMValueForOp(opcode);  // E
+                valSrc = this._getRegValueForOp(opcode); // G
+
+                // correct for duplicate helper usage
+                this._regIP -= 1;
+
+                valResult = valDst - valSrc;
+
+                this._setFlags(
+                    valDst,
+                    valSrc,
+                    valResult,
+                    (   this.FLAG_CF_MASK |
+                        this.FLAG_ZF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_AF_MASK),
+                    "b");
+
+                this._regIP += 1;
+
+                break;
+            case 0x39:
+                valDst = this._getRMValueForOp(opcode);  // E
+                valSrc = this._getRegValueForOp(opcode); // G
+
+                // correct for duplicate helper usage
+                this._regIP -= 1;
+
+                valResult = valDst - valSrc;
+
+                this._setFlags(
+                    valDst,
+                    valSrc,
+                    valResult,
+                    (   this.FLAG_CF_MASK |
+                        this.FLAG_ZF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_AF_MASK),
+                    "w");
+
+                this._regIP += 1;
+
+                break;
+            case 0x3A:
+                valDst = this._getRegValueForOp(opcode); // G
+                valSrc = this._getRMValueForOp(opcode);  // E
+
+                // correct for duplicate helper usage
+                this._regIP -= 1;
+
+                valResult = valDst - valSrc;
+
+                this._setFlags(
+                    valDst,
+                    valSrc,
+                    valResult,
+                    (   this.FLAG_CF_MASK |
+                        this.FLAG_ZF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_AF_MASK),
+                    "b");
+
+                this._regIP += 1;
+
+                break;
+            case 0x3B:
+                valDst = this._getRegValueForOp(opcode); // G
+                valSrc = this._getRMValueForOp(opcode);  // E
+
+                // correct for duplicate helper usage
+                this._regIP -= 1;
+
+                valResult = valDst - valSrc;
+
+                this._setFlags(
+                    valDst,
+                    valSrc,
+                    valResult,
+                    (   this.FLAG_CF_MASK |
+                        this.FLAG_ZF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_AF_MASK),
+                    "b");
+
+                this._regIP += 1;
+
+                break;
+            case 0x3C:
+                console.error("Opcode not implemented!");
+            case 0x3D:
+                console.error("Opcode not implemented!");
+
+            /**
              * Instruction : DEC
              * Meaning     : Decrement by 1
              * Notes       :
