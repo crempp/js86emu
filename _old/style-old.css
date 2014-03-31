@@ -1,33 +1,3 @@
-@font-face {
-    font-family: 'Gafata';
-    font-style: normal;
-    font-weight: 400;
-    src: local('Gafata'), local('Gafata-Regular'), url(assets/fonts/Gafata/Gafata-Regular.ttf);
-}
-@font-face {
-    font-family: 'Orbitron';
-    font-style: normal;
-    font-weight: 400;
-    src: local('Orbitron-Light'), local('Orbitron-Regular'), url(assets/fonts/Orbitron/Orbitron-Regular.ttf);
-}
-@font-face {
-    font-family: 'Orbitron';
-    font-style: normal;
-    font-weight: 700;
-    src: local('Orbitron-Bold'), url(assets/fonts/Orbitron/Orbitron-Bold.ttf);
-}
-@font-face {
-    font-family: 'Ubuntu Mono';
-    font-style: normal;
-    font-weight: 400;
-    src: local('Ubuntu Mono'), local('UbuntuMono-Regular'), url(assets/fonts/Ubuntu_Mono/UbuntuMono-Regular.ttf);
-}
-
-html,body{
-    background-color: #161616;
-    color: #ddd;
-    font-family: 'Gafata', sans-serif;
-}
 
 .row {
     display: table-row;
@@ -147,15 +117,7 @@ html,body{
     left: 0px;
 }
 
-.button {
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
-    border: 1px solid white;
-    background-color: #555;
-    padding: 5px;
-    cursor: pointer;
-}
+
 
 #debug {
     height: 150px;

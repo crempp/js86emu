@@ -1,0 +1,44 @@
+html,body{
+  background-color: $BACKGROUND;
+  color: $FORGROUND;
+  font-family: $FONT;
+}
+
+
+.emulator-application {
+  header {
+    margin-left: 21px;
+
+    h1 {
+      display: inline;
+      font-size: 3em;
+    }
+
+    .controls {
+      float: right;
+
+      fieldset {
+        // This seems to cause wierd behavior
+        //@include border-radius(8px);
+      }
+
+      legend {
+        font-size: 11px;
+      }
+    }
+  }
+
+  .monitor {
+    background-color: #252525;
+    margin: 20px auto;
+    padding: 20px;
+    text-align: center;
+
+    @include border-radius(12px);
+
+    canvas {
+      margin: 0px auto;
+      background-color: #000000;
+    }
+  }
+}
