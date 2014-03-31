@@ -1,8 +1,6 @@
 var storage = {
     handleSelectedDiskImg : function (evt)
     {
-        console.log("HERE");
-    
         var file = evt.target.files[0]; // FileList object
         var reader = new FileReader();
 

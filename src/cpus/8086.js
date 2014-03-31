@@ -70,28 +70,36 @@ var cpu8086 = {
             switch (opcode.reg)
             {
                 case 0:
-                    if (cpu.isDebug()) console.log("Using register AL (byte)");
+                    if (cpu.isDebug()) console.log("_getRegValueForOp() - Using register AL (byte)");
+                    this._regIP += 1;
                     return this._regAL;
                 case 1:
-                    if (cpu.isDebug()) console.log("Using register CL (byte)");
+                    if (cpu.isDebug()) console.log("_getRegValueForOp() - Using register CL (byte)");
+                    this._regIP += 1;
                     return this._regCL;
                 case 2:
-                    if (cpu.isDebug()) console.log("Using register DL (byte)");
+                    if (cpu.isDebug()) console.log("_getRegValueForOp() - Using register DL (byte)");
+                    this._regIP += 1;
                     return this._regDL;
                 case 3:
-                    if (cpu.isDebug()) console.log("Using register BL (byte)");
+                    if (cpu.isDebug()) console.log("_getRegValueForOp() - Using register BL (byte)");
+                    this._regIP += 1;
                     return this._regBL;
                 case 4:
-                    if (cpu.isDebug()) console.log("Using register AH (byte)");
+                    if (cpu.isDebug()) console.log("_getRegValueForOp() - Using register AH (byte)");
+                    this._regIP += 1;
                     return this._regAH;
                 case 5:
-                    if (cpu.isDebug()) console.log("Using register BH (byte)");
+                    if (cpu.isDebug()) console.log("_getRegValueForOp() - Using register BH (byte)");
+                    this._regIP += 1;
                     return this._regBH;
                 case 6:
-                    if (cpu.isDebug()) console.log("Using register CH (byte)");
+                    if (cpu.isDebug()) console.log("_getRegValueForOp() - Using register CH (byte)");
+                    this._regIP += 1;
                     return this._regCH;
                 case 7:
-                    if (cpu.isDebug()) console.log("Using register DH (byte)");
+                    if (cpu.isDebug()) console.log("_getRegValueForOp() - Using register DH (byte)");
+                    this._regIP += 1;
                     return this._regDH;
                 default:
                     throw "Invalid reg table lookup parameters";
@@ -102,28 +110,36 @@ var cpu8086 = {
             switch (opcode.reg)
             {
                 case 0:
-                    if (cpu.isDebug()) console.log("Using register AX (word)");
+                    if (cpu.isDebug()) console.log("_getRegValueForOp() - Using register AX (word)");
+                    this._regIP += 1;
                     return ((this._regAH << 8) | this._regAL);
                 case 1:
-                    if (cpu.isDebug()) console.log("Using register CX (word)");
+                    if (cpu.isDebug()) console.log("_getRegValueForOp() - Using register CX (word)");
+                    this._regIP += 1;
                     return ((this._regCH << 8) | this._regCL);
                 case 2:
-                    if (cpu.isDebug()) console.log("Using register DX (word)");
+                    if (cpu.isDebug()) console.log("_getRegValueForOp() - Using register DX (word)");
+                    this._regIP += 1;
                     return ((this._regDH << 8) | this._regDL);
                 case 3:
-                    if (cpu.isDebug()) console.log("Using register BX (word)");
+                    if (cpu.isDebug()) console.log("_getRegValueForOp() - Using register BX (word)");
+                    this._regIP += 1;
                     return ((this._regBH << 8) | this._regBL);
                 case 4:
-                    if (cpu.isDebug()) console.log("Using register SP (word)");
+                    if (cpu.isDebug()) console.log("_getRegValueForOp() - Using register SP (word)");
+                    this._regIP += 1;
                     return this._regSP;
                 case 5:
-                    if (cpu.isDebug()) console.log("Using register BP (word)");
+                    if (cpu.isDebug()) console.log("_getRegValueForOp() - Using register BP (word)");
+                    this._regIP += 1;
                     return this._regBP;
                 case 6:
-                    if (cpu.isDebug()) console.log("Using register SI (word)");
+                    if (cpu.isDebug()) console.log("_getRegValueForOp() - Using register SI (word)");
+                    this._regIP += 1;
                     return this._regSI;
                 case 7:
-                    if (cpu.isDebug()) console.log("Using register DI (word)");
+                    if (cpu.isDebug()) console.log("_getRegValueForOp() - Using register DI (word)");
+                    this._regIP += 1;
                     return this._regDI;
                 default:
                     throw "Invalid reg table lookup parameters";
@@ -146,41 +162,57 @@ var cpu8086 = {
             {
                 case 0 :
                     // [BX + SI]
+                    if (cpu.isDebug()) console.log("_getRMValueForOp() - Using [BX + SI] to retrieve mem (word)");
                     addr = ( ((this._regBH << 8) | this._regBL) + this._regSI );
+                    this._regIP += 1;
                     return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                     break;
                 case 1 :
                     // [BX + DI]
+                    if (cpu.isDebug()) console.log("_getRMValueForOp() - Using [BX + DI] to retrieve mem (word)");
                     addr = ( ((this._regBH << 8) | this._regBL) + this._regDI );
+                    this._regIP += 1;
                     return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                     break;
                 case 2 :
                     // [BP + SI]
+                    if (cpu.isDebug()) console.log("_getRMValueForOp() - Using [BP + SI] to retrieve mem (word)");
                     addr = ( this._regBP + this._regSI );
+                    this._regIP += 1;
                     return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                     break;
                 case 3 :
                     // [BP + DI]
+                    if (cpu.isDebug()) console.log("_getRMValueForOp() - Using [BP + DI] to retrieve mem (word)");
                     addr = ( this._regBP + this._regDI );
+                    this._regIP += 1;
                     return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                     break;
                 case 4 :
                     // [SI]
+                    if (cpu.isDebug()) console.log("_getRMValueForOp() - Using [SI] to retrieve mem (word)");
                     addr = ( this._regSI );
+                    this._regIP += 1;
                     return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                     break;
                 case 5 :
                     // [DI]
+                    if (cpu.isDebug()) console.log("_getRMValueForOp() - Using [DI] to retrieve mem (word)");
                     addr = ( this._regDI );
+                    this._regIP += 1;
                     return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                     break;
                 case 6 :
                     // Drc't Add
+                    if (cpu.isDebug()) console.log("_getRMValueForOp() - Using Drc't Add to retrieve mem (word)");
+                    this._regIP += 2;
                     return ((this._memoryV[operandValue + 1] << 8) | this._memoryV[operandValue]);
                     break;
                 case 7 :
                     // [BX]
+                    if (cpu.isDebug()) console.log("_getRMValueForOp() - Using [BX] to retrieve mem (word)");
                     addr = ( (this._regBH << 8) | this._regBL );
+                    this._regIP += 1;
                     return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                     break;
             }
@@ -193,41 +225,49 @@ var cpu8086 = {
             {
                 case 0 :
                     // [BX + SI]
+                    if (cpu.isDebug()) console.log("_getRMValueForOp() - Using [BX + SI] + Disp to retrieve mem (word)");
                     console.error("RM Lookup not implemented for these parameters");
                     return 0;
                     break;
                 case 1 :
                     // [BX + DI]
+                    if (cpu.isDebug()) console.log("_getRMValueForOp() - Using [BX + DI] + Disp to retrieve mem (word)");
                     console.error("RM Lookup not implemented for these parameters");
                     return 0;
                     break;
                 case 2 :
                     // [BP + SI]
+                    if (cpu.isDebug()) console.log("_getRMValueForOp() - Using [BP + SI] + Disp to retrieve mem (word)");
                     console.error("RM Lookup not implemented for these parameters");
                     return 0;
                     break;
                 case 3 :
                     // [BP + DI]
+                    if (cpu.isDebug()) console.log("_getRMValueForOp() - Using [BP + DI] + Disp to retrieve mem (word)");
                     console.error("RM Lookup not implemented for these parameters");
                     return 0;
                     break;
                 case 4 :
                     // [SI]
+                    if (cpu.isDebug()) console.log("_getRMValueForOp() - Using [SI] + Disp to retrieve mem (word)");
                     console.error("RM Lookup not implemented for these parameters");
                     return 0;
                     break;
                 case 5 :
                     // [DI]
+                    if (cpu.isDebug()) console.log("_getRMValueForOp() - Using [DI] + Disp to retrieve mem (word)");
                     console.error("RM Lookup not implemented for these parameters");
                     return 0;
                     break;
                 case 6 :
                     // [BP]
+                    if (cpu.isDebug()) console.log("_getRMValueForOp() - Using [BP] + Disp to retrieve mem (word)");
                     console.error("RM Lookup not implemented for these parameters");
                     return 0;
                     break;
                 case 7 :
                     // [BX]
+                    if (cpu.isDebug()) console.log("_getRMValueForOp() - Using [BX] + Disp to retrieve mem (word)");
                     console.error("RM Lookup not implemented for these parameters");
                     return 0;
                     break;
@@ -236,8 +276,11 @@ var cpu8086 = {
         // R/M bits refer to REG tables
         else if (3 === opcode.mod)
         {
+            if (cpu.isDebug()) console.log("_getRMValueForOp() - deffering to _getRegValueForOp()");
             // Modifiy opcode object so reg is now rm. This way we can use existing
             // _getRegValueForOp() method
+
+            // The following helper will increase the IP so we don't have to here
             return this._getRegValueForOp({w:opcode.w, d:opcode.d, reg:opcode.rm, rm:opcode.rm});
         }
         else
@@ -260,30 +303,76 @@ var cpu8086 = {
     _setRegValueForOp : function (opcode, value) {
         if (0 === opcode.w)
         {
+            this._regIP += 1;
             switch (opcode.reg)
             {
-                case 0: this._regAL = value; break;
-                case 1: this._regCL = value; break;
-                case 2: this._regDL = value; break;
-                case 3: this._regBL = value; break;
-                case 4: this._regAH = value; break;
-                case 5: this._regBH = value; break;
-                case 6: this._regCH = value; break;
-                case 7: this._regDH = value; break;
+                case 0:
+                    if (cpu.isDebug()) console.log("_setRegValueForOp() - Setting register AL (byte)");
+                    this._regAL = value;
+                    break;
+                case 1:
+                    if (cpu.isDebug()) console.log("_setRegValueForOp() - Setting register CL (byte)");
+                    this._regCL = value;
+                    break;
+                case 2:
+                    if (cpu.isDebug()) console.log("_setRegValueForOp() - Setting register DL (byte)");
+                    this._regDL = value;
+                    break;
+                case 3:
+                    if (cpu.isDebug()) console.log("_setRegValueForOp() - Setting register BL (byte)");
+                    this._regBL = value;
+                    break;
+                case 4:
+                    if (cpu.isDebug()) console.log("_setRegValueForOp() - Setting register AH (byte)");
+                    this._regAH = value;
+                    break;
+                case 5:
+                    if (cpu.isDebug()) console.log("_setRegValueForOp() - Setting register BH (byte)");
+                    this._regBH = value;
+                    break;
+                case 6:
+                    if (cpu.isDebug()) console.log("_setRegValueForOp() - Setting register CH (byte)");
+                    this._regCH = value;
+                    break;
+                case 7:
+                    if (cpu.isDebug()) console.log("_setRegValueForOp() - Setting register DH (byte)");
+                    this._regDH = value;
+                    break;
             }
         }
         else if (1 === opcode.w)
         {
+            this._regIP += 1;
             switch (opcode.reg)
             {
-                case 0: this._regAH = (value >>> 8); this._regAL = (value & 0xFF); break;
-                case 1: this._regCH = (value >>> 8); this._regCL = (value & 0xFF); break;
-                case 2: this._regDH = (value >>> 8); this._regDL = (value & 0xFF); break;
-                case 3: this._regBH = (value >>> 8); this._regBL = (value & 0xFF); break;
-                case 4: this._regSP = value; break;
-                case 5: this._regBP = value; break;
-                case 6: this._regSI = value; break;
-                case 7: this._regDI = value; break;
+                case 0:
+                    if (cpu.isDebug()) console.log("_setRegValueForOp() - Setting register AX (word)");
+                    this._regAH = (value >>> 8); this._regAL = (value & 0xFF);
+                    break;
+                case 1:
+                    if (cpu.isDebug()) console.log("_setRegValueForOp() - Setting register CX (word)");
+                    this._regCH = (value >>> 8); this._regCL = (value & 0xFF);
+                    break;
+                case 2:
+                    if (cpu.isDebug()) console.log("_setRegValueForOp() - Setting register DX (word)");
+                    this._regDH = (value >>> 8); this._regDL = (value & 0xFF);
+                    break;
+                case 3:
+                    if (cpu.isDebug()) console.log("_setRegValueForOp() - Setting register BX (word)");
+                    this._regBH = (value >>> 8); this._regBL = (value & 0xFF);
+                    break;
+                case 4:
+                    if (cpu.isDebug()) console.log("_setRegValueForOp() - Setting register SP (word)");
+                    this._regSP = value; break;
+                case 5:
+                    if (cpu.isDebug()) console.log("_setRegValueForOp() - Setting register BP (word)");
+                    this._regBP = value; break;
+                case 6:
+                    if (cpu.isDebug()) console.log("_setRegValueForOp() - Setting register SI (word)");
+                    this._regSI = value; break;
+                case 7:
+                    if (cpu.isDebug()) console.log("_setRegValueForOp() - Setting register DI (word)");
+                    this._regDI = value; break;
             }
         }
         else
@@ -302,30 +391,45 @@ var cpu8086 = {
             {
                 case 0 :
                     // [BX + SI]
+                    if (cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX + SI] to set mem (word)");
+
                     addr = ( ((this._regBH << 8) | this._regBL) + this._regSI );
 
                     if (0 === opcode.d) // Dest specified by REG field
                     {
                         // Logic for Byte and Word sizes are the same
                         this._setRegValueForOp(opcode, addr);
+
+                        // Correct for duplicate helper usage
+                        this._regIP -= 1;
                     }
                     else // Dest specified by R/M field
                     {
-                        val = value || this._getRegValueForOp(opcode);
+                        if ('undefined' === typeof value)
+                        {
+                            value = this._getRegValueForOp(opcode);
+                            // Correct for duplicate helper usage
+                            this._regIP -= 1;
+                        }
+
                         if (0 === opcode.w) // Byte
                         {
-                            this._memoryV[addr] = (val & 0x00FF);
+                            this._memoryV[addr] = (value & 0x00FF);
                         }
                         else // Word
                         {
-                            this._memoryV[addr]     = ((val >> 8) & 0x00FF);
-                            this._memoryV[addr + 1] = (val & 0x00FF);
+                            this._memoryV[addr]     = ((value >> 8) & 0x00FF);
+                            this._memoryV[addr + 1] = (value & 0x00FF);
                         }
                     }
-                    return 2;
+
+                    this._regIP += 1;
+
                     break;
                 case 1 :
                     // [BX + DI]
+                    if (cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX + DI] to set mem (word)");
+
                     addr = ( ((this._regBH << 8) | this._regBL) + this._regDI );
 
 //                    if (0 === opcode.d) // Dest specified by REG field
@@ -335,21 +439,30 @@ var cpu8086 = {
 //                    }
 //                    else // Dest specified by R/M field
 //                    {
-                        val = value || this._getRegValueForOp(opcode);
+                        if ('undefined' === typeof value)
+                        {
+                            value = this._getRegValueForOp(opcode);
+                            // Correct for duplicate helper usage
+                            this._regIP -= 1;
+                        }
                         if (0 === opcode.w) // Byte
                         {
-                            this._memoryV[addr] = (val & 0x00FF);
+                            this._memoryV[addr] = (value & 0x00FF);
                         }
                         else // Word
                         {
-                            this._memoryV[addr]     = ((val >> 8) & 0x00FF);
-                            this._memoryV[addr + 1] = (val & 0x00FF);
+                            this._memoryV[addr]     = ((value >> 8) & 0x00FF);
+                            this._memoryV[addr + 1] = (value & 0x00FF);
                         }
 //                    }
-                    return 2;
+
+                    this._regIP += 1;
+
                     break;
                 case 2 :
                     // [BP + SI]
+                    if (cpu.isDebug()) console.log("_setRMValueForOp() - Using [BP + SI] to set mem (word)");
+
                     addr = ( this._regBP + this._regSI );
 
                     if (0 === opcode.d) // Dest specified by REG field
@@ -359,21 +472,31 @@ var cpu8086 = {
                     }
                     else // Dest specified by R/M field
                     {
-                        val = value || this._getRegValueForOp(opcode);
+                        if ('undefined' === typeof value)
+                        {
+                            value = this._getRegValueForOp(opcode);
+                            // Correct for duplicate helper usage
+                            this._regIP -= 1;
+                        }
+
                         if (0 === opcode.w) // Byte
                         {
-                            this._memoryV[addr] = (val & 0x00FF);
+                            this._memoryV[addr] = (value & 0x00FF);
                         }
                         else // Word
                         {
-                            this._memoryV[addr]     = ((val >> 8) & 0x00FF);
-                            this._memoryV[addr + 1] = (val & 0x00FF);
+                            this._memoryV[addr]     = ((value >> 8) & 0x00FF);
+                            this._memoryV[addr + 1] = (value & 0x00FF);
                         }
                     }
-                    return 2;
+
+                    this._regIP += 1;
+
                     break;
                 case 3 :
                     // [BP + DI]
+                    if (cpu.isDebug()) console.log("_setRMValueForOp() - Using [BP + DI] to set mem (word)");
+
                     addr = ( this._regBP + this._regDI );
 
                     if (0 === opcode.d) // Dest specified by REG field
@@ -383,21 +506,31 @@ var cpu8086 = {
                     }
                     else // Dest specified by R/M field
                     {
-                        val = value || this._getRegValueForOp(opcode);
+                        if ('undefined' === typeof value)
+                        {
+                            value = this._getRegValueForOp(opcode);
+                            // Correct for duplicate helper usage
+                            this._regIP -= 1;
+                        }
+
                         if (0 === opcode.w) // Byte
                         {
-                            this._memoryV[addr] = (val & 0x00FF);
+                            this._memoryV[addr] = (value & 0x00FF);
                         }
                         else // Word
                         {
-                            this._memoryV[addr]     = ((val >> 8) & 0x00FF);
-                            this._memoryV[addr + 1] = (val & 0x00FF);
+                            this._memoryV[addr]     = ((value >> 8) & 0x00FF);
+                            this._memoryV[addr + 1] = (value & 0x00FF);
                         }
                     }
-                    return 2;
+
+                    this._regIP += 1;
+
                     break;
                 case 4 :
                     // [SI]
+                    if (cpu.isDebug()) console.log("_setRMValueForOp() - Using [SI] to set mem (word)");
+
                     addr = ( this._regSI );
 
                     if (0 === opcode.d) // Dest specified by REG field
@@ -407,21 +540,31 @@ var cpu8086 = {
                     }
                     else // Dest specified by R/M field
                     {
-                        val = value || this._getRegValueForOp(opcode);
+                        if ('undefined' === typeof value)
+                        {
+                            value = this._getRegValueForOp(opcode);
+                            // Correct for duplicate helper usage
+                            this._regIP -= 1;
+                        }
+
                         if (0 === opcode.w) // Byte
                         {
-                            this._memoryV[addr] = (val & 0x00FF);
+                            this._memoryV[addr] = (value & 0x00FF);
                         }
                         else // Word
                         {
-                            this._memoryV[addr]     = ((val >> 8) & 0x00FF);
-                            this._memoryV[addr + 1] = (val & 0x00FF);
+                            this._memoryV[addr]     = ((value >> 8) & 0x00FF);
+                            this._memoryV[addr + 1] = (value & 0x00FF);
                         }
                     }
-                    return 2;
+
+                    this._regIP += 1;
+
                     break;
                 case 5 :
                     // [DI]
+                    if (cpu.isDebug()) console.log("_setRMValueForOp() - Using [DI] to set mem (word)");
+
                     addr = ( this._regDI );
 
                     if (0 === opcode.d) // Dest specified by REG field
@@ -431,58 +574,87 @@ var cpu8086 = {
                     }
                     else // Dest specified by R/M field
                     {
-                        val = value || this._getRegValueForOp(opcode);
+                        if ('undefined' === typeof value)
+                        {
+                            value = this._getRegValueForOp(opcode);
+                            // Correct for duplicate helper usage
+                            this._regIP -= 1;
+                        }
+
                         if (0 === opcode.w) // Byte
                         {
-                            this._memoryV[addr] = (val & 0x00FF);
+                            this._memoryV[addr] = (value & 0x00FF);
                         }
                         else // Word
                         {
-                            this._memoryV[addr]     = ((val >> 8) & 0x00FF);
-                            this._memoryV[addr + 1] = (val & 0x00FF);
+                            this._memoryV[addr]     = ((value >> 8) & 0x00FF);
+                            this._memoryV[addr + 1] = (value & 0x00FF);
                         }
                     }
-                    return 2;
+
+                    this._regIP += 1;
+
                     break;
                 case 6 :
                     // Drc't Add
-                    val = value || this._getRegValueForOp(opcode);
+                    if (cpu.isDebug()) console.log("_setRMValueForOp() - Using Drc't Add to set mem (word)");
+
+                    if ('undefined' === typeof value)
+                    {
+                        value = this._getRegValueForOp(opcode);
+                        // Correct for duplicate helper usage
+                        this._regIP -= 1;
+                    }
 
                     if (0 === opcode.w) // Byte
                     {
-                        this._memoryV[addr] = (val & 0x00FF);
-                        return 3;
+                        this._memoryV[addr] = (value & 0x00FF);
+
+                        this._regIP += 2;
                     }
                     else // Word
                     {
-                        this._memoryV[addr]     = ((val >> 8) & 0x00FF);
-                        this._memoryV[addr + 1] = (val & 0x00FF);
-                        return 4;
+                        this._memoryV[addr]     = ((value >> 8) & 0x00FF);
+                        this._memoryV[addr + 1] = (value & 0x00FF);
+
+                        this._regIP += 3;
                     }
                     break;
                 case 7 :
                     // [BX]
+                    if (cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX] to set mem (word)");
+
                     addr = ( (this._regBH << 8) | this._regBL );
 
                     if (0 === opcode.d) // Dest specified by REG field
                     {
                         // Logic for Byte and Word sizes are the same
                         this._setRegValueForOp(opcode, addr);
+                        // Correct for duplicate helper usage
+                        this._regIP -= 1;
                     }
                     else // Dest specified by R/M field
                     {
-                        val = value || this._getRegValueForOp(opcode);
+                        if ('undefined' === typeof value)
+                        {
+                            value = this._getRegValueForOp(opcode);
+                            // Correct for duplicate helper usage
+                            this._regIP -= 1;
+                        }
+
                         if (0 === opcode.w) // Byte
                         {
-                            this._memoryV[addr] = (val & 0x00FF);
+                            this._memoryV[addr] = (value & 0x00FF);
                         }
                         else // Word
                         {
-                            this._memoryV[addr]     = ((val >> 8) & 0x00FF);
-                            this._memoryV[addr + 1] = (val & 0x00FF);
+                            this._memoryV[addr]     = ((value >> 8) & 0x00FF);
+                            this._memoryV[addr + 1] = (value & 0x00FF);
                         }
                     }
-                    return 2;
+
+                    this._regIP += 1;
+
                     break;
             }
         }
@@ -493,43 +665,73 @@ var cpu8086 = {
             {
                 case 0 :
                     // [BX + SI]
+                    if (cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX + SI] + Disp to set mem (word)");
+
                     console.error("RM Lookup not implemented for these parameters");
-                    return 0;
+
+                    this._regIP += 1;
+
                     break;
                 case 1 :
                     // [BX + DI]
+                    if (cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX + DI] + Disp to set mem (word)");
+
                     console.error("RM Lookup not implemented for these parameters");
-                    return 0;
+
+                    this._regIP += 1;
+
                     break;
                 case 2 :
                     // [BP + SI]
+                    if (cpu.isDebug()) console.log("_setRMValueForOp() - Using [BP + SI] + Disp to set mem (word)");
+
                     console.error("RM Lookup not implemented for these parameters");
-                    return 0;
+
+                    this._regIP += 1;
+
                     break;
                 case 3 :
                     // [BP + DI]
+                    if (cpu.isDebug()) console.log("_setRMValueForOp() - Using [BP + DI] + Disp to set mem (word)");
+
                     console.error("RM Lookup not implemented for these parameters");
-                    return 0;
+
+                    this._regIP += 1;
+
                     break;
                 case 4 :
                     // [SI]
+                    if (cpu.isDebug()) console.log("_setRMValueForOp() - Using [SI] + Disp to set mem (word)");
+
                     console.error("RM Lookup not implemented for these parameters");
-                    return 0;
+
+                    this._regIP += 1;
+
                     break;
                 case 5 :
                     // [DI]
+                    if (cpu.isDebug()) console.log("_setRMValueForOp() - Using [DI] + Disp to set mem (word)");
+
                     console.error("RM Lookup not implemented for these parameters");
                     return 0;
                     break;
                 case 6 :
                     // [BP]
+                    if (cpu.isDebug()) console.log("_setRMValueForOp() - Using [BP] + Disp to set mem (word)");
+
                     console.error("RM Lookup not implemented for these parameters");
-                    return 0;
+
+                    this._regIP += 1;
+
                     break;
                 case 7 :
                     // [BX]
+                    if (cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX] + Disp to set mem (word)");
+
                     console.error("RM Lookup not implemented for these parameters");
-                    return 0;
+
+                    this._regIP += 1;
+
                     break;
             }
         }
@@ -538,7 +740,7 @@ var cpu8086 = {
         {
             // Modifiy opcode object so reg is now rm. This way we can use existing
             // _getRegValueForOp() method
-            return this._setRegValueForOp(
+            this._setRegValueForOp(
                 {w:opcode.w, d:opcode.d, reg:opcode.rm, rm:opcode.rm},
                 value
             );
@@ -547,7 +749,6 @@ var cpu8086 = {
         {
             throw "Invalid r/m table lookup parameters";
         }
-        return 0;
     },
 
     /**
@@ -897,32 +1098,33 @@ var cpu8086 = {
                 // instruction)
                 valDst = this._getRegValueForOp({w:opcode.w, d:opcode.d, reg:opcode.rm, rm:opcode.rm});
 
+                // Updating IP offsets, helper functions now increment IP
                 if (0x80 === opcode_byte)
                 {
-                    valSrc = ((this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2]);
+                    valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
 
-                    this._regIP += 3;
+                    this._regIP += 2;
                 }
                 else if (0x81 === opcode_byte)
                 {
-                    valSrc = ((this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2]);
+                    valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
 
-                    this._regIP += 4;
+                    this._regIP += 3;
                 }
                 else if (0x82 === opcode_byte)
                 {
-                    valSrc = ((this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2]);
+                    valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
 
-                    this._regIP += 4;
+                    this._regIP += 3;
                 }
                 else if (0x83 === opcode_byte)
                 {
-                    valSrc = this._memoryV[this._regIP + 2];
+                    valSrc = this._memoryV[this._regIP + 1];
 
                     // Sign extend to word
                     if ( 1 === ( (valSrc & 0x80) >> 7)) valSrc = 0xFF00 | valSrc;
 
-                    this._regIP += 3;
+                    this._regIP += 2;
                 }
 
                 switch (opcode.reg) {
@@ -1414,23 +1616,23 @@ var cpu8086 = {
              *      general register first).
              */
             case 0x88:
-                this._regIP += this._setRMValueForOp(opcode);
+                this._setRMValueForOp(opcode);
+                this._regIP += 1;
                 break;
             case 0x89:
-                this._regIP += this._setRMValueForOp(opcode);
+                this._setRMValueForOp(opcode);
+                this._regIP += 1;
                 break;
             case 0x8A:
-                this._regIP += this._setRegValueForOp(opcode,
-                    (this._memoryV[this._regIP + 1])
-                );
-                this._regIP += 3;
+                this._setRegValueForOp(opcode, (this._memoryV[this._regIP + 1]) );
+                this._regIP += 1;
                 break;
             case 0x8B:
                 var val = this._getRMValueForOp(opcode,
                     ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1])
                 );
                 this._setRegValueForOp(opcode, val);
-                this._regIP += 4;
+                this._regIP += 1;
                 break;
             case 0x8C:
                 console.error("Opcode not implemented!");
@@ -1520,6 +1722,105 @@ var cpu8086 = {
             case 0xBF:
                 this._regDI = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
                 this._regIP += 3;
+                break;
+
+            /**
+             * Instruction : OR
+             * Meaning     : Logical inclusive or of the operands
+             * Notes       :
+             */
+            case 0x08:
+            case 0x0A:
+                valDst = this._getRMValueForOp(opcode);
+                valSrc = this._getRegValueForOp(opcode);
+
+                valResult = valDst || valSrc;
+                this._setRMValueForOp(opcode, valResult);
+
+                // Since we've used 3 helpers we've counted the addressing byte 3 times, correct this
+                this._regIP -= 2;
+
+                this._setFlags(
+                    valDst,
+                    valSrc,
+                    valResult,
+                    (   this.FLAG_CF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_ZF_MASK),
+                    'b');
+
+                this._regIP += 1;
+
+                break;
+            case 0x09:
+            case 0x0B:
+                valDst = this._getRMValueForOp(opcode);
+                valSrc = this._getRegValueForOp(opcode);
+
+                valResult = valDst || valSrc;
+                this._setRMValueForOp(opcode, valResult);
+
+                // Since we've used 3 helpers we've counted the addressing byte 3 times, correct this
+                this._regIP -= 2;
+
+                this._setFlags(
+                    valDst,
+                    valSrc,
+                    valResult,
+                    (   this.FLAG_CF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_ZF_MASK),
+                    'w');
+
+                this._regIP += 1;
+
+                break;
+            case 0x0C:
+                valDst = this._regAL;
+                valSrc = (this._memoryV[this._regIP + 1]);
+
+                this._regAL = valDst || valSrc;
+
+                this._setFlags(
+                    valDst,
+                    valSrc,
+                    this._regAL,
+                    (   this.FLAG_CF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_ZF_MASK),
+                    'b');
+
+                this._regIP += 2;
+
+                break;
+            case 0x0D:
+                valDst = ((this._regAH << 8) | this._regAL);
+                valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+
+                valResult = valDst || valSrc;
+
+                this._regAH = (valResult & 0xFF00) >> 8;
+                this._regAL = (valResult & 0x00FF);
+
+                this._setFlags(
+                    valDst,
+                    valSrc,
+                    valResult,
+                    (   this.FLAG_CF_MASK |
+                        this.FLAG_OF_MASK |
+                        this.FLAG_PF_MASK |
+                        this.FLAG_SF_MASK |
+                        this.FLAG_ZF_MASK),
+                    'w');
+
+                this._regIP += 3;
+
                 break;
 
             /**
@@ -1681,7 +1982,7 @@ var cpu8086 = {
 
             /**
              * Instruction : XOR
-             * Meaning     : Set Direction flag.
+             * Meaning     : Performs a bitwise exclusive or of the operands.
              * Notes       :
              */
             case 0x30:
@@ -1702,7 +2003,7 @@ var cpu8086 = {
                         this.FLAG_ZF_MASK),
                     'b');
 
-                this._regIP += 2;
+                this._regIP += 1;
 
                 break;
             case 0x31:
@@ -1711,6 +2012,9 @@ var cpu8086 = {
 
                 valResult = valDst ^ valSrc;
                 this._setRMValueForOp(opcode, valResult);
+
+                // Since we've used 3 helpers we've counted the addressing byte 3 times, correct this
+                this._regIP -= 2;
 
                 this._setFlags(
                     valDst,
@@ -1723,7 +2027,7 @@ var cpu8086 = {
                         this.FLAG_ZF_MASK),
                     'w');
 
-                this._regIP += 2;
+                this._regIP += 1;
 
                 break;
             case 0x32:
@@ -1744,7 +2048,7 @@ var cpu8086 = {
                         this.FLAG_ZF_MASK),
                     'b');
 
-                this._regIP += 2;
+                this._regIP += 1;
 
                 break;
             case 0x33:
@@ -1765,7 +2069,7 @@ var cpu8086 = {
                         this.FLAG_ZF_MASK),
                     'w');
 
-                this._regIP += 2;
+                this._regIP += 1;
 
                 break;
             case 0x34:

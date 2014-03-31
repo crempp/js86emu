@@ -17,6 +17,12 @@ var gfx = {
     _font_path : "bin/fonts/",
     _fonts : {},
 
+    _FONT_FG_LIGHT : 0xAA,
+    _FONT_BG_DARK  : 0x00,
+
+    // This should be set to true for memory models with attributes (normal operation)
+    _use_attribute_bit : false,
+
     // Graphics memory - still needed???
     _gfxMemStart : 0x8000,
     _gfxMemSize  : 4 * 1024, // 4k
@@ -57,8 +63,9 @@ var gfx = {
         var gfxMem = new Uint8Array(this._gfxMemSize);
         for (var i = 0; i <= this._gfxMemSize; i += 2)
         {
-            gfxMem[i]     = 0x00; // Character code
-            gfxMem[i + 1] = 0x02; // Attribute
+            gfxMem[i] = 0x00; // Character code
+            if (this._use_attribute_bit) gfxMem[i + 1] = 0x02; // Attribute
+            else  gfxMem[i + 1] = 0x00; // Character code
         }
         cpu.setMemoryBlock(gfxMem, this._gfxMemStart);
 
@@ -90,6 +97,10 @@ var gfx = {
     {
         console.log("drawGraphics");
 
+        var attribute_offset;
+        if (this._use_attribute_bit) attribute_offset = 2;
+        else attribute_offset = 1;
+
         // Get the graphics memory from system memory
         var gfxMem = cpu.getMemoryBlock(this._gfxMemStart, this._gfxMemSize);
 
@@ -104,7 +115,7 @@ var gfx = {
         {
             for ( var c = 0; c < this._textModeColumns; c++)
             {
-                var memoryOffset = ( (r * this._textModeColumns) + c ) * 2;
+                var memoryOffset = ( (r * this._textModeColumns) + c ) * attribute_offset;
 
                 var glyph = this._fonts[gfxMem[memoryOffset]],
                     attr  = gfxMem[memoryOffset + 1];
@@ -124,7 +135,7 @@ var gfx = {
                         var canvasOffset = ( ((r * this._fontHeight) + fy) * imageData.width + ((c * this._fontWidth) + fx) ) * 4;
 
                         //var value = fx * fy & 0xff;
-                        var value = (0xFF === glyphRow[fx]) ? 0xAA : 0x00;
+                        var value = (0xFF === glyphRow[fx]) ? this._FONT_FG_LIGHT : this._FONT_BG_DARK;
 
                         //imageData.data[canvasOffset] = glyphRow[fx];
                         imageData.data[canvasOffset]     = value; // Red
@@ -255,8 +266,9 @@ var gfx = {
         var attrCounter = 0;
         for (var i = 0; i <= this._gfxMemSize; i += 2)
         {
-            gfxMem[i]     = charCounter++ % 0xFF; // Character code
-            gfxMem[i + 1] = attrCounter++ % 0xFF; // Attribute
+            gfxMem[i] = charCounter++ % 0xFF; // Character code
+            if (this._use_attribute_bit) gfxMem[i + 1] = attrCounter++ % 0xFF; // Attribute
+            else gfxMem[i + 1] = charCounter++ % 0xFF; // Character code
         }
         cpu.setMemoryBlock(gfxMem, this._gfxMemStart);
     },
