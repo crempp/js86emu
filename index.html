@@ -2,31 +2,27 @@
     <head>
         <link rel="stylesheet" href="build/css/style.css">
         <link href="build/lib/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+
+        <!-- Load application -->
+        <script data-main="build/js/main" src="build/lib/require-2.1.11.js"></script>
     </head>
 
     <body>
         <div class="emulator-application">
             <header class="header">
                 <h1>js86emu</h1>
-                <span class="controls">
-                    <fieldset>
-                        <legend>controls</legend>
+                <span id="gui-controls" class="controls">
 
-                        <span id="runbutton" title="run" class="fa fa-play button" onclick='gui.handleRun();'></span>
-                        <span id="resetbutton" title="reset" class="fa fa-refresh button" onclick='gui.handleReset();'></span>
-                        <span id="pausebutton" title="pause" class="fa fa-pause button" onclick='gui.handlePause();'></span>
-                        <span id="haltbutton" title="halt" class="fa fa-stop button" onclick='gui.handleHalt();'></span>
-                        <span id="stepbutton" title="step" class="fa fa-forward button" onclick='gui.handleStep();'></span>
-                        <span id="advancedbutton" title="settings" class="fa fa-cogs button" onclick='gui.handleAdvanced();'></span>
-                        <!--
-                        <span id="vidtestbutton" class="button" onclick='gui.handleVidTest();'>Test Vid</span>
-                        -->
-                    </fieldset>
                 </span>
             </header>
 
             <div class="monitor">
                 <canvas id='gfx-port' width="720" height="350"></canvas>
+            </div>
+
+            <div id="gui-overlay">
+                <div class="transparency"></div>
+                <div id="gui-modal"></div>
             </div>
         </div>
     </body>

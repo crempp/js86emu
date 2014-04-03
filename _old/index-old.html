@@ -26,23 +26,6 @@
             <canvas id='gfx-port' width="640" height="400"></canvas>
         </div>
 
-        <div id="controls">
-            <fieldset>
-                <legend>controls</legend>
-
-                <span id="runbutton" class="fa fa-play fa-lg button" onclick='gui.handleRun();'></span>
-                <span id="resetbutton" class="fa fa-refresh fa-lg button" onclick='gui.handleReset();'></span>
-                <span id="pausebutton" class="fa fa-pause fa-lg button" onclick='gui.handlePause();'></span>
-                <span id="haltbutton" class="fa fa-stop fa-lg button" onclick='gui.handleHalt();'></span>
-                <span id="stepbutton" class="fa fa-forward fa-lg button" onclick='gui.handleStep();'></span>
-
-                <span id="vidtestbutton" class="button" onclick='gui.handleVidTest();'>Test Vid</span>
-                <div style='clear: both;'></div>
-            </fieldset>
-
-            <div style='clear: both;'></div>
-
-        </div>
     </div>
 
     <div class="">
@@ -182,95 +165,7 @@
         </div>
     </div>
 
-    <div id="overlay">
 
-        <div class="transparency"></div>
-
-        <div id="settings">
-            <fieldset>
-                <legend>settings</legend>
-
-                <table>
-                    <tr>
-                        <td><label for="emuCPU">CPU</label></td>
-                        <td>
-                            <select class="input" name="emuCPU" id="emuCPU">
-                                <option value="8086" selected>8086</option>
-                                <option value="186">186</option>
-                                <option value="286">286</option>
-                                <option value="386">386</option>
-                            </select>
-                        </td>
-                        <td></td>
-                    </tr>
-
-                    <tr>
-                        <td><label for="emuBIOS">BIOS</label></td>
-                        <td>
-                            <select class="input" name="emuBIOS" id="emuBIOS">
-                                <option value="none" selected>-none-</option>
-                            </select>
-                        </td>
-                        <td></td>
-                    </tr>
-
-                    <tr>
-                        <td><label for="emuHD">HD</label></td>
-                        <td>
-                            <select class="input" name="emuHD" id="emuHD">
-                                <option value="none" selected>-none-</option>
-                            </select>
-                        </td>
-                        <td>
-                            <div class="fa fa-file-o file_chooser">
-                                <input type="file" class="file-chooser-input" id="hd-file" name="hd-file"/>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td><label for="emuFloppy">Floppy</label></td>
-                        <td>
-                            <select class="input" name="emuFloppy" id="emuFloppy">
-                                <option value="none">-none-</option>
-                                <option value="1.44" selected>1.44</option>
-                            </select>
-                        </td>
-                        <td>
-                            <div class="fa fa-file-o file_chooser">
-                                <input type="file" class="file-chooser-input" id="files" name="files"/>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td><output id="file_chooser_output"></output></td>
-                        <td></td>
-                    </tr>
-
-                    <tr>
-                        <td><label for="emuGfx">Gfx</label></td>
-                        <td>
-                            <select class="input" name="emuGfx" id="emuGfx">
-                                <option value="none">-none-</option>
-                            </select>
-                        </td>
-                        <td></td>
-                    </tr>
-
-                    <tr>
-                        <td><label for="emuInput">Input</label></td>
-                        <td>
-                            <select class="input" name="emuInput" id="emuInput">
-                                <option value="none">-none-</option>
-                            </select>
-                        </td>
-                        <td></td>
-                    </tr>
-                </table>
-            </fieldset>
-        </div>
-    </div>
 
     <div id="offscreen">
         <canvas id='font-table' width="288" height="112"></canvas>

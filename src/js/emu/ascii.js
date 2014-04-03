@@ -1,3 +1,10 @@
+/**
+ *
+ *
+ * @module Emu
+ * @author Chad Rempp <crempp@gmail.com>
+ */
+
 //
 //ASCII control characters (character code 0-31)
 //The first 32 characters in the ASCII-table are unprintable control codes and are used to control peripherals such as printers.

@@ -51,7 +51,7 @@ module.exports = function(grunt) {
                     {
                         expand: true,
                         cwd  : 'src/',
-                        src  :  ['js/**/*'],
+                        src  :  ['js/**/*.js'],
                         dest : 'build/'
                     },
                     // Libraries
@@ -91,6 +91,28 @@ module.exports = function(grunt) {
             }
         },
 
+        jst: {
+            compile: {
+                options: {
+                    templateSettings: {
+                        interpolate : /\{\{(.+?)\}\}/g
+                    }
+                },
+                files: {
+                    "build/js/gui/templates/GuiTemplate.js": ["src/js/gui/templates/**/*.jhtml"]
+                }
+            },
+            options: {
+                namespace : "GuiTemplate",
+                amd       : true,
+                prettify  : true,
+                processName: function(filepath) {
+                    var parts = filepath.split("/");
+                    return parts[parts.length -1].replace(".jhtml", "");
+                }
+            }
+        },
+
         watch: {
 //            gruntfile: {
 //                files: '<%= jshint.gruntfile.src %>',
@@ -107,6 +129,10 @@ module.exports = function(grunt) {
             uglify: {
                 files: 'src/js/**/*.js',
                 tasks: ['uglify']
+            },
+            jst: {
+                files: 'src/js/gui/templates/**/*.jhtml',
+                tasks: ['jst']
             },
             copy: {
                 files: ['src/js/**/*.js',
@@ -125,7 +151,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-sass');
+    grunt.loadNpmTasks('grunt-contrib-jst');
 
     // Default task(s).
-    grunt.registerTask('default', ['uglify', 'copy', 'sass']);
+    grunt.registerTask('default', ['uglify', 'copy', 'sass', 'jst']);
 };

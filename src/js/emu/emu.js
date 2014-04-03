@@ -1,4 +1,12 @@
-window.onload = main;
+/**
+ *
+ *
+ * @module Emu
+ * @author Chad Rempp <crempp@gmail.com>
+ */
+
+
+//window.onload = main;
 
 
 // shim layer with setTimeout fallback

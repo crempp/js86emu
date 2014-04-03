@@ -1,3 +1,10 @@
+/**
+ *
+ *
+ * @module Emu
+ * @author Chad Rempp <crempp@gmail.com>
+ */
+
 var cpu = {
     _cpuModel : "cpu8086",
 

@@ -1,0 +1,48 @@
+{
+    "components" : {
+        "cpu"    : [
+            {
+                "name" : "8086/8088",
+                "module" : "cpus/8086"
+            },
+            {
+                "name" : "186",
+                "module" : "cpus/186"
+            },
+            {
+                "name" : "286",
+                "module" : "cpus/286"
+            },
+            {
+                "name" : "386",
+                "module" : "cpus/386"
+            },
+            {
+                "name" : "486",
+                "module" : "cpus/486"
+            }
+        ],
+        "bios"   : [],
+        "hd"     : [],
+        "floppy" : [],
+        "gfx"    : [
+            {
+                "name" : "MDA (Monochrome Display Adapter)",
+                "module" : "gfx/mda"
+            },
+            {
+                "name" : "CGA (Color Graphics Adapter)",
+                "module" : "gfx/cga"
+            },
+            {
+                "name" : "EGA (Enhanced Graphics Adapter)",
+                "module" : "gfx/ega"
+            },
+            {
+                "name" : "VGA (Video Graphics Array)",
+                "module" : "gfx/vga"
+            }
+        ],
+        "input"  : []
+    }
+}

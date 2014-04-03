@@ -1,3 +1,10 @@
+/**
+ *
+ *
+ * @module Emu
+ * @author Chad Rempp <crempp@gmail.com>
+ */
+
 var cpu8086 = {
     _opcode  : 0x00,
     _memory  : null,

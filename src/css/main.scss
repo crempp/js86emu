@@ -17,6 +17,13 @@ html,body{
     .controls {
       float: right;
 
+      .button {
+        &.active {
+          background-color: #bbbbb;
+          color: #222222;
+        }
+      }
+
       fieldset {
         // This seems to cause wierd behavior
         //@include border-radius(8px);
@@ -40,5 +47,72 @@ html,body{
       margin: 0px auto;
       background-color: #000000;
     }
+  }
+
+  #gui-overlay {
+    display: none;
+
+    .transparency {
+      position: absolute;
+      z-index: 1000;
+      top: 0;
+      left: 0;
+      background-color: #000000;
+
+      @include opacity(0.7);
+      width: 100%;
+      height: 100%;
+    }
+    .modal {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1001;
+      background-color: #444;
+      padding: 20px;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 4;
+      right: 4;
+      cursor: pointer;
+    }
+
+    .modal-settings {
+      label {
+        font-weight: bold;
+        display: block;
+        margin-right: 15px;
+      }
+      label:after {
+        content: ": "
+      }
+      .input {
+        /*float: left;*/
+      }
+      output{
+        display: block;
+        clear: both;
+        padding-left: 45px;;
+      }
+      .file_chooser {
+        position: relative;
+        overflow: hidden;
+        padding: 5px;
+      }
+      .file-chooser-input {
+        position: absolute;
+        display: block !important;
+        opacity: 0 !important;
+        overflow: hidden !important;
+        top: 0px;
+        left: 0px;
+      }
+    }
+  }
+
+  #gui-settings {
+
   }
 }
