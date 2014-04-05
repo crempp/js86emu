@@ -94,9 +94,7 @@ module.exports = function(grunt) {
         jst: {
             compile: {
                 options: {
-                    templateSettings: {
-                        interpolate : /\{\{(.+?)\}\}/g
-                    }
+
                 },
                 files: {
                     "build/js/gui/templates/GuiTemplate.js": ["src/js/gui/templates/**/*.jhtml"]

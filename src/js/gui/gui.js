@@ -22,12 +22,12 @@ function(
 
         _memCenter : 0,
 
-        _guiView : null,
+        _controlView : null,
 
         init : function ()
         {
-            this._guiView = new ControlView();
-            $("#gui-controls").append(this._guiView.render().el);
+            this._controlView = new ControlView();
+            $("#gui-controls").append(this._controlView.render().el);
 
 //            var el = document.getElementById('files')
 //

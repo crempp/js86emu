@@ -1,0 +1,29 @@
+<span title="close" class="fa fa-times-circle-o fa-lg modal-close"></span>
+<div class='modal-settings'>
+    <fieldset>
+        <legend>settings</legend>
+
+        <table>
+            <td><label for="settings-blobProgram">Blob Program</label></td>
+            <td>
+                <% console.log(data.emuSettings.blobProgram) %>
+                <select class="input" name="emuBlobProgram" id="settings-blobProgram">
+                    <option value="none" <% if (null === data.emuSettings.blobProgram){ %>selected<% } %> >--none--</option>
+                    <% _.each(data.blobfiles, function(item) { %>
+                    <option value="<%= item.id %>"><%= item.name %></option>
+                    <% }); %>
+                </select>
+            </td>
+        </table>
+
+        <table>
+            <tr>
+                <td><label for="settings-breakOnError">Break on error</label></td>
+                <td><input type="checkbox" id="settings-breakOnError" name="settings-breakOnError" checked>
+            </tr>
+        </table>
+        <div class="settings-submit">
+            <span title="load" class="button button-settings-submit">load</span>
+        </div>
+    </fieldset>
+</div>

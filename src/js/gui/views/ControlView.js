@@ -9,14 +9,18 @@ define([
     "jquery",
     "underscore",
     "backbone",
+    "gui/models/SettingsModel",
     "gui/templates/GuiTemplate",
-    "gui/views/SettingsView"],
+    "gui/views/SettingsView",
+    "gui/views/LoadBlobView"],
 function(
     $,
     _,
-    backbone,
+    Backbone,
+    SettingsModel,
     GuiTemplate,
-    SettingsView)
+    SettingsView,
+    LoadBlobView)
 {
     var _buttonStates = {
         run      : false,
@@ -36,9 +40,6 @@ function(
      */
     var _toggleState = function (button, $el)
     {
-        // _buttonStates
-        console.log("_toggleState");
-
         switch (button)
         {
             case 'run' :
@@ -94,6 +95,19 @@ function(
             "click .button-settings": "settings"
         },
 
+        settingsModel : null,
+
+        settingsView : null,
+
+        initialize : function () {
+            this.settingsModel = new SettingsModel();
+            this.settingsView = new LoadBlobView({
+                //el: $("#modal-settings"),
+                el: $("#gui-modal"),
+                model: this.settingsModel
+            });
+        },
+
         render: function ()
         {
             this.$el.html(this.template());
@@ -130,9 +144,7 @@ function(
         {
             _toggleState("settings", this.$el);
 
-            var view = new SettingsView();
-            $("#gui-modal").append(view.render().el);
-            view.show();
+            this.settingsView.show();
         }
     });
 
