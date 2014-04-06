@@ -1,5 +1,21 @@
-<div id="debug-memory">
-    <fieldset>
-        <legend>[memory]</legend>
-    </fieldset>
-</div>
+<fieldset>
+    <legend>[memory]</legend>
+    <div>
+        <span>center</span>
+        <span><input id='debug-memory-center' type="text"></span>
+        <span id="memorycenterbutton" class="fa fa-play button" onclick='gui.handleCenterMemoryButton();'></span>
+    </div>
+    <div class='debug-memory-container'>
+        <table id="debug-memory-table">
+            <thead>
+            <tr>
+                <th>addr</th>
+                <th colspan=4>value</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+</fieldset>

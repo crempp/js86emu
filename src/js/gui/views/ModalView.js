@@ -24,25 +24,21 @@ function(
             "click .modal-close": "hide"
         },
 
+        initialize : function (options) {
+            this.options = options || {};
+        },
+
         render: function ()
         {
-            console.log("ModalView::render()");
-            console.log(this.$el);
-
-            //this.$el.html(this.template({data:data}));
-            //$("#gui-modal").append(v.el);
-
-            //$("#gui-modal").html(this.template({data:data}));
-
             this.$el.html(this.template({data:this.model.attributes}));
-
 
             return this;
         },
 
         show : function()
         {
-            console.log("ModalView::show()");
+            this.options.container.append(this.render().el);
+
             this.modalContainer.show();
 
             // Center

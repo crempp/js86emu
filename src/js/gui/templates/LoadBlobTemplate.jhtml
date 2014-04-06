@@ -6,7 +6,6 @@
         <table>
             <td><label for="settings-blobProgram">Blob Program</label></td>
             <td>
-                <% console.log(data.emuSettings.blobProgram) %>
                 <select class="input" name="emuBlobProgram" id="settings-blobProgram">
                     <option value="none" <% if (null === data.emuSettings.blobProgram){ %>selected<% } %> >--none--</option>
                     <% _.each(data.blobfiles, function(item) { %>

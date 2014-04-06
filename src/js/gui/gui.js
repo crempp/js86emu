@@ -9,12 +9,25 @@ define([
     "jquery",
     "underscore",
     "backbone",
-    "gui/views/ControlView"],
+    "gui/views/ControlView",
+    "gui/views/DebugDecodeView",
+    "gui/views/DebugRegisterView",
+    "gui/views/DebugMemoryView",
+    "gui/models/DebugDecodeModel",
+    "gui/models/DebugRegisterModel",
+    "gui/models/DebugMemoryModel"],
 function(
     $,
     _,
     backbone,
-    ControlView)
+    ControlView,
+    DebugDecodeView,
+    DebugRegisterView,
+    DebugMemoryView,
+    DebugDecodeModel,
+    DebugRegisterModel,
+    DebugMemoryModel
+    )
 {
 
     var GUI = {
@@ -29,6 +42,55 @@ function(
             this._controlView = new ControlView();
             $("#gui-controls").append(this._controlView.render().el);
 
+            var opcode_byte = 0x45;
+            var addressing_byte = 0x88;
+            var testDecode = {
+                opcode_byte : opcode_byte,
+                addressing_byte : addressing_byte,
+                prefix : 0x00,
+                opcode : (opcode_byte & 0xFC) >>> 2,
+                d      : (opcode_byte & 0x02) >>> 1,
+                w      : (opcode_byte & 0x01),
+                mod    : (addressing_byte & 0xC0) >>> 6,
+                reg    : (addressing_byte & 0x38) >>> 3,
+                rm     : (addressing_byte & 0x07)
+            };
+            var testDecodeModel = new DebugDecodeModel(testDecode);
+
+            var testRegisterModel = new DebugRegisterModel({
+                AX : 0x00,
+                BX : 0x00,
+                CX : 0x00,
+                DX : 0x00,
+                SI : 0x00,
+                DI : 0x00,
+                BP : 0x00,
+                SP : 0x00,
+                CS : 0x00,
+                DS : 0x00,
+                ES : 0x00,
+                SS : 0x00,
+                IP : 0x00,
+                FLAGS : 0x00
+            });
+
+            // Debug views
+            var debugDecodeView = new DebugDecodeView({model: testDecodeModel});
+            $("#gui-debug-decode").append(debugDecodeView.render().el);
+
+            var debugRegisterView = new DebugRegisterView({model: testRegisterModel});
+            $("#gui-debug-register").append(debugRegisterView.render().el);
+
+            var debugMemoryView = new DebugMemoryView();
+            $("#gui-debug-memory").append(debugMemoryView.render().el);
+        },
+
+        updateDebugDecode : function ()
+        {
+
+        }
+
+
 //            var el = document.getElementById('files')
 //
 //            if (el)
@@ -39,7 +101,6 @@ function(
 //            {
 //                console.error("Missing page component 'files'");
 //            }
-        }
 
 //        handleRun : function () {
 //            cpu.run();
@@ -208,26 +269,7 @@ function(
 //            $tbody.html(content);
 //        },
 //
-//        _padBinary : function(val, num)
-//        {
-//            return String((new Array(num + 1).join("0")) + val.toString(2)).slice(-1 * num);
-//        },
-//        _padBinaryByte : function (val)
-//        {
-//            return String("00000000" + val.toString(2)).slice(-8);
-//        },
-//        _padBinaryWord : function (val)
-//        {
-//            return String("0000000000000000" + val.toString(2)).slice(-16);
-//        },
-//        _padHexByte : function (val)
-//        {
-//            return "0x" + String("00" + val.toString(16)).slice(-2);
-//        },
-//        _padHexWord : function (val)
-//        {
-//            return "0x" + String("0000" + val.toString(16)).slice(-4);
-//        }
+
     };
 
     return GUI;

@@ -2,11 +2,6 @@
 /*font-family: 'Gafata', sans-serif;*/
 /*font-family: 'Orbitron', sans-serif;*/
 
-
-
-
-
-
 #debug {
     height: 150px;
 }
@@ -17,8 +12,7 @@
 #debug-decode {
     display: inline-block;
     vertical-align: top;
-    font-family: 'Ubuntu Mono', sans-serif;
-    font-size: 11px;
+
     width: 187px;
     height: 100%;
 }

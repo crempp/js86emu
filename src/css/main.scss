@@ -2,10 +2,12 @@ html,body{
   background-color: $BACKGROUND;
   color: $FORGROUND;
   font-family: $FONT;
+  height: 100%;
 }
 
-
 .emulator-application {
+  height: 100%;
+
   header {
     margin-left: 21px;
 
@@ -17,20 +19,14 @@ html,body{
     .controls {
       float: right;
 
-      .button {
-        &.active {
-          background-color: #bbbbb;
-          color: #222222;
-        }
-      }
-
       fieldset {
         // This seems to cause wierd behavior
         //@include border-radius(8px);
       }
 
       legend {
-        font-size: 11px;
+        //font-size: 11px;
+        font-family: 'Ubuntu Mono', sans-serif;
       }
     }
   }
@@ -46,6 +42,91 @@ html,body{
     canvas {
       margin: 0px auto;
       background-color: #000000;
+    }
+  }
+
+
+  .gui-debug {
+    background-color: #252525;
+    margin: 20px auto;
+    padding: 10px;
+
+    @include border-radius(12px);
+
+    font-family: 'Ubuntu Mono', sans-serif;
+    //font-size: 11px;
+
+    .row {
+      //overflow: hidden;
+      .row-half {
+        float: left;
+        width : 50%;
+      }
+      .row-full {
+        float: left;
+        width : 100%;
+      }
+      &:before, &:after {
+        content: ".";
+        visibility: hidden;
+        display: table;
+        height: 0;
+        clear: both;
+        line-height: 0;
+      }
+      &:after {
+        line-height: 15px;
+      }
+    }
+
+    .debug-window {
+
+      fieldset {
+        height: 100%;
+      }
+
+      table {
+        border: 1px solid #0c0c0c;
+        border-collapse: collapse;
+
+        width: 100%;
+        margin-top: 4px;
+        margin-bottom: 4px;
+        @include border-radius(4px);
+
+        text-align: center;
+
+        thead {
+          background: #0c0c0c;
+        }
+
+        th, td {
+          border: 1px solid #0c0c0c;
+          padding-left: 3px;
+          padding-right: 3px;
+        }
+
+        td.debug-title {
+          background: #0c0c0c;
+        }
+
+        &.debug-decode-instruction {
+          td :first-of-type {
+            width : 140px;
+          }
+        }
+      }
+    }
+    #gui-debug-decode {
+      height: 156px;
+    }
+    #gui-debug-register {
+      height: 156px;
+    }
+    #gui-debug-memory {
+      fieldset {
+        height: inherit;
+      }
     }
   }
 
@@ -70,6 +151,7 @@ html,body{
       z-index: 1001;
       background-color: #444;
       padding: 20px;
+      @include border-radius(8px);
     }
 
     .modal-close {
@@ -117,7 +199,5 @@ html,body{
     }
   }
 
-  #gui-settings {
 
-  }
 }

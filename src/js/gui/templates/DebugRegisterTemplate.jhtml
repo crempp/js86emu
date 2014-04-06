@@ -1,5 +1,67 @@
-<div id="debug-registers">
-    <fieldset>
-        <legend>[registers]</legend>
-    </fieldset>
-</div>
+<fieldset>
+    <legend>[registers]</legend>
+    <table id="debug-registers-table">
+        <tr>
+            <td class='debug-title'>AX</td>
+            <td><%= model._padHexWord(model.get('AX')) %></td>
+
+            <td class='debug-title'>BX</td>
+            <td><%= model._padHexWord(model.get('BX')) %></td>
+
+            <td class='debug-title'>CX</td>
+            <td><%= model._padHexWord(model.get('CX')) %></td>
+
+            <td class='debug-title'>DX</td>
+            <td><%= model._padHexWord(model.get('DX')) %></td>
+        </tr>
+        <tr>
+            <td class='debug-title'>SI</td>
+            <td><%= model._padHexWord(model.get('SI')) %></td>
+
+            <td class='debug-title'>DI</td>
+            <td><%= model._padHexWord(model.get('DI')) %></td>
+
+            <td class='debug-title'>BP</td>
+            <td><%= model._padHexWord(model.get('BP')) %></td>
+
+            <td class='debug-title'>SP</td>
+            <td><%= model._padHexWord(model.get('SP')) %></td>
+        </tr>
+        <tr>
+            <td class='debug-title'>CS</td>
+            <td><%= model._padHexWord(model.get('CS')) %></td>
+
+            <td class='debug-title'>DS</td>
+            <td><%= model._padHexWord(model.get('DS')) %></td>
+
+            <td class='debug-title'>ES</td>
+            <td><%= model._padHexWord(model.get('ES')) %></td>
+
+            <td class='debug-title'>SS</td>
+            <td><%= model._padHexWord(model.get('SS')) %></td>
+        </tr>
+        <tr>
+            <td class='debug-title'>IP</td>
+            <td><%= model._padHexWord(model.get('IP')) %></td>
+
+            <td class='debug-title'></td>
+            <td></td>
+
+            <td class='debug-title'></td>
+            <td></td>
+
+            <td class='debug-title'></td>
+            <td></td>
+        </tr>
+    </table>
+    <table>
+        <tr>
+            <td class='debug-title'>FLAGS</td>
+            <td class='debug-title'>----ODITSZ-A-P-C</td>
+        </tr>
+        <tr>
+            <td><%= model._padHexWord(model.get('FLAGS')) %></td>
+            <td><%= model._padBinaryWord(model.get('FLAGS')) %></td>
+        </tr>
+    </table>
+</fieldset>

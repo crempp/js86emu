@@ -102,8 +102,7 @@ function(
         initialize : function () {
             this.settingsModel = new SettingsModel();
             this.settingsView = new LoadBlobView({
-                //el: $("#modal-settings"),
-                el: $("#gui-modal"),
+                container : $("#gui-modal"),
                 model: this.settingsModel
             });
         },

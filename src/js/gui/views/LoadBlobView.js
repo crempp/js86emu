@@ -21,8 +21,11 @@ function(
     GuiTemplate)
 {
     var LoadBlobView = ModalView.extend({
+
         id : "modalContent-loadblob",
+
         className : "modal",
+
         template: GuiTemplate['LoadBlobTemplate'],
 
         events: {
@@ -30,27 +33,12 @@ function(
             "click .button-settings-submit": "submit"
         },
 
-        initialize : function () {
-                console.log("LoadBlobView::initialize()");
-                this.model.on('change', this.render, this);
-                this.model.fetch();
+        initialize : function (options) {
+            ModalView.prototype.initialize.call(this, options);
+
+            this.model.on('change', this.render, this);
+            this.model.fetch();
         },
-
-        show : function () {
-            console.log("LoadBlobView::show()");
-
-            this.render();
-            ModalView.prototype.show.call(this);
-        },
-
-//        render : function ()
-//        {
-//            console.log("LoadBlobView::render()");
-//
-//            var v = ModalView.prototype.render.call(this, this.model.attributes);
-//            //$("#gui-modal").append(v.el);
-//            //v.show();
-//        },
 
         submit : function ()
         {
@@ -63,7 +51,9 @@ function(
                 }
             });
 
-            console.log("Set", this.model.attributes);
+            //console.log("Set", this.model.attributes);
+
+            this.hide();
         }
     });
 
