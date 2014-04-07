@@ -11,15 +11,43 @@ define([
     "backbone",
     "gui/models/SettingsModel",
     "gui/views/ModalView",
-    "gui/templates/GuiTemplate"],
+    "gui/views/LoaderView",
+    "gui/templates/GuiTemplate",
+    "emu/emu"],
 function(
     $,
     _,
     Backbone,
     SettingsModel,
     ModalView,
-    GuiTemplate)
+    LoaderView,
+    GuiTemplate,
+    Emu)
 {
+    var _basePath = "files/program-blobs/";
+
+    /**
+     *  Load a binary file via Ajax
+     *
+     * @param fileName
+     * @param cb
+     * @private
+     */
+    var _loadBlob = function (fileName, cb)
+    {
+        var oReq = new XMLHttpRequest();
+        oReq.open("GET", _basePath + fileName, true);
+        oReq.responseType = "arraybuffer";
+
+        oReq.onload = function (oEvent) {
+            var arrayBuffer = oReq.response; // Note: not oReq.responseText
+
+            if (cb) cb(arrayBuffer);
+        };
+
+        oReq.send(null);
+    }
+
     var LoadBlobView = ModalView.extend({
 
         id : "modalContent-loadblob",
@@ -47,13 +75,53 @@ function(
             this.model.set({
                 emuSettings : {
                     "blobProgram"  : ('none' === blobProgram) ? null : blobProgram,
-                    "breakOnError" : this.$el.find('#settings-breakOnError').prop('checked')
+                    "breakOnError" : this.$el.find('#settings-breakOnError').prop('checked'),
+                    "startInDebug" : this.$el.find('#settings-startInDebug').prop('checked')
                 }
             });
 
-            //console.log("Set", this.model.attributes);
+            var emuSettings = this.model.get('emuSettings');
+            var blobfiles = this.model.get('blobfiles');
+            var blobSettings = null;
 
-            this.hide();
+            for (var i = 0; i < blobfiles.length; i++ )
+            {
+                if (blobfiles[i].id === emuSettings.blobProgram)
+                {
+                    blobSettings = blobfiles[i];
+                    break;
+                }
+            }
+
+            if (emuSettings.blobProgram)
+            {
+                var loaderView = new LoaderView();
+                loaderView.show();
+
+                // Assemble emulator settings
+                var settings = {
+                    "run-type"       : "blob",
+                    "blob-settings"  : blobSettings,
+                    "debug-settings" : {
+                        breakOnError : emuSettings.breakOnError,
+                        startInDebug : emuSettings.startInDebug
+                    },
+                    "gui" : this
+                };
+
+                // Load blob
+                var _this = this;
+                _loadBlob(emuSettings.blobProgram, function(arrayBuffer){
+                    if (arrayBuffer) {
+                        Emu.runBlob(settings, arrayBuffer)
+                    }
+                    loaderView.hide();
+                });
+            }
+            else
+            {
+                this.hide();
+            }
         }
     });
 

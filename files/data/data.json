@@ -59,7 +59,9 @@
             "id"   : "codegolf",
             "name" : "SE Codegolf",
             "file" : "files/program-blobs/codegolf",
+            "address" : 61440,
             "cpu-init" : {
+                "type" : "8086",
                 "registers" : {
                     "sp" : 100
                 }

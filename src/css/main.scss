@@ -161,6 +161,15 @@ html,body{
       cursor: pointer;
     }
 
+    .modal-loader {
+      h2 {
+        text-align: center;
+      }
+      padding-bottom: 1.5em;
+      padding-left: 1.5em;
+      padding-right: 1.5em;
+    }
+
     .modal-settings {
       label {
         font-weight: bold;
@@ -198,6 +207,34 @@ html,body{
       }
     }
   }
-
-
 }
+
+//#offscreen {
+//  display: none;
+//}
+//
+//#debug-memory {
+//  display: inline-block;
+//
+//  font-family: 'Ubuntu Mono', sans-serif;
+//  font-size: 11px;
+//  width: 253px;
+//  height: 100%;
+//}
+//#debug-memory-center {
+//  width: 40px;
+//}
+//#debug-memory table {
+//  font-size: 11px;
+//}
+//.debug-memory-row:hover {
+//  background-color: #555555;
+//}
+//.debug-memory-addr{
+//  font-weight: bold;
+//  background-color: #444;
+//  color: #FFF;
+//}
+//.debug-memory-IP {
+//  background-color: blue;
+//}

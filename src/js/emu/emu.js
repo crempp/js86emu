@@ -1,56 +1,54 @@
 /**
- *
+ * Emulator manager
  *
  * @module Emu
  * @author Chad Rempp <crempp@gmail.com>
  */
 
-
-//window.onload = main;
-
-
-// shim layer with setTimeout fallback
-window.requestAnimFrame = (function(){
-    return  window.requestAnimationFrame   ||
-        window.webkitRequestAnimationFrame ||
-        window.mozRequestAnimationFrame    ||
-        function( callback ){
-            window.setTimeout(callback, 1000 / 60);
-        };
-})();
-
-function animloop(){
-    requestAnimFrame(animloop);
-    gfx.drawGraphics();
-};
-
-/**
- *
- */
-function main () 
+define([
+    "emu/cpu"
+],
+function(
+    Cpu
+)
 {
-    // Setup the gui
-    gui.initialize();
+    var Emu = {
 
-    // Enable debugging
-    cpu.toggleDebug();
-
-    // Initialize the CPU
-    cpu.reset();
-    
-    // Set up render system and register input callbacks
-    gfx.setupGraphics(document.getElementById('gfx-port'),
-        function () {
-            input.setupInput();
-
-            // ... storage init??
-            storage.load();
+        run : function  (settings)
+        {
+            // Enable debugging
+            //Cpu.toggleDebug();
 
             // Boot the CPU
-            cpu.boot();
+            Cpu.boot(settings);
+        },
 
-            //animloop();
+        reset : function ()
+        {
+            Cpu.reset();
+        },
+
+        pause : function ()
+        {
+            Cpu.pause();
+        },
+
+        halt : function ()
+        {
+            Cpu.halt();
+        },
+
+        step : function ()
+        {
+            Cpu.step();
+        },
+
+        runBlob : function (settings, blob)
+        {
+            Cpu.setBinary(blob);
+            this.run(settings);
         }
-    );
+    };
 
-}
+    return Emu;
+});

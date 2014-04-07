@@ -26,18 +26,29 @@ function(
 
         initialize : function (options) {
             this.options = options || {};
+
+            this.options.container = this.options.container || $("#gui-modal");
         },
 
         render: function ()
         {
-            this.$el.html(this.template({data:this.model.attributes}));
+            //console.log("ModalView::render()");
+
+            var data;
+            if (this.model) data = {data:this.model.attributes};
+            else data = {};
+
+            this.$el.html(this.template(data));
+
+            //this.setElement(this.el);
 
             return this;
         },
 
         show : function()
         {
-            this.options.container.append(this.render().el);
+            //console.log("ModalView::show()");
+            this.options.container.html(this.render().el);
 
             this.modalContainer.show();
 
@@ -51,10 +62,13 @@ function(
 
         hide : function()
         {
+            //console.log("ModalView::hide()");
             this.modalContainer.hide();
 
             // Remove window resize handler
             $(window).off('resize.settings');
+
+            this.remove();
         },
 
         center : function ()

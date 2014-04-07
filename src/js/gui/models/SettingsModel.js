@@ -12,7 +12,8 @@ define(["backbone"], function(Backbone)
         defaults : {
             "emuSettings" : {
                 "blobProgram"  : null,
-                "breakOnError" : false
+                "breakOnError" : true,
+                "startInDebug" : true
             }
         },
 

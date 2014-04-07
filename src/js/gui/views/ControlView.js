@@ -12,7 +12,8 @@ define([
     "gui/models/SettingsModel",
     "gui/templates/GuiTemplate",
     "gui/views/SettingsView",
-    "gui/views/LoadBlobView"],
+    "gui/views/LoadBlobView",
+    "emu/emu"],
 function(
     $,
     _,
@@ -20,7 +21,8 @@ function(
     SettingsModel,
     GuiTemplate,
     SettingsView,
-    LoadBlobView)
+    LoadBlobView,
+    Emu)
 {
     var _buttonStates = {
         run      : false,
@@ -97,14 +99,11 @@ function(
 
         settingsModel : null,
 
-        settingsView : null,
+//        settingsView : null,
 
         initialize : function () {
             this.settingsModel = new SettingsModel();
-            this.settingsView = new LoadBlobView({
-                container : $("#gui-modal"),
-                model: this.settingsModel
-            });
+
         },
 
         render: function ()
@@ -117,33 +116,46 @@ function(
         {
             _toggleState("run", this.$el);
 
+            Emu.run();
         },
 
         reset : function ()
         {
             _toggleState("reset", this.$el);
+
+            Emu.reset();
         },
 
         pause : function ()
         {
             _toggleState("pause", this.$el);
+
+            Emu.pause();
         },
 
         halt : function ()
         {
             _toggleState("halt", this.$el);
+
+            Emu.halt();
         },
 
         step : function ()
         {
             _toggleState("step", this.$el);
+
+            Emu.step();
         },
 
         settings : function ()
         {
             _toggleState("settings", this.$el);
 
-            this.settingsView.show();
+            var settingsView = new LoadBlobView({
+                container : $("#gui-modal"),
+                model: this.settingsModel
+            });
+            settingsView.show();
         }
     });
 

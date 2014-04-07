@@ -21,7 +21,6 @@ function(
 
         render : function ()
         {
-            console.log("DebugRegisterView::render()");
             this.$el.html(this.template({model: this.model}));
 
             return this;
