@@ -66,12 +66,6 @@ function(
             var debugMemoryView = new DebugMemoryView({model: memModel});
             $("#gui-debug-memory").html(debugMemoryView.render().el);
         }
-
-//        handleVidTest : function ()
-//        {
-//            gfx.debugVideoTestPattern();
-//            gfx.drawGraphics();
-//        },
     };
 
     return GUI;

@@ -22,6 +22,7 @@ html,body{
       fieldset {
         // This seems to cause wierd behavior
         //@include border-radius(8px);
+        float: right;
       }
 
       legend {

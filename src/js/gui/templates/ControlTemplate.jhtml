@@ -1,4 +1,8 @@
 <fieldset>
+    <legend>debug</legend>
+    <span id="vidtestbutton" class="fa button button-vidtest">vid tst</span>
+</fieldset>
+<fieldset>
     <legend>controls</legend>
 
     <span title="run" class="fa fa-play button button-run"></span>
@@ -7,7 +11,4 @@
     <span title="halt" class="fa fa-stop button button-halt"></span>
     <span title="step" class="fa fa-forward button button-step"></span>
     <span title="settings" class="fa fa-cogs button button-settings"></span>
-    <!--
-    <span id="vidtestbutton" class="button" onclick='gui.handleVidTest();'>Test Vid</span>
-    -->
 </fieldset>

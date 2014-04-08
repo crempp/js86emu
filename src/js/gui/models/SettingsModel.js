@@ -27,8 +27,8 @@ define(["backbone"], function(Backbone)
                 },
                 "breakOnError"      : true,
                 "startInDebug"      : true,
-                "decodeToConsole"   : true,
-                "registerToConsole" : true
+                "decodeToConsole"   : false,
+                "registerToConsole" : false
             },
             "blobFiles"  : {},
             "components" : {
