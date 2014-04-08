@@ -14,13 +14,10 @@ function(
 {
     var Emu = {
 
-        run : function  (settings)
+        run : function ()
         {
-            // Enable debugging
-            //Cpu.toggleDebug();
-
             // Boot the CPU
-            Cpu.boot(settings);
+            Cpu.boot();
         },
 
         reset : function ()
@@ -43,10 +40,10 @@ function(
             Cpu.step();
         },
 
-        runBlob : function (settings, blob)
+        runBlob : function (blob)
         {
             Cpu.setBinary(blob);
-            this.run(settings);
+            this.run();
         }
     };
 

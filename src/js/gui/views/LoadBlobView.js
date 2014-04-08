@@ -62,6 +62,7 @@ function(
         },
 
         initialize : function (options) {
+            this.model = SettingsModel;
             ModalView.prototype.initialize.call(this, options);
 
             this.model.on('change', this.render, this);
@@ -82,8 +83,8 @@ function(
                 }
             });
 
-            var emuSettings = this.model.get('emuSettings');
-            var blobfiles = this.model.get('blobfiles');
+            var emuSettings  = this.model.get('emuSettings');
+            var blobfiles    = this.model.get('blobfiles');
             var blobSettings = null;
 
             for (var i = 0; i < blobfiles.length; i++ )
@@ -100,24 +101,16 @@ function(
                 var loaderView = new LoaderView();
                 loaderView.show();
 
-                // Assemble emulator settings
-                var settings = {
-                    "run-type"       : "blob",
-                    "blob-settings"  : blobSettings,
-                    "debug-settings" : {
-                        "breakOnError"      : emuSettings.breakOnError,
-                        "startInDebug"      : emuSettings.startInDebug,
-                        "decodeToConsole"   : emuSettings.decodeToConsole,
-                        "registerToConsole" : emuSettings.registerToConsole
-                    },
-                    "gui" : this
-                };
+                // Update settings
+                var emuSettings = this.model.get("emuSettings");
+                emuSettings["blobSettings"] = blobSettings;
+                emuSettings["run-type"]     = "blob";
+                this.model.set({"emuSettings" : emuSettings});
 
                 // Load blob
-                var _this = this;
                 _loadBlob(emuSettings.blobProgram, function(arrayBuffer){
                     if (arrayBuffer) {
-                        Emu.runBlob(settings, arrayBuffer)
+                        Emu.runBlob(arrayBuffer)
                     }
                     loaderView.hide();
                 });

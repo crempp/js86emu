@@ -9,7 +9,6 @@ define([
     "jquery",
     "underscore",
     "backbone",
-    "gui/models/SettingsModel",
     "gui/templates/GuiTemplate",
     "gui/views/SettingsView",
     "gui/views/LoadBlobView",
@@ -18,7 +17,6 @@ function(
     $,
     _,
     Backbone,
-    SettingsModel,
     GuiTemplate,
     SettingsView,
     LoadBlobView,
@@ -59,9 +57,6 @@ function(
                 _buttonStates['pause'] = false;
                 _buttonStates['halt']  = true;
                 break;
-            //case 'settings' :
-            //    _buttonStates['settings'] = !_buttonStates['settings'];
-            //    break;
         }
 
         for (b in _buttonStates)
@@ -98,13 +93,6 @@ function(
         },
 
         settingsModel : null,
-
-//        settingsView : null,
-
-        initialize : function () {
-            this.settingsModel = new SettingsModel();
-
-        },
 
         render: function ()
         {
@@ -151,10 +139,7 @@ function(
         {
             _toggleState("settings", this.$el);
 
-            var settingsView = new LoadBlobView({
-                container : $("#gui-modal"),
-                model: this.settingsModel
-            });
+            var settingsView = new LoadBlobView({ container : $("#gui-modal") });
             settingsView.show();
         }
     });

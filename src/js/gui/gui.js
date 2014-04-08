@@ -65,12 +65,7 @@ function(
             });
             var debugMemoryView = new DebugMemoryView({model: memModel});
             $("#gui-debug-memory").html(debugMemoryView.render().el);
-        },
-
-//        debugCenterMemory : function (address)
-//        {
-//            console.log("Center Memory");
-//        }
+        }
 
 //        handleVidTest : function ()
 //        {

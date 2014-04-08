@@ -32,22 +32,17 @@ function(
 
         render: function ()
         {
-            //console.log("ModalView::render()");
-
             var data;
             if (this.model) data = {data:this.model.attributes};
             else data = {};
 
             this.$el.html(this.template(data));
 
-            //this.setElement(this.el);
-
             return this;
         },
 
         show : function()
         {
-            //console.log("ModalView::show()");
             this.options.container.html(this.render().el);
 
             this.modalContainer.show();
@@ -62,7 +57,6 @@ function(
 
         hide : function()
         {
-            //console.log("ModalView::hide()");
             this.modalContainer.hide();
 
             // Remove window resize handler

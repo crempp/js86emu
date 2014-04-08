@@ -4,8 +4,12 @@
  * @module Emu
  * @author Chad Rempp <crempp@gmail.com>
  */
-define([],
-function()
+define([
+    "gui/models/SettingsModel"
+],
+function(
+    SettingsModel
+)
 {
     _Cpu = null;
 
@@ -807,7 +811,7 @@ function()
         {
             _Cpu = Cpu;
 
-            _breakOnError = _Cpu.settings["debug-settings"].breakOnError;
+            _breakOnError = SettingsModel.get("emuSettings").breakOnError;
 
             this.halt = false;
 

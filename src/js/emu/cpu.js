@@ -9,18 +9,18 @@ define([
     "emu/gfx",
     "emu/cpu",
     "emu/input",
-    "emu/storage"
+    "emu/storage",
+    "gui/models/SettingsModel"
 ],
 function(
     Gfx,
     Cpu,
     Input,
-    Storage
+    Storage,
+    SettingsModel
 )
 {
     _Gui = null;
-
-
 
     var Cpu = {
         _cpuPaused : false,
@@ -36,19 +36,21 @@ function(
 
         _cpu : null,
 
-        settings : null,
+        //settings : null,
 
-        boot : function (settings)
+        boot : function ()
         {
             // Save the settings
-            this.settings = settings;
+            //this.settings = settings;
 
             // Configure the debug settings
+
+            console.log("in cpu - ", SettingsModel.attributes);
 
             // Load the required CPU
             var _this = this;
             require([
-                "emu/cpus/" + this.settings['blob-settings']['cpu-init']['type'],
+                "emu/cpus/" + SettingsModel.get('emuSettings')['blobSettings']['cpu-init']['type'],
                 "gui/gui"
             ], function(
                 cpuModel,
@@ -64,10 +66,9 @@ function(
                 _this.reset();
 
                 // Setup debugging
-                if (_this.settings['debug-settings']['startInDebug'])
+                if (SettingsModel.get('emuSettings')['startInDebug'])
                 {
                     _this._debugFlag = true;
-                    //_this._cpuPaused = true;
                 }
 
                 // Initialize input
@@ -78,9 +79,10 @@ function(
 
                 // If this run is blob-type load the blob that should have
                 // previously been set
-                if ("blob" === _this.settings["run-type"])
+                SettingsModel.get('emuSettings')['startInDebug']
+                if ("blob" === SettingsModel.get('emuSettings')["run-type"])
                 {
-                    _cpu.loadBinary(_this.settings["blob-settings"]["address"], _this._blob);
+                    _cpu.loadBinary(SettingsModel.get('emuSettings')["blobSettings"]["address"], _this._blob);
                 }
 
                 // Initialize Graphics
