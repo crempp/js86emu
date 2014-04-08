@@ -24,6 +24,14 @@
                 <td><label for="settings-startInDebug">Start in debug mode</label></td>
                 <td><input type="checkbox" id="settings-startInDebug" name="settings-startInDebug" <% if (data.emuSettings.startInDebug){ %>checked<% } %> >
             </tr>
+            <tr>
+                <td><label for="settings-decodeToConsole">Debug decode to console</label></td>
+                <td><input type="checkbox" id="settings-decodeToConsole" name="settings-decodeToConsole" <% if (data.emuSettings.decodeToConsole){ %>checked<% } %> >
+            </tr>
+            <tr>
+                <td><label for="settings-registerToConsole">Debug registers to console</label></td>
+                <td><input type="checkbox" id="settings-registerToConsole" name="settings-registerToConsole" <% if (data.emuSettings.registerToConsole){ %>checked<% } %> >
+            </tr>
         </table>
         <div class="settings-submit">
             <span title="load" class="button button-settings-submit">load</span>

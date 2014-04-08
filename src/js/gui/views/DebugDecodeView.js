@@ -21,8 +21,10 @@ function(
 
         render : function ()
         {
-            console.log("DebugDecodeView::render()");
             this.$el.html(this.template({model: this.model}));
+
+            // if (debugtoconsole)
+            //     this.toConsole();
 
             return this;
         },

@@ -2246,7 +2246,12 @@ function()
             // Update timers
 
             // Debug
-            _Cpu.debugUpdateRegisters(this._bundleRegisters());
+            if (_Cpu.isDebug())
+            {
+                _Cpu.debugUpdateRegisters(this._bundleRegisters());
+                _Cpu.debugUpdateMemory(this._memoryV);
+            }
+
         },
 
         _push : function (value)

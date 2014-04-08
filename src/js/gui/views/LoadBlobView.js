@@ -76,7 +76,9 @@ function(
                 emuSettings : {
                     "blobProgram"  : ('none' === blobProgram) ? null : blobProgram,
                     "breakOnError" : this.$el.find('#settings-breakOnError').prop('checked'),
-                    "startInDebug" : this.$el.find('#settings-startInDebug').prop('checked')
+                    "startInDebug" : this.$el.find('#settings-startInDebug').prop('checked'),
+                    "decodeToConsole"   : this.$el.find('#settings-decodeToConsole').prop('checked'),
+                    "registerToConsole" : this.$el.find('#settings-registerToConsole').prop('checked')
                 }
             });
 
@@ -103,8 +105,10 @@ function(
                     "run-type"       : "blob",
                     "blob-settings"  : blobSettings,
                     "debug-settings" : {
-                        breakOnError : emuSettings.breakOnError,
-                        startInDebug : emuSettings.startInDebug
+                        "breakOnError"      : emuSettings.breakOnError,
+                        "startInDebug"      : emuSettings.startInDebug,
+                        "decodeToConsole"   : emuSettings.decodeToConsole,
+                        "registerToConsole" : emuSettings.registerToConsole
                     },
                     "gui" : this
                 };

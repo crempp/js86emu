@@ -108,6 +108,7 @@ html,body{
 
         td.debug-title {
           background: #0c0c0c;
+          font-weight: bold;
         }
 
         &.debug-decode-instruction {
@@ -119,6 +120,12 @@ html,body{
     }
     #gui-debug-decode {
       height: 156px;
+      .debug-decode-instruction {
+        td:first-of-type {
+          width: 7em;
+        }
+      }
+
     }
     #gui-debug-register {
       height: 156px;
@@ -126,6 +133,26 @@ html,body{
     #gui-debug-memory {
       fieldset {
         height: inherit;
+      }
+      #debug-memory-center {
+        width: 60px;
+      }
+      .debug-memory-table {
+        th:first-of-type {
+          width: 9em;
+        }
+
+        .debug-memory-row:hover {
+          background-color: #555555;
+        }
+        .debug-memory-addr{
+          font-weight: bold;
+          background-color: #444;
+          color: #FFF;
+        }
+        .debug-memory-IP {
+          background-color: blue;
+        }
       }
     }
   }
@@ -209,32 +236,6 @@ html,body{
   }
 }
 
-//#offscreen {
-//  display: none;
-//}
-//
-//#debug-memory {
-//  display: inline-block;
-//
-//  font-family: 'Ubuntu Mono', sans-serif;
-//  font-size: 11px;
-//  width: 253px;
-//  height: 100%;
-//}
-//#debug-memory-center {
-//  width: 40px;
-//}
-//#debug-memory table {
-//  font-size: 11px;
-//}
-//.debug-memory-row:hover {
-//  background-color: #555555;
-//}
-//.debug-memory-addr{
-//  font-weight: bold;
-//  background-color: #444;
-//  color: #FFF;
-//}
-//.debug-memory-IP {
-//  background-color: blue;
-//}
+#offscreen {
+  display: none;
+}

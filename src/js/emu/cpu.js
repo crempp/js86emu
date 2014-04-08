@@ -102,13 +102,6 @@ function(
 
                 if (!this._cpuPaused)
                 {
-                    // Debug
-                    if (this._debugFlag)
-                    {
-                        _Gui.debugCenterMemory(this.getIP());
-                        _Gui.debugUpdateMemory(_cpu._memoryV);
-                    }
-
                     // Emulate one cycle
                     this._emulateCycle();
 
@@ -200,7 +193,13 @@ function(
 
         getMemoryBlock : function (start, size)
         {
-            return _cpu._memoryV.subarray(start, start + size);
+            if ('undefined' === typeof start && 'undefined' === typeof size)
+            {
+                return _cpu._memoryV;
+            }
+            else {
+                return _cpu._memoryV.subarray(start, start + size);
+            }
         },
 
         getMem8 : function(addr8)
@@ -227,13 +226,12 @@ function(
         debugUpdateRegisters : function(regObj)
         {
             _Gui.debugUpdateRegister(regObj);
+        },
+
+        debugUpdateMemory : function(memoryObj)
+        {
+            _Gui.debugUpdateMemory(memoryObj);
         }
-
-//        debugUpdateMemory : function(memoryObj)
-//        {
-//            _Gui.debugUpdateMemory(memoryObj);
-//        },
-
     };
 
     return Cpu;
