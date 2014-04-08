@@ -9,12 +9,14 @@ define([
     "jquery",
     "underscore",
     "backbone",
-    "gui/templates/GuiTemplate"],
+    "gui/templates/GuiTemplate",
+    "gui/models/SettingsModel"],
 function(
     $,
     _,
     Backbone,
-    GuiTemplate)
+    GuiTemplate,
+    SettingsModel)
 {
     var DebugRegisterView = Backbone.View.extend({
         template: GuiTemplate['DebugRegisterTemplate'],
@@ -22,6 +24,11 @@ function(
         render : function ()
         {
             this.$el.html(this.template({model: this.model}));
+
+            if (SettingsModel.get("emuSettings")["registerToConsole"])
+            {
+                this.toConsole();
+            }
 
             return this;
         },
@@ -31,10 +38,10 @@ function(
             var regObj = this.model.attributes;
             console.log(
                 "--------------------------------------------------------------------[registers]\n" +
-                    "  AX: " + this._padHexWord(regObj.AX) + "  BX: " + this._padHexWord(regObj.BX) + "  CX: " + this._padHexWord(regObj.CX) + "  DX: " + this._padHexWord(regObj.DX) + "\n" +
-                    "  SI: " + this._padHexWord(regObj.SI) + "  DI: " + this._padHexWord(regObj.DI) + "  BP: " + this._padHexWord(regObj.BP) + "  SP: " + this._padHexWord(regObj.SP) + "\n" +
-                    "  CS: " + this._padHexWord(regObj.CS) + "  DS: " + this._padHexWord(regObj.DS) + "  ES: " + this._padHexWord(regObj.ES) + "  SS: " + this._padHexWord(regObj.SS) + "\n" +
-                    "  IP: " + this._padHexWord(regObj.IP) + "  FLAGS : " + this._padHexWord(regObj.FLAGS) + " [" + this._padBinaryWord(regObj.FLAGS) + "]"
+                    "  AX: " + this.model._padHexWord(regObj.AX) + "  BX: " + this.model._padHexWord(regObj.BX) + "  CX: " + this.model._padHexWord(regObj.CX) + "  DX: " + this.model._padHexWord(regObj.DX) + "\n" +
+                    "  SI: " + this.model._padHexWord(regObj.SI) + "  DI: " + this.model._padHexWord(regObj.DI) + "  BP: " + this.model._padHexWord(regObj.BP) + "  SP: " + this.model._padHexWord(regObj.SP) + "\n" +
+                    "  CS: " + this.model._padHexWord(regObj.CS) + "  DS: " + this.model._padHexWord(regObj.DS) + "  ES: " + this.model._padHexWord(regObj.ES) + "  SS: " + this.model._padHexWord(regObj.SS) + "\n" +
+                    "  IP: " + this.model._padHexWord(regObj.IP) + "  FLAGS : " + this.model._padHexWord(regObj.FLAGS) + " [" + this.model._padBinaryWord(regObj.FLAGS) + "]"
             );
         }
     });

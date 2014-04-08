@@ -9,12 +9,14 @@ define([
     "jquery",
     "underscore",
     "backbone",
-    "gui/templates/GuiTemplate"],
+    "gui/templates/GuiTemplate",
+    "gui/models/SettingsModel"],
 function(
     $,
     _,
     Backbone,
-    GuiTemplate)
+    GuiTemplate,
+    SettingsModel)
 {
     var DebugDecodeView = Backbone.View.extend({
         template: GuiTemplate['DebugDecodeTemplate'],
@@ -23,8 +25,10 @@ function(
         {
             this.$el.html(this.template({model: this.model}));
 
-            // if (debugtoconsole)
-            //     this.toConsole();
+            if (SettingsModel.get("emuSettings")["decodeToConsole"])
+            {
+                this.toConsole();
+            }
 
             return this;
         },
@@ -33,15 +37,15 @@ function(
         {
             console.log("" +
                 "--------------------------------------------------------------------[decode]\n" +
-                "instruction : " + decodedInst + "\n" +
-                "opcode_byte = 0x" + opcode_byte.toString(16) + " [" + opcode_byte.toString(2) + "]\n" +
-                "    op : 0x" + opcode.opcode.toString(16) + " [" + opcode.opcode.toString(2) + "]\n" +
-                "    d  : 0x" + opcode.d.toString(16) + " [" + opcode.d.toString(2) + "]\n" +
-                "    w  : 0x" + opcode.w.toString(16) + " [" + opcode.w.toString(2) + "]\n" +
-                "addressing_byte = 0x" + addressing_byte.toString(16) + " [" + addressing_byte.toString(2) + "]\n" +
-                "    mod : 0x" + opcode.mod.toString(16) + " [" + opcode.mod.toString(2) + "]\n" +
-                "    reg : 0x" + opcode.reg.toString(16) + " [" + opcode.reg.toString(2) + "]\n" +
-                "    rm  : 0x" + opcode.rm.toString(16)  + " [" + opcode.rm.toString(2) + "]"
+                "instruction : " + this.model._padHexByte(this.model.get('instruction')) + "\n" +
+                "opcode_byte = " + this.model._padHexByte(this.model.get('opcode_byte')) + " [" + this.model._padBinaryByte(this.model.get('opcode_byte')) + "]\n" +
+                "    op : " + this.model._padHexByte(this.model.get('opcode')) + " [" + this.model._padBinary(this.model.get('opcode'), 6) + "]\n" +
+                "    d  : " + this.model._padHexByte(this.model.get('d')) + " [" + this.model._padBinary(this.model.get('d'), 1) + "]\n" +
+                "    w  : " + this.model._padHexByte(this.model.get('w')) + " [" + this.model._padBinary(this.model.get('w'), 1) + "]\n" +
+                "addressing_byte = " + this.model._padHexByte(this.model.get('addressing_byte')) + " [" + this.model._padBinaryByte(this.model.get('addressing_byte')) + "]\n" +
+                "    mod : " + this.model._padHexByte(this.model.get('mod')) + " [" + this.model._padBinary(this.model.get('mod'), 2) + "]\n" +
+                "    reg : " + this.model._padHexByte(this.model.get('reg')) + " [" + this.model._padBinary(this.model.get('reg'), 3) + "]\n" +
+                "    rm  : " + this.model._padHexByte(this.model.get('rm'))  + " [" + this.model._padBinary(this.model.get('rm'), 3) + "]"
             );
         }
     });

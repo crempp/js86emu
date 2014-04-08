@@ -36,17 +36,8 @@ function(
 
         _cpu : null,
 
-        //settings : null,
-
         boot : function ()
         {
-            // Save the settings
-            //this.settings = settings;
-
-            // Configure the debug settings
-
-            console.log("in cpu - ", SettingsModel.attributes);
-
             // Load the required CPU
             var _this = this;
             require([
