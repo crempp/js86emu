@@ -1,0 +1,45 @@
+<fieldset>
+    <legend>[decode]</legend>
+    <table class="debug-decode-instruction">
+        <tr>
+            <td class='debug-title'>instruction</td>
+            <td><%= model.get('instruction') %></td>
+        </tr>
+    </table>
+    <table class='debug-decode-opcode'>
+        <thead>
+            <tr>
+                <th>opcode byte</th>
+                <th>opcode</th>
+                <th>d</th>
+                <th>w</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><%= model._padHexByte(model.get('opcode_byte')) %></td>
+                <td><%= model._padBinary(model.get('opcode'), 6) %></td>
+                <td><%= model._padBinary(model.get('d'), 1) %></td>
+                <td><%= model._padBinary(model.get('w'), 1) %></td>
+            </tr>
+        </tbody>
+    </table>
+    <table class='debug-decode-address'>
+        <thead>
+            <tr>
+                <th>address byte</th>
+                <th>mod</th>
+                <th>reg</th>
+                <th>r/m</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><%= model._padHexByte(model.get('addressing_byte')) %></td>
+                <td><%= model._padBinary(model.get('mod'), 2) %></td>
+                <td><%= model._padBinary(model.get('reg'), 3) %></td>
+                <td><%= model._padBinary(model.get('rm'), 3) %></td>
+            </tr>
+        </tbody>
+    </table>
+</fieldset>

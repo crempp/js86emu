@@ -1,0 +1,26 @@
+/*font-family: 'Gafata', sans-serif;*/
+/*font-family: 'Orbitron', sans-serif;*/
+@font-face {
+  font-family: 'Gafata';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Gafata'), local('Gafata-Regular'), url(../fonts/Gafata/Gafata-Regular.ttf);
+}
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Orbitron-Light'), local('Orbitron-Regular'), url(../fonts/Orbitron/Orbitron-Regular.ttf);
+}
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Orbitron-Bold'), url(../fonts/Orbitron/Orbitron-Bold.ttf);
+}
+@font-face {
+  font-family: 'Ubuntu Mono';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Ubuntu Mono'), local('UbuntuMono-Regular'), url(../fonts/Ubuntu_Mono/UbuntuMono-Regular.ttf);
+}

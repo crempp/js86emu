@@ -1,0 +1,71 @@
+{
+    "components" : {
+        "cpu"    : [
+            {
+                "id"   : "8086",
+                "name" : "8086/8088",
+                "module" : "cpus/8086"
+            },
+            {
+                "id"   : "186",
+                "name" : "186",
+                "module" : "cpus/186"
+            },
+            {
+                "id"   : "286",
+                "name" : "286",
+                "module" : "cpus/286"
+            },
+            {
+                "id"   : "386",
+                "name" : "386",
+                "module" : "cpus/386"
+            },
+            {
+                "id"   : "486",
+                "name" : "486",
+                "module" : "cpus/486"
+            }
+        ],
+        "bios"   : [],
+        "hd"     : [],
+        "floppy" : [],
+        "gfx"    : [
+            {
+                "id"   : "mda",
+                "name" : "MDA (Monochrome Display Adapter)",
+                "module" : "gfx/mda"
+            },
+            {
+                "id"   : "cga",
+                "name" : "CGA (Color Graphics Adapter)",
+                "module" : "gfx/cga"
+            },
+            {
+                "id"   : "ega",
+                "name" : "EGA (Enhanced Graphics Adapter)",
+                "module" : "gfx/ega"
+            },
+            {
+                "id"   : "vga",
+                "name" : "VGA (Video Graphics Array)",
+                "module" : "gfx/vga"
+            }
+        ],
+        "input"  : []
+    },
+    "blobfiles" : [
+        {
+            "id"   : "codegolf",
+            "name" : "SE Codegolf",
+            "file" : "files/program-blobs/codegolf",
+            "address" : 61440,
+            "cpu-init" : {
+                "type" : "8086",
+                "registers" : {
+                    "sp" : 100
+                }
+            }
+        }
+    ]
+}

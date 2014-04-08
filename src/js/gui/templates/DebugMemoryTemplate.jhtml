@@ -1,0 +1,39 @@
+<fieldset>
+    <legend>[memory]</legend>
+    <div>
+        <span>center</span>
+        <span><input id="debug-memory-center" type="text" placeholder="Address" value="<%= (model.get('center')) ? model._padHexWord(model.get('center')) : '' %>"></span>
+        <span class="fa fa-play button gui-button-centermem"></span>
+        <span class="button gui-button-gotoip">Goto IP</span>
+    </div>
+    <div class="debug-memory-container">
+        <table class="debug-memory-table">
+            <thead>
+            <tr>
+                <th>addr</th>
+                <th colspan=8>value</th>
+            </tr>
+            </thead>
+            <tbody>
+                <% _.each(model.get('rows'), function(row) { %>
+                <tr class="debug-memory-row">
+                    <%
+                    var start = (row < 0) ? "--" : model._padHexWord(row),
+                        end   = (row + model.get('numCols') - 1 < 0) ? "--" : model._padHexWord(row + model.get('numCols') - 1);
+                    %>
+                    <td class="debug-memory-addr"><%= start %> - <%= end %></td>
+                    <%
+                    for (var i = 0; i < model.get('numCols'); i++) {
+
+                        var addr  = row + i;
+                        var value = (row + i < 0) ? "--" : model._padHexByte((model.get('memory'))[addr]);
+                        var kls   = (addr === model.get('ip')) ? 'debug-memory-IP' : '';
+                    %>
+                    <td class="debug-memory-value <%= kls %>" title="<%= model._padHexWord(addr) %>"><%= value %></td>
+                    <% }; %>
+                </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+</fieldset>
