@@ -3,6 +3,8 @@ js86emu
 
 x86 emulator written in Javascript.
 
+Demo : http://lapinlabs.com/js86emu/
+
 The plan is to emulate multiple x86 chips along with auxilary hardware such as
 Harddisk controllers, BIOS and graphics.
 
