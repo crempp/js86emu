@@ -7,8 +7,8 @@
 
     <span title="run" class="fa fa-play button button-run"></span>
     <span title="reset" class="fa fa-refresh button button-reset"></span>
-    <span title="pause" class="fa fa-pause button button-pause"></span>
-    <span title="halt" class="fa fa-stop button button-halt"></span>
-    <span title="step" class="fa fa-forward button button-step"></span>
+    <span title="pause [F7]" class="fa fa-pause button button-pause"></span>
+    <span title="halt [F8]" class="fa fa-stop button button-halt"></span>
+    <span title="step [F9]" class="fa fa-forward button button-step"></span>
     <span title="settings" class="fa fa-cogs button button-settings"></span>
 </fieldset>

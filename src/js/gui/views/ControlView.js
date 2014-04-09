@@ -99,7 +99,7 @@ function(
 
         initialize: function() {
             // bind all methods to `this` scope
-            //_.bindAll(this);
+            _.bindAll(this, "keydown", "keyup");
             $(document).on('keydown', this.keydown);
             $(document).on('keyup', this.keyup);
         },
@@ -161,11 +161,26 @@ function(
 
         keydown : function (event)
         {
-            if (Emu.isDebug() && 119 === event.keyCode)
+            // F7 - pause
+            if (118 === event.keyCode)
             {
                 event.preventDefault();
-                Emu.step();
+                this.pause();
             }
+            // F8 - stop
+            else if (119 === event.keyCode)
+            {
+                event.preventDefault();
+                this.halt();
+            }
+            // F9 - step
+            else if (Emu.isDebug() && 120 === event.keyCode)
+            {
+                event.preventDefault();
+                this.step();
+            }
+
+            // F10 - 121
         },
 
         keyup : function (event)
