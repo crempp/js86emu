@@ -37,7 +37,7 @@ function(
         {
             console.log("" +
                 "--------------------------------------------------------------------[decode]\n" +
-                "instruction : " + this.model._padHexByte(this.model.get('instruction')) + "\n" +
+                "instruction : " + this.model.get('instruction') + "\n" +
                 "opcode_byte = " + this.model._padHexByte(this.model.get('opcode_byte')) + " [" + this.model._padBinaryByte(this.model.get('opcode_byte')) + "]\n" +
                 "    op : " + this.model._padHexByte(this.model.get('opcode')) + " [" + this.model._padBinary(this.model.get('opcode'), 6) + "]\n" +
                 "    d  : " + this.model._padHexByte(this.model.get('d')) + " [" + this.model._padBinary(this.model.get('d'), 1) + "]\n" +

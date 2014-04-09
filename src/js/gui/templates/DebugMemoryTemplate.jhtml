@@ -4,7 +4,8 @@
         <span>center</span>
         <span><input id="debug-memory-center" type="text" placeholder="Address" value="<%= (model.get('center')) ? model._padHexWord(model.get('center')) : '' %>"></span>
         <span class="fa fa-play button gui-button-centermem"></span>
-        <span class="button gui-button-gotoip">Goto IP</span>
+        <span class="button gui-button-gotoip">goto ip</span>
+        <span class="button gui-button-gotogfx">goto gfx</span>
     </div>
     <div class="debug-memory-container">
         <table class="debug-memory-table">
@@ -26,10 +27,12 @@
                     for (var i = 0; i < model.get('numCols'); i++) {
 
                         var addr  = row + i;
-                        var value = (row + i < 0) ? "--" : model._padHexByte((model.get('memory'))[addr]);
+                        var value = (model.get('memory'))[addr];
+                        var valueStr = (row + i < 0) ? "--" : model._padHexByte(value);
                         var kls   = (addr === model.get('ip')) ? 'debug-memory-IP' : '';
+                        var title = "addr : " + model._padHexWord(addr) + " bin : " +  model._padBinaryByte(value);
                     %>
-                    <td class="debug-memory-value <%= kls %>" title="<%= model._padHexWord(addr) %>"><%= value %></td>
+                    <td class="debug-memory-value <%= kls %>" title="<%= title %>"><%= valueStr %></td>
                     <% }; %>
                 </tr>
                 <% }); %>

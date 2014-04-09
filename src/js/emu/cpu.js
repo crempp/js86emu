@@ -91,7 +91,7 @@ function(
         {
             for(;;)
             {
-                if (_cpu.halt) break;
+                if (this._haltFlag) break;
 
                 if (!this._cpuPaused)
                 {
@@ -118,11 +118,13 @@ function(
                         break;
                     }
 
-                    // TODO: set drawflag appropriately
-                    this._drawFlag = true;
+                    // TODO: This is wrong! Research the correct timing
+                    if (0 === this._cycles % 10) this._drawFlag = true;
                 }
 
                 if (this._debugFlag) break;
+
+                this._cycles += 1;
             }
         },
 
@@ -138,8 +140,9 @@ function(
 
         reset : function ()
         {
+            this._cycles    = 0;
             this._cpuPaused = false;
-            this._halt      = false;
+            this._haltFlag  = false;
 
             _cpu.reset(this);
         },
@@ -149,9 +152,27 @@ function(
             this._cpuPaused = true;
         },
 
-        halt : function ()
+        halt : function (options)
         {
-            this._halt = true;
+            options = options || {
+                error      : false,
+                enterDebug : false,
+                message    : "",
+                decObj     : null,
+                regObj     : null,
+                memObj     : null
+            };
+
+            this._haltFlag = true;
+
+            if (options.enterDebug)
+            {
+                this._debugFlag = true;
+                _Gui.debugUpdateDecode(options.decObj);
+                _Gui.debugUpdateRegister(options.regObj);
+                _Gui.debugUpdateMemory(options.memObj);
+            }
+
         },
 
         step : function ()

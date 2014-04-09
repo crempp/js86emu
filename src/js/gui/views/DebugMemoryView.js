@@ -9,12 +9,14 @@ define([
     "jquery",
     "underscore",
     "backbone",
-    "gui/templates/GuiTemplate"],
+    "gui/templates/GuiTemplate",
+    "emu/gfx"],
 function(
     $,
     _,
     Backbone,
-    GuiTemplate)
+    GuiTemplate,
+    Gfx)
 {
     var center = 0x20;
 
@@ -23,7 +25,9 @@ function(
 
         events: {
             "click .gui-button-centermem": "doCenter",
-            "click .gui-button-gotoip"   : "doGotoIP"
+            "click .gui-button-gotoip"   : "doGotoIP",
+            "click .gui-button-gotogfx"  : "doGotoGfx",
+
         },
 
         initialize : function (options) {
@@ -54,6 +58,13 @@ function(
             // in the model
             this.model.set({'center' : null});
             this.model.center();
+            this.render();
+        },
+
+        doGotoGfx : function ()
+        {
+            this.model.center(Gfx.getGfxMemStart());
+
             this.render();
         }
 

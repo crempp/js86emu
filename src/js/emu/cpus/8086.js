@@ -885,7 +885,12 @@ function(
                 rm     : (addressing_byte & 0x07)
             };
 
-            if (_Cpu.isDebug()) _Cpu.debugUpdateDecode(opcode);
+            // Pre-cycle Debug
+            if (_Cpu.isDebug())
+            {
+                _Cpu.debugUpdateDecode(opcode);
+                _Cpu.debugUpdateMemory(this._memoryV);
+            }
 
             //====Execute Opcode====
             switch (opcode_byte)
@@ -899,9 +904,168 @@ function(
                     break;
 
                 /**
-                 * Instruction : Call
+                 * Instruction : ADD
+                 * Meaning     : Add src to dst replacing the original contents
+                 *               of dest
+                 * Notes       :
+                 */
+                case 0x00:
+                    valDst = this._getRMValueForOp(opcode);  // E
+                    valSrc = this._getRegValueForOp(opcode); // G
+
+                    // correct for duplicate helper usage
+                    this._regIP -= 1;
+
+                    valResult = valDst + valSrc;
+
+                    this._setRMValueForOp(opcode, valResult);
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "b");
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x01:
+                    valDst = this._getRMValueForOp(opcode);  // E
+                    valSrc = this._getRegValueForOp(opcode); // G
+
+                    valResult = valDst + valSrc;
+
+                    this._setRMValueForOp(opcode, valResult);
+
+                    // correct for 3 helper usages
+                    this._regIP -= 2;
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "w");
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x02:
+                    valDst = this._getRegValueForOp(opcode); // G
+                    valSrc = this._getRMValueForOp(opcode);  // E
+
+                    valResult = valDst + valSrc;
+
+                    this._setRegValueForOp(opcode, valResult);
+
+                    // correct for 3 helper usages
+                    this._regIP -= 2;
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "b");
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x03:
+                    valDst = this._getRegValueForOp(opcode); // G
+                    valSrc = this._getRMValueForOp(opcode);  // E
+
+                    valResult = valDst + valSrc;
+
+                    this._setRMValueForOp(opcode, valResult);
+
+                    // correct for 3 helper usages
+                    this._regIP -= 2;
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "w");
+
+                    this._regIP += 1;
+
+                    break;
+
+                case 0x04:
+                    valDst = this._regAL;
+                    valSrc = this._memoryV[this._regIP + 1];
+
+                    valResult = valDst + valSrc;
+
+                    this._regAL = valResult;
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "b");
+
+                    this._regIP += 2;
+
+                    break;
+                case 0x05:
+                    valDst = ((this._regAH << 8) | this._regAL);
+                    valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+
+                    valResult = valDst + valSrc;
+
+                    this._regAH = (valResult & 0xFF00) >> 8;
+                    this._regAL = (valResult & 0x00FF);
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "w");
+
+                    this._regIP += 1;
+
+                    break;
+
+                /**
+                 * Instruction : CALL
                  * Meaning     : Transfers control to procedure, return address is
-                                (IP) is pushed to stack.
+                 *              (IP) is pushed to stack.
                  * Notes       :
                  */
                 case 0xE8:
@@ -2243,31 +2407,38 @@ function(
 
 
                 default :
-                    console.error("Unknown opcode!");
-                    if (_breakOnError) _Cpu.halt = true;
+                    if (_breakOnError) _Cpu.halt({
+                        error      : true,
+                        enterDebug : true,
+                        message    : "Unknown opcode [0x" + opcode_byte.toString(16) + "]",
+                        decObj     : opcode,
+                        regObj     : this._bundleRegisters(),
+                        memObj     : this._memoryV
+                    });
             }
 
-            // Update timers
+            // TODO: Update timers
 
-            // Debug
+            // Post-cycle Debug
             if (_Cpu.isDebug())
             {
                 _Cpu.debugUpdateRegisters(this._bundleRegisters());
-                _Cpu.debugUpdateMemory(this._memoryV);
             }
 
         },
 
         _push : function (value)
         {
-            console.log("Pushing ", value.toString(16), " to ", this._regSP.toString(16));
-            console.log("  before", this._memoryV[this._regSP].toString(16));
+            //console.log("Pushing ", value.toString(16), " to ", this._regSP.toString(16));
+            //console.log("  before", this._memoryV[this._regSP].toString(16));
+
             // Update stack pointer
             this._regSP -= 2;
 
             this._memoryV[this._regSP]     = (value & 0x00FF);
             this._memoryV[this._regSP + 1] = (value >> 8);
-            console.log("  after", this._memoryV[this._regSP].toString(16));
+
+            //console.log("  after", this._memoryV[this._regSP].toString(16));
         },
 
         _pop : function ()

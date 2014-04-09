@@ -97,6 +97,13 @@ function(
 
         settingsModel : null,
 
+        initialize: function() {
+            // bind all methods to `this` scope
+            //_.bindAll(this);
+            $(document).on('keydown', this.keydown);
+            $(document).on('keyup', this.keyup);
+        },
+
         render: function ()
         {
             this.$el.html(this.template());
@@ -150,6 +157,20 @@ function(
         {
             Gfx.debugVideoTestPattern();
             Gfx.drawGraphics();
+        },
+
+        keydown : function (event)
+        {
+            if (Emu.isDebug() && 119 === event.keyCode)
+            {
+                event.preventDefault();
+                Emu.step();
+            }
+        },
+
+        keyup : function (event)
+        {
+
         }
     });
 

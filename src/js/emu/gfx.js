@@ -303,6 +303,11 @@ function()
             _Cpu.setMemoryBlock(gfxMem, this._gfxMemStart);
         },
 
+        getGfxMemStart : function ()
+        {
+            return this._gfxMemStart;
+        },
+
         /**
          * http://www.zachstronaut.com/posts/2012/08/17/webgl-fake-crt-html5.html
          *

@@ -44,6 +44,11 @@ function(
         {
             Cpu.setBinary(blob);
             this.run();
+        },
+
+        isDebug : function ()
+        {
+            return Cpu.isDebug();
         }
     };
 

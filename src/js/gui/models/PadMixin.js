@@ -23,11 +23,11 @@ function()
         },
         _padHexByte : function (val)
         {
-            return "0x" + String("00" + val.toString(16)).slice(-2);
+            return "0x" + String("00" + val.toString(16)).slice(-2).toUpperCase();
         },
         _padHexWord : function (val)
         {
-            return "0x" + String("0000" + val.toString(16)).slice(-4);
+            return "0x" + String("0000" + val.toString(16)).slice(-4).toUpperCase();
         }
     };
 
