@@ -87,35 +87,35 @@ function(
                 switch (opcode.reg)
                 {
                     case 0:
-                        if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register AL (byte)");
+                        //if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register AL (byte)");
                         this._regIP += 1;
                         return this._regAL;
                     case 1:
-                        if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register CL (byte)");
+                        //if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register CL (byte)");
                         this._regIP += 1;
                         return this._regCL;
                     case 2:
-                        if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register DL (byte)");
+                        //if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register DL (byte)");
                         this._regIP += 1;
                         return this._regDL;
                     case 3:
-                        if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register BL (byte)");
+                        //if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register BL (byte)");
                         this._regIP += 1;
                         return this._regBL;
                     case 4:
-                        if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register AH (byte)");
+                        //if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register AH (byte)");
                         this._regIP += 1;
                         return this._regAH;
                     case 5:
-                        if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register BH (byte)");
+                        //if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register BH (byte)");
                         this._regIP += 1;
                         return this._regBH;
                     case 6:
-                        if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register CH (byte)");
+                        //if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register CH (byte)");
                         this._regIP += 1;
                         return this._regCH;
                     case 7:
-                        if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register DH (byte)");
+                        //if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register DH (byte)");
                         this._regIP += 1;
                         return this._regDH;
                     default:
@@ -127,35 +127,35 @@ function(
                 switch (opcode.reg)
                 {
                     case 0:
-                        if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register AX (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register AX (word)");
                         this._regIP += 1;
                         return ((this._regAH << 8) | this._regAL);
                     case 1:
-                        if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register CX (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register CX (word)");
                         this._regIP += 1;
                         return ((this._regCH << 8) | this._regCL);
                     case 2:
-                        if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register DX (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register DX (word)");
                         this._regIP += 1;
                         return ((this._regDH << 8) | this._regDL);
                     case 3:
-                        if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register BX (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register BX (word)");
                         this._regIP += 1;
                         return ((this._regBH << 8) | this._regBL);
                     case 4:
-                        if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register SP (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register SP (word)");
                         this._regIP += 1;
                         return this._regSP;
                     case 5:
-                        if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register BP (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register BP (word)");
                         this._regIP += 1;
                         return this._regBP;
                     case 6:
-                        if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register SI (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register SI (word)");
                         this._regIP += 1;
                         return this._regSI;
                     case 7:
-                        if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register DI (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRegValueForOp() - Using register DI (word)");
                         this._regIP += 1;
                         return this._regDI;
                     default:
@@ -179,55 +179,55 @@ function(
                 {
                     case 0 :
                         // [BX + SI]
-                        if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BX + SI] to retrieve mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BX + SI] to retrieve mem (word)");
                         addr = ( ((this._regBH << 8) | this._regBL) + this._regSI );
                         this._regIP += 1;
                         return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                         break;
                     case 1 :
                         // [BX + DI]
-                        if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BX + DI] to retrieve mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BX + DI] to retrieve mem (word)");
                         addr = ( ((this._regBH << 8) | this._regBL) + this._regDI );
                         this._regIP += 1;
                         return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                         break;
                     case 2 :
                         // [BP + SI]
-                        if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BP + SI] to retrieve mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BP + SI] to retrieve mem (word)");
                         addr = ( this._regBP + this._regSI );
                         this._regIP += 1;
                         return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                         break;
                     case 3 :
                         // [BP + DI]
-                        if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BP + DI] to retrieve mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BP + DI] to retrieve mem (word)");
                         addr = ( this._regBP + this._regDI );
                         this._regIP += 1;
                         return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                         break;
                     case 4 :
                         // [SI]
-                        if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [SI] to retrieve mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [SI] to retrieve mem (word)");
                         addr = ( this._regSI );
                         this._regIP += 1;
                         return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                         break;
                     case 5 :
                         // [DI]
-                        if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [DI] to retrieve mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [DI] to retrieve mem (word)");
                         addr = ( this._regDI );
                         this._regIP += 1;
                         return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                         break;
                     case 6 :
                         // Drc't Add
-                        if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using Drc't Add to retrieve mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using Drc't Add to retrieve mem (word)");
                         this._regIP += 2;
                         return ((this._memoryV[operandValue + 1] << 8) | this._memoryV[operandValue]);
                         break;
                     case 7 :
                         // [BX]
-                        if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BX] to retrieve mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BX] to retrieve mem (word)");
                         addr = ( (this._regBH << 8) | this._regBL );
                         this._regIP += 1;
                         return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
@@ -242,49 +242,49 @@ function(
                 {
                     case 0 :
                         // [BX + SI]
-                        if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BX + SI] + Disp to retrieve mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BX + SI] + Disp to retrieve mem (word)");
                         console.error("RM Lookup not implemented for these parameters");
                         return 0;
                         break;
                     case 1 :
                         // [BX + DI]
-                        if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BX + DI] + Disp to retrieve mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BX + DI] + Disp to retrieve mem (word)");
                         console.error("RM Lookup not implemented for these parameters");
                         return 0;
                         break;
                     case 2 :
                         // [BP + SI]
-                        if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BP + SI] + Disp to retrieve mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BP + SI] + Disp to retrieve mem (word)");
                         console.error("RM Lookup not implemented for these parameters");
                         return 0;
                         break;
                     case 3 :
                         // [BP + DI]
-                        if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BP + DI] + Disp to retrieve mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BP + DI] + Disp to retrieve mem (word)");
                         console.error("RM Lookup not implemented for these parameters");
                         return 0;
                         break;
                     case 4 :
                         // [SI]
-                        if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [SI] + Disp to retrieve mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [SI] + Disp to retrieve mem (word)");
                         console.error("RM Lookup not implemented for these parameters");
                         return 0;
                         break;
                     case 5 :
                         // [DI]
-                        if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [DI] + Disp to retrieve mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [DI] + Disp to retrieve mem (word)");
                         console.error("RM Lookup not implemented for these parameters");
                         return 0;
                         break;
                     case 6 :
                         // [BP]
-                        if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BP] + Disp to retrieve mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BP] + Disp to retrieve mem (word)");
                         console.error("RM Lookup not implemented for these parameters");
                         return 0;
                         break;
                     case 7 :
                         // [BX]
-                        if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BX] + Disp to retrieve mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BX] + Disp to retrieve mem (word)");
                         console.error("RM Lookup not implemented for these parameters");
                         return 0;
                         break;
@@ -293,7 +293,7 @@ function(
             // R/M bits refer to REG tables
             else if (3 === opcode.mod)
             {
-                if (_Cpu.isDebug()) console.log("_getRMValueForOp() - deffering to _getRegValueForOp()");
+                //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - deffering to _getRegValueForOp()");
                 // Modifiy opcode object so reg is now rm. This way we can use existing
                 // _getRegValueForOp() method
 
@@ -324,35 +324,35 @@ function(
                 switch (opcode.reg)
                 {
                     case 0:
-                        if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register AL (byte)");
+                        //if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register AL (byte)");
                         this._regAL = value;
                         break;
                     case 1:
-                        if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register CL (byte)");
+                        //if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register CL (byte)");
                         this._regCL = value;
                         break;
                     case 2:
-                        if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register DL (byte)");
+                        //if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register DL (byte)");
                         this._regDL = value;
                         break;
                     case 3:
-                        if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register BL (byte)");
+                        //if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register BL (byte)");
                         this._regBL = value;
                         break;
                     case 4:
-                        if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register AH (byte)");
+                        //if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register AH (byte)");
                         this._regAH = value;
                         break;
                     case 5:
-                        if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register BH (byte)");
+                        //if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register BH (byte)");
                         this._regBH = value;
                         break;
                     case 6:
-                        if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register CH (byte)");
+                        //if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register CH (byte)");
                         this._regCH = value;
                         break;
                     case 7:
-                        if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register DH (byte)");
+                        //if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register DH (byte)");
                         this._regDH = value;
                         break;
                 }
@@ -363,32 +363,32 @@ function(
                 switch (opcode.reg)
                 {
                     case 0:
-                        if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register AX (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register AX (word)");
                         this._regAH = (value >>> 8); this._regAL = (value & 0xFF);
                         break;
                     case 1:
-                        if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register CX (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register CX (word)");
                         this._regCH = (value >>> 8); this._regCL = (value & 0xFF);
                         break;
                     case 2:
-                        if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register DX (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register DX (word)");
                         this._regDH = (value >>> 8); this._regDL = (value & 0xFF);
                         break;
                     case 3:
-                        if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register BX (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register BX (word)");
                         this._regBH = (value >>> 8); this._regBL = (value & 0xFF);
                         break;
                     case 4:
-                        if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register SP (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register SP (word)");
                         this._regSP = value; break;
                     case 5:
-                        if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register BP (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register BP (word)");
                         this._regBP = value; break;
                     case 6:
-                        if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register SI (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register SI (word)");
                         this._regSI = value; break;
                     case 7:
-                        if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register DI (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRegValueForOp() - Setting register DI (word)");
                         this._regDI = value; break;
                 }
             }
@@ -408,7 +408,7 @@ function(
                 {
                     case 0 :
                         // [BX + SI]
-                        if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX + SI] to set mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX + SI] to set mem (word)");
 
                         addr = ( ((this._regBH << 8) | this._regBL) + this._regSI );
 
@@ -445,7 +445,7 @@ function(
                         break;
                     case 1 :
                         // [BX + DI]
-                        if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX + DI] to set mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX + DI] to set mem (word)");
 
                         addr = ( ((this._regBH << 8) | this._regBL) + this._regDI );
 
@@ -478,7 +478,7 @@ function(
                         break;
                     case 2 :
                         // [BP + SI]
-                        if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BP + SI] to set mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BP + SI] to set mem (word)");
 
                         addr = ( this._regBP + this._regSI );
 
@@ -512,7 +512,7 @@ function(
                         break;
                     case 3 :
                         // [BP + DI]
-                        if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BP + DI] to set mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BP + DI] to set mem (word)");
 
                         addr = ( this._regBP + this._regDI );
 
@@ -546,7 +546,7 @@ function(
                         break;
                     case 4 :
                         // [SI]
-                        if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [SI] to set mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [SI] to set mem (word)");
 
                         addr = ( this._regSI );
 
@@ -580,7 +580,7 @@ function(
                         break;
                     case 5 :
                         // [DI]
-                        if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [DI] to set mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [DI] to set mem (word)");
 
                         addr = ( this._regDI );
 
@@ -614,7 +614,7 @@ function(
                         break;
                     case 6 :
                         // Drc't Add
-                        if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using Drc't Add to set mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using Drc't Add to set mem (word)");
 
                         if ('undefined' === typeof value)
                         {
@@ -639,7 +639,7 @@ function(
                         break;
                     case 7 :
                         // [BX]
-                        if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX] to set mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX] to set mem (word)");
 
                         addr = ( (this._regBH << 8) | this._regBL );
 
@@ -682,7 +682,7 @@ function(
                 {
                     case 0 :
                         // [BX + SI]
-                        if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX + SI] + Disp to set mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX + SI] + Disp to set mem (word)");
 
                         console.error("RM Lookup not implemented for these parameters");
 
@@ -691,7 +691,7 @@ function(
                         break;
                     case 1 :
                         // [BX + DI]
-                        if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX + DI] + Disp to set mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX + DI] + Disp to set mem (word)");
 
                         console.error("RM Lookup not implemented for these parameters");
 
@@ -700,7 +700,7 @@ function(
                         break;
                     case 2 :
                         // [BP + SI]
-                        if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BP + SI] + Disp to set mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BP + SI] + Disp to set mem (word)");
 
                         console.error("RM Lookup not implemented for these parameters");
 
@@ -709,7 +709,7 @@ function(
                         break;
                     case 3 :
                         // [BP + DI]
-                        if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BP + DI] + Disp to set mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BP + DI] + Disp to set mem (word)");
 
                         console.error("RM Lookup not implemented for these parameters");
 
@@ -718,7 +718,7 @@ function(
                         break;
                     case 4 :
                         // [SI]
-                        if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [SI] + Disp to set mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [SI] + Disp to set mem (word)");
 
                         console.error("RM Lookup not implemented for these parameters");
 
@@ -727,14 +727,14 @@ function(
                         break;
                     case 5 :
                         // [DI]
-                        if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [DI] + Disp to set mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [DI] + Disp to set mem (word)");
 
                         console.error("RM Lookup not implemented for these parameters");
                         return 0;
                         break;
                     case 6 :
                         // [BP]
-                        if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BP] + Disp to set mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BP] + Disp to set mem (word)");
 
                         console.error("RM Lookup not implemented for these parameters");
 
@@ -743,7 +743,7 @@ function(
                         break;
                     case 7 :
                         // [BX]
-                        if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX] + Disp to set mem (word)");
+                        //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX] + Disp to set mem (word)");
 
                         console.error("RM Lookup not implemented for these parameters");
 
@@ -2496,7 +2496,16 @@ function(
             // out of the most significant ALU bit position
             if (flagsToSet & this.FLAG_CF_MASK)
             {
-                if (operand1 < operand2) this._regFlags |= this.FLAG_CF_MASK;
+                // is this addition (this seems like a stupid way to handle this)
+                if (result === operand1 + operand2)
+                {
+                    if ('b' === size && result > 0xFF) this._regFlags |= this.FLAG_CF_MASK;
+                    else if ('w' === size && result > 0xFFFF) this._regFlags |= this.FLAG_CF_MASK;
+                    else this._regFlags &= ~this.FLAG_CF_MASK;
+
+                }
+                // this is subtraction
+                else if (operand1 < operand2) this._regFlags |= this.FLAG_CF_MASK;
                 else this._regFlags &= ~this.FLAG_CF_MASK;
             }
 

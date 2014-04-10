@@ -125,7 +125,7 @@ function()
          */
         drawGraphics : function()
         {
-            console.log("drawGraphics");
+            //console.log("drawGraphics");
 
             var attribute_offset;
             if (this._use_attribute_bit) attribute_offset = 2;

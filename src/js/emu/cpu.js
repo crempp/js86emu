@@ -112,12 +112,6 @@ function(
                     // Store key press state (Press and Release)
                     Input.setKeys();
 
-                    // Debug
-                    if (this._debugFlag)
-                    {
-                        break;
-                    }
-
                     // TODO: This is wrong! Research the correct timing
                     if (0 === this._cycles % 10) this._drawFlag = true;
                 }
