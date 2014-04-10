@@ -165,6 +165,7 @@ function(
                 _Gui.debugUpdateDecode(options.decObj);
                 _Gui.debugUpdateRegister(options.regObj);
                 _Gui.debugUpdateMemory(options.memObj);
+                _Gui.debugUpdateInfo(options);
             }
 
         },

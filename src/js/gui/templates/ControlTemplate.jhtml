@@ -1,8 +1,4 @@
 <fieldset>
-    <legend>debug</legend>
-    <span id="vidtestbutton" class="fa button button-vidtest">vid tst</span>
-</fieldset>
-<fieldset>
     <legend>controls</legend>
 
     <span title="run" class="fa fa-play button button-run"></span>

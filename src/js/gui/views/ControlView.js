@@ -12,8 +12,7 @@ define([
     "gui/templates/GuiTemplate",
     "gui/views/SettingsView",
     "gui/views/LoadBlobView",
-    "emu/emu",
-    "emu/gfx"],
+    "emu/emu"],
 function(
     $,
     _,
@@ -21,8 +20,7 @@ function(
     GuiTemplate,
     SettingsView,
     LoadBlobView,
-    Emu,
-    Gfx)
+    Emu)
 {
     var _buttonStates = {
         run      : false,
@@ -91,8 +89,7 @@ function(
             "click .button-pause"    : "pause",
             "click .button-halt"     : "halt",
             "click .button-step"     : "step",
-            "click .button-settings" : "settings",
-            "click .button-vidtest"  : "vidTest"
+            "click .button-settings" : "settings"
         },
 
         settingsModel : null,
@@ -151,12 +148,6 @@ function(
 
             var settingsView = new LoadBlobView({ container : $("#gui-modal") });
             settingsView.show();
-        },
-
-        vidTest : function ()
-        {
-            Gfx.debugVideoTestPattern();
-            Gfx.drawGraphics();
         },
 
         keydown : function (event)

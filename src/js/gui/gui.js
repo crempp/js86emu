@@ -13,6 +13,7 @@ define([
     "gui/views/DebugDecodeView",
     "gui/views/DebugRegisterView",
     "gui/views/DebugMemoryView",
+    "gui/views/DebugInfoView",
     "gui/models/DebugDecodeModel",
     "gui/models/DebugRegisterModel",
     "gui/models/DebugMemoryModel"],
@@ -24,6 +25,7 @@ function(
     DebugDecodeView,
     DebugRegisterView,
     DebugMemoryView,
+    DebugInfoView,
     DebugDecodeModel,
     DebugRegisterModel,
     DebugMemoryModel
@@ -41,6 +43,14 @@ function(
         {
             this._controlView = new ControlView();
             $("#gui-controls").append(this._controlView.render().el);
+        },
+
+        debugUpdateInfo : function (data)
+        {
+            //var infoModel = new DebugDecodeModel(decObj);
+            //var debugDecodeView = new DebugDecodeView({model: infoModel});
+            var debugInfoView = new DebugInfoView(data);
+            $("#gui-debug-info").html(debugInfoView.render().el);
         },
 
         debugUpdateDecode : function (decObj)

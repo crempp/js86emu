@@ -119,6 +119,21 @@ html,body{
         }
       }
     }
+    #gui-debug-info {
+      height: 36px;
+
+      .debug-info-window {
+        float: left;
+        width: 50%;
+      }
+
+      .info {
+        color: #0011aa;
+      }
+      .error {
+        color: #aa1100;
+      }
+    }
     #gui-debug-decode {
       height: 156px;
       .debug-decode-instruction {

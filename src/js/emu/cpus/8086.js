@@ -243,49 +243,105 @@ function(
                     case 0 :
                         // [BX + SI]
                         //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BX + SI] + Disp to retrieve mem (word)");
-                        console.error("RM Lookup not implemented for these parameters");
+                        if (_breakOnError) _Cpu.halt({
+                            error      : true,
+                            enterDebug : true,
+                            message    : "RM Lookup not implemented for these parameters",
+                            decObj     : opcode,
+                            regObj     : this._bundleRegisters(),
+                            memObj     : this._memoryV
+                        });
                         return 0;
                         break;
                     case 1 :
                         // [BX + DI]
                         //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BX + DI] + Disp to retrieve mem (word)");
-                        console.error("RM Lookup not implemented for these parameters");
+                        if (_breakOnError) _Cpu.halt({
+                            error      : true,
+                            enterDebug : true,
+                            message    : "RM Lookup not implemented for these parameters",
+                            decObj     : opcode,
+                            regObj     : this._bundleRegisters(),
+                            memObj     : this._memoryV
+                        });
                         return 0;
                         break;
                     case 2 :
                         // [BP + SI]
                         //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BP + SI] + Disp to retrieve mem (word)");
-                        console.error("RM Lookup not implemented for these parameters");
+                        if (_breakOnError) _Cpu.halt({
+                            error      : true,
+                            enterDebug : true,
+                            message    : "RM Lookup not implemented for these parameters",
+                            decObj     : opcode,
+                            regObj     : this._bundleRegisters(),
+                            memObj     : this._memoryV
+                        });
                         return 0;
                         break;
                     case 3 :
                         // [BP + DI]
                         //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BP + DI] + Disp to retrieve mem (word)");
-                        console.error("RM Lookup not implemented for these parameters");
+                        if (_breakOnError) _Cpu.halt({
+                            error      : true,
+                            enterDebug : true,
+                            message    : "RM Lookup not implemented for these parameters",
+                            decObj     : opcode,
+                            regObj     : this._bundleRegisters(),
+                            memObj     : this._memoryV
+                        });
                         return 0;
                         break;
                     case 4 :
                         // [SI]
                         //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [SI] + Disp to retrieve mem (word)");
-                        console.error("RM Lookup not implemented for these parameters");
+                        if (_breakOnError) _Cpu.halt({
+                            error      : true,
+                            enterDebug : true,
+                            message    : "RM Lookup not implemented for these parameters",
+                            decObj     : opcode,
+                            regObj     : this._bundleRegisters(),
+                            memObj     : this._memoryV
+                        });
                         return 0;
                         break;
                     case 5 :
                         // [DI]
                         //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [DI] + Disp to retrieve mem (word)");
-                        console.error("RM Lookup not implemented for these parameters");
+                        if (_breakOnError) _Cpu.halt({
+                            error      : true,
+                            enterDebug : true,
+                            message    : "RM Lookup not implemented for these parameters",
+                            decObj     : opcode,
+                            regObj     : this._bundleRegisters(),
+                            memObj     : this._memoryV
+                        });
                         return 0;
                         break;
                     case 6 :
                         // [BP]
                         //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BP] + Disp to retrieve mem (word)");
-                        console.error("RM Lookup not implemented for these parameters");
+                        if (_breakOnError) _Cpu.halt({
+                            error      : true,
+                            enterDebug : true,
+                            message    : "RM Lookup not implemented for these parameters",
+                            decObj     : opcode,
+                            regObj     : this._bundleRegisters(),
+                            memObj     : this._memoryV
+                        });
                         return 0;
                         break;
                     case 7 :
                         // [BX]
                         //if (_Cpu.isDebug()) console.log("_getRMValueForOp() - Using [BX] + Disp to retrieve mem (word)");
-                        console.error("RM Lookup not implemented for these parameters");
+                        if (_breakOnError) _Cpu.halt({
+                            error      : true,
+                            enterDebug : true,
+                            message    : "RM Lookup not implemented for these parameters",
+                            decObj     : opcode,
+                            regObj     : this._bundleRegisters(),
+                            memObj     : this._memoryV
+                        });
                         return 0;
                         break;
                 }
@@ -683,70 +739,111 @@ function(
                     case 0 :
                         // [BX + SI]
                         //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX + SI] + Disp to set mem (word)");
-
-                        console.error("RM Lookup not implemented for these parameters");
-
+                        if (_breakOnError) _Cpu.halt({
+                            error      : true,
+                            enterDebug : true,
+                            message    : "RM Lookup not implemented for these parameters",
+                            decObj     : opcode,
+                            regObj     : this._bundleRegisters(),
+                            memObj     : this._memoryV
+                        });
                         this._regIP += 1;
 
                         break;
                     case 1 :
                         // [BX + DI]
                         //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX + DI] + Disp to set mem (word)");
-
-                        console.error("RM Lookup not implemented for these parameters");
-
+                        if (_breakOnError) _Cpu.halt({
+                            error      : true,
+                            enterDebug : true,
+                            message    : "RM Lookup not implemented for these parameters",
+                            decObj     : opcode,
+                            regObj     : this._bundleRegisters(),
+                            memObj     : this._memoryV
+                        });
                         this._regIP += 1;
 
                         break;
                     case 2 :
                         // [BP + SI]
                         //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BP + SI] + Disp to set mem (word)");
-
-                        console.error("RM Lookup not implemented for these parameters");
-
+                        if (_breakOnError) _Cpu.halt({
+                            error      : true,
+                            enterDebug : true,
+                            message    : "RM Lookup not implemented for these parameters",
+                            decObj     : opcode,
+                            regObj     : this._bundleRegisters(),
+                            memObj     : this._memoryV
+                        });
                         this._regIP += 1;
 
                         break;
                     case 3 :
                         // [BP + DI]
                         //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BP + DI] + Disp to set mem (word)");
-
-                        console.error("RM Lookup not implemented for these parameters");
-
+                        if (_breakOnError) _Cpu.halt({
+                            error      : true,
+                            enterDebug : true,
+                            message    : "RM Lookup not implemented for these parameters",
+                            decObj     : opcode,
+                            regObj     : this._bundleRegisters(),
+                            memObj     : this._memoryV
+                        });
                         this._regIP += 1;
 
                         break;
                     case 4 :
                         // [SI]
                         //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [SI] + Disp to set mem (word)");
-
-                        console.error("RM Lookup not implemented for these parameters");
-
+                        if (_breakOnError) _Cpu.halt({
+                            error      : true,
+                            enterDebug : true,
+                            message    : "RM Lookup not implemented for these parameters",
+                            decObj     : opcode,
+                            regObj     : this._bundleRegisters(),
+                            memObj     : this._memoryV
+                        });
                         this._regIP += 1;
 
                         break;
                     case 5 :
                         // [DI]
                         //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [DI] + Disp to set mem (word)");
-
-                        console.error("RM Lookup not implemented for these parameters");
+                        if (_breakOnError) _Cpu.halt({
+                            error      : true,
+                            enterDebug : true,
+                            message    : "RM Lookup not implemented for these parameters",
+                            decObj     : opcode,
+                            regObj     : this._bundleRegisters(),
+                            memObj     : this._memoryV
+                        });
                         return 0;
                         break;
                     case 6 :
                         // [BP]
                         //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BP] + Disp to set mem (word)");
-
-                        console.error("RM Lookup not implemented for these parameters");
-
+                        if (_breakOnError) _Cpu.halt({
+                            error      : true,
+                            enterDebug : true,
+                            message    : "RM Lookup not implemented for these parameters",
+                            decObj     : opcode,
+                            regObj     : this._bundleRegisters(),
+                            memObj     : this._memoryV
+                        });
                         this._regIP += 1;
 
                         break;
                     case 7 :
                         // [BX]
                         //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX] + Disp to set mem (word)");
-
-                        console.error("RM Lookup not implemented for these parameters");
-
+                        if (_breakOnError) _Cpu.halt({
+                            error      : true,
+                            enterDebug : true,
+                            message    : "RM Lookup not implemented for these parameters",
+                            decObj     : opcode,
+                            regObj     : this._bundleRegisters(),
+                            memObj     : this._memoryV
+                        });
                         this._regIP += 1;
 
                         break;
@@ -900,7 +997,14 @@ function(
                  */
                 case 0x0F :
                     var opcode_byte_2 = this._memoryV[this._regIP + 1];
-                    console.error("Two-byte opcode - not supported! [" + opcode_byte_2.toString(16) + "]");
+                    if (_breakOnError) _Cpu.halt({
+                        error      : true,
+                        enterDebug : true,
+                        message    : "Two-byte opcode - not supported! [" + opcode_byte_2.toString(16) + "]",
+                        decObj     : opcode,
+                        regObj     : this._bundleRegisters(),
+                        memObj     : this._memoryV
+                    });
                     break;
 
                 /**
@@ -1209,9 +1313,25 @@ function(
 
                     break;
                 case 0x3C:
-                    console.error("Opcode not implemented!");
+                    if (_breakOnError) _Cpu.halt({
+                        error      : true,
+                        enterDebug : true,
+                        message    : "Opcode not implemented!",
+                        decObj     : opcode,
+                        regObj     : this._bundleRegisters(),
+                        memObj     : this._memoryV
+                    });
+                    break;
                 case 0x3D:
-                    console.error("Opcode not implemented!");
+                    if (_breakOnError) _Cpu.halt({
+                        error      : true,
+                        enterDebug : true,
+                        message    : "Opcode not implemented!",
+                        decObj     : opcode,
+                        regObj     : this._bundleRegisters(),
+                        memObj     : this._memoryV
+                    });
+                    break;
 
                 /**
                  * Instruction : DEC
@@ -1419,22 +1539,64 @@ function(
 
                     switch (opcode.reg) {
                         case 1 :
-                            console.error("Opcode not implemented!");
+                            if (_breakOnError) _Cpu.halt({
+                                error      : true,
+                                enterDebug : true,
+                                message    : "Opcode not implemented!",
+                                decObj     : opcode,
+                                regObj     : this._bundleRegisters(),
+                                memObj     : this._memoryV
+                            });
                             break;
                         case 2 :
-                            console.error("Opcode not implemented!");
+                            if (_breakOnError) _Cpu.halt({
+                                error      : true,
+                                enterDebug : true,
+                                message    : "Opcode not implemented!",
+                                decObj     : opcode,
+                                regObj     : this._bundleRegisters(),
+                                memObj     : this._memoryV
+                            });
                             break;
                         case 3 :
-                            console.error("Opcode not implemented!");
+                            if (_breakOnError) _Cpu.halt({
+                                error      : true,
+                                enterDebug : true,
+                                message    : "Opcode not implemented!",
+                                decObj     : opcode,
+                                regObj     : this._bundleRegisters(),
+                                memObj     : this._memoryV
+                            });
                             break;
                         case 4 :
-                            console.error("Opcode not implemented!");
+                            if (_breakOnError) _Cpu.halt({
+                                error      : true,
+                                enterDebug : true,
+                                message    : "Opcode not implemented!",
+                                decObj     : opcode,
+                                regObj     : this._bundleRegisters(),
+                                memObj     : this._memoryV
+                            });
                             break;
                         case 5 :
-                            console.error("Opcode not implemented!");
+                            if (_breakOnError) _Cpu.halt({
+                                error      : true,
+                                enterDebug : true,
+                                message    : "Opcode not implemented!",
+                                decObj     : opcode,
+                                regObj     : this._bundleRegisters(),
+                                memObj     : this._memoryV
+                            });
                             break;
                         case 6 :
-                            console.error("Opcode not implemented!");
+                            if (_breakOnError) _Cpu.halt({
+                                error      : true,
+                                enterDebug : true,
+                                message    : "Opcode not implemented!",
+                                decObj     : opcode,
+                                regObj     : this._bundleRegisters(),
+                                memObj     : this._memoryV
+                            });
                             break;
                         /**
                          * Instruction : CMP
@@ -1458,7 +1620,14 @@ function(
 
                             break;
                         default :
-                            console.error("Invalid opcode!");
+                            if (_breakOnError) _Cpu.halt({
+                                error      : true,
+                                enterDebug : true,
+                                message    : "Invalid opcode!",
+                                decObj     : opcode,
+                                regObj     : this._bundleRegisters(),
+                                memObj     : this._memoryV
+                            });
                     }
                     break;
 
@@ -1925,23 +2094,65 @@ function(
                     this._regIP += 1;
                     break;
                 case 0x8C:
-                    console.error("Opcode not implemented!");
+                    if (_breakOnError) _Cpu.halt({
+                        error      : true,
+                        enterDebug : true,
+                        message    : "Opcode not implemented!",
+                        decObj     : opcode,
+                        regObj     : this._bundleRegisters(),
+                        memObj     : this._memoryV
+                    });
                     break;
                 case 0x8E:
-                    console.error("Opcode not implemented!");
+                    if (_breakOnError) _Cpu.halt({
+                        error      : true,
+                        enterDebug : true,
+                        message    : "Opcode not implemented!",
+                        decObj     : opcode,
+                        regObj     : this._bundleRegisters(),
+                        memObj     : this._memoryV
+                    });
                     break;
                 // Move with displacement ???
                 case 0xA0:
-                    console.error("Opcode not implemented!");
+                    if (_breakOnError) _Cpu.halt({
+                        error      : true,
+                        enterDebug : true,
+                        message    : "Opcode not implemented!",
+                        decObj     : opcode,
+                        regObj     : this._bundleRegisters(),
+                        memObj     : this._memoryV
+                    });
                     break;
                 case 0xA1:
-                    console.error("Opcode not implemented!");
+                    if (_breakOnError) _Cpu.halt({
+                        error      : true,
+                        enterDebug : true,
+                        message    : "Opcode not implemented!",
+                        decObj     : opcode,
+                        regObj     : this._bundleRegisters(),
+                        memObj     : this._memoryV
+                    });
                     break;
                 case 0xA2:
-                    console.error("Opcode not implemented!");
+                    if (_breakOnError) _Cpu.halt({
+                        error      : true,
+                        enterDebug : true,
+                        message    : "Opcode not implemented!",
+                        decObj     : opcode,
+                        regObj     : this._bundleRegisters(),
+                        memObj     : this._memoryV
+                    });
                     break;
                 case 0xA3:
-                    console.error("Opcode not implemented!");
+                    if (_breakOnError) _Cpu.halt({
+                        error      : true,
+                        enterDebug : true,
+                        message    : "Opcode not implemented!",
+                        decObj     : opcode,
+                        regObj     : this._bundleRegisters(),
+                        memObj     : this._memoryV
+                    });
                     break;
                 // Move Immediate byte into register (e.g, MOV AL Ib)
                 case 0xB0:
@@ -2172,7 +2383,14 @@ function(
                     break;
                 case 0x8F:
                     // This one isn't as easy
-                    console.error("Opcode not implemented!");
+                    if (_breakOnError) _Cpu.halt({
+                        error      : true,
+                        enterDebug : true,
+                        message    : "Opcode not implemented!",
+                        decObj     : opcode,
+                        regObj     : this._bundleRegisters(),
+                        memObj     : this._memoryV
+                    });
                     break;
 
                 /**
@@ -2235,7 +2453,14 @@ function(
                  * Notes       :
                  */
                 case 0xC2:
-                    console.error("Unknown opcode!");
+                    if (_breakOnError) _Cpu.halt({
+                        error      : true,
+                        enterDebug : true,
+                        message    : "Opcode not implemented!",
+                        decObj     : opcode,
+                        regObj     : this._bundleRegisters(),
+                        memObj     : this._memoryV
+                    });
                     break;
                 case 0xC3:
                     this._regIP = (this._pop() + 3);
