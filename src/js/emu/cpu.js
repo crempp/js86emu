@@ -100,7 +100,8 @@ function(
 
                     this._cycles++;
 
-                    if (0 === this._cycles % 100) this._drawFlag = true;
+                    // TODO: This is wrong! Research the correct timing
+                    if (0 === this._cycles % 10) this._drawFlag = true;
 
                     // If the draw flag is set, update the screen
                     if(this._drawFlag)
@@ -111,14 +112,9 @@ function(
 
                     // Store key press state (Press and Release)
                     Input.setKeys();
-
-                    // TODO: This is wrong! Research the correct timing
-                    if (0 === this._cycles % 10) this._drawFlag = true;
                 }
 
                 if (this._debugFlag) break;
-
-                this._cycles += 1;
             }
         },
 
