@@ -30,7 +30,10 @@
                         var value = (model.get('memory'))[addr];
                         var valueStr = (row + i < 0) ? "--" : model._padHexByte(value);
                         var kls   = (addr === model.get('ip')) ? 'debug-memory-IP' : '';
-                        var title = "addr : " + model._padHexWord(addr) + " bin : " +  model._padBinaryByte(value);
+                        var title = "addr : ";
+                        title += (addr < 0) ? '--' : model._padHexWord(addr);
+                        title += " bin : ";
+                        title +=  ('undefined' === typeof value) ? '--' : model._padBinaryByte(value);
                     %>
                     <td class="debug-memory-value <%= kls %>" title="<%= title %>"><%= valueStr %></td>
                     <% }; %>

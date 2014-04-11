@@ -84,21 +84,27 @@ function(
         tagName:  "div",
 
         events: {
-            "click .button-run"      : "run",
-            "click .button-reset"    : "reset",
-            "click .button-pause"    : "pause",
-            "click .button-halt"     : "halt",
-            "click .button-step"     : "step",
-            "click .button-settings" : "settings"
+            "click   .button-run"      : "run",
+            "click   .button-reset"    : "reset",
+            "click   .button-pause"    : "pause",
+            "click   .button-halt"     : "halt",
+            "click   .button-step"     : "step",
+            "click   .button-settings" : "settings",
+            //"keyup   .button-settings" : "keyUp",
+            //"keydown .button-settings" : "keyDown"
         },
 
         settingsModel : null,
 
         initialize: function() {
             // bind all methods to `this` scope
-            _.bindAll(this, "keydown", "keyup");
-            $(document).on('keydown', this.keydown);
-            $(document).on('keyup', this.keyup);
+            _.bindAll(this, "keyUp", "keyDown");
+
+            // We want the keys to listen anywhere in the doc so we bind
+            // to document, we can't use the backbone event handler
+            // (is this correct)?
+            $(document).on('keydown', this.keyDown);
+            $(document).on('keyup', this.keyUp);
         },
 
         render: function ()
@@ -150,7 +156,7 @@ function(
             settingsView.show();
         },
 
-        keydown : function (event)
+        keyDown : function (event)
         {
             // F7 - pause
             if (118 === event.keyCode)
@@ -174,7 +180,7 @@ function(
             // F10 - 121
         },
 
-        keyup : function (event)
+        keyUp : function (event)
         {
 
         }

@@ -54,7 +54,7 @@ function(
                 _cpu = cpuModel;
 
                 // Initialize the CPU
-                _this.reset();
+                _this.reset(SettingsModel.get('emuSettings')["blobSettings"]);
 
                 // Setup debugging
                 if (SettingsModel.get('emuSettings')['startInDebug'])
@@ -70,7 +70,7 @@ function(
 
                 // If this run is blob-type load the blob that should have
                 // previously been set
-                SettingsModel.get('emuSettings')['startInDebug']
+                //SettingsModel.get('emuSettings')['startInDebug']
                 if ("blob" === SettingsModel.get('emuSettings')["run-type"])
                 {
                     _cpu.loadBinary(SettingsModel.get('emuSettings')["blobSettings"]["address"], _this._blob);
@@ -128,13 +128,13 @@ function(
             this._blob = blob;
         },
 
-        reset : function ()
+        reset : function (settings)
         {
             this._cycles    = 0;
             this._cpuPaused = false;
             this._haltFlag  = false;
 
-            _cpu.reset(this);
+            _cpu.reset(this, settings);
         },
 
         pause : function ()

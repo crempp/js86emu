@@ -462,7 +462,7 @@ function(
             {
                 switch (opcode.rm)
                 {
-                    case 0 :
+                    case 0 : // 000b
                         // [BX + SI]
                         //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX + SI] to set mem (word)");
 
@@ -499,7 +499,7 @@ function(
                         this._regIP += 1;
 
                         break;
-                    case 1 :
+                    case 1 : // 001b
                         // [BX + DI]
                         //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX + DI] to set mem (word)");
 
@@ -532,7 +532,7 @@ function(
                         this._regIP += 1;
 
                         break;
-                    case 2 :
+                    case 2 : // 010b
                         // [BP + SI]
                         //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BP + SI] to set mem (word)");
 
@@ -566,7 +566,7 @@ function(
                         this._regIP += 1;
 
                         break;
-                    case 3 :
+                    case 3 : // 011b
                         // [BP + DI]
                         //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BP + DI] to set mem (word)");
 
@@ -600,7 +600,7 @@ function(
                         this._regIP += 1;
 
                         break;
-                    case 4 :
+                    case 4 : // 100b
                         // [SI]
                         //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [SI] to set mem (word)");
 
@@ -634,7 +634,7 @@ function(
                         this._regIP += 1;
 
                         break;
-                    case 5 :
+                    case 5 : // 101b
                         // [DI]
                         //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [DI] to set mem (word)");
 
@@ -668,32 +668,37 @@ function(
                         this._regIP += 1;
 
                         break;
-                    case 6 :
+                    case 6 : // 110b
                         // Drc't Add
-                        //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using Drc't Add to set mem (word)");
+                        if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using Drc't Add to set mem (word)");
 
                         if ('undefined' === typeof value)
                         {
                             value = this._getRegValueForOp(opcode);
+
                             // Correct for duplicate helper usage
                             this._regIP -= 1;
                         }
 
                         if (0 === opcode.w) // Byte
                         {
+                            addr = this._memoryV[this._regIP + 2];
+
                             this._memoryV[addr] = (value & 0x00FF);
 
                             this._regIP += 2;
                         }
                         else // Word
                         {
-                            this._memoryV[addr]     = ((value >> 8) & 0x00FF);
-                            this._memoryV[addr + 1] = (value & 0x00FF);
+                            var addr = ( (this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2] );
+
+                            this._memoryV[addr]     = (value & 0x00FF);
+                            this._memoryV[addr + 1] = ((value >> 8) & 0x00FF);
 
                             this._regIP += 3;
                         }
                         break;
-                    case 7 :
+                    case 7 : // 111b
                         // [BX]
                         //if (_Cpu.isDebug()) console.log("_setRMValueForOp() - Using [BX] to set mem (word)");
 
@@ -904,7 +909,7 @@ function(
          * FFFF0h - FFFFFh - after RESET the processor always starts program
          * execution at the FFFF0h address.
          */
-        reset : function (Cpu)
+        reset : function (Cpu, settings)
         {
             _Cpu = Cpu;
 
@@ -925,21 +930,22 @@ function(
             }
 
             // Main Registers
-            this._regAH = 0x00; this._regAL = 0x00;
-            this._regBH = 0x00; this._regBL = 0x00;
-            this._regCH = 0x00; this._regCL = 0x00;
-            this._regDH = 0x00; this._regDL = 0x00;
+            this._regAH = settings['cpu-init']['registers']['ah'];
+            this._regAL = 0x00;
+            this._regBH = 0x00;
+            this._regBL = 0x00;
+            this._regCH = 0x00;
+            this._regCL = 0x00;
+            this._regDH = 0x00;
+            this._regDL = 0x00;
+
             this._regSI = 0x0000;
             this._regDI = 0x0000;
             this._regBP = 0x0000;
-
-            // Not sure what this should be, codegolf only works if it's 0x100
-            //this._regSP = 0xFFFE;
-            this._regSP = 0x0100;
+            this._regSP = settings['cpu-init']['registers']['sp'];
 
             // Program counter
-            //this._regIP = 0x0110;
-            this._regIP = 0xF000;
+            this._regIP = settings['cpu-init']['registers']['ip'];
 
             // Segment registers
             this._regCS = 0x0000;
@@ -2088,7 +2094,7 @@ function(
                     break;
                 case 0x8B:
                     var val = this._getRMValueForOp(opcode,
-                        ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1])
+                        ((this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2])
                     );
                     this._setRegValueForOp(opcode, val);
                     this._regIP += 1;

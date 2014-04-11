@@ -24,14 +24,17 @@ function(
         template: GuiTemplate['DebugMemoryTemplate'],
 
         events: {
-            "click .gui-button-centermem": "doCenter",
-            "click .gui-button-gotoip"   : "doGotoIP",
-            "click .gui-button-gotogfx"  : "doGotoGfx",
-
+            "click  .gui-button-centermem" : "doCenter",
+            "keyup   #debug-memory-center" : "keyUp",
+            "keydown #debug-memory-center" : "keyDown",
+            "click  .gui-button-gotoip"    : "doGotoIP",
+            "click  .gui-button-gotogfx"   : "doGotoGfx"
         },
 
         initialize : function (options) {
             this.options = options || {};
+
+            _.bindAll(this, "keyDown", "keyUp");
         },
 
         render : function ()
@@ -66,6 +69,17 @@ function(
             this.model.center(Gfx.getGfxMemStart());
 
             this.render();
+        },
+
+        keyUp : function(event){
+
+        },
+
+        keyDown : function(event){
+            if(event.keyCode == 13){
+                event.preventDefault();
+                this.doCenter();
+            }
         }
 
     });

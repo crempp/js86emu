@@ -37,6 +37,7 @@ html,body{
     margin: 20px auto;
     padding: 20px;
     text-align: center;
+    overflow: hidden;
 
     @include border-radius(12px);
 
