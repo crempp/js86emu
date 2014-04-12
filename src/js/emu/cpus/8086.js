@@ -1024,9 +1024,12 @@ function(
                     valSrc = this._getRegValueForOp(opcode); // G
 
                     // correct for duplicate helper usage
-                    this._regIP -= 1;
+                    this._regIP -= 4;
 
                     valResult = valDst + valSrc;
+
+                    // Clamp byte
+                    valResult = valResult & 0x00FF;
 
                     this._setRMValueForOp(opcode, valResult);
 
@@ -1046,10 +1049,15 @@ function(
 
                     break;
                 case 0x01:
+                    console.log("ADDING~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                     valDst = this._getRMValueForOp(opcode);  // E
                     valSrc = this._getRegValueForOp(opcode); // G
 
                     valResult = valDst + valSrc;
+
+                    console.log("  valDst", valDst);
+                    console.log("  valSrc", valSrc);
+                    console.log("  valResult", valResult);
 
                     this._setRMValueForOp(opcode, valResult);
 
@@ -1554,15 +1562,41 @@ function(
                                 memObj     : this._memoryV
                             });
                             break;
+                        /**
+                         * Instruction : ADC
+                         * Meaning     : Compare
+                         * Notes       :
+                         */
                         case 2 :
-                            if (_breakOnError) _Cpu.halt({
-                                error      : true,
-                                enterDebug : true,
-                                message    : "Opcode not implemented!",
-                                decObj     : opcode,
-                                regObj     : this._bundleRegisters(),
-                                memObj     : this._memoryV
-                            });
+                            valDst = this._getRMValueForOp(opcode);  // E
+                            valSrc = this._getRegValueForOp(opcode); // G
+                            // Clamp byte
+                            valSrc = valSrc & 0x00FF;
+
+                            valResult = valDst + valSrc;
+                            // Clamp word
+                            valResult = valResult & 0xFFFF;
+                            if (this._regFlags & this.FLAG_CF_MASK) valResult += 1;
+
+                            this._setRMValueForOp(opcode, valResult);
+
+                            // correct for duplicate helper usage
+                            this._regIP -= 4;
+
+                            this._setFlags(
+                                valDst,
+                                valSrc,
+                                valResult,
+                                (   this.FLAG_CF_MASK |
+                                    this.FLAG_ZF_MASK |
+                                    this.FLAG_SF_MASK |
+                                    this.FLAG_OF_MASK |
+                                    this.FLAG_PF_MASK |
+                                    this.FLAG_AF_MASK),
+                                "w");
+
+                            this._regIP += 1;
+
                             break;
                         case 3 :
                             if (_breakOnError) _Cpu.halt({
@@ -2771,7 +2805,8 @@ function(
             // resulted in a value whose most significant bit was set
             if (flagsToSet & this.FLAG_SF_MASK)
             {
-                if (result < 0) this._regFlags |= this.FLAG_SF_MASK;
+                if ('b' === size && (result & 0xFF) >> 7) this._regFlags |= this.FLAG_SF_MASK;
+                else if ('w' === size && (result & 0xFFFF) >> 15) this._regFlags |= this.FLAG_SF_MASK;
                 else this._regFlags &= ~this.FLAG_SF_MASK;
             }
 
