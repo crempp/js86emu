@@ -18,6 +18,11 @@ Currently
 
 We'll see how far I get :)
 
+TODO
+----
+* Add memory break points
+* Update memory debug view to keep starting point of rows at a factor of 8 (currently the row begins at IP)
+
 
 References
 ----------

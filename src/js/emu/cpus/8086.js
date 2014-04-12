@@ -1043,7 +1043,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        "b");
+                        "b",
+                        "add");
 
                     this._regIP += 1;
 
@@ -1074,7 +1075,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        "w");
+                        "w",
+                        "add");
 
                     this._regIP += 1;
 
@@ -1100,7 +1102,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        "b");
+                        "b",
+                        "add");
 
                     this._regIP += 1;
 
@@ -1126,7 +1129,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        "w");
+                        "w",
+                        "add");
 
                     this._regIP += 1;
 
@@ -1150,7 +1154,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        "b");
+                        "b",
+                        "add");
 
                     this._regIP += 2;
 
@@ -1174,7 +1179,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        "w");
+                        "w",
+                        "add");
 
                     this._regIP += 1;
 
@@ -1249,7 +1255,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        "b");
+                        "b",
+                        "sub");
 
                     this._regIP += 1;
 
@@ -1273,7 +1280,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        "w");
+                        "w",
+                        "sub");
 
                     this._regIP += 1;
 
@@ -1297,7 +1305,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        "b");
+                        "b",
+                        "sub");
 
                     this._regIP += 1;
 
@@ -1321,7 +1330,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        "b");
+                        "b",
+                        "sub");
 
                     this._regIP += 1;
 
@@ -1367,7 +1377,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        'w');
+                        'w',
+                        "sub");
 
                     this._regIP += 1;
 
@@ -1387,7 +1398,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        'w');
+                        'w',
+                        "sub");
 
                     this._regIP += 1;
 
@@ -1407,7 +1419,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        'w');
+                        'w',
+                        "sub");
 
                     this._regIP += 1;
 
@@ -1427,7 +1440,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        'w');
+                        'w',
+                        "sub");
 
                     this._regIP += 1;
 
@@ -1446,7 +1460,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        'w');
+                        'w',
+                        "sub");
 
                     this._regIP += 1;
 
@@ -1465,7 +1480,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        'w');
+                        'w',
+                        "sub");
 
                     this._regIP += 1;
 
@@ -1484,7 +1500,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        'w');
+                        'w',
+                        "sub");
 
                     this._regIP += 1;
 
@@ -1503,7 +1520,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        'w');
+                        'w',
+                        "sub");
 
                     this._regIP += 1;
 
@@ -1593,7 +1611,8 @@ function(
                                     this.FLAG_OF_MASK |
                                     this.FLAG_PF_MASK |
                                     this.FLAG_AF_MASK),
-                                "w");
+                                "w",
+                                "add");
 
                             this._regIP += 1;
 
@@ -1656,7 +1675,8 @@ function(
                                     this.FLAG_OF_MASK |
                                     this.FLAG_PF_MASK |
                                     this.FLAG_AF_MASK),
-                                'w');
+                                'w',
+                                "sub");
 
                             break;
                         default :
@@ -1700,7 +1720,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        'w');
+                        'w',
+                        "add");
 
                     this._regIP += 1;
 
@@ -1720,7 +1741,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        'w');
+                        'w',
+                        "add");
 
                     this._regIP += 1;
 
@@ -1740,7 +1762,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        'w');
+                        'w',
+                        "add");
 
                     this._regIP += 1;
 
@@ -1760,7 +1783,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        'w');
+                        'w',
+                        "add");
 
                     this._regIP += 1;
 
@@ -1779,7 +1803,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        'w');
+                        'w',
+                        "add");
 
                     this._regIP += 1;
 
@@ -1798,7 +1823,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        'w');
+                        'w',
+                        "add");
 
                     this._regIP += 1;
 
@@ -1817,7 +1843,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        'w');
+                        'w',
+                        "add");
 
                     this._regIP += 1;
 
@@ -1836,7 +1863,8 @@ function(
                             this.FLAG_OF_MASK |
                             this.FLAG_PF_MASK |
                             this.FLAG_AF_MASK),
-                        'w');
+                        'w',
+                        "add");
 
                     this._regIP += 1;
 
@@ -2290,7 +2318,8 @@ function(
                             this.FLAG_PF_MASK |
                             this.FLAG_SF_MASK |
                             this.FLAG_ZF_MASK),
-                        'b');
+                        'b',
+                        "or");
 
                     this._regIP += 1;
 
@@ -2315,7 +2344,8 @@ function(
                             this.FLAG_PF_MASK |
                             this.FLAG_SF_MASK |
                             this.FLAG_ZF_MASK),
-                        'w');
+                        'w',
+                        "or");
 
                     this._regIP += 1;
 
@@ -2335,7 +2365,8 @@ function(
                             this.FLAG_PF_MASK |
                             this.FLAG_SF_MASK |
                             this.FLAG_ZF_MASK),
-                        'b');
+                        'b',
+                        "or");
 
                     this._regIP += 2;
 
@@ -2358,7 +2389,8 @@ function(
                             this.FLAG_PF_MASK |
                             this.FLAG_SF_MASK |
                             this.FLAG_ZF_MASK),
-                        'w');
+                        'w',
+                        "or");
 
                     this._regIP += 3;
 
@@ -2556,7 +2588,8 @@ function(
                             this.FLAG_PF_MASK |
                             this.FLAG_SF_MASK |
                             this.FLAG_ZF_MASK),
-                        'b');
+                        'b',
+                        "or");
 
                     this._regIP += 1;
 
@@ -2580,7 +2613,8 @@ function(
                             this.FLAG_PF_MASK |
                             this.FLAG_SF_MASK |
                             this.FLAG_ZF_MASK),
-                        'w');
+                        'w',
+                        "or");
 
                     this._regIP += 1;
 
@@ -2601,7 +2635,8 @@ function(
                             this.FLAG_PF_MASK |
                             this.FLAG_SF_MASK |
                             this.FLAG_ZF_MASK),
-                        'b');
+                        'b',
+                        "or");
 
                     this._regIP += 1;
 
@@ -2622,7 +2657,8 @@ function(
                             this.FLAG_PF_MASK |
                             this.FLAG_SF_MASK |
                             this.FLAG_ZF_MASK),
-                        'w');
+                        'w',
+                        "or");
 
                     this._regIP += 1;
 
@@ -2643,7 +2679,8 @@ function(
                             this.FLAG_PF_MASK |
                             this.FLAG_SF_MASK |
                             this.FLAG_ZF_MASK),
-                        'b');
+                        'b',
+                        "or");
 
                     this._regIP += 2;
 
@@ -2664,7 +2701,8 @@ function(
                             this.FLAG_PF_MASK |
                             this.FLAG_SF_MASK |
                             this.FLAG_ZF_MASK),
-                        'w');
+                        'w',
+                        "or");
 
                     this._regIP += 3;
 
@@ -2742,16 +2780,17 @@ function(
         /**
          * Generic method to set flags for give operands and result
          *
-         * TODO: I think this only works for subtraction, verify for other operations
+         * TODO: This hasn't been tested for all operations
          *
          * @param operand1
          * @param operand2
          * @param result
          * @param flagsToSet
          * @param size (only used for OF)
+         * @param operation (add | sub | mul | div | or)
          * @private
          */
-        _setFlags : function (operand1, operand2, result, flagsToSet, size)
+        _setFlags : function (operand1, operand2, result, flagsToSet, size, operation)
         {
             // Set defaults
             size = size || 'b';
@@ -2762,16 +2801,39 @@ function(
             if (flagsToSet & this.FLAG_CF_MASK)
             {
                 // is this addition (this seems like a stupid way to handle this)
-                if (result === operand1 + operand2)
+                switch (operation)
                 {
-                    if ('b' === size && result > 0xFF) this._regFlags |= this.FLAG_CF_MASK;
-                    else if ('w' === size && result > 0xFFFF) this._regFlags |= this.FLAG_CF_MASK;
-                    else this._regFlags &= ~this.FLAG_CF_MASK;
-
+                    case "or" :
+                    case "add" :
+                        if ('b' === size && result > 0xFF) this._regFlags |= this.FLAG_CF_MASK;
+                        else if ('w' === size && result > 0xFFFF) this._regFlags |= this.FLAG_CF_MASK;
+                        else this._regFlags &= ~this.FLAG_CF_MASK;
+                        break;
+                    case "sub" :
+                        if (operand1 < operand2) this._regFlags |= this.FLAG_CF_MASK;
+                        else this._regFlags &= ~this.FLAG_CF_MASK;
+                        break;
+                    case "mul" :
+                        if (_breakOnError) _Cpu.halt({
+                            error      : true,
+                            enterDebug : true,
+                            message    : "Multiply CF flag not implemented!",
+                            decObj     : opcode,
+                            regObj     : this._bundleRegisters(),
+                            memObj     : this._memoryV
+                        });
+                        break;
+                    case "div" :
+                        if (_breakOnError) _Cpu.halt({
+                            error      : true,
+                            enterDebug : true,
+                            message    : "Multiply CF flag not implemented!",
+                            decObj     : opcode,
+                            regObj     : this._bundleRegisters(),
+                            memObj     : this._memoryV
+                        });
+                        break;
                 }
-                // this is subtraction
-                else if (operand1 < operand2) this._regFlags |= this.FLAG_CF_MASK;
-                else this._regFlags &= ~this.FLAG_CF_MASK;
             }
 
             // Parity Flag (PF)
@@ -2779,7 +2841,18 @@ function(
             // representation of the result of the last operation
             if (flagsToSet & this.FLAG_PF_MASK)
             {
-                this._regFlags = this._regFlags | (result & 0x01);
+                var bitRep = result.toString(2),
+                    bitCnt = 0;
+                for (b in bitRep) { if ("1" === bitRep[b]) bitCnt++; }
+
+                if (0 === (bitCnt % 2))
+                {
+                    this._regFlags |= this.FLAG_PF_MASK;
+                }
+                else
+                {
+                    this._regFlags &= ~this.FLAG_PF_MASK;
+                }
             }
 
             // Adjust Flag (AF)
@@ -2787,8 +2860,39 @@ function(
             // of the 4 least significant bits.
             if (flagsToSet & this.FLAG_AF_MASK)
             {
-                if ((operand1 & 0x0F) < (operand2 & 0x0F)) this._regFlags |= this.FLAG_AF_MASK;
-                else this._regFlags &= ~this.FLAG_AF_MASK;
+                switch (operation)
+                {
+                    case "or" :
+                    case "add" :
+                        if ((result & 0x0F) > 0x0F) this._regFlags |= this.FLAG_CF_MASK;
+                        else this._regFlags &= ~this.FLAG_CF_MASK;
+                        break;
+                    case "sub" :
+                        if ((operand1 & 0x0F) < (operand2 & 0x0F)) this._regFlags |= this.FLAG_AF_MASK;
+                        else this._regFlags &= ~this.FLAG_AF_MASK;
+                        break;
+                    case "mul" :
+                        if (_breakOnError) _Cpu.halt({
+                            error      : true,
+                            enterDebug : true,
+                            message    : "Multiply AF flag not implemented!",
+                            decObj     : opcode,
+                            regObj     : this._bundleRegisters(),
+                            memObj     : this._memoryV
+                        });
+                        break;
+                    case "div" :
+                        if (_breakOnError) _Cpu.halt({
+                            error      : true,
+                            enterDebug : true,
+                            message    : "Division AF flag not implemented!",
+                            decObj     : opcode,
+                            regObj     : this._bundleRegisters(),
+                            memObj     : this._memoryV
+                        });
+                        break;
+                }
+
             }
 
             // Zero Flag (ZF)
