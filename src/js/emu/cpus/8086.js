@@ -1058,7 +1058,7 @@ function(
                     this._setRMValueForOp(opcode, (valResult & 0xFFFF));
 
                     // correct for duplicate helper usage
-                    this._regIP -= 4; // This seems wonky but it works for the moment
+                    this._regIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -1087,7 +1087,7 @@ function(
                     this._setRMValueForOp(opcode, (valResult & 0x00FF));
 
                     // correct for duplicate helper usage
-                    this._regIP -= 4; // This seems wonky but it works for the moment
+                    this._regIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -1116,7 +1116,7 @@ function(
                     this._setRMValueForOp(opcode, (valResult & 0xFFFF));
 
                     // correct for duplicate helper usage
-                    this._regIP -= 4; // This seems wonky but it works for the moment
+                    this._regIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -1145,7 +1145,7 @@ function(
                     this._setRMValueForOp(opcode, (valResult & 0x00FF));
 
                     // correct for duplicate helper usage
-                    this._regIP -= 4; // This seems wonky but it works for the moment
+                    this._regIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -1174,7 +1174,7 @@ function(
                     this._setRMValueForOp(opcode, (valResult & 0xFFFF));
 
                     // correct for duplicate helper usage
-                    this._regIP -= 4; // This seems wonky but it works for the moment
+                    this._regIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -1372,7 +1372,7 @@ function(
                     this._setRMValueForOp(opcode, valResult & 0x00FF);
 
                     // correct for duplicate helper usage
-                    this._regIP -= 4; // This seems wonky but it works for the moment
+                    this._regIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -2903,6 +2903,188 @@ function(
                 case 0xC3:
                     this._regIP = (this._pop() + 3);
                     break;
+
+            /**
+             * Instruction : SBB
+             * Meaning     : Subtract with borrow
+             * Notes       : Subtracts the two operands, if CF is set subtracts
+             *               one from the result
+             */
+                case 0x18 :
+                    valDst = this._getRMValueForOp(opcode);  // E
+                    valSrc = this._getRegValueForOp(opcode); // G
+
+                    valResult = valDst - valSrc;
+                    if (this._regFlags & this.FLAG_CF_MASK) valResult -= 1;
+
+                    // Set clamped byte
+                    this._setRMValueForOp(opcode, (valResult & 0x00FF));
+
+                    // correct for duplicate helper usage
+                    this._regIP -= 2;
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "b",
+                        "add");
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x19 :
+                    valDst = this._getRMValueForOp(opcode);  // E
+                    valSrc = this._getRegValueForOp(opcode); // G
+
+                    valResult = valDst - valSrc;
+                    if (this._regFlags & this.FLAG_CF_MASK) valResult -= 1;
+
+                    // Set clamped word
+                    this._setRMValueForOp(opcode, (valResult & 0xFFFF));
+
+                    // correct for duplicate helper usage
+                    this._regIP -= 2;
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "w",
+                        "add");
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x1A :
+                    valDst = this._getRegValueForOp(opcode); // G
+                    valSrc = this._getRMValueForOp(opcode);  // E
+
+                    valResult = valDst - valSrc;
+                    if (this._regFlags & this.FLAG_CF_MASK) valResult -= 1;
+
+                    // Set clamped byte
+                    this._setRMValueForOp(opcode, (valResult & 0x00FF));
+
+                    // correct for duplicate helper usage
+                    this._regIP -= 2;
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "b",
+                        "add");
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x1B :
+                    valDst = this._getRegValueForOp(opcode); // G
+                    valSrc = this._getRMValueForOp(opcode);  // E
+
+                    valResult = valDst - valSrc;
+                    if (this._regFlags & this.FLAG_CF_MASK) valResult -= 1;
+
+                    // Set clamped word
+                    this._setRMValueForOp(opcode, (valResult & 0xFFFF));
+
+                    // correct for duplicate helper usage
+                    this._regIP -= 2;
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "w",
+                        "add");
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x1C :
+                    valDst = this._regAL;
+                    valSrc = this._memoryV[this._regIP + 1];
+
+                    valResult = valDst - valSrc;
+                    if (this._regFlags & this.FLAG_CF_MASK) valResult -= 1;
+
+                    // Set clamped byte
+                    this._setRMValueForOp(opcode, (valResult & 0x00FF));
+
+                    // correct for duplicate helper usage
+                    this._regIP -= 2;
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "b",
+                        "add");
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x1D :
+                    valDst = ((this._regAH << 8) | this._regAL);
+                    valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+
+                    valResult = valDst - valSrc;
+                    if (this._regFlags & this.FLAG_CF_MASK) valResult -= 1;
+
+                    // Set clamped word
+                    this._setRMValueForOp(opcode, (valResult & 0xFFFF));
+
+                    // correct for duplicate helper usage
+                    this._regIP -= 2;
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "w",
+                        "add");
+
+                    this._regIP += 1;
+
+                    break;
+
                 /**
                  * Instruction : STC
                  * Meaning     : Set Carry flag.
