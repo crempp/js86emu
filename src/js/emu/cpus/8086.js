@@ -2652,6 +2652,14 @@ function(
                     break;
 
                 /**
+                 * Instruction : NOP
+                 * Meaning     : Logical inclusive or of the operands
+                 * Notes       :
+                 */
+                case 0x90:
+                    this._regIP += 1;
+
+                /**
                  * Instruction : OR
                  * Meaning     : Logical inclusive or of the operands
                  * Notes       :
