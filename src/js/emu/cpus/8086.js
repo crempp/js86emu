@@ -1529,11 +1529,15 @@ function(
                  * Notes       :
                  */
                 case 0xE8:
+                    var thisOpLen = 3;
+
                     // Push return address
-                    this._push(this._regIP);
+                    // The return address is the _NEXT_ instruction, not the current
+                    this._push(this._regIP + thisOpLen);
 
                     // Jump to procedure
-                    this._regIP += ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]) + 3;
+                    // The relative address starts from the _END_ of this op
+                    this._regIP += ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]) + thisOpLen;
 
                     break;
 
@@ -2901,7 +2905,7 @@ function(
                     });
                     break;
                 case 0xC3:
-                    this._regIP = (this._pop() + 3);
+                    this._regIP = (this._pop());
                     break;
 
             /**

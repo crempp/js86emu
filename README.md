@@ -13,10 +13,11 @@ The 8086 processor has ~72 instruction represented by 252 numeric opcodes (this 
 Currently
 
 *  ~98 instructions decoded and mostly working
+*  Functioning stack
 *  Basic (non-segmented) memory
-*  Basic debugging (gotta have this)
+*  Pretty decent debugging (gotta have this)
 *  Code Page 437 font set loads dynamically from a bitmap representation
-*  Text mode (80x25) video
+*  Text mode (80x25) video (no interrupts yet)
 
 We'll see how far I get :)
 
