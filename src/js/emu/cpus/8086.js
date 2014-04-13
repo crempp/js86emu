@@ -1060,7 +1060,7 @@ function(
                     console.log("  valSrc", valSrc);
                     console.log("  valResult", valResult);
 
-                    this._setRMValueForOp(opcode, valResult);
+                    this._setRMValueForOp(opcode, valResult & 0xFFFF);
 
                     // correct for 3 helper usages
                     this._regIP -= 2;
@@ -1087,7 +1087,7 @@ function(
 
                     valResult = valDst + valSrc;
 
-                    this._setRegValueForOp(opcode, valResult);
+                    this._setRegValueForOp(opcode, valResult & 0x00FF);
 
                     // correct for 3 helper usages
                     this._regIP -= 2;
@@ -1114,7 +1114,7 @@ function(
 
                     valResult = valDst + valSrc;
 
-                    this._setRMValueForOp(opcode, valResult);
+                    this._setRMValueForOp(opcode, valResult & 0xFFFF);
 
                     // correct for 3 helper usages
                     this._regIP -= 2;
@@ -1142,7 +1142,7 @@ function(
 
                     valResult = valDst + valSrc;
 
-                    this._regAL = valResult;
+                    this._regAL = valResult & 0x00FF;
 
                     this._setFlags(
                         valDst,
@@ -1545,6 +1545,9 @@ function(
                     {
                         valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
 
+                        // Clamp byte
+                        valSrc = valSrc & 0x00FF;
+
                         this._regIP += 2;
                     }
                     else if (0x81 === opcode_byte)
@@ -1557,11 +1560,17 @@ function(
                     {
                         valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
 
+                        // Clamp byte
+                        valSrc = valSrc & 0x00FF;
+
                         this._regIP += 3;
                     }
                     else if (0x83 === opcode_byte)
                     {
                         valSrc = this._memoryV[this._regIP + 1];
+
+                        // Clamp byte
+                        valSrc = valSrc & 0x00FF;
 
                         // Sign extend to word
                         if ( 1 === ( (valSrc & 0x80) >> 7)) valSrc = 0xFF00 | valSrc;
@@ -1586,20 +1595,14 @@ function(
                          * Notes       :
                          */
                         case 2 :
-                            valDst = this._getRMValueForOp(opcode);  // E
-                            valSrc = this._getRegValueForOp(opcode); // G
-                            // Clamp byte
-                            valSrc = valSrc & 0x00FF;
-
                             valResult = valDst + valSrc;
-                            // Clamp word
-                            valResult = valResult & 0xFFFF;
                             if (this._regFlags & this.FLAG_CF_MASK) valResult += 1;
 
-                            this._setRMValueForOp(opcode, valResult);
+                            // Set clamped word
+                            this._setRMValueForOp(opcode, (valResult & 0xFFFF));
 
                             // correct for duplicate helper usage
-                            this._regIP -= 4;
+                            this._regIP -= 2;
 
                             this._setFlags(
                                 valDst,
@@ -1627,15 +1630,34 @@ function(
                                 memObj     : this._memoryV
                             });
                             break;
+                        /**
+                         * Instruction : AND
+                         * Meaning     : Logical and
+                         * Notes       :
+                         */
                         case 4 :
-                            if (_breakOnError) _Cpu.halt({
-                                error      : true,
-                                enterDebug : true,
-                                message    : "Opcode not implemented!",
-                                decObj     : opcode,
-                                regObj     : this._bundleRegisters(),
-                                memObj     : this._memoryV
-                            });
+                            valResult = valDst & valSrc;
+
+                            // Set clamped word
+                            this._setRMValueForOp(opcode, (valResult & 0xFFFF));
+
+                            // correct for duplicate helper usage
+                            this._regIP -= 2;
+
+                            this._setFlags(
+                                valDst,
+                                valSrc,
+                                valResult,
+                                (   this.FLAG_CF_MASK |
+                                    this.FLAG_ZF_MASK |
+                                    this.FLAG_SF_MASK |
+                                    this.FLAG_OF_MASK |
+                                    this.FLAG_PF_MASK |
+                                    this.FLAG_AF_MASK),
+                                "w",
+                                "add");
+
+                            this._regIP += 1;
                             break;
                         case 5 :
                             if (_breakOnError) _Cpu.halt({
@@ -2864,8 +2886,8 @@ function(
                 {
                     case "or" :
                     case "add" :
-                        if ((result & 0x0F) > 0x0F) this._regFlags |= this.FLAG_CF_MASK;
-                        else this._regFlags &= ~this.FLAG_CF_MASK;
+                        if ((result & 0x0F) > 0x0F) this._regFlags |= this.FLAG_AF_MASK;
+                        else this._regFlags &= ~this.FLAG_AF_MASK;
                         break;
                     case "sub" :
                         if ((operand1 & 0x0F) < (operand2 & 0x0F)) this._regFlags |= this.FLAG_AF_MASK;

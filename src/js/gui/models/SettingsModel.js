@@ -42,9 +42,9 @@ define(["backbone"], function(Backbone)
                     "name"     : ""
                 },
                 "breakOnError"      : true,
-                "startInDebug"      : false,
-                "decodeToConsole"   : false,
-                "registerToConsole" : false
+                "startInDebug"      : true,
+                "decodeToConsole"   : true,
+                "registerToConsole" : true
             },
             "blobFiles"  : {},
             "components" : {
@@ -57,7 +57,7 @@ define(["backbone"], function(Backbone)
             }
         },
 
-        urlRoot : 'files/data/data.json'
+        urlRoot : 'files/data/data.json',
     });
 
     var settingsSingleton = new SettingsModel();

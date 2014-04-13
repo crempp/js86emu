@@ -8,6 +8,8 @@ Demo : http://lapinlabs.com/js86emu/
 The plan is to emulate multiple x86 chips along with auxilary hardware such as
 Harddisk controllers, BIOS and graphics.
 
+The 8086 processor has ~72 instruction represented by 252 numeric opcodes (this actually depends on how you count the group instructions).
+
 Currently
 
 *  ~98 instructions decoded and mostly working
@@ -20,6 +22,8 @@ We'll see how far I get :)
 
 TODO
 ----
+
+* Verify correct word and byte clamping on all relevant instructions
 * Add memory break points
 * Update memory debug view to keep starting point of rows at a factor of 8 (currently the row begins at IP)
 
