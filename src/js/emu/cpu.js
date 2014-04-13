@@ -91,6 +91,12 @@ function(
         {
             for(;;)
             {
+                console.log("cycle ", this._cycles);
+                if (158 === this._cycles)
+                {
+                    this._debugFlag = true;
+                }
+
                 if (this._haltFlag) break;
 
                 if (!this._cpuPaused)

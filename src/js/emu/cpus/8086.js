@@ -3337,6 +3337,123 @@ function(
                     break;
 
                 /**
+                 * Instruction : XCHG
+                 * Meaning     : Exchange contents of source and destination
+                 * Notes       :
+                 */
+                case 0x86 :
+                case 0x87 :
+                    valDst = this._getRegValueForOp(opcode); // G
+                    valSrc = this._getRMValueForOp(opcode);  // E
+
+                    //console.log("  valDst",valDst);
+                    //console.log("  valSrc",valSrc);
+
+                    this._setRegValueForOp(opcode, valSrc);
+                    this._setRMValueForOp(opcode, valDst);
+
+                    // Correct for duplicate helper usage
+                    this._regIP -= 3;
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x91 :
+                    // Exchange CX and AX
+                    valDst = ((this._regCH << 8) | this._regCL);
+                    valSrc = ((this._regAH << 8) | this._regAL);
+
+                    this._regAH = (valDst & 0xFF00) >> 8;
+                    this._regAL = (valDst & 0x00FF);
+
+                    this._regCH = (valSrc & 0xFF00) >> 8;
+                    this._regCL = (valSrc & 0x00FF);
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x92 :
+                    // Exchange DX and AX
+                    valDst = ((this._regDH << 8) | this._regDL);
+                    valSrc = ((this._regAH << 8) | this._regAL);
+
+                    this._regAH = (valDst & 0xFF00) >> 8;
+                    this._regAL = (valDst & 0x00FF);
+
+                    this._regDH = (valSrc & 0xFF00) >> 8;
+                    this._regDL = (valSrc & 0x00FF);
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x93 :
+                    // Exchange BX and AX
+                    valDst = ((this._regBH << 8) | this._regBL);
+                    valSrc = ((this._regAH << 8) | this._regAL);
+
+                    this._regAH = (valDst & 0xFF00) >> 8;
+                    this._regAL = (valDst & 0x00FF);
+
+                    this._regBH = (valSrc & 0xFF00) >> 8;
+                    this._regBL = (valSrc & 0x00FF);
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x94 :
+                    // Exchange SP and AX
+                    valDst = this._regSP;
+                    valSrc = ((this._regAH << 8) | this._regAL);
+
+                    this._regAH = (valDst & 0xFF00) >> 8;
+                    this._regAL = (valDst & 0x00FF);
+
+                    this._regSP = valSrc;
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x95 :
+                    // Exchange BP and AX
+                    valDst = this._regBP;
+                    valSrc = ((this._regAH << 8) | this._regAL);
+
+                    this._regAH = (valDst & 0xFF00) >> 8;
+                    this._regAL = (valDst & 0x00FF);
+
+                    this._regBP = valSrc;
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x96 :
+                    // Exchange SI and AX
+                    valDst = this._regSI;
+                    valSrc = ((this._regAH << 8) | this._regAL);
+
+                    this._regAH = (valDst & 0xFF00) >> 8;
+                    this._regAL = (valDst & 0x00FF);
+
+                    this._regSI = valSrc;
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x97 :
+                    // Exchange DI and AX
+                    valDst = this._regDI;
+                    valSrc = ((this._regAH << 8) | this._regAL);
+
+                    this._regAH = (valDst & 0xFF00) >> 8;
+                    this._regAL = (valDst & 0x00FF);
+
+                    this._regDI = valSrc;
+
+                    this._regIP += 1;
+
+                    break;
+
+                /**
                  * Instruction : XOR
                  * Meaning     : Performs a bitwise exclusive or of the operands.
                  * Notes       :
