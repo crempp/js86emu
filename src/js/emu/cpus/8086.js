@@ -1359,6 +1359,170 @@ function(
                     break;
 
                 /**
+                 * Instruction : AND
+                 * Meaning     : Logical and
+                 * Notes       :
+                 */
+                case 0x20:
+                    valDst = this._getRMValueForOp(opcode);  // E
+                    valSrc = this._getRegValueForOp(opcode); // G
+
+                    valResult = valDst & valSrc;
+
+                    this._setRMValueForOp(opcode, valResult & 0x00FF);
+
+                    // correct for duplicate helper usage
+                    this._regIP -= 4; // This seems wonky but it works for the moment
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "b",
+                        "add");
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x21:
+                    valDst = this._getRMValueForOp(opcode);  // E
+                    valSrc = this._getRegValueForOp(opcode); // G
+
+                    valResult = valDst & valSrc;
+
+                    this._setRMValueForOp(opcode, valResult & 0xFFFF);
+
+                    // correct for 3 helper usages
+                    this._regIP -= 2;
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "w",
+                        "add");
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x22:
+                    valDst = this._getRegValueForOp(opcode); // G
+                    valSrc = this._getRMValueForOp(opcode);  // E
+
+                    valResult = valDst & valSrc;
+
+                    this._setRegValueForOp(opcode, valResult & 0x00FF);
+
+                    // correct for 3 helper usages
+                    this._regIP -= 2;
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "b",
+                        "add");
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x23:
+                    valDst = this._getRegValueForOp(opcode); // G
+                    valSrc = this._getRMValueForOp(opcode);  // E
+
+                    valResult = valDst & valSrc;
+
+                    this._setRMValueForOp(opcode, valResult & 0xFFFF);
+
+                    // correct for 3 helper usages
+                    this._regIP -= 2;
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "w",
+                        "add");
+
+                    this._regIP += 1;
+
+                    break;
+
+                case 0x24:
+                    valDst = this._regAL;
+                    valSrc = this._memoryV[this._regIP + 1];
+
+                    valResult = valDst & valSrc;
+
+                    this._regAL = valResult & 0x00FF;
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "b",
+                        "add");
+
+                    this._regIP += 2;
+
+                    break;
+                case 0x25:
+                    valDst = ((this._regAH << 8) | this._regAL);
+                    valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+
+                    valResult = valDst & valSrc;
+
+                    this._regAH = (valResult & 0xFF00) >> 8;
+                    this._regAL = (valResult & 0x00FF);
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "w",
+                        "add");
+
+                    this._regIP += 1;
+
+                    break;
+
+                /**
                  * Instruction : CALL
                  * Meaning     : Transfers control to procedure, return address is
                  *              (IP) is pushed to stack.
