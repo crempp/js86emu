@@ -1014,6 +1014,186 @@ function(
                     break;
 
                 /**
+                 * Instruction : ADC
+                 * Meaning     : Add with carry
+                 * Notes       : Sums the two operands, if CF is set adds one to the result
+                 */
+                case 0x10 :
+                    valDst = this._getRMValueForOp(opcode);  // E
+                    valSrc = this._getRegValueForOp(opcode); // G
+
+                    valResult = valDst + valSrc;
+                    if (this._regFlags & this.FLAG_CF_MASK) valResult += 1;
+
+                    // Set clamped byte
+                    this._setRMValueForOp(opcode, (valResult & 0x00FF));
+
+                    // correct for duplicate helper usage
+                    this._regIP -= 4; // This seems wonky but it works for the moment
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "b",
+                        "add");
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x11 :
+                    valDst = this._getRMValueForOp(opcode);  // E
+                    valSrc = this._getRegValueForOp(opcode); // G
+
+                    valResult = valDst + valSrc;
+                    if (this._regFlags & this.FLAG_CF_MASK) valResult += 1;
+
+                    // Set clamped word
+                    this._setRMValueForOp(opcode, (valResult & 0xFFFF));
+
+                    // correct for duplicate helper usage
+                    this._regIP -= 4; // This seems wonky but it works for the moment
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "w",
+                        "add");
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x12 :
+                    valDst = this._getRegValueForOp(opcode); // G
+                    valSrc = this._getRMValueForOp(opcode);  // E
+
+                    valResult = valDst + valSrc;
+                    if (this._regFlags & this.FLAG_CF_MASK) valResult += 1;
+
+                    // Set clamped byte
+                    this._setRMValueForOp(opcode, (valResult & 0x00FF));
+
+                    // correct for duplicate helper usage
+                    this._regIP -= 4; // This seems wonky but it works for the moment
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "b",
+                        "add");
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x13 :
+                    valDst = this._getRegValueForOp(opcode); // G
+                    valSrc = this._getRMValueForOp(opcode);  // E
+
+                    valResult = valDst + valSrc;
+                    if (this._regFlags & this.FLAG_CF_MASK) valResult += 1;
+
+                    // Set clamped word
+                    this._setRMValueForOp(opcode, (valResult & 0xFFFF));
+
+                    // correct for duplicate helper usage
+                    this._regIP -= 4; // This seems wonky but it works for the moment
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "w",
+                        "add");
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x14 :
+                    valDst = this._regAL;
+                    valSrc = this._memoryV[this._regIP + 1];
+
+                    valResult = valDst + valSrc;
+                    if (this._regFlags & this.FLAG_CF_MASK) valResult += 1;
+
+                    // Set clamped byte
+                    this._setRMValueForOp(opcode, (valResult & 0x00FF));
+
+                    // correct for duplicate helper usage
+                    this._regIP -= 4; // This seems wonky but it works for the moment
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "b",
+                        "add");
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x15 :
+                    valDst = ((this._regAH << 8) | this._regAL);
+                    valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+
+                    valResult = valDst + valSrc;
+                    if (this._regFlags & this.FLAG_CF_MASK) valResult += 1;
+
+                    // Set clamped word
+                    this._setRMValueForOp(opcode, (valResult & 0xFFFF));
+
+                    // correct for duplicate helper usage
+                    this._regIP -= 4; // This seems wonky but it works for the moment
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "w",
+                        "add");
+
+                    this._regIP += 1;
+
+                    break;
+
+                /**
                  * Instruction : ADD
                  * Meaning     : Add src to dst replacing the original contents
                  *               of dest
@@ -1023,15 +1203,12 @@ function(
                     valDst = this._getRMValueForOp(opcode);  // E
                     valSrc = this._getRegValueForOp(opcode); // G
 
-                    // correct for duplicate helper usage
-                    this._regIP -= 4;
-
                     valResult = valDst + valSrc;
 
-                    // Clamp byte
-                    valResult = valResult & 0x00FF;
+                    this._setRMValueForOp(opcode, valResult & 0x00FF);
 
-                    this._setRMValueForOp(opcode, valResult);
+                    // correct for duplicate helper usage
+                    this._regIP -= 4; // This seems wonky but it works for the moment
 
                     this._setFlags(
                         valDst,
@@ -1050,15 +1227,10 @@ function(
 
                     break;
                 case 0x01:
-                    console.log("ADDING~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                     valDst = this._getRMValueForOp(opcode);  // E
                     valSrc = this._getRegValueForOp(opcode); // G
 
                     valResult = valDst + valSrc;
-
-                    console.log("  valDst", valDst);
-                    console.log("  valSrc", valSrc);
-                    console.log("  valResult", valResult);
 
                     this._setRMValueForOp(opcode, valResult & 0xFFFF);
 
@@ -1591,8 +1763,8 @@ function(
                             break;
                         /**
                          * Instruction : ADC
-                         * Meaning     : Compare
-                         * Notes       :
+                         * Meaning     : Add with carry
+                         * Notes       : Sums the two operands, if CF is set adds one to the result
                          */
                         case 2 :
                             valResult = valDst + valSrc;
