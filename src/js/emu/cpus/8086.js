@@ -1879,14 +1879,21 @@ function(
                     // Group opcodes use R/M to determine register (REG is used to determine
                     // instruction)
                     valDst = this._getRegValueForOp({w:opcode.w, d:opcode.d, reg:opcode.rm, rm:opcode.rm});
+                    var clampMask;
+                    var size;
 
                     // Updating IP offsets, helper functions now increment IP
                     if (0x80 === opcode_byte)
                     {
                         valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
 
-                        // Clamp byte
+                        // Clamp source to byte
                         valSrc = valSrc & 0x00FF;
+
+                        // Clamp value to byte
+                        clampMask = 0x00FF;
+
+                        size = "b";
 
                         this._regIP += 2;
                     }
@@ -1894,14 +1901,24 @@ function(
                     {
                         valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
 
+                        // Clamp value to word
+                        clampMask = 0xFFFF;
+
+                        size = "w";
+
                         this._regIP += 3;
                     }
                     else if (0x82 === opcode_byte)
                     {
                         valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
 
-                        // Clamp byte
+                        // Clamp source to byte
                         valSrc = valSrc & 0x00FF;
+
+                        // Clamp value to byte
+                        clampMask = 0x00FF;
+
+                        size = "b";
 
                         this._regIP += 3;
                     }
@@ -1909,8 +1926,13 @@ function(
                     {
                         valSrc = this._memoryV[this._regIP + 1];
 
-                        // Clamp byte
+                        // Clamp source to byte
                         valSrc = valSrc & 0x00FF;
+
+                        // Clamp value to word
+                        clampMask = 0xFFFF;
+
+                        size = "w";
 
                         // Sign extend to word
                         if ( 1 === ( (valSrc & 0x80) >> 7)) valSrc = 0xFF00 | valSrc;
@@ -1939,7 +1961,7 @@ function(
                             if (this._regFlags & this.FLAG_CF_MASK) valResult += 1;
 
                             // Set clamped word
-                            this._setRMValueForOp(opcode, (valResult & 0xFFFF));
+                            this._setRMValueForOp(opcode, (valResult & clampMask));
 
                             // correct for duplicate helper usage
                             this._regIP -= 2;
@@ -1954,7 +1976,7 @@ function(
                                     this.FLAG_OF_MASK |
                                     this.FLAG_PF_MASK |
                                     this.FLAG_AF_MASK),
-                                "w",
+                                size,
                                 "add");
 
                             this._regIP += 1;
@@ -1972,14 +1994,14 @@ function(
                             break;
                         /**
                          * Instruction : AND
-                         * Meaning     : Logical and
+                         * Meaning     : Logical AND
                          * Notes       :
                          */
                         case 4 :
                             valResult = valDst & valSrc;
 
                             // Set clamped word
-                            this._setRMValueForOp(opcode, (valResult & 0xFFFF));
+                            this._setRMValueForOp(opcode, (valResult & clampMask));
 
                             // correct for duplicate helper usage
                             this._regIP -= 2;
@@ -1994,20 +2016,40 @@ function(
                                     this.FLAG_OF_MASK |
                                     this.FLAG_PF_MASK |
                                     this.FLAG_AF_MASK),
-                                "w",
+                                size,
                                 "add");
 
                             this._regIP += 1;
                             break;
+                        /**
+                         * Instruction : SUB
+                         * Meaning     : Subtract
+                         * Notes       : The source is subtracted from the destination and
+                         *               the result is stored in the destination
+                         */
                         case 5 :
-                            if (_breakOnError) _Cpu.halt({
-                                error      : true,
-                                enterDebug : true,
-                                message    : "Opcode not implemented!",
-                                decObj     : opcode,
-                                regObj     : this._bundleRegisters(),
-                                memObj     : this._memoryV
-                            });
+                            valResult = valDst - valSrc;
+
+                            // Set clamped word
+                            this._setRMValueForOp(opcode, (valResult & clampMask));
+
+                            // correct for duplicate helper usage
+                            this._regIP -= 2;
+
+                            this._setFlags(
+                                valDst,
+                                valSrc,
+                                valResult,
+                                (   this.FLAG_CF_MASK |
+                                    this.FLAG_ZF_MASK |
+                                    this.FLAG_SF_MASK |
+                                    this.FLAG_OF_MASK |
+                                    this.FLAG_PF_MASK |
+                                    this.FLAG_AF_MASK),
+                                size,
+                                "add");
+
+                            this._regIP += 1;
                             break;
                         case 6 :
                             if (_breakOnError) _Cpu.halt({
@@ -2037,7 +2079,7 @@ function(
                                     this.FLAG_OF_MASK |
                                     this.FLAG_PF_MASK |
                                     this.FLAG_AF_MASK),
-                                'w',
+                                size,
                                 "sub");
 
                             break;
@@ -2230,6 +2272,15 @@ function(
 
                     this._regIP += 1;
 
+                    break;
+
+                /**
+                 * Instruction : JMP
+                 * Meaning     : Unconditional jump
+                 * Notes       : Unconditionally transfers control to "label"
+                 */
+                case 0xEB:
+                    this._shortJump();
                     break;
 
                 /**
@@ -2909,12 +2960,12 @@ function(
                     this._regIP = (this._pop());
                     break;
 
-            /**
-             * Instruction : SBB
-             * Meaning     : Subtract with borrow
-             * Notes       : Subtracts the two operands, if CF is set subtracts
-             *               one from the result
-             */
+                /**
+                 * Instruction : SBB
+                 * Meaning     : Subtract with borrow
+                 * Notes       : Subtracts the two operands, if CF is set subtracts
+                 *               one from the result
+                 */
                 case 0x18 :
                     valDst = this._getRMValueForOp(opcode);  // E
                     valSrc = this._getRegValueForOp(opcode); // G
@@ -3118,6 +3169,171 @@ function(
                 case 0xFD:
                     this._regFlags |= this.FLAG_DF_MASK;
                     this._regIP += 1;
+                    break;
+
+                /**
+                 * Instruction : SUB
+                 * Meaning     : Subtract
+                 * Notes       : The source is subtracted from the destination and
+                 *               the result is stored in the destination
+                 */
+                case 0x28:
+                    valDst = this._getRMValueForOp(opcode);  // E
+                    valSrc = this._getRegValueForOp(opcode); // G
+
+                    valResult = valDst - valSrc;
+
+                    this._setRMValueForOp(opcode, valResult & 0x00FF);
+
+                    // correct for duplicate helper usage
+                    this._regIP -= 4; // This seems wonky but it works for the moment
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "b",
+                        "add");
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x29:
+                    valDst = this._getRMValueForOp(opcode);  // E
+                    valSrc = this._getRegValueForOp(opcode); // G
+
+                    valResult = valDst - valSrc;
+
+                    this._setRMValueForOp(opcode, valResult & 0xFFFF);
+
+                    // correct for 3 helper usages
+                    this._regIP -= 3;
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "w",
+                        "add");
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x2A:
+                    valDst = this._getRegValueForOp(opcode); // G
+                    valSrc = this._getRMValueForOp(opcode);  // E
+
+                    valResult = valDst - valSrc;
+
+                    this._setRegValueForOp(opcode, valResult & 0x00FF);
+
+                    // correct for 3 helper usages
+                    this._regIP -= 2;
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "b",
+                        "add");
+
+                    this._regIP += 1;
+
+                    break;
+                case 0x2B:
+                    valDst = this._getRegValueForOp(opcode); // G
+                    valSrc = this._getRMValueForOp(opcode);  // E
+
+                    valResult = valDst - valSrc;
+
+                    this._setRMValueForOp(opcode, valResult & 0xFFFF);
+
+                    // correct for 3 helper usages
+                    this._regIP -= 2;
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "w",
+                        "add");
+
+                    this._regIP += 1;
+
+                    break;
+
+                case 0x2C:
+                    valDst = this._regAL;
+                    valSrc = this._memoryV[this._regIP + 1];
+
+                    valResult = valDst - valSrc;
+
+                    this._regAL = valResult & 0x00FF;
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "b",
+                        "add");
+
+                    this._regIP += 2;
+
+                    break;
+                case 0x2D:
+                    valDst = ((this._regAH << 8) | this._regAL);
+                    valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+
+                    valResult = valDst - valSrc;
+
+                    this._regAH = (valResult & 0xFF00) >> 8;
+                    this._regAL = (valResult & 0x00FF);
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "w",
+                        "add");
+
+                    this._regIP += 1;
+
                     break;
 
                 /**
