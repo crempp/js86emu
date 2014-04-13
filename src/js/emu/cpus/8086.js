@@ -2662,6 +2662,7 @@ function(
                  */
                 case 0x90:
                     this._regIP += 1;
+                    break;
 
                 /**
                  * Instruction : OR
