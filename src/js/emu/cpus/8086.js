@@ -160,7 +160,7 @@ function(
             }
         },
 
-        _getRMValueForOp : function (opcode, operandValue)
+        _getRMValueForOp : function (opcode)
         {
             var addr;
 
@@ -200,8 +200,18 @@ function(
                         return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                         break;
                     case 6 : // Drc't Add
-                        _tempIP += 2;
-                        return ((this._memoryV[operandValue + 1] << 8) | this._memoryV[operandValue]);
+                        if (0 === opcode.w) // Byte
+                        {
+                            _tempIP += 1;
+                            addr = this._memoryV[this._regIP + 2];
+                            return (this._memoryV[addr]);
+                        }
+                        else // Word
+                        {
+                            _tempIP += 2;
+                            addr = (this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2];
+                            return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
+                        }
                         break;
                     case 7 : // [BX]
                         addr = ( (this._regBH << 8) | this._regBL );
@@ -410,9 +420,6 @@ function(
             }
         },
 
-        // TODO: I don't think the following code is correct
-        //       if (0 === opcode.d)
-        // See if it's ever used, investigate and fix if necessary
         _setRMValueForOp : function (opcode, value)
         {
             var addr;
@@ -423,213 +430,52 @@ function(
                 {
                     case 0 : // 000b [BX + SI]
                         addr = ( ((this._regBH << 8) | this._regBL) + this._regSI );
-
-                        if (0 === opcode.d) // Dest specified by REG field
-                        {
-                            this._setRegValueForOp(opcode, addr);
-                        }
-                        else // Dest specified by R/M field
-                        {
-//                            if ('undefined' === typeof value)
-//                            {
-//                                value = this._getRegValueForOp(opcode);
-//                            }
-
-                            if (0 === opcode.w) // Byte
-                            {
-                                this._memoryV[addr] = (value & 0x00FF);
-                            }
-                            else // Word
-                            {
-                                this._memoryV[addr]     = ((value >> 8) & 0x00FF);
-                                this._memoryV[addr + 1] = (value & 0x00FF);
-                            }
-                        }
-
                         break;
                     case 1 : // 001b [BX + DI]
-
                         addr = ( ((this._regBH << 8) | this._regBL) + this._regDI );
-
-                        if (0 === opcode.d) // Dest specified by REG field
-                        {
-                            this._setRegValueForOp(opcode, addr);
-                        }
-                        else
-                        {
-//                            if ('undefined' === typeof value)
-//                            {
-//                                value = this._getRegValueForOp(opcode);
-//                            }
-                            if (0 === opcode.w) // Byte
-                            {
-                                this._memoryV[addr] = (value & 0x00FF);
-                            }
-                            else // Word
-                            {
-                                this._memoryV[addr]     = ((value >> 8) & 0x00FF);
-                                this._memoryV[addr + 1] = (value & 0x00FF);
-                            }
-                        }
-
                         break;
                     case 2 : // 010b [BP + SI]
                         addr = ( this._regBP + this._regSI );
-
-                        if (0 === opcode.d) // Dest specified by REG field
-                        {
-                            this._setRegValueForOp(opcode, addr);
-                        }
-                        else // Dest specified by R/M field
-                        {
-//                            if ('undefined' === typeof value)
-//                            {
-//                                value = this._getRegValueForOp(opcode);
-//                            }
-
-                            if (0 === opcode.w) // Byte
-                            {
-                                this._memoryV[addr] = (value & 0x00FF);
-                            }
-                            else // Word
-                            {
-                                this._memoryV[addr]     = ((value >> 8) & 0x00FF);
-                                this._memoryV[addr + 1] = (value & 0x00FF);
-                            }
-                        }
-
                         break;
                     case 3 : // 011b [BP + DI]
                         addr = ( this._regBP + this._regDI );
-
-                        if (0 === opcode.d) // Dest specified by REG field
-                        {
-                            this._setRegValueForOp(opcode, addr);
-                        }
-                        else // Dest specified by R/M field
-                        {
-//                            if ('undefined' === typeof value)
-//                            {
-//                                value = this._getRegValueForOp(opcode);
-//                            }
-
-                            if (0 === opcode.w) // Byte
-                            {
-                                this._memoryV[addr] = (value & 0x00FF);
-                            }
-                            else // Word
-                            {
-                                this._memoryV[addr]     = ((value >> 8) & 0x00FF);
-                                this._memoryV[addr + 1] = (value & 0x00FF);
-                            }
-                        }
-
                         break;
                     case 4 : // 100b [SI]
                         addr = ( this._regSI );
-
-                        if (0 === opcode.d) // Dest specified by REG field
-                        {
-                            this._setRegValueForOp(opcode, addr);
-                        }
-                        else // Dest specified by R/M field
-                        {
-//                            if ('undefined' === typeof value)
-//                            {
-//                                value = this._getRegValueForOp(opcode);
-//                            }
-
-                            if (0 === opcode.w) // Byte
-                            {
-                                this._memoryV[addr] = (value & 0x00FF);
-                            }
-                            else // Word
-                            {
-                                this._memoryV[addr]     = ((value >> 8) & 0x00FF);
-                                this._memoryV[addr + 1] = (value & 0x00FF);
-                            }
-                        }
-
                         break;
                     case 5 : // 101b [DI]
                         addr = ( this._regDI );
-
-                        if (0 === opcode.d) // Dest specified by REG field
-                        {
-                            this._setRegValueForOp(opcode, addr);
-                        }
-                        else // Dest specified by R/M field
-                        {
-//                            if ('undefined' === typeof value)
-//                            {
-//                                value = this._getRegValueForOp(opcode);
-//                            }
-
-                            if (0 === opcode.w) // Byte
-                            {
-                                this._memoryV[addr] = (value & 0x00FF);
-                            }
-                            else // Word
-                            {
-                                this._memoryV[addr]     = ((value >> 8) & 0x00FF);
-                                this._memoryV[addr + 1] = (value & 0x00FF);
-                            }
-                        }
-
-                        _tempIP += 1;
-
                         break;
                     case 6 : // 110b Drc't Add
-//                        if ('undefined' === typeof value)
-//                        {
-//                            value = this._getRegValueForOp(opcode);
-//                        }
-
                         if (0 === opcode.w) // Byte
                         {
                             addr = this._memoryV[this._regIP + 2];
-
-                            this._memoryV[addr] = (value & 0x00FF);
-
                             _tempIP += 1;
                         }
                         else // Word
                         {
                             var addr = ( (this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2] );
-
-                            this._memoryV[addr]     = (value & 0x00FF);
-                            this._memoryV[addr + 1] = ((value >> 8) & 0x00FF);
-
                             _tempIP += 2;
                         }
                         break;
                     case 7 : // 111b [BX]
                         addr = ( (this._regBH << 8) | this._regBL );
-
-                        if (0 === opcode.d) // Dest specified by REG field
-                        {
-                            this._setRegValueForOp(opcode, addr);
-                        }
-                        else // Dest specified by R/M field
-                        {
-                            if ('undefined' === typeof value)
-                            {
-                                value = this._getRegValueForOp(opcode);
-                            }
-
-                            if (0 === opcode.w) // Byte
-                            {
-                                this._memoryV[addr] = (value & 0x00FF);
-                            }
-                            else // Word
-                            {
-                                this._memoryV[addr]     = ((value >> 8) & 0x00FF);
-                                this._memoryV[addr + 1] = (value & 0x00FF);
-                            }
-                        }
-
                         break;
                 }
+
+                // Set value to memory
+                if (0 === opcode.w) // Byte
+                {
+                    this._memoryV[addr] = (value & 0x00FF);
+                }
+                else // Word
+                {
+                    //this._memoryV[addr]     = ((value >> 8) & 0x00FF);
+                    //this._memoryV[addr + 1] = (value & 0x00FF);
+                    this._memoryV[addr]     = (value & 0x00FF);
+                    this._memoryV[addr + 1] = ((value >> 8) & 0x00FF);
+                }
+
             }
             else if (1 === opcode.mod || 2 == opcode.mod)
             {
@@ -729,11 +575,6 @@ function(
             // R/M bits refer to REG tables
             else if (3 === opcode.mod)
             {
-//                if ('undefined' === typeof value)
-//                {
-//                    value = this._getRegValueForOp(opcode);
-//                }
-
                 // Modifiy opcode object so reg is now rm. This way we can use existing
                 // _getRegValueForOp() method
                 this._setRegValueForOp(
@@ -916,7 +757,7 @@ function(
                     this._setRMValueForOp(opcode, (valResult & 0x00FF));
 
                     // correct for duplicate helper usage
-                    _tempIP -= 4; // This seems wonky but it works for the moment
+                    //_tempIP -= 4; // This seems wonky but it works for the moment
 
                     this._setFlags(
                         valDst,
@@ -945,7 +786,7 @@ function(
                     this._setRMValueForOp(opcode, (valResult & 0xFFFF));
 
                     // correct for duplicate helper usage
-                    _tempIP -= 2;
+                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -974,7 +815,7 @@ function(
                     this._setRMValueForOp(opcode, (valResult & 0x00FF));
 
                     // correct for duplicate helper usage
-                    _tempIP -= 2;
+                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -1003,7 +844,7 @@ function(
                     this._setRMValueForOp(opcode, (valResult & 0xFFFF));
 
                     // correct for duplicate helper usage
-                    _tempIP -= 2;
+                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -1032,7 +873,7 @@ function(
                     this._setRMValueForOp(opcode, (valResult & 0x00FF));
 
                     // correct for duplicate helper usage
-                    _tempIP -= 2;
+                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -1061,7 +902,7 @@ function(
                     this._setRMValueForOp(opcode, (valResult & 0xFFFF));
 
                     // correct for duplicate helper usage
-                    _tempIP -= 2;
+                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -1095,7 +936,7 @@ function(
                     this._setRMValueForOp(opcode, valResult & 0x00FF);
 
                     // correct for duplicate helper usage
-                    _tempIP -= 4; // This seems wonky but it works for the moment
+                    //_tempIP -= 4; // This seems wonky but it works for the moment
 
                     this._setFlags(
                         valDst,
@@ -1122,7 +963,7 @@ function(
                     this._setRMValueForOp(opcode, valResult & 0xFFFF);
 
                     // correct for 3 helper usages
-                    _tempIP -= 2;
+                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -1149,7 +990,7 @@ function(
                     this._setRegValueForOp(opcode, valResult & 0x00FF);
 
                     // correct for 3 helper usages
-                    _tempIP -= 2;
+                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -1176,7 +1017,7 @@ function(
                     this._setRMValueForOp(opcode, valResult & 0xFFFF);
 
                     // correct for 3 helper usages
-                    _tempIP -= 2;
+                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -1259,7 +1100,7 @@ function(
                     this._setRMValueForOp(opcode, valResult & 0x00FF);
 
                     // correct for duplicate helper usage
-                    _tempIP -= 2;
+                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -1286,7 +1127,7 @@ function(
                     this._setRMValueForOp(opcode, valResult & 0xFFFF);
 
                     // correct for 3 helper usages
-                    _tempIP -= 2;
+                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -1313,7 +1154,7 @@ function(
                     this._setRegValueForOp(opcode, valResult & 0x00FF);
 
                     // correct for 3 helper usages
-                    _tempIP -= 2;
+                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -1340,7 +1181,7 @@ function(
                     this._setRMValueForOp(opcode, valResult & 0xFFFF);
 
                     // correct for 3 helper usages
-                    _tempIP -= 2;
+                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -1467,9 +1308,6 @@ function(
                     valDst = this._getRMValueForOp(opcode);  // E
                     valSrc = this._getRegValueForOp(opcode); // G
 
-                    // correct for duplicate helper usage
-                    _tempIP -= 1;
-
                     valResult = valDst - valSrc;
 
                     this._setFlags(
@@ -1485,15 +1323,12 @@ function(
                         "b",
                         "sub");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x39:
                     valDst = this._getRMValueForOp(opcode);  // E
                     valSrc = this._getRegValueForOp(opcode); // G
-
-                    // correct for duplicate helper usage
-                    _tempIP -= 1;
 
                     valResult = valDst - valSrc;
 
@@ -1510,16 +1345,13 @@ function(
                         "w",
                         "sub");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x3A:
                     valDst = this._getRegValueForOp(opcode); // G
                     valSrc = this._getRMValueForOp(opcode);  // E
 
-                    // correct for duplicate helper usage
-                    _tempIP -= 1;
-
                     valResult = valDst - valSrc;
 
                     this._setFlags(
@@ -1535,16 +1367,13 @@ function(
                         "b",
                         "sub");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x3B:
                     valDst = this._getRegValueForOp(opcode); // G
                     valSrc = this._getRMValueForOp(opcode);  // E
 
-                    // correct for duplicate helper usage
-                    _tempIP -= 1;
-
                     valResult = valDst - valSrc;
 
                     this._setFlags(
@@ -1560,7 +1389,7 @@ function(
                         "b",
                         "sub");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x3C:
@@ -1850,9 +1679,6 @@ function(
                             // Set clamped word
                             this._setRMValueForOp(opcode, (valResult & clampMask));
 
-                            // correct for duplicate helper usage
-                            //_tempIP -= 2;
-
                             this._setFlags(
                                 valDst,
                                 valSrc,
@@ -1890,9 +1716,6 @@ function(
                             // Set clamped word
                             this._setRMValueForOp(opcode, (valResult & clampMask));
 
-                            // correct for duplicate helper usage
-                            //_tempIP -= 2;
-
                             this._setFlags(
                                 valDst,
                                 valSrc,
@@ -1919,9 +1742,6 @@ function(
 
                             // Set clamped word
                             this._setRMValueForOp(opcode, (valResult & clampMask));
-
-                            // correct for duplicate helper usage
-                            //_tempIP -= 2;
 
                             this._setFlags(
                                 valDst,
@@ -2448,45 +2268,25 @@ function(
                     valSrc =  this._getRegValueForOp(opcode);
                     this._setRMValueForOp(opcode, valSrc);
 
-                    // Correct for helper usage
-                    _tempIP -= 1;
-
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
                     break;
                 case 0x89:
-                    // !!!!!!!!!!!!!!!!
-                    // Add getter here
                     valSrc =  this._getRegValueForOp(opcode);
                     this._setRMValueForOp(opcode, valSrc);
 
-                    // Correct for helper usage
-                    _tempIP -= 1;
-
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
                     break;
                 case 0x8A:
-                    //this._setRegValueForOp(opcode, (this._memoryV[this._regIP + 1]) );
-
                     valSrc = this._getRMValueForOp(opcode);
                     this._setRegValueForOp(opcode, valSrc);
 
-                    // Correct for helper usage
-                    _tempIP -= 1;
-
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
                     break;
                 case 0x8B:
-
-                    //var valSrc = this._getRMValueForOp(opcode,
-                    //    ((this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2])
-                    //);
                     valSrc = this._getRMValueForOp(opcode);
                     this._setRegValueForOp(opcode, valSrc);
 
-                    // Correct for helper usage
-                    //_tempIP -= 1;
-
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
                     break;
                 case 0x8C:
                     if (_breakOnError) _Cpu.halt({
@@ -2642,9 +2442,6 @@ function(
                     valResult = valDst || valSrc;
                     this._setRMValueForOp(opcode, valResult);
 
-                    // Since we've used 3 helpers we've counted the addressing byte 3 times, correct this
-                    _tempIP -= 2;
-
                     this._setFlags(
                         valDst,
                         valSrc,
@@ -2668,9 +2465,6 @@ function(
                     valResult = valDst || valSrc;
                     this._setRMValueForOp(opcode, valResult);
 
-                    // Since we've used 3 helpers we've counted the addressing byte 3 times, correct this
-                    _tempIP -= 2;
-
                     this._setFlags(
                         valDst,
                         valSrc,
@@ -2683,7 +2477,7 @@ function(
                         'w',
                         "or");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x0C:
@@ -2891,7 +2685,7 @@ function(
                     this._setRMValueForOp(opcode, (valResult & 0x00FF));
 
                     // correct for duplicate helper usage
-                    _tempIP -= 2;
+                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -2920,7 +2714,7 @@ function(
                     this._setRMValueForOp(opcode, (valResult & 0xFFFF));
 
                     // correct for duplicate helper usage
-                    _tempIP -= 2;
+                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -2949,7 +2743,7 @@ function(
                     this._setRMValueForOp(opcode, (valResult & 0x00FF));
 
                     // correct for duplicate helper usage
-                    _tempIP -= 2;
+                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -2978,7 +2772,7 @@ function(
                     this._setRMValueForOp(opcode, (valResult & 0xFFFF));
 
                     // correct for duplicate helper usage
-                    _tempIP -= 2;
+                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -3007,7 +2801,7 @@ function(
                     this._setRMValueForOp(opcode, (valResult & 0x00FF));
 
                     // correct for duplicate helper usage
-                    _tempIP -= 2;
+                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -3036,7 +2830,7 @@ function(
                     this._setRMValueForOp(opcode, (valResult & 0xFFFF));
 
                     // correct for duplicate helper usage
-                    _tempIP -= 2;
+                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -3100,7 +2894,7 @@ function(
                     this._setRMValueForOp(opcode, valResult & 0x00FF);
 
                     // correct for duplicate helper usage
-                    _tempIP -= 4; // This seems wonky but it works for the moment
+                    //_tempIP -= 4; // This seems wonky but it works for the moment
 
                     this._setFlags(
                         valDst,
@@ -3127,7 +2921,7 @@ function(
                     this._setRMValueForOp(opcode, valResult & 0xFFFF);
 
                     // correct for 3 helper usages
-                    _tempIP -= 3;
+                    //_tempIP -= 3;
 
                     this._setFlags(
                         valDst,
@@ -3154,7 +2948,7 @@ function(
                     this._setRegValueForOp(opcode, valResult & 0x00FF);
 
                     // correct for 3 helper usages
-                    _tempIP -= 2;
+                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -3181,7 +2975,7 @@ function(
                     this._setRMValueForOp(opcode, valResult & 0xFFFF);
 
                     // correct for 3 helper usages
-                    _tempIP -= 2;
+                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -3267,7 +3061,7 @@ function(
                     this._setRMValueForOp(opcode, valDst);
 
                     // Correct for duplicate helper usage
-                    _tempIP -= 3;
+                    //_tempIP -= 3;
 
                     this._regIP += (_tempIP + 1);
 
@@ -3391,7 +3185,7 @@ function(
                         'b',
                         "or");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x31:
@@ -3400,9 +3194,6 @@ function(
 
                     valResult = valDst ^ valSrc;
                     this._setRMValueForOp(opcode, valResult);
-
-                    // Since we've used 3 helpers we've counted the addressing byte 3 times, correct this
-                    _tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -3416,7 +3207,7 @@ function(
                         'w',
                         "or");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x32:
@@ -3438,7 +3229,7 @@ function(
                         'b',
                         "or");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x33:
@@ -3460,7 +3251,7 @@ function(
                         'w',
                         "or");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x34:
@@ -3482,7 +3273,7 @@ function(
                         'b',
                         "or");
 
-                    this._regIP += 2;
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x35:
