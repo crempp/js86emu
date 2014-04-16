@@ -1772,7 +1772,7 @@ function(
                     // Updating IP offsets, helper functions now increment IP
                     if (0x80 === opcode_byte)
                     {
-                        valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+                        valSrc = ((this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2]);
 
                         // Clamp source to byte
                         valSrc = valSrc & 0x00FF;
@@ -1782,11 +1782,11 @@ function(
 
                         size = "b";
 
-                        _tempIP += 2;
+                        _tempIP += 1;
                     }
                     else if (0x81 === opcode_byte)
                     {
-                        valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+                        valSrc = ((this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2]);
 
                         // Clamp value to word
                         clampMask = 0xFFFF;
@@ -1797,7 +1797,7 @@ function(
                     }
                     else if (0x82 === opcode_byte)
                     {
-                        valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+                        valSrc = ((this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2]);
 
                         // Clamp source to byte
                         valSrc = valSrc & 0x00FF;
@@ -1807,11 +1807,11 @@ function(
 
                         size = "b";
 
-                        _tempIP += 3;
+                        _tempIP += 1;
                     }
                     else if (0x83 === opcode_byte)
                     {
-                        valSrc = this._memoryV[this._regIP + 1];
+                        valSrc = this._memoryV[this._regIP + 2];
 
                         // Clamp source to byte
                         valSrc = valSrc & 0x00FF;
@@ -1824,7 +1824,7 @@ function(
                         // Sign extend to word
                         if ( 1 === ( (valSrc & 0x80) >> 7)) valSrc = 0xFF00 | valSrc;
 
-                        _tempIP += 2;
+                        _tempIP += 1;
                     }
 
                     switch (opcode.reg) {
@@ -1851,7 +1851,7 @@ function(
                             this._setRMValueForOp(opcode, (valResult & clampMask));
 
                             // correct for duplicate helper usage
-                            _tempIP -= 2;
+                            //_tempIP -= 2;
 
                             this._setFlags(
                                 valDst,
@@ -1891,7 +1891,7 @@ function(
                             this._setRMValueForOp(opcode, (valResult & clampMask));
 
                             // correct for duplicate helper usage
-                            _tempIP -= 2;
+                            //_tempIP -= 2;
 
                             this._setFlags(
                                 valDst,
@@ -1921,7 +1921,7 @@ function(
                             this._setRMValueForOp(opcode, (valResult & clampMask));
 
                             // correct for duplicate helper usage
-                            _tempIP -= 2;
+                            //_tempIP -= 2;
 
                             this._setFlags(
                                 valDst,
@@ -3566,7 +3566,8 @@ function(
          */
         _shortJump : function ()
         {
-            // The jump address a signed (twos complement) offset from the current location.
+            // The jump address is a signed (twos complement) offset from the
+            // current location.
             var offset = this._memoryV[this._regIP + 1];
 
             // One-byte twos-complement conversion
