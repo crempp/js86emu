@@ -951,7 +951,7 @@ function(
                         "b",
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x01:
@@ -978,7 +978,7 @@ function(
                         "w",
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x02:
@@ -1005,7 +1005,7 @@ function(
                         "b",
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x03:
@@ -1032,7 +1032,7 @@ function(
                         "w",
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
 
@@ -2700,7 +2700,7 @@ function(
                         "b",
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x19 :
@@ -2729,7 +2729,7 @@ function(
                         "w",
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x1A :
@@ -2758,7 +2758,7 @@ function(
                         "b",
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x1B :
@@ -2787,7 +2787,7 @@ function(
                         "w",
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x1C :
