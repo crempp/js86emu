@@ -345,28 +345,28 @@ function(
                 switch (opcode.reg)
                 {
                     case 0:
-                        this._regAL = value;
+                        this._regAL = (value & 0x00FF);
                         break;
                     case 1:
-                        this._regCL = value;
+                        this._regCL = (value & 0x00FF);
                         break;
                     case 2:
-                        this._regDL = value;
+                        this._regDL = (value & 0x00FF);
                         break;
                     case 3:
-                        this._regBL = value;
+                        this._regBL = (value & 0x00FF);
                         break;
                     case 4:
-                        this._regAH = value;
+                        this._regAH = (value & 0x00FF);
                         break;
                     case 5:
-                        this._regBH = value;
+                        this._regBH = (value & 0x00FF);
                         break;
                     case 6:
-                        this._regCH = value;
+                        this._regCH = (value & 0x00FF);
                         break;
                     case 7:
-                        this._regDH = value;
+                        this._regDH = (value & 0x00FF);
                         break;
                 }
             }
@@ -375,28 +375,32 @@ function(
                 switch (opcode.reg)
                 {
                     case 0:
-                        this._regAH = (value >>> 8); this._regAL = (value & 0xFF);
+                        this._regAH = ((value >> 8) & 0x0FF);
+                        this._regAL = (value & 0x00FF);
                         break;
                     case 1:
-                        this._regCH = (value >>> 8); this._regCL = (value & 0xFF);
+                        this._regCH = ((value >> 8) & 0x0FF);
+                        this._regCL = (value & 0x00FF);
                         break;
                     case 2:
-                        this._regDH = (value >>> 8); this._regDL = (value & 0xFF);
+                        this._regDH = ((value >> 8) & 0x0FF);
+                        this._regDL = (value & 0x00FF);
                         break;
                     case 3:
-                        this._regBH = (value >>> 8); this._regBL = (value & 0xFF);
+                        this._regBH = ((value >> 8) & 0x0FF);
+                        this._regBL = (value & 0x00FF);
                         break;
                     case 4:
-                        this._regSP = value;
+                        this._regSP = (value & 0xFFFF);
                         break;
                     case 5:
-                        this._regBP = value;
+                        this._regBP = (value & 0xFFFF);
                         break;
                     case 6:
-                        this._regSI = value;
+                        this._regSI = (value & 0xFFFF);
                         break;
                     case 7:
-                        this._regDI = value;
+                        this._regDI = (value & 0xFFFF);
                         break;
                 }
             }
@@ -1537,7 +1541,7 @@ function(
                         valResult = 0xFFFF + 1 + valResult;
                     }
 
-                    this._regSP = valResult;
+                    this._regSP = (valResult & 0xFFFF);
 
                     this._setFlags(
                         regX,
@@ -1565,7 +1569,7 @@ function(
                         valResult = 0xFFFF + 1 + valResult;
                     }
 
-                    this._regBP = valResult;
+                    this._regBP = (valResult & 0xFFFF);
 
                     this._setFlags(
                         regX,
@@ -1593,7 +1597,7 @@ function(
                         valResult = 0xFFFF + 1 + valResult;
                     }
 
-                    this._regSI = valResult;
+                    this._regSI = (valResult & 0xFFFF);
 
                     this._setFlags(
                         regX,
@@ -1621,7 +1625,7 @@ function(
                         valResult = 0xFFFF + 1 + valResult;
                     }
 
-                    this._regDI = valResult;
+                    this._regDI = (valResult & 0xFFFF);
 
                     this._setFlags(
                         regX,
@@ -2502,7 +2506,7 @@ function(
                     valDst = this._getRMValueForOp(opcode);
                     valSrc = this._getRegValueForOp(opcode);
 
-                    valResult = valDst || valSrc;
+                    valResult = (valDst || valSrc) & 0x00FF;
                     this._setRMValueForOp(opcode, valResult);
 
                     this._setFlags(
@@ -2525,7 +2529,7 @@ function(
                     valDst = this._getRMValueForOp(opcode);
                     valSrc = this._getRegValueForOp(opcode);
 
-                    valResult = valDst || valSrc;
+                    valResult = (valDst || valSrc) & 0xFFFF;
                     this._setRMValueForOp(opcode, valResult);
 
                     this._setFlags(
@@ -2547,7 +2551,7 @@ function(
                     valDst = this._regAL;
                     valSrc = (this._memoryV[this._regIP + 1]);
 
-                    this._regAL = valDst || valSrc;
+                    this._regAL = (valDst || valSrc) & 0x00FF;
 
                     this._setFlags(
                         valDst,
@@ -3290,7 +3294,7 @@ function(
                     valDst = this._getRMValueForOp(opcode);
                     valSrc = this._getRegValueForOp(opcode);
 
-                    valResult = valDst ^ valSrc;
+                    valResult = (valDst ^ valSrc) & 0x00FF;
                     this._setRMValueForOp(opcode, valResult);
 
                     this._setFlags(
@@ -3312,7 +3316,7 @@ function(
                     valDst = this._getRMValueForOp(opcode);
                     valSrc = this._getRegValueForOp(opcode);
 
-                    valResult = valDst ^ valSrc;
+                    valResult = (valDst ^ valSrc) & 0xFFFF;
                     this._setRMValueForOp(opcode, valResult);
 
                     this._setFlags(
@@ -3334,7 +3338,7 @@ function(
                     valDst = this._getRegValueForOp(opcode);
                     valSrc = this._getRMValueForOp(opcode);
 
-                    valResult = valDst ^ valSrc;
+                    valResult = (valDst ^ valSrc) & 0x00FF;
                     this._setRegValueForOp(opcode, valResult);
 
                     this._setFlags(
@@ -3356,7 +3360,7 @@ function(
                     valDst = this._getRegValueForOp(opcode);
                     valSrc = this._getRMValueForOp(opcode);
 
-                    valResult = valDst ^ valSrc;
+                    valResult = (valDst ^ valSrc) & 0xFFFF;
                     this._setRegValueForOp(opcode, valResult);
 
                     this._setFlags(
@@ -3378,7 +3382,7 @@ function(
                     valDst = this._regAL;
                     valSrc = this._memoryV[this._regIP + 1];
 
-                    valResult = valDst ^ valSrc;
+                    valResult = (valDst ^ valSrc) & 0x00FF;
                     this._regAL = valResult;
 
                     this._setFlags(
@@ -3400,7 +3404,7 @@ function(
                     valDst = ( (this._regAH << 8) | this._regAL );
                     valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
 
-                    valResult = valDst ^ valSrc;
+                    valResult = (valDst ^ valSrc) & 0xFFFF;
                     this._regAL = valResult;
 
                     this._setFlags(
