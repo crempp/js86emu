@@ -772,7 +772,7 @@ function(
                         "b",
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x11 :
@@ -801,7 +801,7 @@ function(
                         "w",
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x12 :
@@ -830,7 +830,7 @@ function(
                         "b",
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x13 :
@@ -859,7 +859,7 @@ function(
                         "w",
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x14 :
@@ -1057,7 +1057,7 @@ function(
                         "b",
                         "add");
 
-                    this._regIP += 2;
+                    this._regIP += 1;
 
                     break;
                 case 0x05:
@@ -1115,7 +1115,7 @@ function(
                         "b",
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x21:
@@ -1142,7 +1142,7 @@ function(
                         "w",
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x22:
@@ -1169,7 +1169,7 @@ function(
                         "b",
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x23:
@@ -1196,7 +1196,7 @@ function(
                         "w",
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
 
@@ -1221,7 +1221,7 @@ function(
                         "b",
                         "add");
 
-                    this._regIP += 2;
+                    this._regIP += 1;
 
                     break;
                 case 0x25:
@@ -1257,15 +1257,13 @@ function(
                  * Notes       :
                  */
                 case 0xE8:
-                    var thisOpLen = 3;
-
                     // Push return address
                     // The return address is the _NEXT_ instruction, not the current
-                    this._push(this._regIP + thisOpLen);
+                    this._push(this._regIP + 3);
 
                     // Jump to procedure
                     // The relative address starts from the _END_ of this op
-                    this._regIP += ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]) + thisOpLen;
+                    this._regIP += ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]) + 3;
 
                     break;
 
@@ -1276,7 +1274,7 @@ function(
                  */
                 case 0xF8:
                     this._regFlags &= ~this.FLAG_CF_MASK;
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
 
                 /**
@@ -1286,7 +1284,7 @@ function(
                  */
                 case 0xFA:
                     this._regFlags &= ~this.FLAG_IF_MASK;
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
 
                 /**
@@ -1296,7 +1294,7 @@ function(
                  */
                 case 0xFC:
                     this._regFlags &= ~this.FLAG_DF_MASK;
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
 
                 /**
@@ -1420,7 +1418,15 @@ function(
                  */
                 case 0x48 :
                     regX = ((this._regAH << 8) | this._regAL);
+
                     valResult = regX - 1;
+
+                    // Handle underflow correctly
+                    if (valResult < 0)
+                    {
+                        valResult = 0xFFFF + 1 + valResult;
+                    }
+
                     this._regAH = (valResult & 0xFF00) >> 8;
                     this._regAL = (valResult & 0x00FF);
 
@@ -1436,12 +1442,20 @@ function(
                         'w',
                         "sub");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
                 case 0x49 :
                     regX = ((this._regCH << 8) | this._regCL);
+
                     valResult = regX - 1;
+
+                    // Handle underflow correctly
+                    if (valResult < 0)
+                    {
+                        valResult = 0xFFFF + 1 + valResult;
+                    }
+
                     this._regCH = (valResult & 0xFF00) >> 8;
                     this._regCL = (valResult & 0x00FF);
 
@@ -1457,12 +1471,20 @@ function(
                         'w',
                         "sub");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
                 case 0x4A :
                     regX = ((this._regDH << 8) | this._regDL);
+
                     valResult = regX - 1;
+
+                    // Handle underflow correctly
+                    if (valResult < 0)
+                    {
+                        valResult = 0xFFFF + 1 + valResult;
+                    }
+
                     this._regDH = (valResult & 0xFF00) >> 8;
                     this._regDL = (valResult & 0x00FF);
 
@@ -1478,12 +1500,20 @@ function(
                         'w',
                         "sub");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
                 case 0x4B :
                     regX = ((this._regBH << 8) | this._regBL);
+
                     valResult = regX - 1;
+
+                    // Handle underflow correctly
+                    if (valResult < 0)
+                    {
+                        valResult = 0xFFFF + 1 + valResult;
+                    }
+
                     this._regBH = (valResult & 0xFF00) >> 8;
                     this._regBL = (valResult & 0x00FF);
 
@@ -1499,12 +1529,20 @@ function(
                         'w',
                         "sub");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
                 case 0x4C :
                     regX = this._regSP;
+
                     valResult = regX - 1;
+
+                    // Handle underflow correctly
+                    if (valResult < 0)
+                    {
+                        valResult = 0xFFFF + 1 + valResult;
+                    }
+
                     this._regSP = valResult;
 
                     this._setFlags(
@@ -1519,12 +1557,20 @@ function(
                         'w',
                         "sub");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
                 case 0x4D :
                     regX = this._regBP;
+
                     valResult = regX - 1;
+
+                    // Handle underflow correctly
+                    if (valResult < 0)
+                    {
+                        valResult = 0xFFFF + 1 + valResult;
+                    }
+
                     this._regBP = valResult;
 
                     this._setFlags(
@@ -1539,12 +1585,20 @@ function(
                         'w',
                         "sub");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
                 case 0x4E :
                     regX = this._regSI;
+
                     valResult = regX - 1;
+
+                    // Handle underflow correctly
+                    if (valResult < 0)
+                    {
+                        valResult = 0xFFFF + 1 + valResult;
+                    }
+
                     this._regSI = valResult;
 
                     this._setFlags(
@@ -1559,12 +1613,20 @@ function(
                         'w',
                         "sub");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
                 case 0x4F :
                     regX = this._regDI;
+
                     valResult = regX - 1;
+
+                    // Handle underflow correctly
+                    if (valResult < 0)
+                    {
+                        valResult = 0xFFFF + 1 + valResult;
+                    }
+
                     this._regDI = valResult;
 
                     this._setFlags(
@@ -1579,7 +1641,7 @@ function(
                         'w',
                         "sub");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
 
@@ -1740,6 +1802,13 @@ function(
                         case 5 :
                             valResult = valDst - valSrc;
 
+                            // Handle underflow correctly
+                            if (valResult < 0)
+                            {
+                                if ("b" === size) valResult = 0x00FF + 1 + valResult;
+                                else if ("w" === size) valResult = 0xFFFF + 1 + valResult;
+                            }
+
                             // Set clamped word
                             this._setRMValueForOp(opcode, (valResult & clampMask));
 
@@ -1836,7 +1905,7 @@ function(
                         'w',
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
                 case 0x41 :
@@ -1857,7 +1926,7 @@ function(
                         'w',
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
                 case 0x42 :
@@ -1878,7 +1947,7 @@ function(
                         'w',
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
                 case 0x43 :
@@ -1899,7 +1968,7 @@ function(
                         'w',
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
                 case 0x44 :
@@ -1919,7 +1988,7 @@ function(
                         'w',
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
                 case 0x45 :
@@ -1939,7 +2008,7 @@ function(
                         'w',
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
                 case 0x46 :
@@ -1959,7 +2028,7 @@ function(
                         'w',
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
                 case 0x47 :
@@ -1979,7 +2048,7 @@ function(
                         'w',
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
 
@@ -2426,7 +2495,7 @@ function(
                  * Notes       :
                  */
                 case 0x90:
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
 
                 /**
@@ -2454,7 +2523,7 @@ function(
                         'b',
                         "or");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x09:
@@ -2533,55 +2602,55 @@ function(
                  */
                 case 0x07:
                     this._regES = this._pop();
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
                 case 0x17:
                     this._regSS = this._pop();
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
                 case 0x1F:
                     this._regDS = this._pop();
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
                 case 0x58:
                     valResult = this._pop();
                     this._regAH = (valResult & 0xFF00) >> 8;
                     this._regAL = (valResult & 0x00FF);
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
                 case 0x59:
                     valResult = this._pop();
                     this._regCH = (valResult & 0xFF00) >> 8;
                     this._regCL = (valResult & 0x00FF);
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
                 case 0x5A:
                     valResult = this._pop();
                     this._regDH = (valResult & 0xFF00) >> 8;
                     this._regDL = (valResult & 0x00FF);
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
                 case 0x5B:
                     valResult = this._pop();
                     this._regBH = (valResult & 0xFF00) >> 8;
                     this._regBL = (valResult & 0x00FF);
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
                 case 0x5C:
                     this._regSP = this._pop();
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
                 case 0x5D:
                     this._regBP = this._pop();
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
                 case 0x5E:
                     this._regSI = this._pop();
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
                 case 0x5F:
                     this._regDI = this._pop();
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
                 case 0x8F:
                     // This one isn't as easy
@@ -2602,51 +2671,51 @@ function(
                  */
                 case 0x06:
                     this._push(this._regES);
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
                 case 0x0E:
                     this._push(this._regCS);
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
                 case 0x16:
                     this._push(this._regSS);
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
                 case 0x1E:
                     this._push(this._regDS);
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
                 case 0x50:
                     this._push(((this._regAH << 8) | this._regAL));
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
                 case 0x51:
                     this._push(((this._regCH << 8) | this._regCL));
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
                 case 0x52:
                     this._push(((this._regDH << 8) | this._regDL));
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
                 case 0x53:
                     this._push(((this._regBH << 8) | this._regBL));
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
                 case 0x54:
                     this._push(this._regSP);
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
                 case 0x55:
                     this._push(this._regBP);
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
                 case 0x56:
                     this._push(this._regSI);
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
                 case 0x57:
                     this._push(this._regDI);
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
 
                 /**
@@ -2665,7 +2734,7 @@ function(
                     });
                     break;
                 case 0xC3:
-                    this._regIP = (this._pop());
+                    this._regIP = this._pop();
                     break;
 
                 /**
@@ -2680,6 +2749,12 @@ function(
 
                     valResult = valDst - valSrc;
                     if (this._regFlags & this.FLAG_CF_MASK) valResult -= 1;
+
+                    // Handle underflow correctly
+                    if (valResult < 0)
+                    {
+                        valResult = 0x00FF + 1 + valResult;
+                    }
 
                     // Set clamped byte
                     this._setRMValueForOp(opcode, (valResult & 0x00FF));
@@ -2710,6 +2785,12 @@ function(
                     valResult = valDst - valSrc;
                     if (this._regFlags & this.FLAG_CF_MASK) valResult -= 1;
 
+                    // Handle underflow correctly
+                    if (valResult < 0)
+                    {
+                        valResult = 0xFFFF + 1 + valResult;
+                    }
+
                     // Set clamped word
                     this._setRMValueForOp(opcode, (valResult & 0xFFFF));
 
@@ -2738,6 +2819,12 @@ function(
 
                     valResult = valDst - valSrc;
                     if (this._regFlags & this.FLAG_CF_MASK) valResult -= 1;
+
+                    // Handle underflow correctly
+                    if (valResult < 0)
+                    {
+                        valResult = 0x00FF + 1 + valResult;
+                    }
 
                     // Set clamped byte
                     this._setRMValueForOp(opcode, (valResult & 0x00FF));
@@ -2768,11 +2855,14 @@ function(
                     valResult = valDst - valSrc;
                     if (this._regFlags & this.FLAG_CF_MASK) valResult -= 1;
 
+                    // Handle underflow correctly
+                    if (valResult < 0)
+                    {
+                        valResult = 0xFFFF + 1 + valResult;
+                    }
+
                     // Set clamped word
                     this._setRMValueForOp(opcode, (valResult & 0xFFFF));
-
-                    // correct for duplicate helper usage
-                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -2796,6 +2886,12 @@ function(
 
                     valResult = valDst - valSrc;
                     if (this._regFlags & this.FLAG_CF_MASK) valResult -= 1;
+
+                    // Handle underflow correctly
+                    if (valResult < 0)
+                    {
+                        valResult = 0x00FF + 1 + valResult;
+                    }
 
                     // Set clamped byte
                     this._setRMValueForOp(opcode, (valResult & 0x00FF));
@@ -2825,6 +2921,12 @@ function(
 
                     valResult = valDst - valSrc;
                     if (this._regFlags & this.FLAG_CF_MASK) valResult -= 1;
+
+                    // Handle underflow correctly
+                    if (valResult < 0)
+                    {
+                        valResult = 0xFFFF + 1 + valResult;
+                    }
 
                     // Set clamped word
                     this._setRMValueForOp(opcode, (valResult & 0xFFFF));
@@ -2856,7 +2958,7 @@ function(
                  */
                 case 0xF9:
                     this._regFlags |= this.FLAG_CF_MASK;
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
 
                 /**
@@ -2866,7 +2968,7 @@ function(
                  */
                 case 0xFB:
                     this._regFlags |= this.FLAG_IF_MASK;
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
 
                 /**
@@ -2876,7 +2978,7 @@ function(
                  */
                 case 0xFD:
                     this._regFlags |= this.FLAG_DF_MASK;
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
                     break;
 
                 /**
@@ -2891,10 +2993,13 @@ function(
 
                     valResult = valDst - valSrc;
 
-                    this._setRMValueForOp(opcode, valResult & 0x00FF);
+                    // Handle underflow correctly
+                    if (valResult < 0)
+                    {
+                        valResult = 0x00FF + 1 + valResult;
+                    }
 
-                    // correct for duplicate helper usage
-                    //_tempIP -= 4; // This seems wonky but it works for the moment
+                    this._setRMValueForOp(opcode, valResult & 0x00FF);
 
                     this._setFlags(
                         valDst,
@@ -2909,7 +3014,7 @@ function(
                         "b",
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x29:
@@ -2918,10 +3023,13 @@ function(
 
                     valResult = valDst - valSrc;
 
-                    this._setRMValueForOp(opcode, valResult & 0xFFFF);
+                    // Handle underflow correctly
+                    if (valResult < 0)
+                    {
+                        valResult = 0xFFFF + 1 + valResult;
+                    }
 
-                    // correct for 3 helper usages
-                    //_tempIP -= 3;
+                    this._setRMValueForOp(opcode, valResult & 0xFFFF);
 
                     this._setFlags(
                         valDst,
@@ -2936,7 +3044,7 @@ function(
                         "w",
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x2A:
@@ -2945,10 +3053,13 @@ function(
 
                     valResult = valDst - valSrc;
 
-                    this._setRegValueForOp(opcode, valResult & 0x00FF);
+                    // Handle underflow correctly
+                    if (valResult < 0)
+                    {
+                        valResult = 0x00FF + 1 + valResult;
+                    }
 
-                    // correct for 3 helper usages
-                    //_tempIP -= 2;
+                    this._setRegValueForOp(opcode, valResult & 0x00FF);
 
                     this._setFlags(
                         valDst,
@@ -2963,7 +3074,7 @@ function(
                         "b",
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x2B:
@@ -2972,10 +3083,13 @@ function(
 
                     valResult = valDst - valSrc;
 
-                    this._setRMValueForOp(opcode, valResult & 0xFFFF);
+                    // Handle underflow correctly
+                    if (valResult < 0)
+                    {
+                        valResult = 0xFFFF + 1 + valResult;
+                    }
 
-                    // correct for 3 helper usages
-                    //_tempIP -= 2;
+                    this._setRMValueForOp(opcode, valResult & 0xFFFF);
 
                     this._setFlags(
                         valDst,
@@ -2990,7 +3104,7 @@ function(
                         "w",
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
 
@@ -2999,6 +3113,12 @@ function(
                     valSrc = this._memoryV[this._regIP + 1];
 
                     valResult = valDst - valSrc;
+
+                    // Handle underflow correctly
+                    if (valResult < 0)
+                    {
+                        valResult = 0x00FF + 1 + valResult;
+                    }
 
                     this._regAL = valResult & 0x00FF;
 
@@ -3024,6 +3144,12 @@ function(
 
                     valResult = valDst - valSrc;
 
+                    // Handle underflow correctly
+                    if (valResult < 0)
+                    {
+                        valResult = 0xFFFF + 1 + valResult;
+                    }
+
                     this._regAH = (valResult & 0xFF00) >> 8;
                     this._regAL = (valResult & 0x00FF);
 
@@ -3040,7 +3166,7 @@ function(
                         "w",
                         "add");
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 3;
 
                     break;
 
@@ -3054,16 +3180,10 @@ function(
                     valDst = this._getRegValueForOp(opcode); // G
                     valSrc = this._getRMValueForOp(opcode);  // E
 
-                    //console.log("  valDst",valDst);
-                    //console.log("  valSrc",valSrc);
-
                     this._setRegValueForOp(opcode, valSrc);
                     this._setRMValueForOp(opcode, valDst);
 
-                    // Correct for duplicate helper usage
-                    //_tempIP -= 3;
-
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += (_tempIP + 2);
 
                     break;
                 case 0x91 :
@@ -3077,7 +3197,7 @@ function(
                     this._regCH = (valSrc & 0xFF00) >> 8;
                     this._regCL = (valSrc & 0x00FF);
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
                 case 0x92 :
@@ -3091,7 +3211,7 @@ function(
                     this._regDH = (valSrc & 0xFF00) >> 8;
                     this._regDL = (valSrc & 0x00FF);
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
                 case 0x93 :
@@ -3105,7 +3225,7 @@ function(
                     this._regBH = (valSrc & 0xFF00) >> 8;
                     this._regBL = (valSrc & 0x00FF);
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
                 case 0x94 :
@@ -3118,7 +3238,7 @@ function(
 
                     this._regSP = valSrc;
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
                 case 0x95 :
@@ -3131,7 +3251,7 @@ function(
 
                     this._regBP = valSrc;
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
                 case 0x96 :
@@ -3144,7 +3264,7 @@ function(
 
                     this._regSI = valSrc;
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
                 case 0x97 :
@@ -3157,7 +3277,7 @@ function(
 
                     this._regDI = valSrc;
 
-                    this._regIP += (_tempIP + 1);
+                    this._regIP += 1;
 
                     break;
 
@@ -3273,7 +3393,7 @@ function(
                         'b',
                         "or");
 
-                    this._regIP += (_tempIP + 2);
+                    this._regIP += (_tempIP + 1);
 
                     break;
                 case 0x35:
@@ -3541,7 +3661,7 @@ function(
             // Indicates when an arithmetic overflow has occurred in an operation,
             // indicating that the signed two's-complement result would not fit in
             // the number of bits used for the operation (the ALU width).
-            if (flagsToSet & this.FLAG_DF_MASK)
+            if (flagsToSet & this.FLAG_OF_MASK)
             {
                 var shift;
                 if ('w' === size) shift = 15; else shift = 7;
