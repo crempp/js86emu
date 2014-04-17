@@ -171,32 +171,26 @@ function(
                 {
                     case 0 : // [BX + SI]
                         addr = ( ((this._regBH << 8) | this._regBL) + this._regSI );
-                        _tempIP += 1;
                         return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                         break;
                     case 1 : // [BX + DI]
                         addr = ( ((this._regBH << 8) | this._regBL) + this._regDI );
-                        _tempIP += 1;
                         return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                         break;
                     case 2 : // [BP + SI]
                         addr = ( this._regBP + this._regSI );
-                        _tempIP += 1;
                         return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                         break;
                     case 3 : // [BP + DI]
                         addr = ( this._regBP + this._regDI );
-                        _tempIP += 1;
                         return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                         break;
                     case 4 : // [SI]
                         addr = ( this._regSI );
-                        _tempIP += 1;
                         return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                         break;
                     case 5 : // [DI]
                         addr = ( this._regDI );
-                        _tempIP += 1;
                         return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                         break;
                     case 6 : // Drc't Add
@@ -215,7 +209,6 @@ function(
                         break;
                     case 7 : // [BX]
                         addr = ( (this._regBH << 8) | this._regBL );
-                        _tempIP += 1;
                         return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                         break;
                 }
@@ -447,6 +440,7 @@ function(
                         addr = ( this._regDI );
                         break;
                     case 6 : // 110b Drc't Add
+                        //
                         if (0 === opcode.w) // Byte
                         {
                             addr = this._memoryV[this._regIP + 2];
@@ -3030,6 +3024,12 @@ function(
                     }
 
                     this._setRMValueForOp(opcode, valResult & 0xFFFF);
+
+                    // correct for direct addressing IP counting
+                    if (0 === opcode.mod && 6 === opcode.rm)
+                    {
+                        _tempIP -= 2;
+                    }
 
                     this._setFlags(
                         valDst,
