@@ -594,6 +594,31 @@ function(
         },
 
         /**
+         * Get the amount the IP should increment for an RM operand
+         *
+         * @param opcode
+         * @private
+         */
+        _getRMIncIP : function (opcode)
+        {
+            if (0 === opcode.mod)
+            {
+                if (6 === opcode.rm) // 110b Drc't Add
+                {
+                    if (0 === opcode.w) // Byte
+                    {
+                        return 1;
+                    }
+                    else // Word
+                    {
+                        return 2;
+                    }
+                }
+            }
+            return 0;
+        },
+
+        /**
          * Reset the CPU state
          *
          * TODO: Verify this information
@@ -861,8 +886,10 @@ function(
 
                     break;
                 case 0x14 :
+                    var ipRMInc = this._getRMIncIP(opcode);
+
                     valDst = this._regAL;
-                    valSrc = this._memoryV[this._regIP + 1];
+                    valSrc = this._memoryV[this._regIP + ipRMInc + 1];
 
                     valResult = valDst + valSrc;
                     if (this._regFlags & this.FLAG_CF_MASK) valResult += 1;
@@ -890,8 +917,10 @@ function(
 
                     break;
                 case 0x15 :
+                    var ipRMInc = this._getRMIncIP(opcode);
+
                     valDst = ((this._regAH << 8) | this._regAL);
-                    valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+                    valSrc = ((this._memoryV[this._regIP + ipRMInc + 2] << 8) | this._memoryV[this._regIP + ipRMInc + 1]);
 
                     valResult = valDst + valSrc;
                     if (this._regFlags & this.FLAG_CF_MASK) valResult += 1;
@@ -1681,11 +1710,11 @@ function(
                     valDst = this._getRegValueForOp({w:opcode.w, d:opcode.d, reg:opcode.rm, rm:opcode.rm});
                     var clampMask;
                     var size;
+                    var ipRMInc = this._getRMIncIP(opcode);
 
-                    // Updating IP offsets, helper functions now increment IP
                     if (0x80 === opcode_byte)
                     {
-                        valSrc = ((this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2]);
+                        valSrc = ((this._memoryV[this._regIP + ipRMInc + 3] << 8) | this._memoryV[this._regIP + ipRMInc + 2]);
 
                         // Clamp source to byte
                         valSrc = valSrc & 0x00FF;
@@ -1699,7 +1728,7 @@ function(
                     }
                     else if (0x81 === opcode_byte)
                     {
-                        valSrc = ((this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2]);
+                        valSrc = ((this._memoryV[this._regIP + ipRMInc + 3] << 8) | this._memoryV[this._regIP + ipRMInc + 2]);
 
                         // Clamp value to word
                         clampMask = 0xFFFF;
@@ -1710,7 +1739,7 @@ function(
                     }
                     else if (0x82 === opcode_byte)
                     {
-                        valSrc = ((this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2]);
+                        valSrc = ((this._memoryV[this._regIP + ipRMInc + 3] << 8) | this._memoryV[this._regIP + ipRMInc + 2]);
 
                         // Clamp source to byte
                         valSrc = valSrc & 0x00FF;
@@ -1724,7 +1753,7 @@ function(
                     }
                     else if (0x83 === opcode_byte)
                     {
-                        valSrc = this._memoryV[this._regIP + 2];
+                        valSrc = this._memoryV[this._regIP + ipRMInc + 2];
 
                         // Clamp source to byte
                         valSrc = valSrc & 0x00FF;
@@ -2607,11 +2636,15 @@ function(
                     this._regIP += 3;
                     break;
                 case 0xC6:
-                    this._setRMValueForOp(opcode, this._memoryV[this._regIP + 1]);
+                    var ipRMInc = this._getRMIncIP(opcode);
+                    valSrc = this._memoryV[this._regIP + ipRMInc + 2];
+                    this._setRMValueForOp(opcode, valSrc);
                     this._regIP += (_tempIP + 3);
                     break;
                 case 0xC7:
-                    this._setRMValueForOp(opcode, (this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+                    var ipRMInc = this._getRMIncIP(opcode);
+                    valSrc = (this._memoryV[this._regIP + ipRMInc + 3] << 8) | this._memoryV[this._regIP + ipRMInc + 2];
+                    this._setRMValueForOp(opcode, valSrc);
                     this._regIP += (_tempIP + 4);
                     break;
 
@@ -3007,8 +3040,10 @@ function(
 
                     break;
                 case 0x1C :
+                    var ipRMInc = this._getRMIncIP(opcode);
+
                     valDst = this._regAL;
-                    valSrc = this._memoryV[this._regIP + 1];
+                    valSrc = this._memoryV[this._regIP + ipRMInc + 1];
 
                     valResult = valDst - valSrc;
                     if (this._regFlags & this.FLAG_CF_MASK) valResult -= 1;
@@ -3042,8 +3077,10 @@ function(
 
                     break;
                 case 0x1D :
+                    var ipRMInc = this._getRMIncIP(opcode);
+
                     valDst = ((this._regAH << 8) | this._regAL);
-                    valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+                    valSrc = ((this._memoryV[this._regIP + ipRMInc + 2] << 8) | this._memoryV[this._regIP + ipRMInc + 1]);
 
                     valResult = valDst - valSrc;
                     if (this._regFlags & this.FLAG_CF_MASK) valResult -= 1;
