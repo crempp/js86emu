@@ -92,7 +92,7 @@ function(
             for(;;)
             {
                 console.log("cycle ", this._cycles);
-                if (135 === this._cycles)
+                if (1508 === this._cycles)
                 //if (417 === this._cycles)
                 {
                     this._debugFlag = true;

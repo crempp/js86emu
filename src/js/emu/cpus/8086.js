@@ -1389,24 +1389,48 @@ function(
 
                     break;
                 case 0x3C:
-                    if (_breakOnError) _Cpu.halt({
-                        error      : true,
-                        enterDebug : true,
-                        message    : "Opcode not implemented!",
-                        decObj     : opcode,
-                        regObj     : this._bundleRegisters(),
-                        memObj     : this._memoryV
-                    });
+                    valDst = this._regAL;
+                    valSrc = this._memoryV[this._regIP + 1];
+
+                    valResult = valDst - valSrc;
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "b",
+                        "sub");
+
+                    this._regIP += 2;
+
                     break;
                 case 0x3D:
-                    if (_breakOnError) _Cpu.halt({
-                        error      : true,
-                        enterDebug : true,
-                        message    : "Opcode not implemented!",
-                        decObj     : opcode,
-                        regObj     : this._bundleRegisters(),
-                        memObj     : this._memoryV
-                    });
+                    valDst = ((this._regAH << 8) | this._regAL);
+                    valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+
+                    valResult = valDst - valSrc;
+
+                    this._setFlags(
+                        valDst,
+                        valSrc,
+                        valResult,
+                        (   this.FLAG_CF_MASK |
+                            this.FLAG_ZF_MASK |
+                            this.FLAG_SF_MASK |
+                            this.FLAG_OF_MASK |
+                            this.FLAG_PF_MASK |
+                            this.FLAG_AF_MASK),
+                        "w",
+                        "sub");
+
+                    this._regIP += w;
+
                     break;
 
                 /**
@@ -2581,6 +2605,14 @@ function(
                 case 0xBF:
                     this._regDI = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
                     this._regIP += 3;
+                    break;
+                case 0xC6:
+                    this._setRMValueForOp(opcode, this._memoryV[this._regIP + 1]);
+                    this._regIP += (_tempIP + 3);
+                    break;
+                case 0xC7:
+                    this._setRMValueForOp(opcode, (this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+                    this._regIP += (_tempIP + 4);
                     break;
 
                 /**
