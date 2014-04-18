@@ -156,7 +156,7 @@ function(
                     decObj     : opcode,
                     regObj     : this._bundleRegisters(),
                     memObj     : this._memoryV
-                });
+                })
             }
         },
 
@@ -1770,16 +1770,63 @@ function(
                     }
 
                     switch (opcode.reg) {
-                        case 1 :
-                            if (_breakOnError) _Cpu.halt({
-                                error      : true,
-                                enterDebug : true,
-                                message    : "Opcode not implemented!",
-                                decObj     : opcode,
-                                regObj     : this._bundleRegisters(),
-                                memObj     : this._memoryV
-                            });
+                        /**
+                         * Instruction : ADD
+                         * Meaning     : Add src to dst replacing the original contents
+                         *               of dest
+                         * Notes       :
+                         */
+                        case 0 :
+                            valResult = valDst + valSrc;
+
+                            // Set clamped word
+                            this._setRMValueForOp(opcode, (valResult & clampMask));
+
+                            this._setFlags(
+                                valDst,
+                                valSrc,
+                                valResult,
+                                (   this.FLAG_CF_MASK |
+                                    this.FLAG_ZF_MASK |
+                                    this.FLAG_SF_MASK |
+                                    this.FLAG_OF_MASK |
+                                    this.FLAG_PF_MASK |
+                                    this.FLAG_AF_MASK),
+                                size,
+                                "add");
+
+                            this._regIP += (_tempIP + 2);
+
                             break;
+
+                        /**
+                         * Instruction : OR
+                         * Meaning     : Logical inclusive or of the operands
+                         * Notes       :
+                         */
+                        case 1 :
+                            valResult = (valDst || valSrc);
+
+                            // Set clamped word
+                            this._setRMValueForOp(opcode, (valResult & clampMask));
+
+                            this._setFlags(
+                                valDst,
+                                valSrc,
+                                valResult,
+                                (   this.FLAG_CF_MASK |
+                                    this.FLAG_ZF_MASK |
+                                    this.FLAG_SF_MASK |
+                                    this.FLAG_OF_MASK |
+                                    this.FLAG_PF_MASK |
+                                    this.FLAG_AF_MASK),
+                                size,
+                                "add");
+
+                            this._regIP += (_tempIP + 2);
+
+                            break;
+
                         /**
                          * Instruction : ADC
                          * Meaning     : Add with carry
@@ -1808,15 +1855,42 @@ function(
                             this._regIP += (_tempIP + 2);
 
                             break;
+
+                        /**
+                         * Instruction : SBB
+                         * Meaning     : Subtract with borrow
+                         * Notes       : Subtracts the two operands, if CF is set subtracts
+                         *               one from the result
+                         */
                         case 3 :
-                            if (_breakOnError) _Cpu.halt({
-                                error      : true,
-                                enterDebug : true,
-                                message    : "Opcode not implemented!",
-                                decObj     : opcode,
-                                regObj     : this._bundleRegisters(),
-                                memObj     : this._memoryV
-                            });
+                            valResult = valDst - valSrc;
+                            if (this._regFlags & this.FLAG_CF_MASK) valResult -= 1;
+
+                            // Handle underflow correctly
+                            if (valResult < 0)
+                            {
+                                if ("b" === size) valResult = 0x00FF + 1 + valResult;
+                                else if ("w" === size) valResult = 0xFFFF + 1 + valResult;
+                            }
+
+                            // Set clamped word
+                            this._setRMValueForOp(opcode, (valResult & clampMask));
+
+                            this._setFlags(
+                                valDst,
+                                valSrc,
+                                valResult,
+                                (   this.FLAG_CF_MASK |
+                                    this.FLAG_ZF_MASK |
+                                    this.FLAG_SF_MASK |
+                                    this.FLAG_OF_MASK |
+                                    this.FLAG_PF_MASK |
+                                    this.FLAG_AF_MASK),
+                                size,
+                                "sub");
+
+                            this._regIP += (_tempIP + 2);
+
                             break;
                         /**
                          * Instruction : AND
@@ -1878,15 +1952,32 @@ function(
 
                             this._regIP += (_tempIP + 2);
                             break;
+
+                        /**
+                         * Instruction : XOR
+                         * Meaning     : Performs a bitwise exclusive or of the operands.
+                         * Notes       :
+                         */
                         case 6 :
-                            if (_breakOnError) _Cpu.halt({
-                                error      : true,
-                                enterDebug : true,
-                                message    : "Opcode not implemented!",
-                                decObj     : opcode,
-                                regObj     : this._bundleRegisters(),
-                                memObj     : this._memoryV
-                            });
+                            valResult = (valDst ^ valSrc);
+
+                            // Set clamped word
+                            this._setRMValueForOp(opcode, (valResult & clampMask));
+
+                            this._setFlags(
+                                valDst,
+                                valSrc,
+                                valResult,
+                                (   this.FLAG_CF_MASK |
+                                    this.FLAG_ZF_MASK |
+                                    this.FLAG_SF_MASK |
+                                    this.FLAG_OF_MASK |
+                                    this.FLAG_PF_MASK |
+                                    this.FLAG_AF_MASK),
+                                size,
+                                "or");
+
+                            this._regIP += (_tempIP + 2);
                             break;
                         /**
                          * Instruction : CMP
@@ -3604,13 +3695,18 @@ function(
             // Post-cycle Debug
             if (_Cpu.isDebug())
             {
-                var options = options || {
-                    error      : false,
-                    enterDebug : false,
-                    message    : "[c:" + _Cpu._cycles + "] " + opcode.instruction,
-                    decObj     : opcode
-                };
-                _Gui.debugUpdateInfo(options);
+                // Don't update info if cpu was halted this cycle
+                if (! _Cpu._haltFlag )
+                {
+                    var options = options || {
+                        error      : false,
+                        enterDebug : false,
+                        message    : "[c:" + _Cpu._cycles + "] " + opcode.instruction,
+                        decObj     : opcode
+                    };
+                    _Gui.debugUpdateInfo(options);
+                }
+
                 _Cpu.debugUpdateRegisters(this._bundleRegisters());
 
             }
