@@ -91,8 +91,8 @@ function(
         {
             for(;;)
             {
-                console.log("cycle ", this._cycles);
-                if (1513 === this._cycles)
+                //console.log("cycle ", this._cycles);
+                if (3600 === this._cycles)
                 {
                     this._debugFlag = true;
                 }
@@ -107,7 +107,7 @@ function(
                     this._cycles++;
 
                     // TODO: This is wrong! Research the correct timing
-                    if (0 === this._cycles % 10) this._drawFlag = true;
+                    if (0 === this._cycles % 100) this._drawFlag = true;
 
                     // If the draw flag is set, update the screen
                     if(this._drawFlag)

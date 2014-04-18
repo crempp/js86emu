@@ -1707,7 +1707,7 @@ function(
                 case 0x83:
                     // Group opcodes use R/M to determine register (REG is used to determine
                     // instruction)
-                    valDst = this._getRegValueForOp({w:opcode.w, d:opcode.d, reg:opcode.rm, rm:opcode.rm});
+                    valDst = this._getRMValueForOp({mod: opcode.mod, w:opcode.w, d:opcode.d, reg:opcode.rm, rm:opcode.rm});
                     var clampMask;
                     var size;
                     var ipRMInc = this._getRMIncIP(opcode);
@@ -3607,7 +3607,7 @@ function(
                 var options = options || {
                     error      : false,
                     enterDebug : false,
-                    message    : opcode.instruction,
+                    message    : "[c:" + _Cpu._cycles + "] " + opcode.instruction,
                     decObj     : opcode
                 };
                 _Gui.debugUpdateInfo(options);
