@@ -1872,6 +1872,102 @@ function(
                     break;
 
                 /**
+                 * Instruction : GRP4
+                 * Meaning     : Group Opcode 4
+                 * Notes       :
+                 */
+                case 0xFE:
+                    switch (opcode.reg) {
+                        /**
+                         * Instruction : INC
+                         * Meaning     : Increment by 1
+                         * Notes       :
+                         */
+                        case 0 :
+                            valDst = this._getRMValueForOp(opcode);  // E
+
+                            valResult = (valDst + 1) & 0x00FF;
+
+                            this._setRMValueForOp(opcode, valResult);
+
+                            this._setFlags(
+                                regX,
+                                1,
+                                valResult,
+                                (   this.FLAG_ZF_MASK |
+                                    this.FLAG_SF_MASK |
+                                    this.FLAG_OF_MASK |
+                                    this.FLAG_PF_MASK |
+                                    this.FLAG_AF_MASK),
+                                'b',
+                                "add");
+
+                            this._regIP += 2;
+
+                            break;
+                        /**
+                         * Instruction : DEC
+                         * Meaning     : Decrement by 1
+                         * Notes       :
+                         */
+                        case 1 :
+                            valDst = this._getRMValueForOp(opcode);  // E
+
+                            valResult = (valDst - 1) & 0x00FF;
+
+                            // Handle underflow correctly
+                            if (valResult < 0)
+                            {
+                                if ("b" === size) valResult = 0x00FF + 1 + valResult;
+                                else if ("w" === size) valResult = 0xFFFF + 1 + valResult;
+                            }
+
+                            this._setRMValueForOp(opcode, valResult);
+
+                            this._setFlags(
+                                regX,
+                                1,
+                                valResult,
+                                (   this.FLAG_ZF_MASK |
+                                    this.FLAG_SF_MASK |
+                                    this.FLAG_OF_MASK |
+                                    this.FLAG_PF_MASK |
+                                    this.FLAG_AF_MASK),
+                                'b',
+                                "seb");
+
+                            this._regIP += 2;
+
+                            break;
+                        default :
+                            if (_breakOnError) _Cpu.halt({
+                                error      : true,
+                                enterDebug : true,
+                                message    : "Invalid opcode!",
+                                decObj     : opcode,
+                                regObj     : this._bundleRegisters(),
+                                memObj     : this._memoryV
+                            });
+                    }
+
+                    break;
+                /**
+                 * Instruction : GRP5
+                 * Meaning     : Group Opcode 5
+                 * Notes       :
+                 */
+                case 0xFF:
+                    if (_breakOnError) _Cpu.halt({
+                        error      : true,
+                        enterDebug : true,
+                        message    : "Opcode not implemented!",
+                        decObj     : opcode,
+                        regObj     : this._bundleRegisters(),
+                        memObj     : this._memoryV
+                    });
+                    break;
+
+                /**
                  * Instruction : HLT
                  * Meaning     : Halt the System
                  * Notes       :
@@ -3422,7 +3518,6 @@ function(
                     this._regIP += 3;
 
                     break;
-
 
                 default :
                     if (_breakOnError) _Cpu.halt({
