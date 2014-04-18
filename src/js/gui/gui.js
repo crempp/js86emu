@@ -47,8 +47,6 @@ function(
 
         debugUpdateInfo : function (data)
         {
-            //var infoModel = new DebugDecodeModel(decObj);
-            //var debugDecodeView = new DebugDecodeView({model: infoModel});
             var debugInfoView = new DebugInfoView(data);
             $("#gui-debug-info").html(debugInfoView.render().el);
         },

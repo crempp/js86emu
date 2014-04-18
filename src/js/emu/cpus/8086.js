@@ -3567,7 +3567,15 @@ function(
             // Post-cycle Debug
             if (_Cpu.isDebug())
             {
+                var options = options || {
+                    error      : false,
+                    enterDebug : false,
+                    message    : opcode.instruction,
+                    decObj     : opcode
+                };
+                _Gui.debugUpdateInfo(options);
                 _Cpu.debugUpdateRegisters(this._bundleRegisters());
+
             }
 
         },
