@@ -23,8 +23,14 @@ We'll see how far I get :)
 
 TODO
 ----
-
-* Verify correct word and byte clamping on all relevant instructions
+* Fix operations which set src to an RM value, they over count IP increment. The following is the fix but care needs to be taken to determine which ops need it
+  ```
+  // correct for direct addressing IP counting
+  if (0 === opcode.mod && 6 === opcode.rm)
+  {
+      _tempIP -= 2;
+  }
+  ```
 * Add memory break points
 * Update memory debug view to keep starting point of rows at a factor of 8 (currently the row begins at IP)
 
@@ -41,8 +47,8 @@ References
 * [Wikipedia article on the 8086](http://en.wikipedia.org/wiki/8086)
 * [8086 Opcode Map](http://www.mlsite.net/8086/)
 * [The Instruction Set of 8086](http://www.ing.unlp.edu.ar/electrotecnia/arcom1/UNDERSTANDING8085_8086_cap14_Instruccion_set.pdf)
-* http://www.c-jump.com/CIS77/ASM/Memory/lecture.html
-* http://www.compileonline.com/compile_assembly_online.php
+* [Modes of Memory Addressing on x86](http://www.c-jump.com/CIS77/ASM/Memory/lecture.html)
+* [Compile and Execute Assembly Online](http://www.compileonline.com/compile_assembly_online.php)
 
 Notes
 -----

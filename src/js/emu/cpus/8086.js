@@ -779,9 +779,6 @@ function(
                     // Set clamped byte
                     this._setRMValueForOp(opcode, (valResult & 0x00FF));
 
-                    // correct for duplicate helper usage
-                    //_tempIP -= 4; // This seems wonky but it works for the moment
-
                     this._setFlags(
                         valDst,
                         valSrc,
@@ -807,9 +804,6 @@ function(
 
                     // Set clamped word
                     this._setRMValueForOp(opcode, (valResult & 0xFFFF));
-
-                    // correct for duplicate helper usage
-                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -837,9 +831,6 @@ function(
                     // Set clamped byte
                     this._setRMValueForOp(opcode, (valResult & 0x00FF));
 
-                    // correct for duplicate helper usage
-                    //_tempIP -= 2;
-
                     this._setFlags(
                         valDst,
                         valSrc,
@@ -865,9 +856,6 @@ function(
 
                     // Set clamped word
                     this._setRMValueForOp(opcode, (valResult & 0xFFFF));
-
-                    // correct for duplicate helper usage
-                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -897,9 +885,6 @@ function(
                     // Set clamped byte
                     this._setRMValueForOp(opcode, (valResult & 0x00FF));
 
-                    // correct for duplicate helper usage
-                    //_tempIP -= 2;
-
                     this._setFlags(
                         valDst,
                         valSrc,
@@ -927,9 +912,6 @@ function(
 
                     // Set clamped word
                     this._setRMValueForOp(opcode, (valResult & 0xFFFF));
-
-                    // correct for duplicate helper usage
-                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -962,9 +944,6 @@ function(
 
                     this._setRMValueForOp(opcode, valResult & 0x00FF);
 
-                    // correct for duplicate helper usage
-                    //_tempIP -= 4; // This seems wonky but it works for the moment
-
                     this._setFlags(
                         valDst,
                         valSrc,
@@ -988,9 +967,6 @@ function(
                     valResult = valDst + valSrc;
 
                     this._setRMValueForOp(opcode, valResult & 0xFFFF);
-
-                    // correct for 3 helper usages
-                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -1016,9 +992,6 @@ function(
 
                     this._setRegValueForOp(opcode, valResult & 0x00FF);
 
-                    // correct for 3 helper usages
-                    //_tempIP -= 2;
-
                     this._setFlags(
                         valDst,
                         valSrc,
@@ -1042,9 +1015,6 @@ function(
                     valResult = valDst + valSrc;
 
                     this._setRMValueForOp(opcode, valResult & 0xFFFF);
-
-                    // correct for 3 helper usages
-                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -1126,9 +1096,6 @@ function(
 
                     this._setRMValueForOp(opcode, valResult & 0x00FF);
 
-                    // correct for duplicate helper usage
-                    //_tempIP -= 2;
-
                     this._setFlags(
                         valDst,
                         valSrc,
@@ -1152,9 +1119,6 @@ function(
                     valResult = valDst & valSrc;
 
                     this._setRMValueForOp(opcode, valResult & 0xFFFF);
-
-                    // correct for 3 helper usages
-                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -1180,9 +1144,6 @@ function(
 
                     this._setRegValueForOp(opcode, valResult & 0x00FF);
 
-                    // correct for 3 helper usages
-                    //_tempIP -= 2;
-
                     this._setFlags(
                         valDst,
                         valSrc,
@@ -1206,9 +1167,6 @@ function(
                     valResult = valDst & valSrc;
 
                     this._setRMValueForOp(opcode, valResult & 0xFFFF);
-
-                    // correct for 3 helper usages
-                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -1781,6 +1739,12 @@ function(
 
                             // Set clamped word
                             this._setRMValueForOp(opcode, (valResult & clampMask));
+
+                            // correct for direct addressing IP counting
+                            if (0 === opcode.mod && 6 === opcode.rm)
+                            {
+                                _tempIP -= 2;
+                            }
 
                             this._setFlags(
                                 valDst,
@@ -3009,9 +2973,6 @@ function(
                     // Set clamped byte
                     this._setRMValueForOp(opcode, (valResult & 0x00FF));
 
-                    // correct for duplicate helper usage
-                    //_tempIP -= 2;
-
                     this._setFlags(
                         valDst,
                         valSrc,
@@ -3044,9 +3005,6 @@ function(
                     // Set clamped word
                     this._setRMValueForOp(opcode, (valResult & 0xFFFF));
 
-                    // correct for duplicate helper usage
-                    //_tempIP -= 2;
-
                     this._setFlags(
                         valDst,
                         valSrc,
@@ -3078,9 +3036,6 @@ function(
 
                     // Set clamped byte
                     this._setRMValueForOp(opcode, (valResult & 0x00FF));
-
-                    // correct for duplicate helper usage
-                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
@@ -3148,9 +3103,6 @@ function(
                     // Set clamped byte
                     this._setRMValueForOp(opcode, (valResult & 0x00FF));
 
-                    // correct for duplicate helper usage
-                    //_tempIP -= 2;
-
                     this._setFlags(
                         valDst,
                         valSrc,
@@ -3184,9 +3136,6 @@ function(
 
                     // Set clamped word
                     this._setRMValueForOp(opcode, (valResult & 0xFFFF));
-
-                    // correct for duplicate helper usage
-                    //_tempIP -= 2;
 
                     this._setFlags(
                         valDst,
