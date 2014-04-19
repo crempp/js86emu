@@ -92,7 +92,8 @@ function(
             for(;;)
             {
                 //console.log("cycle ", this._cycles);
-                if (3800 === this._cycles)
+                //if (4460 === this._cycles)
+                if (4990 === this._cycles)
                 {
                     this._debugFlag = true;
                 }

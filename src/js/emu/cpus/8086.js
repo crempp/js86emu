@@ -1054,7 +1054,7 @@ function(
                         "b",
                         "add");
 
-                    this._regIP += 1;
+                    this._regIP += 2;
 
                     break;
                 case 0x05:
@@ -1246,9 +1246,15 @@ function(
                     // The return address is the _NEXT_ instruction, not the current
                     this._push(this._regIP + 3);
 
-                    // Jump to procedure
-                    // The relative address starts from the _END_ of this op
-                    this._regIP += ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]) + 3;
+                    // The jump address is a signed (twos complement) offset from the
+                    // current location.
+                    var offset = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+
+                    // two-byte twos-complement conversion
+                    offset = ((offset >> 15) === 1) ? (-1 * (offset >> 15)) * ((offset ^ 0xFFFF) + 1) : offset;
+
+                    // We must skip the last byte of this instruction
+                    this._regIP += (offset + 3);
 
                     break;
 
