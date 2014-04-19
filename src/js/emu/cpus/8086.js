@@ -2275,7 +2275,7 @@ function(
                  * Notes       :
                  */
                 case 0x70:
-                    if ( 1 === (this._regFlags & this.FLAG_OF_MASK) )
+                    if ( 1 <= (this._regFlags & this.FLAG_OF_MASK) )
                     {
                         this._shortJump();
                     }
@@ -2307,7 +2307,7 @@ function(
                  * Notes       :
                  */
                 case 0x72:
-                    if ( 1 === (this._regFlags & this.FLAG_CF_MASK) )
+                    if ( 1 <= (this._regFlags & this.FLAG_CF_MASK) )
                     {
                         this._shortJump();
                     }
@@ -2371,8 +2371,8 @@ function(
                  * Notes       :
                  */
                 case 0x76:
-                    if ( 1 === (this._regFlags & this.FLAG_CF_MASK) ||
-                         1 === (this._regFlags & this.FLAG_ZF_MASK) )
+                    if ( 1 <= (this._regFlags & this.FLAG_CF_MASK) ||
+                         1 <= (this._regFlags & this.FLAG_ZF_MASK) )
                     {
                         this._shortJump();
                     }
@@ -2388,7 +2388,8 @@ function(
                  * Notes       :
                  */
                 case 0x77:
-                    if ( !(this._regFlags & this.FLAG_CF_MASK) & !(this._regFlags & this.FLAG_ZF_MASK) )
+                    if ( 0 === (this._regFlags & this.FLAG_CF_MASK) &&
+                         0 === (this._regFlags & this.FLAG_ZF_MASK) )
                     {
                         this._shortJump();
                     }
@@ -2404,7 +2405,7 @@ function(
                  * Notes       :
                  */
                 case 0x78:
-                    if ( this._regFlags & this.FLAG_SF_MASK)
+                    if ( 1 <= ( this._regFlags & this.FLAG_SF_MASK) )
                     {
                         this._shortJump();
                     }
@@ -2420,7 +2421,7 @@ function(
                  * Notes       :
                  */
                 case 0x79:
-                    if ( !( this._regFlags & this.FLAG_SF_MASK) )
+                    if ( 0 === ( this._regFlags & this.FLAG_SF_MASK) )
                     {
                         this._shortJump();
                     }
@@ -2436,7 +2437,7 @@ function(
                  * Notes       :
                  */
                 case 0x7A:
-                    if ( this._regFlags & this.FLAG_PF_MASK)
+                    if ( 1 <= ( this._regFlags & this.FLAG_PF_MASK) )
                     {
                         this._shortJump();
                     }
@@ -2452,7 +2453,7 @@ function(
                  * Notes       :
                  */
                 case 0x7B:
-                    if ( !( this._regFlags & this.FLAG_PF_MASK) )
+                    if ( 0 === ( this._regFlags & this.FLAG_PF_MASK) )
                     {
                         this._shortJump();
                     }
@@ -2468,7 +2469,10 @@ function(
                  * Notes       :
                  */
                 case 0x7C:
-                    if ( this._regFlags & this.FLAG_SF_MASK !== this._regFlags & this.FLAG_OF_MASK )
+                    if ( ( 0 === this._regFlags & this.FLAG_SF_MASK &&
+                           1 <=  this._regFlags & this.FLAG_OF_MASK ) ||
+                         ( 1 <= this._regFlags & this.FLAG_SF_MASK &&
+                           0 === this._regFlags & this.FLAG_OF_MASK ) )
                     {
                         this._shortJump();
                     }
@@ -2484,7 +2488,11 @@ function(
                  * Notes       :
                  */
                 case 0x7D:
-                    if ( this._regFlags & this.FLAG_SF_MASK === this._regFlags & this.FLAG_OF_MASK )
+                    //if ( this._regFlags & this.FLAG_SF_MASK === this._regFlags & this.FLAG_OF_MASK )
+                    if ( ( 1 <=  this._regFlags & this.FLAG_SF_MASK ||
+                           0 === this._regFlags & this.FLAG_OF_MASK ) &&
+                         ( 0 === this._regFlags & this.FLAG_SF_MASK ||
+                           1 <=  this._regFlags & this.FLAG_OF_MASK ) )
                     {
                         this._shortJump();
                     }
@@ -2500,8 +2508,11 @@ function(
                  * Notes       :
                  */
                 case 0x7E:
-                    if ( this._regFlags & this.FLAG_ZF_MASK ||
-                        (this._regFlags & this.FLAG_SF_MASK !== this._regFlags & this.FLAG_OF_MASK ) )
+                    if ( 1 <= this._regFlags & this.FLAG_ZF_MASK ||
+                         ( ( 0 === this._regFlags & this.FLAG_SF_MASK &&
+                             1 <=  this._regFlags & this.FLAG_OF_MASK ) ||
+                           ( 1 <=  this._regFlags & this.FLAG_SF_MASK &&
+                             0 === this._regFlags & this.FLAG_OF_MASK ) ) )
                     {
                         this._shortJump();
                     }
@@ -2517,8 +2528,11 @@ function(
                  * Notes       :
                  */
                 case 0x7F:
-                    if ( !(this._regFlags & this.FLAG_ZF_MASK) ||
-                        (this._regFlags & this.FLAG_SF_MASK === this._regFlags & this.FLAG_OF_MASK ) )
+                    if ( 0 === (this._regFlags & this.FLAG_ZF_MASK) &&
+                         ( ( 1 <=  this._regFlags & this.FLAG_SF_MASK ||
+                             0 === this._regFlags & this.FLAG_OF_MASK ) &&
+                           ( 0 === this._regFlags & this.FLAG_SF_MASK ||
+                             1 <=  this._regFlags & this.FLAG_OF_MASK ) ) )
                     {
                         this._shortJump();
                     }
