@@ -23,7 +23,7 @@ function(
         _memory  : null,
         _memoryV : null,
 
-        halt     : false,
+        //halt     : false,
 
         // Main Registers
         _regAH : null, _regAL : null, // primary accumulator
@@ -569,7 +569,8 @@ function(
 
             _breakOnError = SettingsModel.get("emuSettings").breakOnError;
 
-            this.halt = false;
+            //this.halt = false;
+            _Cpu._haltFlag = false;
 
             // Initialize registers and memory once
             this._opcode = 0x00;
@@ -642,7 +643,8 @@ function(
                 w      : (opcode_byte & 0x01),
                 mod    : (addressing_byte & 0xC0) >>> 6,
                 reg    : (addressing_byte & 0x38) >>> 3,
-                rm     : (addressing_byte & 0x07)
+                rm     : (addressing_byte & 0x07),
+                cycle  : _Cpu._cycles
             };
 
             // Pre-cycle Debug
@@ -2037,7 +2039,16 @@ function(
                  * Notes       :
                  */
                 case 0xF4:
-                    this.halt = true;
+                    //this.halt = true;
+                    //_Cpu._haltFlag = false;
+                    _Cpu.halt({
+                        error      : false,
+                        enterDebug : true,
+                        message    : "Program halted",
+                        decObj     : opcode,
+                        regObj     : this._bundleRegisters(),
+                        memObj     : this._memoryV
+                    });
                     break;
 
                 /**

@@ -27,7 +27,8 @@ function(
             mod             : 0x00,
             reg             : 0x00,
             rm              : 0x00,
-            instruction     : "Unknown"
+            instruction     : "Unknown",
+            cycle           : 0
         },
 
         initialize: function(opcodeObj) {

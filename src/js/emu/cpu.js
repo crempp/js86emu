@@ -91,19 +91,13 @@ function(
         {
             for(;;)
             {
-                //console.log("cycle ", this._cycles);
-                //if (8526 === this._cycles)
-                if (11500 === this._cycles)
-                {
-                    this._debugFlag = true;
+                 if (11500 === this._cycles) this._debugFlag = true;
+                // if (0x011D === _cpu._regIP) this._debugFlag = true;
+
+                if (this._haltFlag){
+                    Gfx.drawGraphics();
+                    break;
                 }
-
-//                if (0x011D === _cpu._regIP)
-//                {
-//                    this._debugFlag = true;
-//                }
-
-                if (this._haltFlag) break;
 
                 if (!this._cpuPaused)
                 {
@@ -113,7 +107,7 @@ function(
                     this._cycles++;
 
                     // TODO: This is wrong! Research the correct timing
-                    if (0 === this._cycles % 100) this._drawFlag = true;
+                    //if (0 === this._cycles % 100) this._drawFlag = true;
 
                     // If the draw flag is set, update the screen
                     if(this._drawFlag)
@@ -229,11 +223,6 @@ function(
     //        ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
     //        return _cpu._memoryV[addr16];
         },
-
-//        _emulateCycle : function ()
-//        {
-//            _cpu.emulateCycle();
-//        },
 
         debugUpdateDecode : function(decodeObj)
         {
