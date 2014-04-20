@@ -159,6 +159,8 @@ function(
                 memObj     : null
             };
 
+            Gfx.drawGraphics();
+
             this._haltFlag = true;
 
             if (options.enterDebug)
