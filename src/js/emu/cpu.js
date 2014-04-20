@@ -92,18 +92,23 @@ function(
             for(;;)
             {
                 //console.log("cycle ", this._cycles);
-                //if (4460 === this._cycles)
-                if (5056 === this._cycles)
+                //if (8526 === this._cycles)
+                if (11500 === this._cycles)
                 {
                     this._debugFlag = true;
                 }
+
+//                if (0x011D === _cpu._regIP)
+//                {
+//                    this._debugFlag = true;
+//                }
 
                 if (this._haltFlag) break;
 
                 if (!this._cpuPaused)
                 {
                     // Emulate one cycle
-                    this._emulateCycle();
+                    _cpu.emulateCycle();
 
                     this._cycles++;
 
@@ -225,10 +230,10 @@ function(
     //        return _cpu._memoryV[addr16];
         },
 
-        _emulateCycle : function ()
-        {
-            _cpu.emulateCycle();
-        },
+//        _emulateCycle : function ()
+//        {
+//            _cpu.emulateCycle();
+//        },
 
         debugUpdateDecode : function(decodeObj)
         {

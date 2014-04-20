@@ -48,7 +48,11 @@ function(
     var _oplist = {
         retrieveCode : function (op)
         {
-            return this["0x" + (op.toString(16)).toUpperCase()];
+            if (op)
+            {
+                return this["0x" + (op.toString(16)).toUpperCase()];
+            }
+            else return "--";
         },
 
         "0x0" : "ADD Eb Gb",

@@ -171,142 +171,89 @@ function(
                 {
                     case 0 : // [BX + SI]
                         addr = ( ((this._regBH << 8) | this._regBL) + this._regSI );
-                        return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                         break;
                     case 1 : // [BX + DI]
                         addr = ( ((this._regBH << 8) | this._regBL) + this._regDI );
-                        return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                         break;
                     case 2 : // [BP + SI]
                         addr = ( this._regBP + this._regSI );
-                        return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                         break;
                     case 3 : // [BP + DI]
                         addr = ( this._regBP + this._regDI );
-                        return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                         break;
                     case 4 : // [SI]
                         addr = ( this._regSI );
-                        return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                         break;
                     case 5 : // [DI]
                         addr = ( this._regDI );
-                        return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                         break;
                     case 6 : // Drc't Add
                         if (0 === opcode.w) // Byte
                         {
                             _tempIP += 1;
                             addr = this._memoryV[this._regIP + 2];
-                            return (this._memoryV[addr]);
                         }
                         else // Word
                         {
                             _tempIP += 2;
                             addr = (this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2];
-                            return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                         }
                         break;
                     case 7 : // [BX]
                         addr = ( (this._regBH << 8) | this._regBL );
-                        return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                         break;
+                }
+                if (0 === opcode.w)
+                {
+                    return (this._memoryV[addr]);
+                }
+                else
+                {
+                    return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                 }
             }
             // Use R/M Table 2 with 8-bit signed displacement
             else if (1 === opcode.mod || 2 == opcode.mod)
             {
                 // Add DISP to register specified
+                var disp = ( (this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2] );
+
+                _tempIP += 2;
+
                 switch (opcode.rm)
                 {
                     case 0 : // [BX + SI]
-                        if (_breakOnError) _Cpu.halt({
-                            error      : true,
-                            enterDebug : true,
-                            message    : "RM Lookup not implemented for these parameters",
-                            decObj     : opcode,
-                            regObj     : this._bundleRegisters(),
-                            memObj     : this._memoryV
-                        });
-                        return 0;
+                        addr = ( ((this._regBH << 8) | this._regBL) + this._regSI + disp );
                         break;
                     case 1 : // [BX + DI]
-                        if (_breakOnError) _Cpu.halt({
-                            error      : true,
-                            enterDebug : true,
-                            message    : "RM Lookup not implemented for these parameters",
-                            decObj     : opcode,
-                            regObj     : this._bundleRegisters(),
-                            memObj     : this._memoryV
-                        });
-                        return 0;
+                        addr = ( ((this._regBH << 8) | this._regBL) + this._regDI + disp );
                         break;
                     case 2 : // [BP + SI]
-                        if (_breakOnError) _Cpu.halt({
-                            error      : true,
-                            enterDebug : true,
-                            message    : "RM Lookup not implemented for these parameters",
-                            decObj     : opcode,
-                            regObj     : this._bundleRegisters(),
-                            memObj     : this._memoryV
-                        });
-                        return 0;
+                        addr = ( this._regBP + this._regSI + disp );
                         break;
                     case 3 : // [BP + DI]
-                        if (_breakOnError) _Cpu.halt({
-                            error      : true,
-                            enterDebug : true,
-                            message    : "RM Lookup not implemented for these parameters",
-                            decObj     : opcode,
-                            regObj     : this._bundleRegisters(),
-                            memObj     : this._memoryV
-                        });
-                        return 0;
+                        addr = ( this._regBP + this._regDI + disp );
                         break;
                     case 4 : // [SI]
-                        if (_breakOnError) _Cpu.halt({
-                            error      : true,
-                            enterDebug : true,
-                            message    : "RM Lookup not implemented for these parameters",
-                            decObj     : opcode,
-                            regObj     : this._bundleRegisters(),
-                            memObj     : this._memoryV
-                        });
-                        return 0;
+                        addr = ( this._regSI + disp );
                         break;
                     case 5 : // [DI]
-                        if (_breakOnError) _Cpu.halt({
-                            error      : true,
-                            enterDebug : true,
-                            message    : "RM Lookup not implemented for these parameters",
-                            decObj     : opcode,
-                            regObj     : this._bundleRegisters(),
-                            memObj     : this._memoryV
-                        });
-                        return 0;
+                        addr = ( this._regDI + disp );
                         break;
                     case 6 : // [BP]
-                        if (_breakOnError) _Cpu.halt({
-                            error      : true,
-                            enterDebug : true,
-                            message    : "RM Lookup not implemented for these parameters",
-                            decObj     : opcode,
-                            regObj     : this._bundleRegisters(),
-                            memObj     : this._memoryV
-                        });
-                        return 0;
+                        addr = ( this._regBP + disp );
                         break;
                     case 7 : // [BX]
-                        if (_breakOnError) _Cpu.halt({
-                            error      : true,
-                            enterDebug : true,
-                            message    : "RM Lookup not implemented for these parameters",
-                            decObj     : opcode,
-                            regObj     : this._bundleRegisters(),
-                            memObj     : this._memoryV
-                        });
-                        return 0;
+                        addr = ( ((this._regBH << 8) | this._regBL) + disp );
                         break;
+                }
+                if (0 === opcode.w)
+                {
+                    return (this._memoryV[addr]);
+                }
+                else
+                {
+                    return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
                 }
             }
             // R/M bits refer to REG tables
@@ -468,8 +415,6 @@ function(
                 }
                 else // Word
                 {
-                    //this._memoryV[addr]     = ((value >> 8) & 0x00FF);
-                    //this._memoryV[addr + 1] = (value & 0x00FF);
                     this._memoryV[addr]     = (value & 0x00FF);
                     this._memoryV[addr + 1] = ((value >> 8) & 0x00FF);
                 }
@@ -478,96 +423,53 @@ function(
             else if (1 === opcode.mod || 2 == opcode.mod)
             {
                 // Add DISP to register specified
+                var disp = ( (this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2] );
+
                 switch (opcode.rm)
                 {
                     case 0 : // [BX + SI]
-                        if (_breakOnError) _Cpu.halt({
-                            error      : true,
-                            enterDebug : true,
-                            message    : "RM Lookup not implemented for these parameters",
-                            decObj     : opcode,
-                            regObj     : this._bundleRegisters(),
-                            memObj     : this._memoryV
-                        });
-
+                        addr = (( (this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2] ) + this._regSI + disp);
+                        _tempIP += 2;
                         break;
                     case 1 : // [BX + DI]
-                        if (_breakOnError) _Cpu.halt({
-                            error      : true,
-                            enterDebug : true,
-                            message    : "RM Lookup not implemented for these parameters",
-                            decObj     : opcode,
-                            regObj     : this._bundleRegisters(),
-                            memObj     : this._memoryV
-                        });
-
+                        addr = (( (this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2] ) + this._regDI + disp);
+                        _tempIP += 2;
                         break;
                     case 2 : // [BP + SI]
-                        if (_breakOnError) _Cpu.halt({
-                            error      : true,
-                            enterDebug : true,
-                            message    : "RM Lookup not implemented for these parameters",
-                            decObj     : opcode,
-                            regObj     : this._bundleRegisters(),
-                            memObj     : this._memoryV
-                        });
-
+                        addr = (this._regBP + this._regSI + disp);
+                        _tempIP += 2;
                         break;
                     case 3 : // [BP + DI]
-                        if (_breakOnError) _Cpu.halt({
-                            error      : true,
-                            enterDebug : true,
-                            message    : "RM Lookup not implemented for these parameters",
-                            decObj     : opcode,
-                            regObj     : this._bundleRegisters(),
-                            memObj     : this._memoryV
-                        });
-
+                        addr = (this._regBP + this._regDI + disp);
+                        _tempIP += 2;
                         break;
                     case 4 : // [SI]
-                        if (_breakOnError) _Cpu.halt({
-                            error      : true,
-                            enterDebug : true,
-                            message    : "RM Lookup not implemented for these parameters",
-                            decObj     : opcode,
-                            regObj     : this._bundleRegisters(),
-                            memObj     : this._memoryV
-                        });
-
+                        addr = (this._regSI + disp);
+                        _tempIP += 2;
                         break;
                     case 5 : // [DI]
-                        if (_breakOnError) _Cpu.halt({
-                            error      : true,
-                            enterDebug : true,
-                            message    : "RM Lookup not implemented for these parameters",
-                            decObj     : opcode,
-                            regObj     : this._bundleRegisters(),
-                            memObj     : this._memoryV
-                        });
-
+                        addr = (this._regDI + disp);
+                        _tempIP += 2;
                         break;
                     case 6 : // [BP]
-                        if (_breakOnError) _Cpu.halt({
-                            error      : true,
-                            enterDebug : true,
-                            message    : "RM Lookup not implemented for these parameters",
-                            decObj     : opcode,
-                            regObj     : this._bundleRegisters(),
-                            memObj     : this._memoryV
-                        });
-
+                        addr = (this._regBP + disp);
+                        _tempIP += 2;
                         break;
                     case 7 : // [BX]
-                        if (_breakOnError) _Cpu.halt({
-                            error      : true,
-                            enterDebug : true,
-                            message    : "RM Lookup not implemented for these parameters",
-                            decObj     : opcode,
-                            regObj     : this._bundleRegisters(),
-                            memObj     : this._memoryV
-                        });
-
+                        addr = ( ((this._regBH << 8) | this._regBL) + disp );
+                        _tempIP += 2;
                         break;
+                }
+
+                // Set value to memory
+                if (0 === opcode.w) // Byte
+                {
+                    this._memoryV[addr] = (value & 0x00FF);
+                }
+                else // Word
+                {
+                    this._memoryV[addr]     = (value & 0x00FF);
+                    this._memoryV[addr + 1] = ((value >> 8) & 0x00FF);
                 }
             }
             // R/M bits refer to REG tables
@@ -614,6 +516,10 @@ function(
                         return 2;
                     }
                 }
+            }
+            else if (1 === opcode.mod || 2 == opcode.mod)
+            {
+                return 2;
             }
             return 0;
         },
@@ -1678,7 +1584,8 @@ function(
 
                     if (0x80 === opcode_byte)
                     {
-                        valSrc = ((this._memoryV[this._regIP + ipRMInc + 3] << 8) | this._memoryV[this._regIP + ipRMInc + 2]);
+                        //valSrc = ((this._memoryV[this._regIP + ipRMInc + 3] << 8) | this._memoryV[this._regIP + ipRMInc + 2]);
+                        valSrc = (this._memoryV[this._regIP + ipRMInc + 2]);
 
                         // Clamp source to byte
                         valSrc = valSrc & 0x00FF;
@@ -1747,7 +1654,8 @@ function(
                             this._setRMValueForOp(opcode, (valResult & clampMask));
 
                             // correct for direct addressing IP counting
-                            if (0 === opcode.mod && 6 === opcode.rm)
+                            if ( (0 === opcode.mod && 6 === opcode.rm) ||
+                                 (1 === opcode.mod || 2 === opcode.mod) )
                             {
                                 _tempIP -= 2;
                             }
@@ -1780,6 +1688,13 @@ function(
                             // Set clamped word
                             this._setRMValueForOp(opcode, (valResult & clampMask));
 
+                            // correct for direct addressing IP counting
+                            if ( (0 === opcode.mod && 6 === opcode.rm) ||
+                                 (1 === opcode.mod || 2 === opcode.mod) )
+                            {
+                                _tempIP -= 2;
+                            }
+
                             this._setFlags(
                                 valDst,
                                 valSrc,
@@ -1808,6 +1723,13 @@ function(
 
                             // Set clamped word
                             this._setRMValueForOp(opcode, (valResult & clampMask));
+
+                            // correct for direct addressing IP counting
+                            if ( (0 === opcode.mod && 6 === opcode.rm) ||
+                                 (1 === opcode.mod || 2 === opcode.mod) )
+                            {
+                                _tempIP -= 2;
+                            }
 
                             this._setFlags(
                                 valDst,
@@ -1846,6 +1768,13 @@ function(
                             // Set clamped word
                             this._setRMValueForOp(opcode, (valResult & clampMask));
 
+                            // correct for direct addressing IP counting
+                            if ( (0 === opcode.mod && 6 === opcode.rm) ||
+                                 (1 === opcode.mod || 2 === opcode.mod) )
+                            {
+                                _tempIP -= 2;
+                            }
+
                             this._setFlags(
                                 valDst,
                                 valSrc,
@@ -1872,6 +1801,13 @@ function(
 
                             // Set clamped word
                             this._setRMValueForOp(opcode, (valResult & clampMask));
+
+                            // correct for direct addressing IP counting
+                            if ( (0 === opcode.mod && 6 === opcode.rm) ||
+                                 (1 === opcode.mod || 2 === opcode.mod) )
+                            {
+                                _tempIP -= 2;
+                            }
 
                             this._setFlags(
                                 valDst,
@@ -1907,6 +1843,13 @@ function(
                             // Set clamped word
                             this._setRMValueForOp(opcode, (valResult & clampMask));
 
+                            // correct for direct addressing IP counting
+                            if ( (0 === opcode.mod && 6 === opcode.rm) ||
+                                 (1 === opcode.mod || 2 === opcode.mod) )
+                            {
+                                _tempIP -= 2;
+                            }
+
                             this._setFlags(
                                 valDst,
                                 valSrc,
@@ -1933,6 +1876,13 @@ function(
 
                             // Set clamped word
                             this._setRMValueForOp(opcode, (valResult & clampMask));
+
+                            // correct for direct addressing IP counting
+                            if ( (0 === opcode.mod && 6 === opcode.rm) ||
+                                 (1 === opcode.mod || 2 === opcode.mod) )
+                            {
+                                _tempIP -= 2;
+                            }
 
                             this._setFlags(
                                 valDst,
@@ -3908,7 +3858,7 @@ function(
                 if ('w' === size) shift = 15; else shift = 7;
 
                 if ( 1 === (operand1 >> shift) && 1 === (operand2 >> shift) && 0 === (result >> shift) ||
-                    0 === (operand1 >> shift) && 0 === (operand2 >> shift) && 1 === (result >> shift))
+                     0 === (operand1 >> shift) && 0 === (operand2 >> shift) && 1 === (result >> shift))
                     this._regFlags = this._regFlags | this.FLAG_OF_MASK;
                 else this._regFlags &= ~this.FLAG_OF_MASK;
             }
