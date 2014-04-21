@@ -24,7 +24,8 @@ function(
     GuiTemplate,
     Emu)
 {
-    var _basePath = "files/program-blobs/";
+    //var _basePath = "files/program-blobs/";
+    var _basePath = "";
 
     /**
      *  Load a binary file via Ajax
@@ -36,6 +37,7 @@ function(
     var _loadBlob = function (fileName, cb)
     {
         var oReq = new XMLHttpRequest();
+
         oReq.open("GET", _basePath + fileName, true);
         oReq.responseType = "arraybuffer";
 
@@ -108,7 +110,8 @@ function(
                 this.model.set({"emuSettings" : emuSettings});
 
                 // Load blob
-                _loadBlob(emuSettings.blobProgram, function(arrayBuffer){
+                console.log(emuSettings);
+                _loadBlob(emuSettings.blobSettings.file, function(arrayBuffer){
                     if (arrayBuffer) {
                         Emu.runBlob(arrayBuffer)
                     }
