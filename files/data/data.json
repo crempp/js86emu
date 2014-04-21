@@ -74,12 +74,12 @@
             "name" : "Branch Test",
             "file" : "files/program-blobs/branch.BIN",
             "selected" : true,
-            "address" : 0,
+            "address" : 256,
             "cpu-init" : {
                 "type" : "8086",
                 "registers" : {
-                    "sp" : 256,
-                    "ip" : 0
+                    "sp" : 6000,
+                    "ip" : 256
                 }
             }
         },
@@ -92,7 +92,7 @@
             "cpu-init" : {
                 "type" : "8086",
                 "registers" : {
-                    "sp" : 256,
+                    "sp" : 6000,
                     "ip" : 0
                 }
             }
