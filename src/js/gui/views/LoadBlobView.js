@@ -110,12 +110,14 @@ function(
                 this.model.set({"emuSettings" : emuSettings});
 
                 // Load blob
-                console.log(emuSettings);
-                _loadBlob(emuSettings.blobSettings.file, function(arrayBuffer){
-                    if (arrayBuffer) {
-                        Emu.runBlob(arrayBuffer)
-                    }
-                    loaderView.hide();
+                _loadBlob(emuSettings.blobProgram, function(arrayBuffer){
+                    require(['gui/gui'], function(GUI) {
+                        if (arrayBuffer) {
+                            GUI.setControlState("running");
+                            Emu.runBlob(arrayBuffer)
+                        }
+                        loaderView.hide();
+                    });
                 });
             }
             else

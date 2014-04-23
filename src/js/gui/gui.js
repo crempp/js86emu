@@ -39,30 +39,40 @@ function(
 
         _controlView : null,
 
+        _debugInfoView     : null,
+        _debugDecodeView   : null,
+        _debugRegisterView : null,
+        _debugMemoryView   : null,
+
         init : function ()
         {
             this._controlView = new ControlView();
             $("#gui-controls").append(this._controlView.render().el);
         },
 
+        setControlState : function (state)
+        {
+            this._controlView.setState(state);
+        },
+
         debugUpdateInfo : function (data)
         {
-            var debugInfoView = new DebugInfoView(data);
-            $("#gui-debug-info").html(debugInfoView.render().el);
+            this._debugInfoView = new DebugInfoView(data);
+            $("#gui-debug-info").html(this._debugInfoView.render().el);
         },
 
         debugUpdateDecode : function (decObj)
         {
             var decModel = new DebugDecodeModel(decObj);
-            var debugDecodeView = new DebugDecodeView({model: decModel});
-            $("#gui-debug-decode").html(debugDecodeView.render().el);
+            this._debugDecodeView = new DebugDecodeView({model: decModel});
+            $("#gui-debug-decode").html(this._debugDecodeView.render().el);
         },
 
         debugUpdateRegister : function (regObj)
         {
             var regModel = new DebugRegisterModel(regObj);
-            var debugRegisterView = new DebugRegisterView({model: regModel});
-            $("#gui-debug-register").html(debugRegisterView.render().el);
+            this._debugRegisterView = new DebugRegisterView({model: regModel});
+            $("#gui-debug-register").html(this._debugRegisterView.render().el);
         },
 
         debugUpdateMemory : function (memObj)
@@ -71,8 +81,16 @@ function(
                 numRows : 5,
                 numCols : 8
             });
-            var debugMemoryView = new DebugMemoryView({model: memModel});
-            $("#gui-debug-memory").html(debugMemoryView.render().el);
+            this._debugMemoryView = new DebugMemoryView({model: memModel});
+            $("#gui-debug-memory").html(this._debugMemoryView.render().el);
+        },
+
+        disableDebug : function ()
+        {
+            this._debugInfoView.disable();
+            this._debugDecodeView.disable();
+            this._debugRegisterView.disable();
+            this._debugMemoryView.disable();
         }
     };
 

@@ -89,7 +89,7 @@ function(
             "click   .button-pause"    : "pause",
             "click   .button-halt"     : "halt",
             "click   .button-step"     : "step",
-            "click   .button-settings" : "settings",
+            "click   .button-settings" : "settings"
             //"keyup   .button-settings" : "keyUp",
             //"keydown .button-settings" : "keyDown"
         },
@@ -154,6 +154,23 @@ function(
 
             var settingsView = new LoadBlobView({ container : $("#gui-modal") });
             settingsView.show();
+        },
+
+        setState : function (state)
+        {
+            console.log(state);
+            switch (state)
+            {
+                case "running" :
+                    _toggleState("run", this.$el);
+                    break;
+                case "stopped" :
+                    _toggleState("halt", this.$el);
+                    break;
+                case "paused" :
+                    _toggleState("pause", this.$el);
+                    break;
+            }
         },
 
         keyDown : function (event)

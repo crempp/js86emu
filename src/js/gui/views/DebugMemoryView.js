@@ -46,6 +46,11 @@ function(
             return this;
         },
 
+        disable : function ()
+        {
+            this.$el.hide();
+        },
+
         doCenter : function ()
         {
             var addr = $("#debug-memory-center").val();

@@ -16,12 +16,24 @@ function(
 
         run : function ()
         {
-            // Boot the CPU
-            Cpu.boot();
+            Cpu._debugFlag = false;
+            if (Cpu.state === Cpu.STATE_PAUSED)
+            {
+                Cpu.run();
+            }
+            else
+            {
+                Cpu.boot();
+            }
         },
 
         reset : function ()
         {
+            if (Cpu.state === Cpu.STATE_RUNNING)
+            {
+                Cpu.halt();
+            }
+
             Cpu.reset();
         },
 

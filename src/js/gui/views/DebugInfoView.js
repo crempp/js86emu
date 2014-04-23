@@ -46,6 +46,11 @@ define([
                 return this;
             },
 
+            disable : function ()
+            {
+                this.$el.hide();
+            },
+
             vidTest : function ()
             {
                 Gfx.debugVideoTestPattern();
