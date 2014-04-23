@@ -109,10 +109,13 @@ function(
 
                 // Load blob
                 _loadBlob(emuSettings.blobProgram, function(arrayBuffer){
-                    if (arrayBuffer) {
-                        Emu.runBlob(arrayBuffer)
-                    }
-                    loaderView.hide();
+                    require(['gui/gui'], function(GUI) {
+                        if (arrayBuffer) {
+                            GUI.setControlState("running");
+                            Emu.runBlob(arrayBuffer)
+                        }
+                        loaderView.hide();
+                    });
                 });
             }
             else

@@ -23,11 +23,16 @@ function(
     _Gui = null;
 
     var Cpu = {
-        _cpuPaused : false,
+        STATE_PAUSED  : 0,
+        STATE_RUNNING : 1,
+        STATE_STOPPED : 2,
+
+        state : 2,
 
         _debugFlag : false,
 
-        // Should this be on or off to begin?
+        _haltFlag : false,
+
         _drawFlag : false,
 
         _cycles : 0,
@@ -47,6 +52,18 @@ function(
                 cpuModel,
                 Gui
             ){
+                // Initialize settings and state
+                _this.state     = _this.STATE_RUNNING;
+                _this._drawFlag = false;
+                _this._cycles   = 0;
+                _this._haltFlag = false;
+
+                // Setup debugging
+                if (SettingsModel.get('emuSettings')['startInDebug'])
+                {
+                    _this._debugFlag = true;
+                }
+
                 // Save the gui module
                 _Gui = Gui;
 
@@ -54,13 +71,7 @@ function(
                 _cpu = cpuModel;
 
                 // Initialize the CPU
-                _this.reset(SettingsModel.get('emuSettings')["blobSettings"]);
-
-                // Setup debugging
-                if (SettingsModel.get('emuSettings')['startInDebug'])
-                {
-                    _this._debugFlag = true;
-                }
+                _cpu.reset(_this, SettingsModel.get('emuSettings')["blobSettings"]);
 
                 // Initialize input
                 Input.setupInput();
@@ -89,38 +100,48 @@ function(
         // Emulation loop
         run : function ()
         {
+            this.state = this.STATE_RUNNING;
+
             for(;;)
             {
-                 if (11500 === this._cycles) this._debugFlag = true;
+                console.log("running...")
+                // if (11500 === this._cycles) this._debugFlag = true;
                 // if (0x011D === _cpu._regIP) this._debugFlag = true;
 
-                if (this._haltFlag){
+                if (this._haltFlag || this.state === this.STATE_STOPPED){
                     Gfx.drawGraphics();
                     break;
                 }
 
-                if (!this._cpuPaused)
+                if (this.state === this.STATE_PAUSED)
                 {
-                    // Emulate one cycle
-                    _cpu.emulateCycle();
-
-                    this._cycles++;
-
-                    // TODO: This is wrong! Research the correct timing
-                    //if (0 === this._cycles % 100) this._drawFlag = true;
-
-                    // If the draw flag is set, update the screen
-                    if(this._drawFlag)
-                    {
-                        Gfx.drawGraphics();
-                        this._drawFlag = false;
-                    }
-
-                    // Store key press state (Press and Release)
-                    Input.setKeys();
+                    break;
                 }
 
-                if (this._debugFlag) break;
+                // Emulate one cycle
+                _cpu.emulateCycle();
+
+                this._cycles++;
+
+                // TODO: This is wrong! Research the correct timing
+                //if (0 === this._cycles % 100) this._drawFlag = true;
+
+                // If the draw flag is set, update the screen
+                if(this._drawFlag)
+                {
+                    Gfx.drawGraphics();
+                    this._drawFlag = false;
+                }
+
+                // Store key press state (Press and Release)
+                Input.setKeys();
+
+
+                if (this._debugFlag && !this._haltFlag)
+                {
+                    this.pause();
+                    break;
+                }
             }
         },
 
@@ -134,18 +155,26 @@ function(
             this._blob = blob;
         },
 
-        reset : function (settings)
+        reset : function ()
         {
-            this._cycles    = 0;
-            this._cpuPaused = false;
-            this._haltFlag  = false;
+            this.state     = this.STATE_STOPPED;
+            this._drawFlag = false;
+            this._cycles   = 0;
+            this._haltFlag = false;
 
-            _cpu.reset(this, settings);
+            _cpu.reset(this, SettingsModel.get('emuSettings')["blobSettings"]);
+
+            Gfx.drawGraphics();
+
+            _Gui.setControlState("stopped");
+
+            _Gui.disableDebug();
         },
 
         pause : function ()
         {
-            this._cpuPaused = true;
+            this.state = this.STATE_PAUSED;
+            _Gui.setControlState("paused");
         },
 
         halt : function (options)
@@ -162,6 +191,9 @@ function(
             Gfx.drawGraphics();
 
             this._haltFlag = true;
+            this.state     = this.STATE_STOPPED;
+
+            _Gui.setControlState("stopped");
 
             if (options.enterDebug)
             {

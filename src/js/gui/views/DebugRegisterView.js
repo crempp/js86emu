@@ -33,6 +33,11 @@ function(
             return this;
         },
 
+        disable : function ()
+        {
+            this.$el.hide();
+        },
+
         toConsole : function ()
         {
             var regObj = this.model.attributes;
