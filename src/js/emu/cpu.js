@@ -104,7 +104,6 @@ function(
 
             for(;;)
             {
-                console.log("running...")
                 // if (11500 === this._cycles) this._debugFlag = true;
                 // if (0x011D === _cpu._regIP) this._debugFlag = true;
 

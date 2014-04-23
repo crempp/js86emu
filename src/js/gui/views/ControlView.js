@@ -158,7 +158,6 @@ function(
 
         setState : function (state)
         {
-            console.log(state);
             switch (state)
             {
                 case "running" :
