@@ -6,10 +6,12 @@
  */
 
 define([
-    "emu/cpu"
+    "emu/cpu",
+    "emu/bios",
 ],
 function(
-    Cpu
+    Cpu,
+    Bios
 )
 {
     var Emu = {
