@@ -2222,6 +2222,38 @@ function(
                     break;
 
                 /**
+                 * Instruction : INT
+                 * Meaning     : Interrupt
+                 * Notes       : Initiates a software interrupt by pushing the
+                 *               flags, clearing the Trap and Interrupt Flags,
+                 *               pushing CS followed by IP and loading CS:IP
+                 *               with the value found in the interrupt vector
+                 *               table. Execution then begins at the location
+                 *               addressed by the new CS:IP
+                 */
+                case 0xCC:
+                    break;
+                case 0xCD:
+                    var intCode = this._memoryV[this._regIP + 1];
+
+                    // Push flags
+                    this._push(this._regFlags);
+
+                    // Clear trap and interrupt flags
+                    this._regFlags &= ~this.FLAG_TF_MASK;
+                    this._regFlags &= ~this.FLAG_IF_MASK;
+
+                    // Push CS
+                    this._push(this._regCS);
+
+                    // Push IP
+                    this._push(this._regIP);
+
+
+
+                    break;
+
+                /**
                  * Instruction : JMP
                  * Meaning     : Unconditional jump
                  * Notes       : Unconditionally transfers control to "label"
