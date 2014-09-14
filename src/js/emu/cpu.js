@@ -10,6 +10,7 @@ define([
     "emu/cpu",
     "emu/input",
     "emu/storage",
+    "emu/util/data",
     "gui/models/SettingsModel"
 ],
 function(
@@ -17,6 +18,7 @@ function(
     Cpu,
     Input,
     Storage,
+    DataLoader,
     SettingsModel
 )
 {
@@ -27,7 +29,7 @@ function(
         STATE_RUNNING : 1,
         STATE_STOPPED : 2,
 
-        state : 2,
+        state : 2, // STATE_STOPPED
 
         _debugFlag : false,
 
@@ -41,17 +43,245 @@ function(
 
         _cpu : null,
 
-        boot : function ()
+        /**
+         * Configure the CPU
+         *
+         * @returns {Promise}
+         */
+        configure : function ()
         {
-            // Load the required CPU
+            console.info("Cpu::configure");
+
             var _this = this;
-            require([
-                "emu/cpus/" + SettingsModel.get('emuSettings')['blobSettings']['cpu-init']['type'],
-                "gui/gui"
-            ], function(
-                cpuModel,
-                Gui
-            ){
+
+            var _configure = function (resolve, reject)
+            {
+                console.log("a");
+
+                require([
+                    "gui/gui",
+                    "emu/cpus/" + SettingsModel.get('emuSettings')['blobSettings']['cpu-init']['type']
+                ], function(
+                    Gui,
+                    cpuModel
+                ){
+                    // Save the gui module
+                    _Gui = Gui;
+
+                    // Save the instance of the cpu module
+                    _cpu = cpuModel;
+
+                    // Initialize the CPU
+                    _cpu.configure(_this, SettingsModel.get('emuSettings')["blobSettings"]);
+
+                    // Initialize memory
+                    _cpu.initializeMemory();
+
+                    // Initialize input
+                    Input.setupInput();
+
+                    // Initialize storage
+                    Storage.load();
+
+                    resolve();
+                });
+            };
+
+            return new Promise(_configure);
+        },
+
+        /**
+         * Clear the memory
+         *
+         * @returns {Promise}
+         */
+        clearMemory : function ()
+        {
+            console.info("Cpu::clearMemory");
+
+            var _this = this;
+
+            var _clear = function (resolve, reject)
+            {
+                _cpu.clearMemory();
+
+                resolve();
+            }
+
+            return new Promise(_clear);
+        },
+
+        /**
+         * Load the BIOS ROM
+         *
+         * @returns {Promise}
+         */
+        loadBiosRom : function()
+        {
+            console.info("Cpu::loadBiosRom");
+
+            var _this = this;
+
+            var _load = function (resolve, reject)
+            {
+                console.log("b");
+
+                // TODO: Move the bios file path to the config
+                dl = DataLoader.create("files/bios-roms/xtbios.bin");
+                dl.on("load", function(arrayBuffer){
+                    console.log("done loading bios");
+
+                    if (arrayBuffer.byteLength > 0)
+                    {
+                        var load_address = _cpu.bios_rom_address - arrayBuffer.byteLength + 16;
+                        _cpu.loadBinary(load_address, arrayBuffer);
+
+                        resolve();
+                    }
+                    else
+                    {
+                        reject(Error("No BIOS ROM data loaded"));
+                    }
+                });
+                dl.load();
+            };
+
+            return new Promise(_load);
+        },
+
+        /**
+         * Load video ROM
+         *
+         * @returns {Promise}
+         */
+        loadVideoRom : function()
+        {
+            console.info("Cpu::loadVideoRom");
+
+            var _this = this;
+
+            var _load = function (resolve, reject)
+            {
+                console.log("c");
+
+                // Initialize Graphics
+                Gfx.setupGraphics(document.getElementById('gfx-port'), _this,
+                    function () {
+                        resolve();
+                    }
+                );
+            };
+
+            return new Promise(_load);
+        },
+
+        /**
+         * Clear CPU Registers
+         *
+         * @returns {Promise}
+         */
+        clearRegisters : function()
+        {
+            console.info("Cpu::clearRegisters");
+
+            var _this = this;
+
+            var _clear = function (resolve, reject)
+            {
+                console.log("d");
+
+                _cpu.clearRegisters();
+
+                resolve();
+            };
+
+            return new Promise(_clear);
+        },
+
+        /**
+         * Clear CPU cache
+         *
+         * @returns {Promise}
+         */
+        clearCache : function()
+        {
+            console.info("Cpu::clearCache");
+
+            var _this = this;
+
+            var _clear = function (resolve, reject)
+            {
+                console.log("e");
+
+                // No CPU caching currently implemented
+                resolve();
+            };
+JMP
+Ap
+            return new Promise(_clear);
+        },
+
+        /**
+         * Run CPU self-tests
+         *
+         * @returns {Promise}
+         */
+        selfTest : function()
+        {
+            console.info("Cpu::selfTest");
+
+            var _this = this;
+
+            var _test = function (resolve, reject)
+            {
+                console.log("f");
+
+                // Self tests not implemented
+                resolve();
+            };
+
+            return new Promise(_test);
+        },
+
+        /**
+         * Jump CPU to BIOS entry point
+         *
+         * @returns {Promise}
+         */
+        jumpToBios : function()
+        {
+            console.info("Cpu::jumpToBios");
+
+            var _this = this;
+
+            var _jump = function (resolve, reject)
+            {
+                console.log("g");
+
+                // If this run is blob-type load the blob that should have
+                // previously been set
+                //SettingsModel.get('emuSettings')['startInDebug']
+//                if ("blob" === SettingsModel.get('emuSettings')["run-type"])
+//                {
+//                    _cpu.loadBinary(SettingsModel.get('emuSettings')["blobSettings"]["address"], _this._blob);
+//                }
+
+                _cpu.initIP();
+
+                resolve();
+            };
+
+            return new Promise(_jump);
+        },
+
+        initState : function ()
+        {
+            console.info("Cpu::initState");
+
+            var _this = this;
+
+            var _init = function (resolve, reject)
+            {
                 // Initialize settings and state
                 _this.state     = _this.STATE_RUNNING;
                 _this._drawFlag = false;
@@ -64,56 +294,37 @@ function(
                     _this._debugFlag = true;
                 }
 
-                // Save the gui module
-                _Gui = Gui;
+                resolve();
+            };
 
-                // Save the cpu module
-                _cpu = cpuModel;
-
-                // Initialize the CPU
-                _cpu.reset(_this, SettingsModel.get('emuSettings')["blobSettings"]);
-
-                // Initialize input
-                Input.setupInput();
-
-                // Initialize storage
-                Storage.load();
-
-                // If this run is blob-type load the blob that should have
-                // previously been set
-                //SettingsModel.get('emuSettings')['startInDebug']
-                if ("blob" === SettingsModel.get('emuSettings')["run-type"])
-                {
-                    _cpu.loadBinary(SettingsModel.get('emuSettings')["blobSettings"]["address"], _this._blob);
-                }
-
-                // Initialize Graphics
-                Gfx.setupGraphics(document.getElementById('gfx-port'), _this,
-                    function () {
-                        // Done initializing Gfx
-                        _this.run();
-                    }
-                );
-            });
+            return new Promise(_init);
         },
 
         // Emulation loop
         run : function ()
         {
-            this.state = this.STATE_RUNNING;
+            var _this = Cpu;
+
+            _this.state = this.STATE_RUNNING;
+
+            var _lastCPSCheck = {
+                cycles : 0,
+                time   : (new Date()).getTime()
+            };
+
+            console.log("running...")
 
             for(;;)
             {
-                console.log("running...")
-                // if (11500 === this._cycles) this._debugFlag = true;
-                // if (0x011D === _cpu._regIP) this._debugFlag = true;
+                // if (11500 === _this._cycles) _this._debugFlag = true;
+                // if (0x011D === _cpu._regIP) _this._debugFlag = true;
 
-                if (this._haltFlag || this.state === this.STATE_STOPPED){
+                if (_this._haltFlag || _this.state === _this.STATE_STOPPED){
                     Gfx.drawGraphics();
                     break;
                 }
 
-                if (this.state === this.STATE_PAUSED)
+                if (_this.state === _this.STATE_PAUSED)
                 {
                     break;
                 }
@@ -121,25 +332,55 @@ function(
                 // Emulate one cycle
                 _cpu.emulateCycle();
 
-                this._cycles++;
+                _this._cycles++;
 
+                // Every 1000 cycles check the cycles-per-second
+                if (0 == _this._cycles % 1000)
+                {
+                    // Calculate new CPS
+                    var now = (new Date()).getTime()
+                    var timeDelta   = now - _lastCPSCheck.time;
+                    var cycleDelta  = _this._cycles - _lastCPSCheck.cycles;
+                    var cps         = cycleDelta / (timeDelta / 1000);
+
+                    // Update state
+                    _lastCPSCheck = {
+                        cycles : _this._cycles,
+                        time   : (new Date()).getTime(),
+                        cps    : cps
+                    };
+
+                    console.log("CPS: " + cps);
+
+                    if (cps > 10000)
+                    {
+                        console.log(cycleDelta + " cycles in " + cycleDelta + "milliseconds [" + cps + "]");
+                        console.warn("OMG!!! Slow down");
+
+                        _this.pause();
+
+                        window.setTimeout(Cpu.run, 100);
+
+                        break;
+                    }
+                }
                 // TODO: This is wrong! Research the correct timing
-                //if (0 === this._cycles % 100) this._drawFlag = true;
+                //if (0 === _this._cycles % 100) _this._drawFlag = true;
 
                 // If the draw flag is set, update the screen
-                if(this._drawFlag)
+                if(_this._drawFlag)
                 {
                     Gfx.drawGraphics();
-                    this._drawFlag = false;
+                    _this._drawFlag = false;
                 }
 
                 // Store key press state (Press and Release)
                 Input.setKeys();
 
 
-                if (this._debugFlag && !this._haltFlag)
+                if (_this._debugFlag && !_this._haltFlag)
                 {
-                    this.pause();
+                    _this.pause();
                     break;
                 }
             }

@@ -7,26 +7,66 @@
 
 define([
     "emu/cpu",
-    "emu/bios",
+    "emu/bios"
 ],
 function(
     Cpu,
     Bios
 )
 {
+    var _error = function(error)
+    {
+        console.error(error.message);
+        console.log(error.stack);
+    };
+
+    // Load xtbios.bin to FE00:0000
+    // Load et4000.bin to C000:0000
+    // (http://www.dreamincode.net/forums/topic/231628-fake86-an-8086-pc-emulator-project/page__st__15)
     var Emu = {
+
+        pre_boot : function()
+        {
+            var _pre_boot = function (resolve, reject)
+            {
+                // Configure the CPU and load ROMs
+                Cpu.configure()
+                    .then(function(){return Cpu.clearMemory();}, _error)
+                    .then(function(){return Cpu.loadBiosRom();}, _error)
+                    .then(function(){return Cpu.loadVideoRom();}, _error)
+                    .then(function(){resolve();}, _error);
+            }
+
+            return new Promise(_pre_boot);
+        },
+
+        boot : function ()
+        {
+            var _boot = function (resolve, reject)
+            {
+                Cpu._haltFlag = false;
+
+                Cpu.clearRegisters()
+                    .then(function(){return Cpu.clearCache();}, _error)
+                    .then(function(){return Cpu.selfTest();}, _error)
+                    .then(function(){return Cpu.jumpToBios();}, _error)
+                    .then(function(){return Cpu.initState();}, _error)
+                    .then(function(){resolve();}, _error);
+            }
+
+            return new Promise(_boot);
+        },
 
         run : function ()
         {
-            Cpu._debugFlag = false;
-            if (Cpu.state === Cpu.STATE_PAUSED)
-            {
-                Cpu.run();
-            }
-            else
-            {
-                Cpu.boot();
-            }
+            var _this = this;
+            this.pre_boot()
+                .then(function(){
+                    return _this.boot();
+                }, _error)
+                .then(function(){
+                    Cpu.run();
+                }, _error);
         },
 
         reset : function ()

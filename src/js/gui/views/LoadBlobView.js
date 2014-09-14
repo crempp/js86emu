@@ -13,7 +13,8 @@ define([
     "gui/views/ModalView",
     "gui/views/LoaderView",
     "gui/templates/GuiTemplate",
-    "emu/emu"],
+    "emu/emu",
+    "emu/util/data"],
 function(
     $,
     _,
@@ -22,33 +23,11 @@ function(
     ModalView,
     LoaderView,
     GuiTemplate,
-    Emu)
+    Emu,
+    DataLoader)
 {
     //var _basePath = "files/program-blobs/";
     var _basePath = "";
-
-    /**
-     *  Load a binary file via Ajax
-     *
-     * @param fileName
-     * @param cb
-     * @private
-     */
-    var _loadBlob = function (fileName, cb)
-    {
-        var oReq = new XMLHttpRequest();
-
-        oReq.open("GET", _basePath + fileName, true);
-        oReq.responseType = "arraybuffer";
-
-        oReq.onload = function (oEvent) {
-            var arrayBuffer = oReq.response; // Note: not oReq.responseText
-
-            if (cb) cb(arrayBuffer);
-        };
-
-        oReq.send(null);
-    }
 
     var LoadBlobView = ModalView.extend({
 
@@ -110,7 +89,8 @@ function(
                 this.model.set({"emuSettings" : emuSettings});
 
                 // Load blob
-                _loadBlob(emuSettings.blobProgram, function(arrayBuffer){
+                dl = DataLoader.create(_basePath + emuSettings.blobSettings.file);
+                dl.on("load", function(arrayBuffer){
                     require(['gui/gui'], function(GUI) {
                         if (arrayBuffer) {
                             GUI.setControlState("running");
@@ -119,6 +99,7 @@ function(
                         loaderView.hide();
                     });
                 });
+                dl.load();
             }
             else
             {
