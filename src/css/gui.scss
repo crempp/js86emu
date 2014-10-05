@@ -1,0 +1,153 @@
+#gui-overlay {
+  display: none;
+
+  .transparency {
+    position: absolute;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+    background-color: #000000;
+
+    @include opacity(0.7);
+    width: 100%;
+    height: 100%;
+  }
+  .modal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1001;
+    background-color: #444;
+    padding: 20px;
+    @include border-radius(8px);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 4;
+    right: 4;
+    cursor: pointer;
+  }
+
+  .modal-loader {
+    h2 {
+      text-align: center;
+    }
+    padding-bottom: 1.5em;
+    padding-left: 1.5em;
+    padding-right: 1.5em;
+  }
+
+  .modal-settings {
+    height: 600px;
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-right: 15px;
+    }
+    label:after {
+      content: ": "
+    }
+    .input {
+      /*float: left;*/
+    }
+    output{
+      display: block;
+      clear: both;
+      padding-left: 45px;;
+    }
+    .file_chooser {
+      position: relative;
+      overflow: hidden;
+      padding: 5px;
+    }
+    .file-chooser-input {
+      position: absolute;
+      display: block !important;
+      opacity: 0 !important;
+      overflow: hidden !important;
+      top: 0px;
+      left: 0px;
+    }
+
+    .settings-submit {
+      padding: 10px;
+      text-align: center;
+    }
+
+    .modal-settings-tabs {
+      width: 120px;
+      height: 100%;
+      float: left;
+      font-size: 20px;
+      line-height: 1.3;
+
+      position: relative;
+
+      .modal-settings-tab {
+        padding-left: 6px;
+        padding-top: 4px;
+        padding-right: 4px;
+        padding-bottom: 4px;
+
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+
+        cursor: pointer;
+
+        &:hover {
+          background-color: #555555;
+        }
+      }
+
+      .selected {
+        background-color: #333333;;
+      }
+
+      .settings-submit {
+        position: absolute;
+        bottom: 0px;
+
+        .button {
+          background-color: #f3f3f3;
+          color: #555555;
+          font-weight: bold;
+          padding-left: 30px;
+          padding-right: 30px;
+        }
+      }
+    }
+    .modal-settings-window {
+      width: 400px;
+      height: 100%;
+      float: left;
+
+      display: none;
+      background-color: #333333;
+
+      &.active {
+        display: inherit;
+      }
+
+      h1 {
+        text-align: center;
+        margin-top: 5px;
+        margin-bottom: 5px;
+      }
+
+      fieldset {
+        margin-left: 20px;
+        margin-right: 20px;
+      }
+    }
+
+    ::after {
+      clear: both;
+    }
+  }
+}

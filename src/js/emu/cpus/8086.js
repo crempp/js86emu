@@ -1,5 +1,41 @@
 /**
+ * 8086 CPU
  *
+ * TODO: Verify this information
+ * The video RAM starts at address 8000h,
+ *
+ * (from http://www.cpu-world.com/Arch/8086.html)
+ *
+ * Program memory - program can be located anywhere in memory. Jump and
+ * call instructions can be used for short jumps within currently selected
+ * 64 KB code segment, as well as for far jumps anywhere within 1 MB of
+ * memory. All conditional jump instructions can be used to jump within
+ * approximately +127 - -127 bytes from current instruction.
+ *
+ * Data memory - the 8086 processor can access data in any one out of 4
+ * available segments, which limits the size of accessible memory to 256 KB
+ * (if all four segments point to different 64 KB blocks). Accessing data
+ * from the Data, Code, Stack or Extra segments can be usually done by
+ * prefixing instructions with the DS:, CS:, SS: or ES: (some registers and
+ * instructions by default may use the ES or SS segments instead of DS
+ * segment).
+ *
+ * Word data can be located at odd or even byte boundaries. The processor
+ * uses two memory accesses to read 16-bit word located at odd byte
+ * boundaries. Reading word data from even byte boundaries requires only
+ * one memory access.
+ *
+ * Stack memory can be placed anywhere in memory. The stack can be located
+ * at odd memory addresses, but it is not recommended for performance
+ * reasons (see "Data Memory" above).
+ *
+ * Reserved locations:
+ *
+ * 0000h - 03FFh are reserved for interrupt vectors. Each interrupt vector
+ * is a 32-bit pointer in format segment:offset.
+ *
+ * FFFF0h - FFFFFh - after RESET the processor always starts program
+ * execution at the FFFF0h address.
  *
  * @module Emu
  * @author Chad Rempp <crempp@gmail.com>
@@ -13,12 +49,18 @@ function(
 {
     _Cpu = null;
 
+    _settings = null;
+
     _breakOnError = false;
 
     // Temporary IP counter. Tracks IP increment as instruction runs.
     _tempIP = 1;
 
     var Cpu8086 = {
+
+        bios_rom_address: 0xFE000,
+        video_rom_address: 0xC0000,
+
         _opcode  : 0x00,
         _memory  : null,
         _memoryV : null,
@@ -524,68 +566,25 @@ function(
             return 0;
         },
 
-        /**
-         * Reset the CPU state
-         *
-         * TODO: Verify this information
-         * The video RAM starts at address 8000h,
-         *
-         * (from http://www.cpu-world.com/Arch/8086.html)
-         *
-         * Program memory - program can be located anywhere in memory. Jump and
-         * call instructions can be used for short jumps within currently selected
-         * 64 KB code segment, as well as for far jumps anywhere within 1 MB of
-         * memory. All conditional jump instructions can be used to jump within
-         * approximately +127 - -127 bytes from current instruction.
-         *
-         * Data memory - the 8086 processor can access data in any one out of 4
-         * available segments, which limits the size of accessible memory to 256 KB
-         * (if all four segments point to different 64 KB blocks). Accessing data
-         * from the Data, Code, Stack or Extra segments can be usually done by
-         * prefixing instructions with the DS:, CS:, SS: or ES: (some registers and
-         * instructions by default may use the ES or SS segments instead of DS
-         * segment).
-         *
-         * Word data can be located at odd or even byte boundaries. The processor
-         * uses two memory accesses to read 16-bit word located at odd byte
-         * boundaries. Reading word data from even byte boundaries requires only
-         * one memory access.
-         *
-         * Stack memory can be placed anywhere in memory. The stack can be located
-         * at odd memory addresses, but it is not recommended for performance
-         * reasons (see "Data Memory" above).
-         *
-         * Reserved locations:
-         *
-         * 0000h - 03FFh are reserved for interrupt vectors. Each interrupt vector
-         * is a 32-bit pointer in format segment:offset.
-         *
-         * FFFF0h - FFFFFh - after RESET the processor always starts program
-         * execution at the FFFF0h address.
-         */
-        reset : function (Cpu, settings)
+        configure : function (Cpu, settings)
         {
             _Cpu = Cpu;
 
+            _settings = settings;
+
             _breakOnError = SettingsModel.get("emuSettings").breakOnError;
+        },
 
-            //this.halt = false;
-            _Cpu._haltFlag = false;
-
-            // Initialize registers and memory once
-            this._opcode = 0x00;
-
+        initializeMemory : function()
+        {
             this._memory  = new ArrayBuffer(1048576); // 1,048,576 bytes (1MB)
             this._memoryV = new Uint8Array(this._memory);
+        },
 
-            // Zero memory
-            for (var i = 0; i < this._memoryV.length; i++)
-            {
-                this._memoryV[i] = 0;
-            }
-
+        clearRegisters : function ()
+        {
             // Main Registers
-            this._regAH = settings['cpu-init']['registers']['ah'];
+            this._regAH = _settings['cpu-init']['registers']['ah'];
             this._regAL = 0x00;
             this._regBH = 0x00;
             this._regBL = 0x00;
@@ -597,10 +596,10 @@ function(
             this._regSI = 0x0000;
             this._regDI = 0x0000;
             this._regBP = 0x0000;
-            this._regSP = settings['cpu-init']['registers']['sp'];
+            this._regSP = _settings['cpu-init']['registers']['sp'];
 
             // Program counter
-            this._regIP = settings['cpu-init']['registers']['ip'];
+            this._regIP = _settings['cpu-init']['registers']['ip'];
 
             // Segment registers
             this._regCS = 0x0000;
@@ -610,6 +609,22 @@ function(
 
             // Status register
             this._regFlags = 0xF000;
+
+            this._opcode = 0x00;
+        },
+
+        initIP : function (ip)
+        {
+            this._regIP = ip || this.bios_rom_address;
+        },
+
+        clearMemory : function ()
+        {
+            // Zero memory
+            for (var i = 0; i < this._memoryV.length; i++)
+            {
+                this._memoryV[i] = 0;
+            }
         },
 
         loadBinary : function (addr, blob)

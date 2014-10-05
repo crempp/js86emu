@@ -13,7 +13,8 @@ define([
     "gui/views/ModalView",
     "gui/views/LoaderView",
     "gui/templates/GuiTemplate",
-    "emu/emu"],
+    "emu/emu",
+    "emu/util/data"],
 function(
     $,
     _,
@@ -22,7 +23,8 @@ function(
     ModalView,
     LoaderView,
     GuiTemplate,
-    Emu)
+    Emu,
+    DataLoader)
 {
     var _basePath = "files/program-blobs/";
 
@@ -109,7 +111,8 @@ function(
                 this.model.set({"emuSettings" : emuSettings});
 
                 // Load blob
-                _loadBlob(emuSettings.blobProgram, function(arrayBuffer){
+                dl = DataLoader.create(_basePath + emuSettings.blobSettings.file);
+                dl.on("load", function(arrayBuffer){
                     require(['gui/gui'], function(GUI) {
                         if (arrayBuffer) {
                             GUI.setControlState("running");
@@ -118,6 +121,7 @@ function(
                         loaderView.hide();
                     });
                 });
+                dl.load();
             }
             else
             {
