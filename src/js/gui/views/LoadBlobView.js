@@ -36,6 +36,7 @@ function(
     var _loadBlob = function (fileName, cb)
     {
         var oReq = new XMLHttpRequest();
+
         oReq.open("GET", _basePath + fileName, true);
         oReq.responseType = "arraybuffer";
 

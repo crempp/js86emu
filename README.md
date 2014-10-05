@@ -34,6 +34,10 @@ TODO
 * Add memory break points
 * Update memory debug view to keep starting point of rows at a factor of 8 (currently the row begins at IP)
 
+Test Programs
+-------------
+Test programs have been assembled with JWasm
+jwasm -0 -fpc -ms -bin
 
 References
 ----------
