@@ -31,10 +31,10 @@ define([], function(){
                 "module" : "cpus/486"
             }
         ],
-            "bios"   : [],
-            "hd"     : [],
-            "floppy" : [],
-            "gfx"    : [
+        "bios"   : [],
+        "hd"     : [],
+        "floppy" : [],
+        "gfx"    : [
             {
                 "id"   : "mda",
                 "name" : "MDA (Monochrome Display Adapter)",
@@ -56,7 +56,7 @@ define([], function(){
                 "module" : "gfx/vga"
             }
         ],
-            "input"  : []
+        "input"  : []
     };
 
     return Components;
