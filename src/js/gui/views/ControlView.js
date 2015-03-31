@@ -28,7 +28,8 @@ function(
         pause    : false,
         halt     : false,
         step     : false,
-        settings : false
+        settings : false,
+        open     : false
     }
 
     /**
@@ -89,7 +90,8 @@ function(
             "click   .button-pause"    : "pause",
             "click   .button-halt"     : "halt",
             "click   .button-step"     : "step",
-            "click   .button-settings" : "settings"
+            "click   .button-settings" : "settings",
+            "click   .button-open"     : "open"
             //"keyup   .button-settings" : "keyUp",
             //"keydown .button-settings" : "keyDown"
         },
@@ -152,8 +154,16 @@ function(
         {
             _toggleState("settings", this.$el);
 
-            var settingsView = new LoadBlobView({ container : $("#gui-modal") });
+            var settingsView = new SettingsView({ container : $("#gui-modal") });
             settingsView.show();
+        },
+
+        open : function ()
+        {
+            _toggleState("open", this.$el);
+
+            var openView = new LoadBlobView({ container : $("#gui-modal") });
+            openView.show();
         },
 
         setState : function (state)

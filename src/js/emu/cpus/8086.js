@@ -2237,6 +2237,38 @@ function(
                     break;
 
                 /**
+                 * Instruction : INT
+                 * Meaning     : Interrupt
+                 * Notes       : Initiates a software interrupt by pushing the
+                 *               flags, clearing the Trap and Interrupt Flags,
+                 *               pushing CS followed by IP and loading CS:IP
+                 *               with the value found in the interrupt vector
+                 *               table. Execution then begins at the location
+                 *               addressed by the new CS:IP
+                 */
+                case 0xCC:
+                    break;
+                case 0xCD:
+                    var intCode = this._memoryV[this._regIP + 1];
+
+                    // Push flags
+                    this._push(this._regFlags);
+
+                    // Clear trap and interrupt flags
+                    this._regFlags &= ~this.FLAG_TF_MASK;
+                    this._regFlags &= ~this.FLAG_IF_MASK;
+
+                    // Push CS
+                    this._push(this._regCS);
+
+                    // Push IP
+                    this._push(this._regIP);
+
+
+
+                    break;
+
+                /**
                  * Instruction : JMP
                  * Meaning     : Unconditional jump
                  * Notes       : Unconditionally transfers control to "label"
@@ -2516,6 +2548,49 @@ function(
                     {
                         this._regIP += 2;
                     }
+                    break;
+
+
+                /**
+                 * Instruction : LODSB
+                 * Meaning     : Load byte sized string
+                 * Notes       : Transfers string element addressed by DS:SI (even if an
+                 *               operand is supplied) to the accumulator. SI is
+                 *               incremented based on the size of the operand or based
+                 *               on the instruction used. If the Direction Flag is set SI
+                 *               is decremented, if the Direction Flag is clear SI is
+                 *               incremented. Use with REP prefixes.
+                 */
+                case 0xAC:
+                    var addr = this._regDI + this._regSI;
+                    this._regAH = 0;
+                    this._regAL = this._memoryV[addr];
+
+                    if (this._regFlags & this.FLAG_DF_MASK) this._regSI -= 1;
+                    else  this._regSI += 1;
+
+                    this._regIP += 1;
+                    break;
+
+                /**
+                 * Instruction : LODSW
+                 * Meaning     : Load word sized string
+                 * Notes       : Transfers string element addressed by DS:SI (even if an
+                 *               operand is supplied) to the accumulator. SI is
+                 *               incremented based on the size of the operand or based
+                 *               on the instruction used. If the Direction Flag is set SI
+                 *               is decremented, if the Direction Flag is clear SI is
+                 *               incremented. Use with REP prefixes.
+                 */
+                case 0xAD:
+                    var addr = this._regDI + this._regSI;
+                    this._regAH = this._memoryV[addr + 1];
+                    this._regAL = this._memoryV[addr];
+
+                    if (this._regFlags & this.FLAG_DF_MASK) this._regSI -= 1;
+                    else  this._regSI += 1;
+
+                    this._regIP += 1;
                     break;
 
                 /**

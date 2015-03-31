@@ -21,6 +21,12 @@ Currently
 
 We'll see how far I get :)
 
+Quickstart
+----
+* Install Nodejs
+* install Ruby
+* 
+
 TODO
 ----
 * Fix operations which set src to an RM value, they over count IP increment. The following is the fix but care needs to be taken to determine which ops need it

@@ -26,8 +26,30 @@ function(
     Emu,
     DataLoader)
 {
-    //var _basePath = "files/program-blobs/";
-    var _basePath = "";
+    var _basePath = "files/program-blobs/";
+
+    /**
+     *  Load a binary file via Ajax
+     *
+     * @param fileName
+     * @param cb
+     * @private
+     */
+    var _loadBlob = function (fileName, cb)
+    {
+        var oReq = new XMLHttpRequest();
+
+        oReq.open("GET", _basePath + fileName, true);
+        oReq.responseType = "arraybuffer";
+
+        oReq.onload = function (oEvent) {
+            var arrayBuffer = oReq.response; // Note: not oReq.responseText
+
+            if (cb) cb(arrayBuffer);
+        };
+
+        oReq.send(null);
+    }
 
     var LoadBlobView = ModalView.extend({
 

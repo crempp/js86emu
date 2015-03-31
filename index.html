@@ -20,7 +20,30 @@
                 <canvas id='gfx-port' width="720" height="350"></canvas>
             </div>
 
+            <div class="help" style="display:none;">
+                <h2>Introduction</h2>
+                <p>js86emu is an x86 emulator written in Javascript.</p>
+                <p>The plan is to emulate multiple x86 chips along with auxilary hardware such as Harddisk controllers, BIOS and graphics.</p>
+                <p>The 8086 processor has ~72 instruction represented by 252 numeric opcodes (this actually depends on how you count the group instructions).</p>
+                <p>Currently
+                    <ul>
+                        <li>~98 instructions decoded and mostly working</li>
+                        <li>Functioning stack</li>
+                        <li>Basic (non-segmented) memory</li>
+                        <li>Pretty decent debugging (gotta have this)</li>
+                        <li>Code Page 437 font set loads dynamically from a bitmap representation</li>
+                        <li>Text mode (80x25) video (no interrupts yet)</li>
+                    </ul>
+                </p>
+
+                <h2>quick start</h2>
+                <p>The emulator currently only runs a basic COM file taken from Code Golf. Click on the open button <span title="open" class="fa fa-folder button button-open"></span> in the controls above and select "SE Codegolf."</p>
+
+            </div>
+
             <div class="gui-debug">
+
+
                 <div class="row">
                     <div id="gui-debug-info" class="debug-window row-full"></div>
                 </div>

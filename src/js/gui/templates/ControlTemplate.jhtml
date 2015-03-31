@@ -6,5 +6,6 @@
     <span title="pause [F7]" class="fa fa-pause button button-pause"></span>
     <span title="halt [F8]" class="fa fa-stop button button-halt"></span>
     <span title="step [F9]" class="fa fa-forward button button-step"></span>
+    <span title="open" class="fa fa-folder button button-open"></span>
     <span title="settings" class="fa fa-cogs button button-settings"></span>
 </fieldset>
