@@ -2,9 +2,13 @@
   "name": "js86emu",
   "version": "0.0.1",
   "description": "x86 emulator written in Javascript.",
-  "main": "Gruntfile.js",
+  "main": "",
   "author": "Chad Rempp",
   "license": "GPL",
+  "repository" : {
+      "type" : "git",
+      "url" : "https://bitbucket.org/crempp/js86emu.git"
+  },
   "devDependencies": {
     "grunt-contrib-concat": "~0.3.0",
     "grunt-contrib-uglify": "~0.2.4",
@@ -14,6 +18,11 @@
     "grunt-contrib-sass": "~0.5.0",
     "grunt-contrib-jst" : "~0.6.0",
     "grunt": "~0.4.4",
-    "jshint": "~2.1.11"
+    "jshint": "~2.1.11",
+    "mocha": "2.0.1",
+    "should": "4.3.0",
+    "requirejs": "2.1.15",
+    "jquery": "2.1.1",
+    "backbone": "1.1.2"
   }
 }

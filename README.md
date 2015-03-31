@@ -39,6 +39,13 @@ Test Programs
 Test programs have been assembled with JWasm
 jwasm -0 -fpc -ms -bin
 
+Tests
+-----
+js86emu uses Mocha and should for it's tests. To run tests
+  ```
+  mocha
+  ```
+
 References
 ----------
 * [IBM PS/2 Files](http://www.walshcomptech.com/selectpccbbs/)
