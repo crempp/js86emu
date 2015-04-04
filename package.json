@@ -23,6 +23,8 @@
     "should": "4.3.0",
     "requirejs": "2.1.15",
     "jquery": "2.1.1",
-    "backbone": "1.1.2"
+    "backbone": "1.1.2",
+    "connect": "3.3.5",
+    "serve-static": "1.9.2"
   }
 }

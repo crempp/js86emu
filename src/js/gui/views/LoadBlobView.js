@@ -26,7 +26,8 @@ function(
     Emu,
     DataLoader)
 {
-    var _basePath = "files/program-blobs/";
+    // var _basePath = "files/program-blobs/";
+    var _basePath = "";
 
     /**
      *  Load a binary file via Ajax

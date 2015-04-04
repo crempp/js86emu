@@ -117,6 +117,24 @@ function(
         FLAG_DF_MASK : 0x0400,
         FLAG_OF_MASK : 0x0800,
 
+        _decode : function (opcode_byte, addressing_byte) {
+            /**
+             * Decode the opcode bytes
+             */
+            return {
+                opcode_byte : opcode_byte,
+                addressing_byte : addressing_byte,
+                prefix : 0x00, // Not supporting prefix opcodes yet
+                opcode : (opcode_byte & 0xFC) >>> 2,
+                d      : (opcode_byte & 0x02) >>> 1,
+                w      : (opcode_byte & 0x01),
+                mod    : (addressing_byte & 0xC0) >>> 6,
+                reg    : (addressing_byte & 0x38) >>> 3,
+                rm     : (addressing_byte & 0x07),
+                cycle  : _Cpu._cycles
+            };
+        },
+
         /**
          * Looks up the correct register to use based on the w and reg
          * values in the opcode.
@@ -131,22 +149,22 @@ function(
             {
                 switch (opcode.reg)
                 {
-                    case 0:
+                    case 0: // 000
                         return this._regAL;
-                    case 1:
+                    case 1: // 001
                         return this._regCL;
-                    case 2:
+                    case 2: // 010
                         return this._regDL;
-                    case 3:
+                    case 3: // 011
                         return this._regBL;
-                    case 4:
+                    case 4: // 100
                         return this._regAH;
-                    case 5:
-                        return this._regBH;
-                    case 6:
+                    case 5: // 101
                         return this._regCH;
-                    case 7:
+                    case 6: // 110
                         return this._regDH;
+                    case 7: // 111
+                        return this._regBH;
                     default:
                         if (_breakOnError) _Cpu.halt({
                             error      : true,
@@ -649,18 +667,7 @@ function(
             var addressing_byte = this._memoryV[this._regIP + 1];
 
             //====Decode Opcode====
-            var opcode = {
-                opcode_byte : opcode_byte,
-                addressing_byte : addressing_byte,
-                prefix : 0x00, // Not supporting prefix opcodes yet
-                opcode : (opcode_byte & 0xFC) >>> 2,
-                d      : (opcode_byte & 0x02) >>> 1,
-                w      : (opcode_byte & 0x01),
-                mod    : (addressing_byte & 0xC0) >>> 6,
-                reg    : (addressing_byte & 0x38) >>> 3,
-                rm     : (addressing_byte & 0x07),
-                cycle  : _Cpu._cycles
-            };
+            var opcode = self._decode(opcode_byte, addressing_byte);
 
             // Pre-cycle Debug
             if (_Cpu.isDebug())
