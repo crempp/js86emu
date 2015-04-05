@@ -188,8 +188,6 @@ function(
 
             var _clear = function (resolve, reject)
             {
-                console.log("d");
-
                 _cpu.clearRegisters();
 
                 resolve();
@@ -211,8 +209,6 @@ function(
 
             var _clear = function (resolve, reject)
             {
-                console.log("e");
-
                 // No CPU caching currently implemented
                 resolve();
             };

@@ -143,6 +143,32 @@ var Util = {
             "name": "Test Program",
             "selected": true
         };
+    },
+
+    /**
+     * Load the CPU Module using Require.js
+     *
+     * @param done
+     */
+    loadCpuModule : function(done) {
+        // Load the CPU module using require.js
+        requirejs(['emu/cpu'], function (_File) {
+            Cpu = _File;
+            done();
+        });
+    },
+
+    /**
+     * Load the CPU Module using Require.js
+     *
+     * @param done
+     */
+    loadCpuInstanceModule : function(done) {
+        // Load the CPU module using require.js
+        requirejs(['emu/cpus/8086'], function (_File) {
+            Cpu = _File;
+            done();
+        });
     }
 };
 

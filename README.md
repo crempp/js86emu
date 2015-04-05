@@ -47,10 +47,23 @@ jwasm -0 -fpc -ms -bin
 
 Tests
 -----
-js86emu uses Mocha and should for it's tests. To run tests
+js86emu uses Mocha and should for it's tests.
+  ```
+  npm install -g mocha
+  npm install -g istanbul
+  ```
+ 
+To run tests
   ```
   mocha
   ```
+
+To run coverage
+  ```
+  istanbul cover --hook-run-in-context node_modules/mocha/bin/_mocha -- -R spec
+  open coverage/lcov-report/index.html
+  ```
+
 
 References
 ----------
