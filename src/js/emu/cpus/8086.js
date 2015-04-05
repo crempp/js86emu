@@ -41,9 +41,11 @@
  * @author Chad Rempp <crempp@gmail.com>
  */
 define([
+    "emu/exceptions",
     "gui/models/SettingsModel"
 ],
 function(
+    EmuExceptions,
     SettingsModel
 )
 {
@@ -584,6 +586,13 @@ function(
             return 0;
         },
 
+        /**
+         * Configure this cpu instance by saving a reference to the generic
+         * CPU emulator and settings. Setup some general flags.
+         *
+         * @param Cpu
+         * @param settings
+         */
         configure : function (Cpu, settings)
         {
             _Cpu = Cpu;
@@ -593,49 +602,75 @@ function(
             _breakOnError = SettingsModel.get("emuSettings").breakOnError;
         },
 
+        /**
+         * Create the memory array.
+         */
         initializeMemory : function()
         {
             this._memory  = new ArrayBuffer(1048576); // 1,048,576 bytes (1MB)
             this._memoryV = new Uint8Array(this._memory);
         },
 
+        /**
+         * Reset the registers to the values defined in the settings.
+         */
         clearRegisters : function ()
         {
             // Main Registers
             this._regAH = _settings['cpu-init']['registers']['ah'];
-            this._regAL = 0x00;
-            this._regBH = 0x00;
-            this._regBL = 0x00;
-            this._regCH = 0x00;
-            this._regCL = 0x00;
-            this._regDH = 0x00;
-            this._regDL = 0x00;
+            this._regAL = _settings['cpu-init']['registers']['al'];
+            this._regBH = _settings['cpu-init']['registers']['bh'];
+            this._regBL = _settings['cpu-init']['registers']['bl'];
+            this._regCH = _settings['cpu-init']['registers']['ch'];
+            this._regCL = _settings['cpu-init']['registers']['cl'];
+            this._regDH = _settings['cpu-init']['registers']['dh'];
+            this._regDL = _settings['cpu-init']['registers']['dl'];
 
-            this._regSI = 0x0000;
-            this._regDI = 0x0000;
-            this._regBP = 0x0000;
+            this._regSI = _settings['cpu-init']['registers']['si'];;
+            this._regDI = _settings['cpu-init']['registers']['di'];;
+            this._regBP = _settings['cpu-init']['registers']['bp'];;
             this._regSP = _settings['cpu-init']['registers']['sp'];
 
             // Program counter
             this._regIP = _settings['cpu-init']['registers']['ip'];
 
             // Segment registers
-            this._regCS = 0x0000;
-            this._regDS = 0x0000;
-            this._regES = 0x0000;
-            this._regSS = 0x0000;
+            this._regCS = _settings['cpu-init']['registers']['cs'];;
+            this._regDS = _settings['cpu-init']['registers']['ds'];;
+            this._regES = _settings['cpu-init']['registers']['es'];;
+            this._regSS = _settings['cpu-init']['registers']['ss'];;
 
             // Status register
-            this._regFlags = 0xF000;
+            this._regFlags = _settings['cpu-init']['registers']['flags'];;
 
             this._opcode = 0x00;
         },
 
+        /**
+         * Initialize the instruction pointer.
+         *
+         * If an IP is given that value is used, otherwise if the 'use-bios'
+         * setting is true the BIOS ROM starting address is used, otherwise
+         * the IP value defined in the settings is used.
+         *
+         * @param (optional) ip
+         */
         initIP : function (ip)
         {
-            this._regIP = ip || this.bios_rom_address;
+            if (ip) {
+                this._regIP = ip;
+            }
+            else if (_settings['use-bios']) {
+                this._regIP = this.bios_rom_address;
+            }
+            else {
+                this._regIP = _settings['cpu-init']['registers']['ip'];
+            }
         },
 
+        /**
+         * Zero out the memory
+         */
         clearMemory : function ()
         {
             // Zero memory
@@ -645,10 +680,33 @@ function(
             }
         },
 
+        /**
+         * Load the given blob into memory starting at the given address
+         *
+         * @param addr Start address for the load
+         * @param blob Binary data to load
+         */
         loadBinary : function (addr, blob)
         {
+            if (blob.length > this._memoryV.length)
+            {
+                throw new EmuExceptions.MemoryBinaryTooLarge(blob.length)
+                //throw "BLAHAHAHA";
+            }
             var av = new Uint8Array(blob);
             this._memoryV.set(av, addr);
+        },
+
+        /**
+         * Return a setting
+         *
+         * Used mostly for testing
+         *
+         * @param key
+         * @returns {*}
+         */
+        getSetting : function (key) {
+            return _settings[key];
         },
 
         /**
@@ -667,7 +725,7 @@ function(
             var addressing_byte = this._memoryV[this._regIP + 1];
 
             //====Decode Opcode====
-            var opcode = self._decode(opcode_byte, addressing_byte);
+            var opcode = this._decode(opcode_byte, addressing_byte);
 
             // Pre-cycle Debug
             if (_Cpu.isDebug())

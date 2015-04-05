@@ -22,7 +22,7 @@ function(
     SettingsModel
 )
 {
-    _Gui = null;
+    var _Gui = null;
 
     var Cpu = {
         STATE_PAUSED  : 0,
@@ -216,8 +216,6 @@ function(
                 // No CPU caching currently implemented
                 resolve();
             };
-JMP
-Ap
             return new Promise(_clear);
         },
 

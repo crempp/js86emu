@@ -19,12 +19,14 @@
     "grunt-contrib-jst" : "~0.6.0",
     "grunt": "~0.4.4",
     "jshint": "~2.1.11",
-    "mocha": "2.0.1",
-    "should": "4.3.0",
     "requirejs": "2.1.15",
     "jquery": "2.1.1",
     "backbone": "1.1.2",
+
+    "mocha": "2.0.1",
+    "should": "4.3.0",
     "connect": "3.3.5",
-    "serve-static": "1.9.2"
+    "serve-static": "1.9.2",
+    "deepcopy": "0.4.0"
   }
 }
