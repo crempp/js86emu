@@ -51,6 +51,8 @@ function(
 {
     _Cpu = null;
 
+    _Gui = null
+
     _settings = null;
 
     _breakOnError = false;
@@ -596,10 +598,13 @@ function(
          *
          * @param Cpu
          * @param settings
+         * @param Gui
          */
-        configure : function (Cpu, settings)
+        configure : function (Cpu, settings, Gui)
         {
             _Cpu = Cpu;
+
+            _Gui = Gui;
 
             _settings = settings;
 

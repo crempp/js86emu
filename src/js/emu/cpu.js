@@ -72,7 +72,7 @@ function(
                     _cpu = cpuModel;
 
                     // Initialize the CPU
-                    _cpu.configure(_this, SettingsModel.get('emuSettings')["blobSettings"]);
+                    _cpu.configure(_this, SettingsModel.get('emuSettings')["blobSettings"], _Gui);
 
                     // Initialize memory
                     _cpu.initializeMemory();
@@ -255,10 +255,11 @@ function(
                 // If this run is blob-type load the blob that should have
                 // previously been set
                 //SettingsModel.get('emuSettings')['startInDebug']
-//                if ("blob" === SettingsModel.get('emuSettings')["run-type"])
-//                {
-//                    _cpu.loadBinary(SettingsModel.get('emuSettings')["blobSettings"]["address"], _this._blob);
-//                }
+
+                if ("blob" === SettingsModel.get('emuSettings')["run-type"])
+                {
+                    _cpu.loadBinary(SettingsModel.get('emuSettings')["blobSettings"]["address"], _this._blob);
+                }
 
                 _cpu.initIP();
 
