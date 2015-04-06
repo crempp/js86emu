@@ -55,33 +55,38 @@ var Util = {
         cpu._regDL = 0x08; // accumulator, other functions
 
         // Index registers
-        cpu._regSI = 0x09; // Source Index
-        cpu._regDI = 0x0A; // Destination Index
-        cpu._regBP = 0x0B; // Base Pointer
-        cpu._regSP = 0x0C; // Stack Pointer
+        cpu._regSI = 0x0009; // Source Index
+        cpu._regDI = 0x000A; // Destination Index
+        cpu._regBP = 0x000B; // Base Pointer
+        cpu._regSP = 0x000C; // Stack Pointer
 
         // Program counter
-        cpu._regIP = 0x0D; // Instruction Pointer
+        cpu._regIP = 0x000D; // Instruction Pointer
 
         // Segment registers
-        cpu._regCS = 0x0E; // Code Segment
-        cpu._regDS = 0x0F; // Data Segment
-        cpu._regES = 0x10; // ExtraSegment
-        cpu._regSS = 0x11; // Stack Segment
+        cpu._regCS = 0x000E; // Code Segment
+        cpu._regDS = 0x000F; // Data Segment
+        cpu._regES = 0x0010; // ExtraSegment
+        cpu._regSS = 0x0011; // Stack Segment
 
         cpu._regFlags = 0x12;
     },
 
     /**
-     * Set the value of the first _n_ bytes of memory to it's address (easy to
-     * verify the value that way).
+     * Set the value of the first _n_ bytes of memory to it's address modulo
+     * 251.
+     *
+     * This provides an easy way to verify address values. We use modulo 251
+     * because each address can only hold one byte and we use a prime number
+     * to prevent patterns forming that lead to coincidental aligmnents.
+     *
      *
      * @param cpu
      */
     setMemoryIdent : function (cpu, n) {
-        n = n || 256;
+        n = n || 255;
         for (a = 0; a < n; a++) {
-            cpu._memoryV.set(a, a);
+            cpu._memoryV.set(a, a % 251);
         }
     },
 

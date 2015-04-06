@@ -56,7 +56,7 @@ function(
     _breakOnError = false;
 
     // Temporary IP counter. Tracks IP increment as instruction runs.
-    _tempIP = 1;
+    _tempIP = 0;
 
     var Cpu8086 = {
 
@@ -277,10 +277,14 @@ function(
             // Use R/M Table 2 with 8-bit signed displacement
             else if (1 === opcode.mod || 2 == opcode.mod)
             {
-                // Add DISP to register specified
-                var disp = ( (this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2] );
-
-                _tempIP += 2;
+                var disp;
+                if (1 === opcode.mod) {
+                    disp = this._memoryV[this._regIP + 2];
+                    _tempIP += 1;
+                } else {
+                    disp = ( (this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2] );
+                    _tempIP += 2;
+                }
 
                 switch (opcode.rm)
                 {
@@ -695,18 +699,6 @@ function(
             }
             var av = new Uint8Array(blob);
             this._memoryV.set(av, addr);
-        },
-
-        /**
-         * Return a setting
-         *
-         * Used mostly for testing
-         *
-         * @param key
-         * @returns {*}
-         */
-        getSetting : function (key) {
-            return _settings[key];
         },
 
         /**
@@ -4056,6 +4048,29 @@ function(
                 IP : this._regIP,
                 FLAGS : this._regFlags
             };
+        },
+
+        /**
+         * Return a setting
+         *
+         * Used mostly for testing
+         *
+         * @param key
+         * @returns {*}
+         */
+        t_getSetting : function (key) {
+            return _settings[key];
+        },
+
+        /**
+         * Return the _tempIP counter and reset it.
+         *
+         * @returns {number|*} _tempIP value before resetting
+         */
+        t_getTmpIPAndReset : function () {
+            var tmpIP = _tempIP;
+            _tempIP = 0;
+            return tmpIP;
         }
     };
 

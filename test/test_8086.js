@@ -1,3 +1,11 @@
+/**
+ * Test the 8086 CPU
+ *
+ * Tests through out this file make referece to "The 8086 Family User Guide."
+ * These references look like:
+ *   T8086FUM 2-45
+ * which refers to page 2-45 of the manual.
+ */
 var path = require('path');
 var requirejs = require('requirejs');
 var assert = require("assert")
@@ -59,14 +67,14 @@ describe('Emu.Cpu.8086', function () {
 
         it('should configure', function() {
             // The CPU was configured in the beforeEach()
-            tmp_cpu.getSetting("address").should.be.equal(tmp_settings["address"]);
-            tmp_cpu.getSetting("use-bios").should.be.equal(tmp_settings["use-bios"]);
-            tmp_cpu.getSetting("file").should.be.equal(tmp_settings["file"]);
-            tmp_cpu.getSetting("id").should.be.equal(tmp_settings["id"]);
-            tmp_cpu.getSetting("name").should.be.equal(tmp_settings["name"]);
-            tmp_cpu.getSetting("selected").should.be.equal(tmp_settings["selected"]);
+            tmp_cpu.t_getSetting("address").should.be.equal(tmp_settings["address"]);
+            tmp_cpu.t_getSetting("use-bios").should.be.equal(tmp_settings["use-bios"]);
+            tmp_cpu.t_getSetting("file").should.be.equal(tmp_settings["file"]);
+            tmp_cpu.t_getSetting("id").should.be.equal(tmp_settings["id"]);
+            tmp_cpu.t_getSetting("name").should.be.equal(tmp_settings["name"]);
+            tmp_cpu.t_getSetting("selected").should.be.equal(tmp_settings["selected"]);
             // Use .eql for an object, how deep does this go?
-            tmp_cpu.getSetting("cpu-init").should.be.eql(tmp_settings["cpu-init"]);
+            tmp_cpu.t_getSetting("cpu-init").should.be.eql(tmp_settings["cpu-init"]);
         });
 
         it('should initialize memory', function() {
@@ -145,9 +153,10 @@ describe('Emu.Cpu.8086', function () {
         });
 
         it('should load binary', function() {
+            var blob;
             // Should be able to load a blob the size of ram
             tmp_cpu.clearMemory();
-            var blob = new Uint8Array(tmp_cpu._memoryV.length);
+            blob = new Uint8Array(tmp_cpu._memoryV.length);
             for (var i = 0; i <= tmp_cpu._memoryV.length; i += 1)
             {
                 blob[i] = 0x01;
@@ -165,9 +174,9 @@ describe('Emu.Cpu.8086', function () {
 
             memSum.should.equal(tmp_cpu._memoryV.length);
 
-            // Oversized blobs should throw exceptions
+            // Over sized blobs should throw exceptions
             tmp_cpu.clearMemory();
-            var blob = new Uint8Array(tmp_cpu._memoryV.length + 1);
+            blob = new Uint8Array(tmp_cpu._memoryV.length + 1);
             for (var i = 0; i <= tmp_cpu._memoryV.length + 1; i += 1)
             {
                 blob[i] = 0x01;
@@ -207,9 +216,10 @@ describe('Emu.Cpu.8086', function () {
 
             // Assign identifying values to memory
             cpu8086.clearMemory();
-            u.setMemoryIdent(cpu8086);
-        })
+            u.setMemoryIdent(cpu8086, cpu8086._memoryV.length);
+        });
 
+        /* T8086FUM 4.20 */
         it('should return register value based on opcode <_getRegValueForOp>', function () {
             /**
              *   REG w=0 w=1  REG w=0 w=1
@@ -252,10 +262,177 @@ describe('Emu.Cpu.8086', function () {
                 .should.equal(cpu8086._regDI);
         });
 
-        it.skip('should return register/memory based on opcode <_getRMValueForOp>', function () {
-            // TODO: Write test
-            false.should.be.true;
-            //cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("00000001"), u.Bin2Hex("00111000")))
+        /* T8086FUM 4.20 */
+        it('should return register/memory based on opcode <_getRMValueForOp>', function () {
+            // TODO: Does this addressing ever care about the 'd' bit?
+            // NOTE: the _getRMValueForOp helper returns the *value* at the
+            // calculated address, not the address. However for testing
+            // purposes the values have been set to the address for simplicity.
+
+            // 2-Byte register shortcuts
+            var _regAX = ((cpu8086._regAH << 8) | cpu8086._regAL);
+            var _regBX = ((cpu8086._regBH << 8) | cpu8086._regBL);
+            var _regCX = ((cpu8086._regCH << 8) | cpu8086._regCL);
+            var _regDX = ((cpu8086._regDH << 8) | cpu8086._regDL);
+
+            // memory getter shortcut
+            var m8 = function(a){return cpu8086._memoryV[a];};
+            var m16 = function(a){return ((cpu8086._memoryV[a + 1] << 8) | cpu8086._memoryV[a]);};
+
+            var addr, disp8, disp16;
+
+            // Test the address for both byte and word return values
+            // TODO: Does the 8086 actually support different 'w' values in
+            // this addressing mode?
+            for (var w = 0; w <= 1; w++) {
+                // cast w to a string for use in binary number building
+                var ws = w.toString();
+                var m = (0 === w) ? m8 : m16;
+
+                // R/M Table (no displacement)
+                // mod=00, d=0,
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("00000000")))
+                    .should.equal(m(_regBX + cpu8086._regSI));
+                cpu8086.t_getTmpIPAndReset().should.equal(0);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("00000001")))
+                    .should.equal(m(_regBX + cpu8086._regDI));
+                cpu8086.t_getTmpIPAndReset().should.equal(0);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("00000010")))
+                    .should.equal(m(cpu8086._regBP + cpu8086._regSI));
+                cpu8086.t_getTmpIPAndReset().should.equal(0);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("00000011")))
+                    .should.equal(m(cpu8086._regBP + cpu8086._regDI));
+                cpu8086.t_getTmpIPAndReset().should.equal(0);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("00000100")))
+                    .should.equal(m(cpu8086._regSI));
+                cpu8086.t_getTmpIPAndReset().should.equal(0);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("00000101")))
+                    .should.equal(m(cpu8086._regDI));
+                cpu8086.t_getTmpIPAndReset().should.equal(0);
+
+                if (w === 0) addr = cpu8086._regIP + 2;
+                else addr = (cpu8086._memoryV[cpu8086._regIP + 3] << 8) | cpu8086._memoryV[cpu8086._regIP + 2];
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("00000110")))
+                    .should.equal(m(addr));
+                cpu8086.t_getTmpIPAndReset().should.equal((w === 0) ? 1 : 2);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("00000111")))
+                    .should.equal(m(_regBX));
+                cpu8086.t_getTmpIPAndReset().should.equal(0);
+
+                // R/M Table (with byte displacement)
+                // mod=01, d=0,
+                disp8 = cpu8086._memoryV[cpu8086._regIP + 2];
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("01000000")))
+                    .should.equal(m(_regBX + cpu8086._regSI + disp8));
+                cpu8086.t_getTmpIPAndReset().should.equal(1);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("01000001")))
+                    .should.equal(m(_regBX + cpu8086._regDI + disp8));
+                cpu8086.t_getTmpIPAndReset().should.equal(1);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("01000010")))
+                    .should.equal(m(cpu8086._regBP + cpu8086._regSI + disp8));
+                cpu8086.t_getTmpIPAndReset().should.equal(1);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("01000011")))
+                    .should.equal(m(cpu8086._regBP + cpu8086._regDI + disp8));
+                cpu8086.t_getTmpIPAndReset().should.equal(1);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("01000100")))
+                    .should.equal(m(cpu8086._regSI + disp8));
+                cpu8086.t_getTmpIPAndReset().should.equal(1);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("01000101")))
+                    .should.equal(m(cpu8086._regDI + disp8));
+                cpu8086.t_getTmpIPAndReset().should.equal(1);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("01000110")))
+                    .should.equal(m(cpu8086._regBP + +disp8));
+                cpu8086.t_getTmpIPAndReset().should.equal(1);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("01000111")))
+                    .should.equal(m(_regBX + disp8));
+                cpu8086.t_getTmpIPAndReset().should.equal(1);
+
+                // R/M Table (with byte displacement)
+                // mod=10, d=0,
+                disp16 = ( (cpu8086._memoryV[cpu8086._regIP + 3] << 8) | cpu8086._memoryV[cpu8086._regIP + 2] );
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000000")))
+                    .should.equal(m(_regBX + cpu8086._regSI + disp16));
+                cpu8086.t_getTmpIPAndReset().should.equal(2);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000001")))
+                    .should.equal(m(_regBX + cpu8086._regDI + disp16));
+                cpu8086.t_getTmpIPAndReset().should.equal(2);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000010")))
+                    .should.equal(m(cpu8086._regBP + cpu8086._regSI + disp16));
+                cpu8086.t_getTmpIPAndReset().should.equal(2);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000011")))
+                    .should.equal(m(cpu8086._regBP + cpu8086._regDI + disp16));
+                cpu8086.t_getTmpIPAndReset().should.equal(2);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000100")))
+                    .should.equal(m(cpu8086._regSI + disp16));
+                cpu8086.t_getTmpIPAndReset().should.equal(2);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000101")))
+                    .should.equal(m(cpu8086._regDI + disp16));
+                cpu8086.t_getTmpIPAndReset().should.equal(2);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000110")))
+                    .should.equal(m(cpu8086._regBP + +disp16));
+                cpu8086.t_getTmpIPAndReset().should.equal(2);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000111")))
+                    .should.equal(m(_regBX + disp16));
+                cpu8086.t_getTmpIPAndReset().should.equal(2);
+
+                // R/M Table (with byte displacement)
+                // mod=11, d=0,
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("11000000")))
+                    .should.equal((w === 0) ? cpu8086._regAL : _regAX);
+                cpu8086.t_getTmpIPAndReset().should.equal(0);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("11000001")))
+                    .should.equal((w === 0) ? cpu8086._regCL : _regCX);
+                cpu8086.t_getTmpIPAndReset().should.equal(0);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("11000010")))
+                    .should.equal((w === 0) ? cpu8086._regDL : _regDX);
+                cpu8086.t_getTmpIPAndReset().should.equal(0);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("11000011")))
+                    .should.equal((w === 0) ? cpu8086._regBL : _regBX);
+                cpu8086.t_getTmpIPAndReset().should.equal(0);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("11000100")))
+                    .should.equal((w === 0) ? cpu8086._regAH : cpu8086._regSP);
+                cpu8086.t_getTmpIPAndReset().should.equal(0);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("11000101")))
+                    .should.equal((w === 0) ? cpu8086._regCH : cpu8086._regBP);
+                cpu8086.t_getTmpIPAndReset().should.equal(0);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("11000110")))
+                    .should.equal((w === 0) ? cpu8086._regDH : cpu8086._regSI);
+                cpu8086.t_getTmpIPAndReset().should.equal(0);
+
+                cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("11000111")))
+                    .should.equal((w === 0) ? cpu8086._regBH : cpu8086._regDI);
+                cpu8086.t_getTmpIPAndReset().should.equal(0);
+
+            }
+
         });
 
         it.skip('should set register value based on opcode <_setRegValueForOp>', function () {

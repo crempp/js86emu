@@ -14,7 +14,7 @@ requirejs.config({
 /**
  * Emulator tests
  */
-describe('Emu.Cpu', function () {
+describe('Emu', function () {
 
     var mockEmu;
 
