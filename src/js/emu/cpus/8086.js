@@ -375,13 +375,13 @@ function(
                         this._regAH = (value & 0x00FF);
                         break;
                     case 5:
-                        this._regBH = (value & 0x00FF);
-                        break;
-                    case 6:
                         this._regCH = (value & 0x00FF);
                         break;
-                    case 7:
+                    case 6:
                         this._regDH = (value & 0x00FF);
+                        break;
+                    case 7:
+                        this._regBH = (value & 0x00FF);
                         break;
                 }
             }
