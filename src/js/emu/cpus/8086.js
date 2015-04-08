@@ -459,7 +459,6 @@ function(
                         addr = ( this._regDI );
                         break;
                     case 6 : // 110b Drc't Add
-                        //
                         if (0 === opcode.w) // Byte
                         {
                             addr = this._memoryV[this._regIP + 2];
@@ -490,42 +489,40 @@ function(
             }
             else if (1 === opcode.mod || 2 == opcode.mod)
             {
-                // Add DISP to register specified
-                var disp = ( (this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2] );
+                var disp;
+                if (1 === opcode.mod) {
+                    disp = this._memoryV[this._regIP + 2];
+                    _tempIP += 1;
+                } else {
+                    disp = ( (this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2] );
+                    _tempIP += 2;
+                }
 
                 switch (opcode.rm)
                 {
                     case 0 : // [BX + SI]
-                        addr = (( (this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2] ) + this._regSI + disp);
-                        _tempIP += 2;
+                        addr = ( ((this._regBH << 8) | this._regBL) + this._regSI + disp );
                         break;
                     case 1 : // [BX + DI]
-                        addr = (( (this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2] ) + this._regDI + disp);
-                        _tempIP += 2;
+                        addr = ( ((this._regBH << 8) | this._regBL) + this._regDI + disp );
                         break;
                     case 2 : // [BP + SI]
                         addr = (this._regBP + this._regSI + disp);
-                        _tempIP += 2;
                         break;
                     case 3 : // [BP + DI]
                         addr = (this._regBP + this._regDI + disp);
-                        _tempIP += 2;
                         break;
                     case 4 : // [SI]
                         addr = (this._regSI + disp);
-                        _tempIP += 2;
                         break;
                     case 5 : // [DI]
                         addr = (this._regDI + disp);
-                        _tempIP += 2;
                         break;
                     case 6 : // [BP]
                         addr = (this._regBP + disp);
-                        _tempIP += 2;
                         break;
                     case 7 : // [BX]
                         addr = ( ((this._regBH << 8) | this._regBL) + disp );
-                        _tempIP += 2;
                         break;
                 }
 
