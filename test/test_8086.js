@@ -538,11 +538,8 @@ describe('Emu.Cpu.8086', function () {
             // easier to ensure the correct memory location is set to 255 if
             // all locations start at 0.
 
-            // 2-Byte register shortcuts
-            var _regAX = ((cpu8086._regAH << 8) | cpu8086._regAL);
+            // 2-Byte BX register shortcut
             var _regBX = ((cpu8086._regBH << 8) | cpu8086._regBL);
-            var _regCX = ((cpu8086._regCH << 8) | cpu8086._regCL);
-            var _regDX = ((cpu8086._regDH << 8) | cpu8086._regDL);
 
             // memory getter shortcut
             var m8 = function(a){return cpu8086._memoryV[a];};
@@ -739,10 +736,23 @@ describe('Emu.Cpu.8086', function () {
             }
         });
 
-        it.skip('should ??? <_getRMIncIP>', function () {
-            // TODO: Write test
-            false.should.be.true;
-            // cpu8086._getRMIncIP()
+        it('should calculate the the IP increment for RM addressing <_getRMIncIP>', function () {
+            for (var opcode_byte = 0; opcode_byte < 256; opcode_byte++) {
+                for (var addressing_byte = 0; addressing_byte < 256; addressing_byte++) {
+                    var opcode = cpu8086._decode(opcode_byte, addressing_byte);
+                    var inc = cpu8086._getRMIncIP(opcode);
+
+                    if ((0 === opcode.mod) && (6 === opcode.rm) && (0 === opcode.w)) {
+                        inc.should.equal(1);
+                    } else if ((0 === opcode.mod) && (6 === opcode.rm) && (1 === opcode.w)) {
+                        inc.should.equal(2);
+                    } else if ((1 === opcode.mod || 2 == opcode.mod)) {
+                        inc.should.equal(2);
+                    } else {
+                        inc.should.equal(0);
+                    }
+                }
+            }
         });
 
         it.skip('should execute push', function () {
