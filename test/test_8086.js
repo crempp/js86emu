@@ -205,6 +205,10 @@ describe('Emu.Cpu.8086', function () {
      * CPU Utility Tests
      */
     describe('Cpu utilities', function() {
+        // memory getter shortcut
+        var m8 = function(a){return cpu8086._memoryV[a];};
+        var m16 = function(a){return ((cpu8086._memoryV[a + 1] << 8) | cpu8086._memoryV[a]);};
+
         before(function(){
             cpu8086.initializeMemory();
         });
@@ -284,11 +288,7 @@ describe('Emu.Cpu.8086', function () {
             var _regCX = ((cpu8086._regCH << 8) | cpu8086._regCL);
             var _regDX = ((cpu8086._regDH << 8) | cpu8086._regDL);
 
-            // memory getter shortcut
-            var m8 = function(a){return cpu8086._memoryV[a];};
-            var m16 = function(a){return ((cpu8086._memoryV[a + 1] << 8) | cpu8086._memoryV[a]);};
-
-            var addr, disp8, disp16;
+            var disp8, disp16;
 
             // Test the address for both byte and word return values
             // TODO: Does the 8086 actually support different 'w' values in
@@ -541,10 +541,6 @@ describe('Emu.Cpu.8086', function () {
             // 2-Byte BX register shortcut
             var _regBX = ((cpu8086._regBH << 8) | cpu8086._regBL);
 
-            // memory getter shortcut
-            var m8 = function(a){return cpu8086._memoryV[a];};
-            var m16 = function(a){return ((cpu8086._memoryV[a + 1] << 8) | cpu8086._memoryV[a]);};
-
             var addr, disp8, disp16;
 
             // Test the address for both byte and word return values
@@ -755,10 +751,16 @@ describe('Emu.Cpu.8086', function () {
             }
         });
 
-        it.skip('should execute push', function () {
-            // TODO: Write test
-            false.should.be.true;
-           // cpu8086. _push()
+        it('should execute push', function () {
+            cpu8086.clearMemory();
+
+            cpu8086._push(0xFF);
+            m8(cpu8086._regSP).should.equal(0xFF);
+
+            cpu8086.clearMemory();
+
+            cpu8086._push(0xFFFF);
+            m16(cpu8086._regSP).should.equal(0xFFFF);
         });
 
         it.skip('should execute pop', function () {

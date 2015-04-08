@@ -3794,9 +3794,6 @@ function(
 
         _push : function (value)
         {
-            //console.log("Pushing ", value.toString(16), " to ", this._regSP.toString(16));
-            //console.log("  before", this._memoryV[this._regSP].toString(16));
-
             // Update stack pointer
             this._regSP -= 2;
 
