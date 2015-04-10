@@ -205,6 +205,12 @@ describe('Emu.Cpu.8086', function () {
      * CPU Utility Tests
      */
     describe('Cpu utilities', function() {
+        // 2-Byte register shortcuts
+        var _regAX = function(){return ((cpu8086._regAH << 8) | cpu8086._regAL)};
+        var _regBX = function(){return ((cpu8086._regBH << 8) | cpu8086._regBL)};
+        var _regCX = function(){return ((cpu8086._regCH << 8) | cpu8086._regCL)};
+        var _regDX = function(){return ((cpu8086._regDH << 8) | cpu8086._regDL)};
+
         // memory getter shortcut
         var m8 = function(a){return cpu8086._memoryV[a];};
         var m16 = function(a){return ((cpu8086._memoryV[a + 1] << 8) | cpu8086._memoryV[a]);};
@@ -282,12 +288,6 @@ describe('Emu.Cpu.8086', function () {
             // calculated address, not the address. However for testing
             // purposes the values have been set to the address for simplicity.
 
-            // 2-Byte register shortcuts
-            var _regAX = ((cpu8086._regAH << 8) | cpu8086._regAL);
-            var _regBX = ((cpu8086._regBH << 8) | cpu8086._regBL);
-            var _regCX = ((cpu8086._regCH << 8) | cpu8086._regCL);
-            var _regDX = ((cpu8086._regDH << 8) | cpu8086._regDL);
-
             var disp8, disp16;
 
             // Test the address for both byte and word return values
@@ -301,11 +301,11 @@ describe('Emu.Cpu.8086', function () {
                 // R/M Table (no displacement)
                 // mod=00, rm=000
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("00000000")))
-                    .should.equal(m(_regBX + cpu8086._regSI));
+                    .should.equal(m(_regBX() + cpu8086._regSI));
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
                 // mod=00, rm=001
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("00000001")))
-                    .should.equal(m(_regBX + cpu8086._regDI));
+                    .should.equal(m(_regBX() + cpu8086._regDI));
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
                 // mod=00, rm=010
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("00000010")))
@@ -329,18 +329,18 @@ describe('Emu.Cpu.8086', function () {
                 cpu8086.t_getTmpIPAndReset().should.equal((w === 0) ? 1 : 2);
                 // mod=00, rm=111
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("00000111")))
-                    .should.equal(m(_regBX));
+                    .should.equal(m(_regBX()));
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
 
                 // R/M Table (with byte displacement)
                 disp8 = cpu8086._memoryV[cpu8086._regIP + 2];
                 // mod=01, rm=000
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("01000000")))
-                    .should.equal(m(_regBX + cpu8086._regSI + disp8));
+                    .should.equal(m(_regBX() + cpu8086._regSI + disp8));
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
                 // mod=01, rm=001
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("01000001")))
-                    .should.equal(m(_regBX + cpu8086._regDI + disp8));
+                    .should.equal(m(_regBX() + cpu8086._regDI + disp8));
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
                 // mod=01, rm=010
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("01000010")))
@@ -364,18 +364,18 @@ describe('Emu.Cpu.8086', function () {
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
                 // mod=01, rm=111
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("01000111")))
-                    .should.equal(m(_regBX + disp8));
+                    .should.equal(m(_regBX() + disp8));
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
 
                 // R/M Table (with byte displacement)
                 disp16 = ( (cpu8086._memoryV[cpu8086._regIP + 3] << 8) | cpu8086._memoryV[cpu8086._regIP + 2] );
                 // mod=10, rm=000
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000000")))
-                    .should.equal(m(_regBX + cpu8086._regSI + disp16));
+                    .should.equal(m(_regBX() + cpu8086._regSI + disp16));
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
                 // mod=10, rm=001
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000001")))
-                    .should.equal(m(_regBX + cpu8086._regDI + disp16));
+                    .should.equal(m(_regBX() + cpu8086._regDI + disp16));
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
                 // mod=10, rm=010
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000010")))
@@ -399,25 +399,25 @@ describe('Emu.Cpu.8086', function () {
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
                 // mod=10, rm=111
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000111")))
-                    .should.equal(m(_regBX + disp16));
+                    .should.equal(m(_regBX() + disp16));
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
 
                 // Reg Table
                 // mod=11, rm=000
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("11000000")))
-                    .should.equal((w === 0) ? cpu8086._regAL : _regAX);
+                    .should.equal((w === 0) ? cpu8086._regAL : _regAX());
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
                 // mod=11, rm=001
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("11000001")))
-                    .should.equal((w === 0) ? cpu8086._regCL : _regCX);
+                    .should.equal((w === 0) ? cpu8086._regCL : _regCX());
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
                 // mod=11, rm=010
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("11000010")))
-                    .should.equal((w === 0) ? cpu8086._regDL : _regDX);
+                    .should.equal((w === 0) ? cpu8086._regDL : _regDX());
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
                 // mod=11, rm=011
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("11000011")))
-                    .should.equal((w === 0) ? cpu8086._regBL : _regBX);
+                    .should.equal((w === 0) ? cpu8086._regBL : _regBX());
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
                 // mod=11, rm=100
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("11000100")))
@@ -538,10 +538,7 @@ describe('Emu.Cpu.8086', function () {
             // easier to ensure the correct memory location is set to 255 if
             // all locations start at 0.
 
-            // 2-Byte BX register shortcut
-            var _regBX = ((cpu8086._regBH << 8) | cpu8086._regBL);
-
-            var addr, disp8, disp16;
+            var disp8, disp16;
 
             // Test the address for both byte and word return values
             // TODO: Does the 8086 actually support different 'w' values in
@@ -558,12 +555,12 @@ describe('Emu.Cpu.8086', function () {
                 // R/M Table (no displacement)
                 // mod=00, rm=000
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("00000000")), testValue);
-                m(_regBX + cpu8086._regSI).should.equal(testValue);
+                m(_regBX() + cpu8086._regSI).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
                 cpu8086.clearMemory();
                 // mod=00, rm=001
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("00000001")), testValue);
-                m(_regBX + cpu8086._regDI).should.equal(testValue);
+                m(_regBX() + cpu8086._regDI).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
                 cpu8086.clearMemory();
                 // mod=00, rm=010
@@ -593,7 +590,7 @@ describe('Emu.Cpu.8086', function () {
                 cpu8086.clearMemory();
                 // mod=00, rm=111
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("00000111")), testValue);
-                m(_regBX).should.equal(testValue);
+                m(_regBX()).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
                 cpu8086.clearMemory();
 
@@ -601,12 +598,12 @@ describe('Emu.Cpu.8086', function () {
                 disp8 = cpu8086._memoryV[cpu8086._regIP + 2];
                 // mod=01, rm=000
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("01000000")), testValue);
-                m(_regBX + cpu8086._regSI + disp8).should.equal(testValue);
+                m(_regBX() + cpu8086._regSI + disp8).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
                 cpu8086.clearMemory();
                 // mod=01, rm=000
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("01000001")), testValue);
-                m(_regBX + cpu8086._regDI + disp8).should.equal(testValue);
+                m(_regBX() + cpu8086._regDI + disp8).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
                 cpu8086.clearMemory();
                 // mod=01, rm=000
@@ -636,7 +633,7 @@ describe('Emu.Cpu.8086', function () {
                 cpu8086.clearMemory();
                 // mod=01, rm=000
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("01000111")), testValue);
-                m(_regBX + disp8).should.equal(testValue);
+                m(_regBX() + disp8).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
                 cpu8086.clearMemory();
 
@@ -644,12 +641,12 @@ describe('Emu.Cpu.8086', function () {
                 disp16 = ( (cpu8086._memoryV[cpu8086._regIP + 3] << 8) | cpu8086._memoryV[cpu8086._regIP + 2] );
                 // mod=10, rm=000
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000000")), testValue);
-                m(_regBX + cpu8086._regSI + disp16).should.equal(testValue);
+                m(_regBX() + cpu8086._regSI + disp16).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
                 cpu8086.clearMemory();
                 // mod=10, rm=001
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000001")), testValue);
-                m(_regBX + cpu8086._regDI + disp16).should.equal(testValue);
+                m(_regBX() + cpu8086._regDI + disp16).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
                 cpu8086.clearMemory();
                 // mod=10, rm=010
@@ -679,7 +676,7 @@ describe('Emu.Cpu.8086', function () {
                 cpu8086.clearMemory();
                 // mod=10, rm=111
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000111")), testValue);
-                m(_regBX + disp16).should.equal(testValue);
+                m(_regBX() + disp16).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
                 cpu8086.clearMemory();
 
@@ -752,21 +749,58 @@ describe('Emu.Cpu.8086', function () {
         });
 
         it('should execute push', function () {
-            cpu8086.clearMemory();
+            var starting_SP;
 
+            // Push a byte
+            cpu8086.clearMemory();
+            starting_SP = cpu8086._regSP;
             cpu8086._push(0xFF);
             m8(cpu8086._regSP).should.equal(0xFF);
+            cpu8086._regSP.should.equal(starting_SP - 2);
 
+            // Push a word
             cpu8086.clearMemory();
-
+            starting_SP = cpu8086._regSP;
             cpu8086._push(0xFFFF);
             m16(cpu8086._regSP).should.equal(0xFFFF);
+            cpu8086._regSP.should.equal(starting_SP - 2);
+
+            // On the 8086, a PUSH instruction or implicit stack push will
+            // decrement the SP register by two and store the appropriate
+            // quantity at SS:SP (i.e. 16*SS+SP). If the SP register was $0000,
+            // the data will go to SS:$FFFE. If the SP register was $0001, the
+            // MSB of the data will go to SS:$0000 and the LSB will go to
+            // SS:$FFFF. The processor will not take any special notice of the
+            // stack wraparound. While stack wraparound would typically be a
+            // bad thing, there are some situations on the 8086 where it could
+            // be ignored at wouldn't affect anything. For example, if SS
+            // pointed to 64K of RAM that wasn't needed for anything else, and
+            // a program which was never going to exit sometimes restarted
+            // itself by simply calling "main()" without resetting the stack,
+            // the stack could wrap around without affecting program operation,
+            // since all effective-address calculations would wrap around the
+            // same way.
+            //
+            // Note that on the 80386 and later processors, the stack-underflow
+            // behavior is changed. PUSH, POP, CALL, RET, etc. use ESP rather
+            // than SP, and ESP wraps to $FFFFFFFF rather than $FFFF.
+            //
+            // http://stackoverflow.com/a/4830642/1436323
         });
 
-        it.skip('should execute pop', function () {
-            // TODO: Write test
-            false.should.be.true;
-            // cpu8086._pop()
+        it('should execute pop', function () {
+            cpu8086.clearMemory();
+
+            // Cram some values onto the stack
+            for (var i = 0; i < 16; i++) {
+                cpu8086._memoryV[cpu8086._regSP + i] = i;
+            }
+
+            cpu8086._pop().should.equal((0x01 << 8) | 0x00);
+            cpu8086._pop().should.equal((0x03 << 8) | 0x02);
+            cpu8086._pop().should.equal((0x05 << 8) | 0x04);
+
+            // TODO: Stack underflow (see above)
         });
 
         it.skip('should execute short jump', function () {
