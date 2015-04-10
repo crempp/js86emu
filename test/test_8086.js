@@ -815,10 +815,31 @@ describe('Emu.Cpu.8086', function () {
             // cpu8086._setFlags()
         });
 
-        it.skip('should bundle register values', function () {
-            // TODO: Write test
-            false.should.be.true;
-            // cpu8086._bundleRegisters()
+        it('should bundle register values', function () {
+            cpu8086._bundleRegisters().should.eql({
+                AX: (0x01 << 8) | 0x02,
+                  AH: 0x01,
+                  AL: 0x02,
+                  BX: (0x03 << 8) | 0x04,
+                  BH: 0x03,
+                  BL: 0x04,
+                  CX: (0x05 << 8) | 0x06,
+                  CH: 0x05,
+                  CL: 0x06,
+                  DX: (0x07 << 8) | 0x08,
+                  DH: 0x07,
+                  DL: 0x08,
+                  SI: 0x09,
+                  DI: 0x0A,
+                  BP: 0x0B,
+                  SP: 0x0C,
+                  CS: 0x0E,
+                  DS: 0x0F,
+                  ES: 0x10,
+                  SS: 0x11,
+                  IP: 0x0D,
+                  FLAGS: 0x12
+            });
         });
 
         afterEach(function(){
