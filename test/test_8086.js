@@ -803,10 +803,20 @@ describe('Emu.Cpu.8086', function () {
             // TODO: Stack underflow (see above)
         });
 
-        it.skip('should execute short jump', function () {
-            // TODO: Write test
-            false.should.be.true;
-            // cpu8086._shortJump()
+        it('should execute short jump', function () {
+            // Jump 3 bytes forward
+            cpu8086._memoryV[cpu8086._regIP + 1] = u.Bin2Hex("00000011");
+            var offset = cpu8086._memoryV[cpu8086._regIP + 1];
+            cpu8086._shortJump();
+            cpu8086._regIP.should.equal(0x12);
+
+            u.setRegisterIdent(cpu8086);
+
+            // Jump 3 bytes backward
+            cpu8086._memoryV[cpu8086._regIP + 1] = u.Bin2Hex("11111101");
+            var offset = cpu8086._memoryV[cpu8086._regIP + 1];
+            cpu8086._shortJump();
+            cpu8086._regIP.should.equal(0x0A);
         });
 
         it.skip('should set flag register', function () {

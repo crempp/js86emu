@@ -3831,10 +3831,12 @@ function(
 
             // One-byte twos-complement conversion
             // It seems Javascript does not do ~ (bitwise not) correctly
-            offset = ((offset >> 7) === 1) ? (-1 * (offset >> 7)) * ((offset ^ 0xFF) + 1) : offset;
+            var negative = ((offset >> 7) === 1)
+
+            offset = negative ? (-1 * (offset >> 7)) * ((offset ^ 0xFF) + 1) : offset;
 
             // We must skip the last byte of this instruction
-            this._regIP += (offset + 2);
+            this._regIP += negative ? offset : offset + 2;
         },
 
         /**
