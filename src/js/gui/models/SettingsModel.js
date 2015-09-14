@@ -29,7 +29,7 @@ define(["backbone"], function(Backbone)
                             "di": 0x00,
                             "bp": 0x00,
                             "sp": 0x00,
-                            "ip": 0x00,
+                            "ip": 0xFC21F,
                             "cs": 0x00,
                             "ds": 0x00,
                             "es": 0x00,
@@ -42,7 +42,7 @@ define(["backbone"], function(Backbone)
                     "name"     : ""
                 },
                 "breakOnError"      : true,
-                "startInDebug"      : false,
+                "startInDebug"      : true,
                 "decodeToConsole"   : true,
                 "registerToConsole" : true
             },

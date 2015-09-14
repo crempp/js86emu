@@ -108,3 +108,12 @@ function(
 
     return Emu;
 });
+
+/*
+for (var i = 0xEE000; i < this._memoryV.length; i++){console.log(i, this._memoryV[i]);if (this._memoryV[i] > 1) {console.log(i); break;}}
+
+1032735  0xFC21F
+         0xFE000
+
+for (var i = 0xFC21F; i < this._memoryV.length; i++){console.log(i, this._memoryV[i]);}
+*/
