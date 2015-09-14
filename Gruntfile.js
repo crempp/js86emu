@@ -152,5 +152,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-jst');
 
     // Default task(s).
-    grunt.registerTask('default', ['uglify', 'copy', 'sass', 'jst']);
+    //grunt.registerTask('default', ['uglify', 'copy', 'sass', 'jst']);
+    grunt.registerTask('default', ['copy', 'sass', 'jst']);
 };

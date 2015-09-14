@@ -50,14 +50,12 @@ function(
          */
         configure : function ()
         {
-            console.info("Cpu::configure");
+            //console.info("Cpu::configure");
 
             var _this = this;
 
             var _configure = function (resolve, reject)
             {
-                console.log("a");
-
                 require([
                     "gui/gui",
                     "emu/cpus/" + SettingsModel.get('emuSettings')['blobSettings']['cpu-init']['type']
@@ -97,7 +95,7 @@ function(
          */
         clearMemory : function ()
         {
-            console.info("Cpu::clearMemory");
+            //console.info("Cpu::clearMemory");
 
             var _this = this;
 
@@ -118,18 +116,16 @@ function(
          */
         loadBiosRom : function()
         {
-            console.info("Cpu::loadBiosRom");
+            //console.info("Cpu::loadBiosRom");
 
             var _this = this;
 
             var _load = function (resolve, reject)
             {
-                console.log("b");
-
                 // TODO: Move the bios file path to the config
                 dl = DataLoader.create("files/bios-roms/xtbios.bin");
                 dl.on("load", function(arrayBuffer){
-                    console.log("done loading bios");
+                    //console.log("done loading bios");
 
                     if (arrayBuffer.byteLength > 0)
                     {
@@ -156,14 +152,12 @@ function(
          */
         loadVideoRom : function()
         {
-            console.info("Cpu::loadVideoRom");
+            //console.info("Cpu::loadVideoRom");
 
             var _this = this;
 
             var _load = function (resolve, reject)
             {
-                console.log("c");
-
                 // Initialize Graphics
                 Gfx.setupGraphics(document.getElementById('gfx-port'), _this,
                     function () {
@@ -182,7 +176,7 @@ function(
          */
         clearRegisters : function()
         {
-            console.info("Cpu::clearRegisters");
+            //console.info("Cpu::clearRegisters");
 
             var _this = this;
 
@@ -203,7 +197,7 @@ function(
          */
         clearCache : function()
         {
-            console.info("Cpu::clearCache");
+            //console.info("Cpu::clearCache");
 
             var _this = this;
 
@@ -222,14 +216,12 @@ function(
          */
         selfTest : function()
         {
-            console.info("Cpu::selfTest");
+            //console.info("Cpu::selfTest");
 
             var _this = this;
 
             var _test = function (resolve, reject)
             {
-                console.log("f");
-
                 // Self tests not implemented
                 resolve();
             };
@@ -244,14 +236,12 @@ function(
          */
         jumpToBios : function()
         {
-            console.info("Cpu::jumpToBios");
+            //console.info("Cpu::jumpToBios");
 
             var _this = this;
 
             var _jump = function (resolve, reject)
             {
-                console.log("g");
-
                 // If this run is blob-type load the blob that should have
                 // previously been set
                 //SettingsModel.get('emuSettings')['startInDebug']
@@ -271,7 +261,7 @@ function(
 
         initState : function ()
         {
-            console.info("Cpu::initState");
+            //console.info("Cpu::initState");
 
             var _this = this;
 
@@ -307,7 +297,7 @@ function(
                 time   : (new Date()).getTime()
             };
 
-            console.log("running...")
+            //console.log("running...")
 
             for(;;)
             {
@@ -345,7 +335,7 @@ function(
                         cps    : cps
                     };
 
-                    console.log("CPS: " + cps);
+                    //console.log("CPS: " + cps);
 
                     if (cps > 10000)
                     {

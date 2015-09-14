@@ -85,8 +85,8 @@ var Util = {
      */
     setMemoryIdent : function (cpu, n) {
         n = n || 255;
-        for (a = 0; a < n; a++) {
-            cpu._memoryV.set(a, a % 251);
+        for (var a = 0; a < n; a++) {
+            cpu._memoryV.set([a], a % 251);
         }
     },
 
@@ -148,6 +148,14 @@ var Util = {
             "name": "Test Program",
             "selected": true
         };
+    },
+
+    buildGUIMock : function() {
+        var gui = {
+            debugUpdateInfo: function(){}
+        }
+
+        return gui;
     },
 
     /**

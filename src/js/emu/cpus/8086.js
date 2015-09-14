@@ -3783,6 +3783,7 @@ function(
                         message    : "[c:" + _Cpu._cycles + "] " + opcode.instruction,
                         decObj     : opcode
                     };
+
                     _Gui.debugUpdateInfo(options);
                 }
 
@@ -3799,8 +3800,6 @@ function(
 
             this._memoryV[this._regSP]     = (value & 0x00FF);
             this._memoryV[this._regSP + 1] = (value >> 8);
-
-            //console.log("  after", this._memoryV[this._regSP].toString(16));
         },
 
         _pop : function ()
@@ -3831,12 +3830,11 @@ function(
 
             // One-byte twos-complement conversion
             // It seems Javascript does not do ~ (bitwise not) correctly
-            var negative = ((offset >> 7) === 1)
-
+            var negative = ((offset >> 7) === 1);
             offset = negative ? (-1 * (offset >> 7)) * ((offset ^ 0xFF) + 1) : offset;
 
             // We must skip the last byte of this instruction
-            this._regIP += negative ? offset : offset + 2;
+            this._regIP += (offset + 2);
         },
 
         /**

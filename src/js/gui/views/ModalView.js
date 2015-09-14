@@ -36,8 +36,6 @@ function(
             if (this.model) data = {data:this.model.attributes};
             else data = {};
 
-            console.log(data);
-
             this.$el.html(this.template(data));
 
             return this;

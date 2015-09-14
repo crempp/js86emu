@@ -37,25 +37,21 @@ define([], function(){
             });
         }
 
-    }
+    };
 
     var SettingsLoader = {
         definition : {}
     };
 
     for (section in definitions) {
-        console.log(section);
 
         SettingsLoader.definition.__defineGetter__(section, function() {
 //            if (! _definitionsRegistry.hasOwnProperty(section)) {
 //                var sectionDef = require([definitions[section]]);
 //                console.log("done loading", sectionDef);
 //            }
-            console.log('in getter', section);
         })
     }
-
-    console.log(SettingsLoader.definition.general);
 
     return SettingsLoader;
 });
