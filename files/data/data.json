@@ -90,7 +90,7 @@
             "id"   : "branch",
             "name" : "Branch Test",
             "file" : "files/program-blobs/branch.BIN",
-            "selected" : true,
+            "selected" : false,
             "address" : 256,
             "use-bios" : false,
             "cpu-init" : {
@@ -121,7 +121,7 @@
             "id"   : "addressing",
             "name" : "Addressing Test",
             "file" : "files/program-blobs/testea.BIN",
-            "selected" : false,
+            "selected" : true,
             "address" : 0,
             "use-bios" : false,
             "cpu-init" : {

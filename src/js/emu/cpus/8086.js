@@ -65,6 +65,8 @@ function(
         bios_rom_address: 0xFE000,
         video_rom_address: 0xC0000,
 
+        tmpBios : null,
+
         _opcode  : 0x00,
         _memory  : null,
         _memoryV : null,
@@ -2323,7 +2325,17 @@ function(
                     // Push IP
                     this._push(this._regIP);
 
+                    // Run BIOS procedure
+                    this.tmpBios.INT10h(this, _Cpu);
 
+                    // Pop IP
+                    this._regIP = this._pop();
+
+                    // Pop CS
+                    this._regCS = this._pop();
+
+                    // Pop flags
+                    this._regFlags = this._pop();
 
                     break;
 
@@ -2622,7 +2634,7 @@ function(
                  */
                 case 0xAC:
                     var addr = this._regDI + this._regSI;
-                    this._regAH = 0;
+                    //this._regAH = 0;
                     this._regAL = this._memoryV[addr];
 
                     if (this._regFlags & this.FLAG_DF_MASK) this._regSI -= 1;

@@ -58,10 +58,12 @@ function(
             {
                 require([
                     "gui/gui",
-                    "emu/cpus/" + SettingsModel.get('emuSettings')['blobSettings']['cpu-init']['type']
+                    "emu/cpus/" + SettingsModel.get('emuSettings')['blobSettings']['cpu-init']['type'],
+                    "emu/bios/simplebios"
                 ], function(
                     Gui,
-                    cpuModel
+                    cpuModel,
+                    Bios
                 ){
                     // Save the gui module
                     _Gui = Gui;
@@ -70,10 +72,17 @@ function(
                     _cpu = cpuModel;
 
                     // Initialize the CPU
-                    _cpu.configure(_this, SettingsModel.get('emuSettings')["blobSettings"], _Gui);
+                    _cpu.configure(
+                        _this,
+                        SettingsModel.get('emuSettings')["blobSettings"],
+                        _Gui
+                    );
 
                     // Initialize memory
                     _cpu.initializeMemory();
+
+                    // Configure BIOS
+                    _cpu.tmpBios = Bios;
 
                     // Initialize input
                     Input.setupInput();
