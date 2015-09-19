@@ -2695,19 +2695,10 @@ function(
                     break;
                 case 0x8C:
                 case 0x8E:
-                    if (_breakOnError) _Cpu.halt({
-                        error      : true,
-                        enterDebug : true,
-                        message    : "[c:" + _Cpu._cycles + "] Opcode not implemented! [0x" + opcode_byte.toString(16) + "]",
-                        decObj     : opcode,
-                        regObj     : this._bundleRegisters(),
-                        memObj     : this._memoryV
-                    });
-                    break;
-                    //valSrc = this._getRegValueForOp(opcode);
-                    //this._setRegValueForOp(opcode, valSrc);
-                    //
-                    //this._regIP += (_tempIP + 2);
+                    valSrc = this._getRegValueForOp(opcode);
+                    this._setRegValueForOp(opcode, valSrc);
+
+                    this._regIP += (_tempIP + 2);
                     break;
                 // Move with displacement ???
                 case 0xA0:

@@ -14,13 +14,13 @@ mov si, offset banner
 call printmsg
 ;call printmsg
 
-mov ax, 0F000h
-mov es, ax
+mov ax, 0F000h   ; 1179
+mov es, ax       ; 1180
 jmp loopmain
 
 disptest dw 1234h
 
-loopmain:
+loopmain:       ; 1181
 mov cx, oper1
 add cx, oper2
 
