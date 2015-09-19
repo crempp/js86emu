@@ -24,6 +24,8 @@ function(
 {
     var _Gui = null;
 
+    var _Bios = null;
+
     var Cpu = {
         STATE_PAUSED  : 0,
         STATE_RUNNING : 1,
@@ -82,6 +84,8 @@ function(
                     _cpu.initializeMemory();
 
                     // Configure BIOS
+                    _Bios = Bios;
+                    _Bios.Gfx = Gfx;
                     _cpu.tmpBios = Bios;
 
                     // Initialize input
@@ -295,9 +299,11 @@ function(
         },
 
         // Emulation loop
-        run : function ()
+        run : function (cyclesToRun)
         {
             var _this = Cpu;
+
+            var cyclesToRun = cyclesToRun || null;
 
             _this.state = this.STATE_RUNNING;
 
@@ -306,13 +312,11 @@ function(
                 time   : (new Date()).getTime()
             };
 
-            //console.log("running...")
+            //debugger;
 
-            for(;;)
+            // Run forever if numCycles is null else run for numCycles
+            while (cyclesToRun === null || cyclesToRun-- > 0)
             {
-                // if (11500 === _this._cycles) _this._debugFlag = true;
-                // if (0x011D === _cpu._regIP) _this._debugFlag = true;
-
                 if (_this._haltFlag || _this.state === _this.STATE_STOPPED){
                     Gfx.drawGraphics();
                     break;
@@ -372,7 +376,9 @@ function(
                 Input.setKeys();
 
 
-                if (_this._debugFlag && !_this._haltFlag)
+                if (cyclesToRun === null &&
+                    _this._debugFlag &&
+                    !_this._haltFlag)
                 {
                     _this.pause();
                     break;

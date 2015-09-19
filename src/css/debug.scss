@@ -79,6 +79,10 @@
     .debug-info-window {
       float: left;
       width: 50%;
+
+      #debug-info-runcycles {
+        width: 50px;
+      }
     }
 
     .info {

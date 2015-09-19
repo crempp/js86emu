@@ -17,23 +17,23 @@ define(["backbone"], function(Backbone)
                     "address"  : 0x00,
                     "cpu-init" : {
                         "registers": {
-                            "ah": 0x00,
-                            "al": 0x00,
-                            "bh": 0x00,
-                            "bl": 0x00,
-                            "ch": 0x00,
-                            "cl": 0x00,
-                            "dh": 0x00,
-                            "dl": 0x00,
-                            "si": 0x00,
-                            "di": 0x00,
-                            "bp": 0x00,
-                            "sp": 0x00,
-                            "ip": 0x00,
-                            "cs": 0x00,
-                            "ds": 0x00,
-                            "es": 0x00,
-                            "ss": 0x00
+                            "ah": 0x0000,
+                            "al": 0x0000,
+                            "bh": 0x0000,
+                            "bl": 0x0000,
+                            "ch": 0x0000,
+                            "cl": 0x0000,
+                            "dh": 0x0000,
+                            "dl": 0x0000,
+                            "si": 0x0000,
+                            "di": 0x0000,
+                            "bp": 0x0000,
+                            "sp": 0xFFFF,
+                            "ip": 0x0000,
+                            "cs": 0xF000,
+                            "ds": 0xF000,
+                            "es": 0xF000,
+                            "ss": 0xF000
                         },
                         "type": null
                     },
@@ -43,8 +43,8 @@ define(["backbone"], function(Backbone)
                 },
                 "breakOnError"      : true,
                 "startInDebug"      : true,
-                "decodeToConsole"   : true,
-                "registerToConsole" : true
+                "decodeToConsole"   : false,
+                "registerToConsole" : false
             },
             "blobFiles"  : {},
             "components" : {

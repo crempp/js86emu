@@ -2102,7 +2102,7 @@ function(
                     if (_breakOnError) _Cpu.halt({
                         error      : true,
                         enterDebug : true,
-                        message    : "Opcode not implemented!",
+                        message    : "[c:" + _Cpu._cycles + "] Opcode not implemented! [0x" + opcode_byte.toString(16) + "]",
                         decObj     : opcode,
                         regObj     : this._bundleRegisters(),
                         memObj     : this._memoryV
@@ -2336,6 +2336,8 @@ function(
 
                     // Pop flags
                     this._regFlags = this._pop();
+
+                    this._regIP += 2;
 
                     break;
 
@@ -2678,11 +2680,6 @@ function(
                  *      general register first).
                  */
                 case 0x88:
-                    valSrc =  this._getRegValueForOp(opcode);
-                    this._setRMValueForOp(opcode, valSrc);
-
-                    this._regIP += (_tempIP + 2);
-                    break;
                 case 0x89:
                     valSrc =  this._getRegValueForOp(opcode);
                     this._setRMValueForOp(opcode, valSrc);
@@ -2690,11 +2687,6 @@ function(
                     this._regIP += (_tempIP + 2);
                     break;
                 case 0x8A:
-                    valSrc = this._getRMValueForOp(opcode);
-                    this._setRegValueForOp(opcode, valSrc);
-
-                    this._regIP += (_tempIP + 2);
-                    break;
                 case 0x8B:
                     valSrc = this._getRMValueForOp(opcode);
                     this._setRegValueForOp(opcode, valSrc);
@@ -2702,31 +2694,27 @@ function(
                     this._regIP += (_tempIP + 2);
                     break;
                 case 0x8C:
+                case 0x8E:
                     if (_breakOnError) _Cpu.halt({
                         error      : true,
                         enterDebug : true,
-                        message    : "Opcode not implemented!",
+                        message    : "[c:" + _Cpu._cycles + "] Opcode not implemented! [0x" + opcode_byte.toString(16) + "]",
                         decObj     : opcode,
                         regObj     : this._bundleRegisters(),
                         memObj     : this._memoryV
                     });
                     break;
-                case 0x8E:
-                    if (_breakOnError) _Cpu.halt({
-                        error      : true,
-                        enterDebug : true,
-                        message    : "Opcode not implemented!",
-                        decObj     : opcode,
-                        regObj     : this._bundleRegisters(),
-                        memObj     : this._memoryV
-                    });
+                    //valSrc = this._getRegValueForOp(opcode);
+                    //this._setRegValueForOp(opcode, valSrc);
+                    //
+                    //this._regIP += (_tempIP + 2);
                     break;
                 // Move with displacement ???
                 case 0xA0:
                     if (_breakOnError) _Cpu.halt({
                         error      : true,
                         enterDebug : true,
-                        message    : "Opcode not implemented!",
+                        message    : "[c:" + _Cpu._cycles + "] Opcode not implemented! [0x" + opcode_byte.toString(16) + "]",
                         decObj     : opcode,
                         regObj     : this._bundleRegisters(),
                         memObj     : this._memoryV
@@ -2736,7 +2724,7 @@ function(
                     if (_breakOnError) _Cpu.halt({
                         error      : true,
                         enterDebug : true,
-                        message    : "Opcode not implemented!",
+                        message    : "[c:" + _Cpu._cycles + "] Opcode not implemented! [0x" + opcode_byte.toString(16) + "]",
                         decObj     : opcode,
                         regObj     : this._bundleRegisters(),
                         memObj     : this._memoryV
@@ -2746,7 +2734,7 @@ function(
                     if (_breakOnError) _Cpu.halt({
                         error      : true,
                         enterDebug : true,
-                        message    : "Opcode not implemented!",
+                        message    : "[c:" + _Cpu._cycles + "] Opcode not implemented! [0x" + opcode_byte.toString(16) + "]",
                         decObj     : opcode,
                         regObj     : this._bundleRegisters(),
                         memObj     : this._memoryV
@@ -2756,7 +2744,7 @@ function(
                     if (_breakOnError) _Cpu.halt({
                         error      : true,
                         enterDebug : true,
-                        message    : "Opcode not implemented!",
+                        message    : "[c:" + _Cpu._cycles + "] Opcode not implemented! [0x" + opcode_byte.toString(16) + "]",
                         decObj     : opcode,
                         regObj     : this._bundleRegisters(),
                         memObj     : this._memoryV
@@ -3013,7 +3001,7 @@ function(
                     if (_breakOnError) _Cpu.halt({
                         error      : true,
                         enterDebug : true,
-                        message    : "Opcode not implemented!",
+                        message    : "[c:" + _Cpu._cycles + "] Opcode not implemented! [0x" + opcode_byte.toString(16) + "]",
                         decObj     : opcode,
                         regObj     : this._bundleRegisters(),
                         memObj     : this._memoryV
@@ -3083,7 +3071,7 @@ function(
                     if (_breakOnError) _Cpu.halt({
                         error      : true,
                         enterDebug : true,
-                        message    : "Opcode not implemented!",
+                        message    : "[c:" + _Cpu._cycles + "] Opcode not implemented! [0x" + opcode_byte.toString(16) + "]",
                         decObj     : opcode,
                         regObj     : this._bundleRegisters(),
                         memObj     : this._memoryV
@@ -3774,7 +3762,7 @@ function(
                     if (_breakOnError) _Cpu.halt({
                         error      : true,
                         enterDebug : true,
-                        message    : "Unknown opcode [0x" + opcode_byte.toString(16) + "]",
+                        message    : "[c:" + _Cpu._cycles + "] Unknown opcode [0x" + opcode_byte.toString(16) + "]",
                         decObj     : opcode,
                         regObj     : this._bundleRegisters(),
                         memObj     : this._memoryV

@@ -3,6 +3,8 @@
         <legend>debug control</legend>
         <span title="test video" class="fa button button-vidtest">vid tst</span>
         <span title="force video draw" class="fa button button-forcedraw">frc drw</span>
+        <span title="run cycles" class="fa button button-runcycles">run cycles: </span>
+        <span><input id="debug-info-runcycles" type="text" placeholder="Cycles" value=""></span>
     </fieldset>
 </div>
 <div class="debug-info-window">

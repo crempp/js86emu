@@ -1,8 +1,11 @@
 define([], function()
 {
+    var _cursorRow    = 0;
+    var _cursorColumn = 0;
+
     var Bios = {
 
-        _cursor : 0,
+        Gfx : null,
 
         INT10h: function(cpuModel, cpu) {
             // Run BIOS procedure
@@ -364,14 +367,26 @@ define([], function()
                  * Returns: NONE
                  */
                 case 0x0E :
-                    cpu.halt({
-                        error      : true,
-                        enterDebug : true,
-                        message    : "BIOS Procedure 0x0E not implemented",
-                        decObj     : cpuModel._opcode,
-                        regObj     : cpuModel._bundleRegisters(),
-                        memObj     : cpuModel._memoryV
-                    });
+                    var char = cpuModel._regAL;
+
+                    // TODO: handle paging
+                    // TODO: handle colors
+
+                    // Cariage return
+                    if (char == 0x0D) {
+                        _cursorColumn = 0;
+                    }
+                    // Line feed
+                    else if (char == 0x0A) {
+                        _cursorRow++;
+                    }
+                    else {
+                        this.Gfx.writeChar(char, _cursorRow, _cursorColumn);
+                        _cursorColumn++;
+                    }
+
+                    //this.Gfx.drawGraphics()
+
                     break;
 
                 /**

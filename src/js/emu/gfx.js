@@ -190,6 +190,20 @@ function()
         },
 
         /**
+         *
+         * @param char
+         * @param row
+         * @param column
+         */
+        writeChar : function (char, row, column) {
+            var gfxMem = new Uint8Array(2);
+            var i = (((row * 80) + 1) + (column + 1)) - 1;
+            gfxMem[0] = char; // Character code
+            //gfxMem[1] = attrCounter++ % 0xFF; // Attribute
+            _Cpu.setMemoryBlock(gfxMem, this._gfxMemStart + i);;
+        },
+
+        /**
          * Load the font file and build the font table
          *
          * @param font
