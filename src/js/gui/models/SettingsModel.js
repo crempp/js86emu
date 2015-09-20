@@ -29,7 +29,7 @@ define(["backbone"], function(Backbone)
                             "di": 0x0000,
                             "bp": 0x0000,
                             "sp": 0xFFFF,
-                            "ip": 0x0000,
+                            "ip": 0xFC21F,
                             "cs": 0xF000,
                             "ds": 0xF000,
                             "es": 0xF000,

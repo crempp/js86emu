@@ -58,9 +58,10 @@ function(
 
             var _configure = function (resolve, reject)
             {
+                var cpuType = SettingsModel.get('emuSettings')['blobSettings']['cpu-init']['type'] || '8086';
                 require([
                     "gui/gui",
-                    "emu/cpus/" + SettingsModel.get('emuSettings')['blobSettings']['cpu-init']['type'],
+                    "emu/cpus/" + cpuType,
                     "emu/bios/simplebios"
                 ], function(
                     Gui,
@@ -129,14 +130,14 @@ function(
          */
         loadBiosRom : function()
         {
-            //console.info("Cpu::loadBiosRom");
+            console.info("Cpu::loadBiosRom");
 
             var _this = this;
 
             var _load = function (resolve, reject)
             {
                 // TODO: Move the bios file path to the config
-                dl = DataLoader.create("files/bios-roms/xtbios.bin");
+                dl = DataLoader.create("files/bios-roms/8086tiny_bios");
                 dl.on("load", function(arrayBuffer){
                     //console.log("done loading bios");
 
