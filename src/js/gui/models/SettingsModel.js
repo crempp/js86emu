@@ -33,7 +33,8 @@ define(["backbone"], function(Backbone)
                             "cs": 0xF000,
                             "ds": 0xF000,
                             "es": 0xF000,
-                            "ss": 0xF000
+                            "ss": 0xF000,
+                            "flags" : 0x0000,
                         },
                         "type": null
                     },

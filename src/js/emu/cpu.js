@@ -149,7 +149,7 @@ function(
                     if (arrayBuffer.byteLength > 0)
                     {
                         //var load_address = _cpu.bios_rom_address - arrayBuffer.byteLength + 16;
-                        var load_address = _cpu.bios_rom_address - arrayBuffer.byteLength + 16;
+                        var load_address = _cpu.bios_rom_address;
                         _cpu.loadBinary(load_address, arrayBuffer);
 
                         resolve();
@@ -394,9 +394,14 @@ function(
             }
         },
 
-        getIP : function()
+        getIP : function ()
         {
             return _cpu._regIP;
+        },
+
+        getIPMemPos : function ()
+        {
+            return _cpu.segment2absolute(_cpu._regCS, _cpu._regIP);
         },
 
         setBinary : function (blob)

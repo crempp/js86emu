@@ -31,7 +31,7 @@
                         var valueStr = (row + i < 0) ? "--" : model._padHexByte(value);
                         var kls   = (addr === model.get('ip')) ? 'debug-memory-IP' : '';
                         var title = "addr : ";
-                        title += (addr < 0) ? '--' : model._padHexWord(addr);
+                        title += (addr < 0) ? '--' : model._padHex20bit(addr);
                         title += " bin : ";
                         title +=  ('undefined' === typeof value) ? '--' : model._padBinaryByte(value);
                     %>

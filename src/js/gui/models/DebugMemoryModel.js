@@ -44,7 +44,8 @@ function(
                 }
 
                 // Refresh the IP
-                this.set({'ip' : Cpu.getIP()});
+                var ipMemPos = Cpu.getIPMemPos();
+                this.set({'ip' : ipMemPos});
 
                 var numCols = this.get('numCols'),
                     numRows = this.get('numRows');
