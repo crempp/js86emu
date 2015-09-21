@@ -28,6 +28,10 @@ function()
         _padHexWord : function (val)
         {
             return "0x" + String("0000" + val.toString(16)).slice(-4).toUpperCase();
+        },
+        _padHex20bit : function (val)
+        {
+            return "0x" + String("00000" + val.toString(16)).slice(-5).toUpperCase();
         }
     };
 

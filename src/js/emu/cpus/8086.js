@@ -2652,7 +2652,7 @@ function(
                 case 0xAC:
                     var addr = this._regDI + this._regSI;
                     //this._regAH = 0;
-                    this._regAL = this._memoryV[this.segment2absolute(this._regCS, addr)];
+                    this._regAL = this._memoryV[this.segment2absolute(this._regDS, addr)];
 
                     if (this._regFlags & this.FLAG_DF_MASK) this._regSI -= 1;
                     else  this._regSI += 1;
@@ -2672,8 +2672,8 @@ function(
                  */
                 case 0xAD:
                     var addr = this._regDI + this._regSI;
-                    this._regAH = this._memoryV[this.segment2absolute(this._regCS, addr + 1)];
-                    this._regAL = this._memoryV[this.segment2absolute(this._regCS, addr)];
+                    this._regAH = this._memoryV[this.segment2absolute(this._regDS, addr + 1)];
+                    this._regAL = this._memoryV[this.segment2absolute(this._regDS, addr)];
 
                     if (this._regFlags & this.FLAG_DF_MASK) this._regSI -= 1;
                     else  this._regSI += 1;
@@ -3813,20 +3813,20 @@ function(
             // Update stack pointer
             this._regSP -= 2;
 
-            this._memoryV[this.segment2absolute(this._regCS, this._regSP)]     = (value & 0x00FF);
-            this._memoryV[this.segment2absolute(this._regCS, this._regSP + 1)] = (value >> 8);
+            this._memoryV[this.segment2absolute(this._regSS, this._regSP)]     = (value & 0x00FF);
+            this._memoryV[this.segment2absolute(this._regSS, this._regSP + 1)] = (value >> 8);
         },
 
         _pop : function ()
         {
             // Get the value from the stack
-            var value = ((this._memoryV[this.segment2absolute(this._regCS, this._regSP + 1)] << 8) |
-                          this._memoryV[this.segment2absolute(this._regCS, this._regSP)]);
+            var value = ((this._memoryV[this.segment2absolute(this._regSS, this._regSP + 1)] << 8) |
+                          this._memoryV[this.segment2absolute(this._regSS, this._regSP)]);
 
             // Zero the memory locations on the stack.
             // This isn't necessary but helps with debugging
-            this._memoryV[this.segment2absolute(this._regCS, this._regSP)]     = 0;
-            this._memoryV[this.segment2absolute(this._regCS, this._regSP + 1)] = 0;
+            this._memoryV[this.segment2absolute(this._regSS, this._regSP)]     = 0;
+            this._memoryV[this.segment2absolute(this._regSS, this._regSP + 1)] = 0;
 
 
             this._regSP += 2;

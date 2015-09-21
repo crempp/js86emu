@@ -2,7 +2,7 @@
     <legend>[memory]</legend>
     <div>
         <span>center</span>
-        <span><input id="debug-memory-center" type="text" placeholder="Address" value="<%= (model.get('center')) ? model._padHexWord(model.get('center')) : '' %>"></span>
+        <span><input id="debug-memory-center" type="text" placeholder="Address" value="<%= (model.get('center')) ? model._padHex20bit(model.get('center')) : '' %>"></span>
         <span class="fa fa-play button gui-button-centermem"></span>
         <span class="button gui-button-gotoip">goto ip</span>
         <span class="button gui-button-gotogfx">goto gfx</span>
@@ -19,8 +19,8 @@
                 <% _.each(model.get('rows'), function(row) { %>
                 <tr class="debug-memory-row">
                     <%
-                    var start = (row < 0) ? "--" : model._padHexWord(row),
-                        end   = (row + model.get('numCols') - 1 < 0) ? "--" : model._padHexWord(row + model.get('numCols') - 1);
+                    var start = (row < 0) ? "--" : model._padHex20bit(row),
+                        end   = (row + model.get('numCols') - 1 < 0) ? "--" : model._padHex20bit(row + model.get('numCols') - 1);
                     %>
                     <td class="debug-memory-addr"><%= start %> - <%= end %></td>
                     <%
