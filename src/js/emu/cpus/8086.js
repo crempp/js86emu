@@ -62,7 +62,7 @@ function(
 
     var Cpu8086 = {
 
-        bios_rom_address: 0xFE000,
+        bios_rom_address: 0xF0100,
         video_rom_address: 0xC0000,
 
         tmpBios : null,
@@ -257,12 +257,13 @@ function(
                         if (0 === opcode.w) // Byte
                         {
                             _tempIP += 1;
-                            addr = this._memoryV[this._regIP + 2];
+                            addr = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)];
                         }
                         else // Word
                         {
                             _tempIP += 2;
-                            addr = (this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2];
+                            addr = (this._memoryV[this.segment2absolute(this._regCS, this._regIP + 3)] << 8) |
+                                    this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)];
                         }
                         break;
                     case 7 : // [BX]
@@ -271,11 +272,12 @@ function(
                 }
                 if (0 === opcode.w)
                 {
-                    return (this._memoryV[addr]);
+                    return (this._memoryV[this.segment2absolute(this._regCS, addr)]);
                 }
                 else
                 {
-                    return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
+                    return ((this._memoryV[this.segment2absolute(this._regCS, addr + 1)] << 8) |
+                             this._memoryV[this.segment2absolute(this._regCS, addr)]);
                 }
             }
             // Use R/M Table 2 with 8-bit signed displacement
@@ -283,10 +285,11 @@ function(
             {
                 var disp;
                 if (1 === opcode.mod) {
-                    disp = this._memoryV[this._regIP + 2];
+                    disp = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)];
                     _tempIP += 1;
                 } else {
-                    disp = ( (this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2] );
+                    disp = ( (this._memoryV[this.segment2absolute(this._regCS, this._regIP + 3)] << 8) |
+                              this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)] );
                     _tempIP += 2;
                 }
 
@@ -319,11 +322,12 @@ function(
                 }
                 if (0 === opcode.w)
                 {
-                    return (this._memoryV[addr]);
+                    return (this._memoryV[this.segment2absolute(this._regCS, addr)]);
                 }
                 else
                 {
-                    return ((this._memoryV[addr + 1] << 8) | this._memoryV[addr]);
+                    return ((this._memoryV[this.segment2absolute(this._regCS, addr + 1)] << 8) |
+                             this._memoryV[this.segment2absolute(this._regCS, addr)]);
                 }
             }
             // R/M bits refer to REG tables
@@ -463,12 +467,13 @@ function(
                     case 6 : // 110b Drc't Add
                         if (0 === opcode.w) // Byte
                         {
-                            addr = this._memoryV[this._regIP + 2];
+                            addr = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)];
                             _tempIP += 1;
                         }
                         else // Word
                         {
-                            var addr = ( (this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2] );
+                            var addr = ( (this._memoryV[this.segment2absolute(this._regCS, this._regIP + 3)] << 8) |
+                                          this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)] );
                             _tempIP += 2;
                         }
                         break;
@@ -480,12 +485,12 @@ function(
                 // Set value to memory
                 if (0 === opcode.w) // Byte
                 {
-                    this._memoryV[addr] = (value & 0x00FF);
+                    this._memoryV[this.segment2absolute(this._regCS, addr)] = (value & 0x00FF);
                 }
                 else // Word
                 {
-                    this._memoryV[addr]     = (value & 0x00FF);
-                    this._memoryV[addr + 1] = ((value >> 8) & 0x00FF);
+                    this._memoryV[this.segment2absolute(this._regCS, addr)]     = (value & 0x00FF);
+                    this._memoryV[this.segment2absolute(this._regCS, addr + 1)] = ((value >> 8) & 0x00FF);
                 }
 
             }
@@ -493,10 +498,11 @@ function(
             {
                 var disp;
                 if (1 === opcode.mod) {
-                    disp = this._memoryV[this._regIP + 2];
+                    disp = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)];
                     _tempIP += 1;
                 } else {
-                    disp = ( (this._memoryV[this._regIP + 3] << 8) | this._memoryV[this._regIP + 2] );
+                    disp = ( (this._memoryV[this.segment2absolute(this._regCS, this._regIP + 3)] << 8) |
+                              this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)] );
                     _tempIP += 2;
                 }
 
@@ -531,12 +537,12 @@ function(
                 // Set value to memory
                 if (0 === opcode.w) // Byte
                 {
-                    this._memoryV[addr] = (value & 0x00FF);
+                    this._memoryV[this.segment2absolute(this._regCS, addr)] = (value & 0x00FF);
                 }
                 else // Word
                 {
-                    this._memoryV[addr]     = (value & 0x00FF);
-                    this._memoryV[addr + 1] = ((value >> 8) & 0x00FF);
+                    this._memoryV[this.segment2absolute(this._regCS, addr)]     = (value & 0x00FF);
+                    this._memoryV[this.segment2absolute(this._regCS, addr + 1)] = ((value >> 8) & 0x00FF);
                 }
             }
             // R/M bits refer to REG tables
@@ -698,11 +704,15 @@ function(
         {
             if (blob.length > this._memoryV.length)
             {
-                throw new EmuExceptions.MemoryBinaryTooLarge(blob.length)
-                //throw "BLAHAHAHA";
+                throw new EmuExceptions.MemoryBinaryTooLarge(blob.length);
             }
             var av = new Uint8Array(blob);
             this._memoryV.set(av, addr);
+        },
+
+        segment2absolute : function (segment, offset)
+        {
+            return (segment * 16) + offset;
         },
 
         /**
@@ -717,8 +727,8 @@ function(
             _tempIP = 0;
 
             // Fetch Opcode
-            var opcode_byte     = this._memoryV[this._regIP];
-            var addressing_byte = this._memoryV[this._regIP + 1];
+            var opcode_byte     = this._memoryV[this.segment2absolute(this._regCS, this._regIP)];
+            var addressing_byte = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
 
             //====Decode Opcode====
             var opcode = this._decode(opcode_byte, addressing_byte);
@@ -737,7 +747,7 @@ function(
                  * Two-byte instructions
                  */
                 case 0x0F :
-                    var opcode_byte_2 = this._memoryV[this._regIP + 1];
+                    var opcode_byte_2 = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
                     if (_breakOnError) _Cpu.halt({
                         error      : true,
                         enterDebug : true,
@@ -861,7 +871,7 @@ function(
                     var ipRMInc = this._getRMIncIP(opcode);
 
                     valDst = this._regAL;
-                    valSrc = this._memoryV[this._regIP + ipRMInc + 1];
+                    valSrc = this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 1)];
 
                     valResult = valDst + valSrc;
                     if (this._regFlags & this.FLAG_CF_MASK) valResult += 1;
@@ -889,7 +899,8 @@ function(
                     var ipRMInc = this._getRMIncIP(opcode);
 
                     valDst = ((this._regAH << 8) | this._regAL);
-                    valSrc = ((this._memoryV[this._regIP + ipRMInc + 2] << 8) | this._memoryV[this._regIP + ipRMInc + 1]);
+                    valSrc = ((this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 2)] << 8) |
+                               this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 1)]);
 
                     valResult = valDst + valSrc;
                     if (this._regFlags & this.FLAG_CF_MASK) valResult += 1;
@@ -1019,7 +1030,7 @@ function(
 
                 case 0x04:
                     valDst = this._regAL;
-                    valSrc = this._memoryV[this._regIP + 1];
+                    valSrc = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
 
                     valResult = valDst + valSrc;
 
@@ -1043,7 +1054,8 @@ function(
                     break;
                 case 0x05:
                     valDst = ((this._regAH << 8) | this._regAL);
-                    valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+                    valSrc = ((this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)] << 8) |
+                               this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)]);
 
                     valResult = valDst + valSrc;
 
@@ -1171,7 +1183,7 @@ function(
 
                 case 0x24:
                     valDst = this._regAL;
-                    valSrc = this._memoryV[this._regIP + 1];
+                    valSrc = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
 
                     valResult = valDst & valSrc;
 
@@ -1195,7 +1207,8 @@ function(
                     break;
                 case 0x25:
                     valDst = ((this._regAH << 8) | this._regAL);
-                    valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+                    valSrc = ((this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)] << 8) |
+                               this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)]);
 
                     valResult = valDst & valSrc;
 
@@ -1232,7 +1245,8 @@ function(
 
                     // The jump address is a signed (twos complement) offset from the
                     // current location.
-                    var offset = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+                    var offset = ((this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)] << 8) |
+                                   this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)]);
 
                     // two-byte twos-complement conversion
                     offset = ((offset >> 15) === 1) ? (-1 * (offset >> 15)) * ((offset ^ 0xFFFF) + 1) : offset;
@@ -1367,7 +1381,7 @@ function(
                     break;
                 case 0x3C:
                     valDst = this._regAL;
-                    valSrc = this._memoryV[this._regIP + 1];
+                    valSrc = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
 
                     valResult = valDst - valSrc;
 
@@ -1389,7 +1403,8 @@ function(
                     break;
                 case 0x3D:
                     valDst = ((this._regAH << 8) | this._regAL);
-                    valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+                    valSrc = ((this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)] << 8) |
+                               this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)]);
 
                     valResult = valDst - valSrc;
 
@@ -1663,7 +1678,7 @@ function(
                     if (0x80 === opcode_byte)
                     {
                         //valSrc = ((this._memoryV[this._regIP + ipRMInc + 3] << 8) | this._memoryV[this._regIP + ipRMInc + 2]);
-                        valSrc = (this._memoryV[this._regIP + ipRMInc + 2]);
+                        valSrc = (this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 2)]);
 
                         // Clamp source to byte
                         valSrc = valSrc & 0x00FF;
@@ -1677,7 +1692,8 @@ function(
                     }
                     else if (0x81 === opcode_byte)
                     {
-                        valSrc = ((this._memoryV[this._regIP + ipRMInc + 3] << 8) | this._memoryV[this._regIP + ipRMInc + 2]);
+                        valSrc = ((this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 3)] << 8) |
+                                   this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 2)]);
 
                         // Clamp value to word
                         clampMask = 0xFFFF;
@@ -1688,7 +1704,8 @@ function(
                     }
                     else if (0x82 === opcode_byte)
                     {
-                        valSrc = ((this._memoryV[this._regIP + ipRMInc + 3] << 8) | this._memoryV[this._regIP + ipRMInc + 2]);
+                        valSrc = ((this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 3)] << 8) |
+                                   this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 2)]);
 
                         // Clamp source to byte
                         valSrc = valSrc & 0x00FF;
@@ -1702,7 +1719,7 @@ function(
                     }
                     else if (0x83 === opcode_byte)
                     {
-                        valSrc = this._memoryV[this._regIP + ipRMInc + 2];
+                        valSrc = this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 2)];
 
                         // Clamp source to byte
                         valSrc = valSrc & 0x00FF;
@@ -2310,8 +2327,6 @@ function(
                 case 0xCC:
                     break;
                 case 0xCD:
-                    var intCode = this._memoryV[this._regIP + 1];
-
                     // Push flags
                     this._push(this._regFlags);
 
@@ -2637,7 +2652,7 @@ function(
                 case 0xAC:
                     var addr = this._regDI + this._regSI;
                     //this._regAH = 0;
-                    this._regAL = this._memoryV[addr];
+                    this._regAL = this._memoryV[this.segment2absolute(this._regCS, addr)];
 
                     if (this._regFlags & this.FLAG_DF_MASK) this._regSI -= 1;
                     else  this._regSI += 1;
@@ -2657,8 +2672,8 @@ function(
                  */
                 case 0xAD:
                     var addr = this._regDI + this._regSI;
-                    this._regAH = this._memoryV[addr + 1];
-                    this._regAL = this._memoryV[addr];
+                    this._regAH = this._memoryV[this.segment2absolute(this._regCS, addr + 1)];
+                    this._regAL = this._memoryV[this.segment2absolute(this._regCS, addr)];
 
                     if (this._regFlags & this.FLAG_DF_MASK) this._regSI -= 1;
                     else  this._regSI += 1;
@@ -2743,83 +2758,88 @@ function(
                     break;
                 // Move Immediate byte into register (e.g, MOV AL Ib)
                 case 0xB0:
-                    this._regAL = this._memoryV[this._regIP + 1];
+                    this._regAL = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
                     this._regIP += 2;
                     break;
                 case 0xB1:
-                    this._regCL = this._memoryV[this._regIP + 1];
+                    this._regCL = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
                     this._regIP += 2;
                     break;
                 case 0xB2:
-                    this._regDL = this._memoryV[this._regIP + 1];
+                    this._regDL = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
                     this._regIP += 2;
                     break;
                 case 0xB3:
-                    this._regBL = this._memoryV[this._regIP + 1];
+                    this._regBL = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
                     this._regIP += 2;
                     break;
                 case 0xB4:
-                    this._regAH = this._memoryV[this._regIP + 1];
+                    this._regAH = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
                     this._regIP += 2;
                     break;
                 case 0xB5:
-                    this._regCH = this._memoryV[this._regIP + 1];
+                    this._regCH = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
                     this._regIP += 2;
                     break;
                 case 0xB6:
-                    this._regDH = this._memoryV[this._regIP + 1];
+                    this._regDH = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
                     this._regIP += 2;
                     break;
                 case 0xB7:
-                    this._regBH = this._memoryV[this._regIP + 1];
+                    this._regBH = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
                     this._regIP += 2;
                     break;
                 // Move Immediate word into register (e.g, MOV AX Ib)
                 case 0xB8:
-                    this._regAH = this._memoryV[this._regIP + 2];
-                    this._regAL = this._memoryV[this._regIP + 1];
+                    this._regAH = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)];
+                    this._regAL = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
                     this._regIP += 3;
                     break;
                 case 0xB9:
-                    this._regCH = this._memoryV[this._regIP + 2];
-                    this._regCL = this._memoryV[this._regIP + 1];
+                    this._regCH = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)];
+                    this._regCL = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
                     this._regIP += 3;
                     break;
                 case 0xBA:
-                    this._regDH = this._memoryV[this._regIP + 2];
-                    this._regDL = this._memoryV[this._regIP + 1];
+                    this._regDH = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)];
+                    this._regDL = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
                     this._regIP += 3;
                     break;
                 case 0xBB:
-                    this._regBH = this._memoryV[this._regIP + 2];
-                    this._regBL = this._memoryV[this._regIP + 1];
+                    this._regBH = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)];
+                    this._regBL = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
                     this._regIP += 3;
                     break;
                 case 0xBC:
-                    this._regSP = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+                    this._regSP = ((this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)] << 8) |
+                                    this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)]);
                     this._regIP += 3;
                     break;
                 case 0xBD:
-                    this._regBP = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+                    this._regBP = ((this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)] << 8) |
+                                    this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)]);
                     this._regIP += 3;
                     break;
                 case 0xBE:
-                    this._regSI = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+                    this._regSI = ((this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)] << 8) |
+                                    this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)]);
                     this._regIP += 3;
                     break;
                 case 0xBF:
-                    this._regDI = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+                    this._regDI = ((this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)] << 8) |
+                                    this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)]);
                     this._regIP += 3;
                     break;
                 case 0xC6:
                     var ipRMInc = this._getRMIncIP(opcode);
-                    valSrc = this._memoryV[this._regIP + ipRMInc + 2];
+                    valSrc = this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 2)];
                     this._setRMValueForOp(opcode, valSrc);
                     this._regIP += (_tempIP + 3);
                     break;
                 case 0xC7:
                     var ipRMInc = this._getRMIncIP(opcode);
-                    valSrc = (this._memoryV[this._regIP + ipRMInc + 3] << 8) | this._memoryV[this._regIP + ipRMInc + 2];
+                    valSrc = (this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 3)] << 8) |
+                              this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 2)];
                     this._setRMValueForOp(opcode, valSrc);
                     this._regIP += (_tempIP + 4);
                     break;
@@ -2886,7 +2906,7 @@ function(
                     break;
                 case 0x0C:
                     valDst = this._regAL;
-                    valSrc = (this._memoryV[this._regIP + 1]);
+                    valSrc = (this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)]);
 
                     this._regAL = (valDst || valSrc) & 0x00FF;
 
@@ -2907,7 +2927,8 @@ function(
                     break;
                 case 0x0D:
                     valDst = ((this._regAH << 8) | this._regAL);
-                    valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+                    valSrc = ((this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)] << 8) |
+                               this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)]);
 
                     valResult = valDst || valSrc;
 
@@ -3210,7 +3231,7 @@ function(
                     var ipRMInc = this._getRMIncIP(opcode);
 
                     valDst = this._regAL;
-                    valSrc = this._memoryV[this._regIP + ipRMInc + 1];
+                    valSrc = this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 1)];
 
                     valResult = valDst - valSrc;
                     if (this._regFlags & this.FLAG_CF_MASK) valResult -= 1;
@@ -3244,7 +3265,8 @@ function(
                     var ipRMInc = this._getRMIncIP(opcode);
 
                     valDst = ((this._regAH << 8) | this._regAL);
-                    valSrc = ((this._memoryV[this._regIP + ipRMInc + 2] << 8) | this._memoryV[this._regIP + ipRMInc + 1]);
+                    valSrc = ((this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 2)] << 8) |
+                               this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 1)]);
 
                     valResult = valDst - valSrc;
                     if (this._regFlags & this.FLAG_CF_MASK) valResult -= 1;
@@ -3440,7 +3462,7 @@ function(
 
                 case 0x2C:
                     valDst = this._regAL;
-                    valSrc = this._memoryV[this._regIP + 1];
+                    valSrc = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
 
                     valResult = valDst - valSrc;
 
@@ -3470,7 +3492,8 @@ function(
                     break;
                 case 0x2D:
                     valDst = ((this._regAH << 8) | this._regAL);
-                    valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+                    valSrc = ((this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)] << 8) |
+                               this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)]);
 
                     valResult = valDst - valSrc;
 
@@ -3706,7 +3729,7 @@ function(
                     break;
                 case 0x34:
                     valDst = this._regAL;
-                    valSrc = this._memoryV[this._regIP + 1];
+                    valSrc = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
 
                     valResult = (valDst ^ valSrc) & 0x00FF;
                     this._regAL = valResult;
@@ -3728,7 +3751,8 @@ function(
                     break;
                 case 0x35:
                     valDst = ( (this._regAH << 8) | this._regAL );
-                    valSrc = ((this._memoryV[this._regIP + 2] << 8) | this._memoryV[this._regIP + 1]);
+                    valSrc = ((this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)] << 8) |
+                               this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)]);
 
                     valResult = (valDst ^ valSrc) & 0xFFFF;
                     this._regAL = valResult;
@@ -3789,19 +3813,20 @@ function(
             // Update stack pointer
             this._regSP -= 2;
 
-            this._memoryV[this._regSP]     = (value & 0x00FF);
-            this._memoryV[this._regSP + 1] = (value >> 8);
+            this._memoryV[this.segment2absolute(this._regCS, this._regSP)]     = (value & 0x00FF);
+            this._memoryV[this.segment2absolute(this._regCS, this._regSP + 1)] = (value >> 8);
         },
 
         _pop : function ()
         {
             // Get the value from the stack
-            var value = ((this._memoryV[this._regSP + 1] << 8) | this._memoryV[this._regSP]);
+            var value = ((this._memoryV[this.segment2absolute(this._regCS, this._regSP + 1)] << 8) |
+                          this._memoryV[this.segment2absolute(this._regCS, this._regSP)]);
 
             // Zero the memory locations on the stack.
             // This isn't necessary but helps with debugging
-            this._memoryV[this._regSP]     = 0;
-            this._memoryV[this._regSP + 1] = 0;
+            this._memoryV[this.segment2absolute(this._regCS, this._regSP)]     = 0;
+            this._memoryV[this.segment2absolute(this._regCS, this._regSP + 1)] = 0;
 
 
             this._regSP += 2;
@@ -3817,7 +3842,7 @@ function(
         {
             // The jump address is a signed (twos complement) offset from the
             // current location.
-            var offset = this._memoryV[this._regIP + 1];
+            var offset = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
 
             // One-byte twos-complement conversion
             // It seems Javascript does not do ~ (bitwise not) correctly

@@ -27,6 +27,9 @@ function(
     var _Bios = null;
 
     var Cpu = {
+        SLOWDOWN_WAIT_TIME : 15, // (ms)
+        CYCLE_CHECK_INTERVAL : 40000,
+
         STATE_PAUSED  : 0,
         STATE_RUNNING : 1,
         STATE_STOPPED : 2,
@@ -141,8 +144,11 @@ function(
                 dl.on("load", function(arrayBuffer){
                     //console.log("done loading bios");
 
+                    //debugger;
+
                     if (arrayBuffer.byteLength > 0)
                     {
+                        //var load_address = _cpu.bios_rom_address - arrayBuffer.byteLength + 16;
                         var load_address = _cpu.bios_rom_address - arrayBuffer.byteLength + 16;
                         _cpu.loadBinary(load_address, arrayBuffer);
 
@@ -341,6 +347,7 @@ function(
                     var timeDelta   = now - _lastCPSCheck.time;
                     var cycleDelta  = _this._cycles - _lastCPSCheck.cycles;
                     var cps         = cycleDelta / (timeDelta / 1000);
+                    var MHz         = cps / 1000000;
 
                     // Update state
                     _lastCPSCheck = {
@@ -351,14 +358,14 @@ function(
 
                     //console.log("CPS: " + cps);
 
-                    if (cps > 10000)
+                    if (cps > this.CYCLE_CHECK_INTERVAL)
                     {
-                        console.log(cycleDelta + " cycles in " + cycleDelta + "milliseconds [" + cps + "]");
+                        console.log(cycleDelta + " cycles in " + timeDelta + " milliseconds [" + MHz + " MHz]");
                         console.warn("OMG!!! Slow down");
 
                         _this.pause();
 
-                        window.setTimeout(Cpu.run, 100);
+                        window.setTimeout(Cpu.run, this.SLOWDOWN_WAIT_TIME);
 
                         break;
                     }
