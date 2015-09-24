@@ -49,16 +49,22 @@ function(
     SettingsModel
 )
 {
-    _Cpu = null;
+    var _Cpu = null;
 
-    _Gui = null
+    var _Gui = null
 
-    _settings = null;
+    var _settings = null;
 
-    _breakOnError = false;
+    var _breakOnError = false;
 
     // Temporary IP counter. Tracks IP increment as instruction runs.
-    _tempIP = 0;
+    var _tempIP = 0;
+
+    // Segment override flags
+    var _CS_OVERRIDE = false;
+    var _DS_OVERRIDE = false;
+    var _ES_OVERRIDE = false;
+    var _SS_OVERRIDE = false
 
     var Cpu8086 = {
 
@@ -712,6 +718,11 @@ function(
 
         segment2absolute : function (segment, offset)
         {
+            // Handle segment overrides
+            if (_CS_OVERRIDE) segment = this._regCS;
+            else if (_DS_OVERRIDE) segment = this._regDS;
+            else if (_ES_OVERRIDE) segment = this._regES;
+            else if (_SS_OVERRIDE) segment = this._regSS;
             return (segment * 16) + offset;
         },
 
@@ -726,8 +737,39 @@ function(
             // Reset IP counter
             _tempIP = 0;
 
+            // Set segment override flags
+            _CS_OVERRIDE = false;
+            _DS_OVERRIDE = false;
+            _ES_OVERRIDE = false;
+            _SS_OVERRIDE = false
+
             // Fetch Opcode
-            var opcode_byte     = this._memoryV[this.segment2absolute(this._regCS, this._regIP)];
+            var opcode_byte  = this._memoryV[this.segment2absolute(this._regCS, this._regIP)];
+
+            // Set segment override flags and fetch another opcode
+            if (opcode_byte === 0x26)
+            {
+                _ES_OVERRIDE = true;
+                this._regIP += 1;
+                opcode_byte  = this._memoryV[this.segment2absolute(this._regCS, this._regIP)];
+            }
+            else if (opcode_byte === 0x36) {
+                _SS_OVERRIDE = true;
+                this._regIP += 1;
+                opcode_byte  = this._memoryV[this.segment2absolute(this._regCS, this._regIP)];
+            }
+            else if (opcode_byte === 0x2E) {
+                _CS_OVERRIDE = true;
+                this._regIP += 1;
+                opcode_byte  = this._memoryV[this.segment2absolute(this._regCS, this._regIP)];
+            }
+            else if (opcode_byte === 0x3E) {
+                _DS_OVERRIDE = true;
+                this._regIP += 1;
+                opcode_byte  = this._memoryV[this.segment2absolute(this._regCS, this._regIP)];
+            }
+
+            // Fetch addressing byte
             var addressing_byte = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
 
             //====Decode Opcode====
@@ -2325,6 +2367,14 @@ function(
                  *               addressed by the new CS:IP
                  */
                 case 0xCC:
+                    if (_breakOnError) _Cpu.halt({
+                        error      : true,
+                        enterDebug : true,
+                        message    : "[c:" + _Cpu._cycles + "] Opcode not implemented! [0x" + opcode_byte.toString(16) + "]",
+                        decObj     : opcode,
+                        regObj     : this._bundleRegisters(),
+                        memObj     : this._memoryV
+                    });
                     break;
                 case 0xCD:
                     // Push flags
@@ -2341,6 +2391,7 @@ function(
                     this._push(this._regIP);
 
                     // Run BIOS procedure
+                    // TODO: Make this work with a real BIOS
                     this.tmpBios.INT10h(this, _Cpu);
 
                     // Pop IP
@@ -3326,6 +3377,48 @@ function(
                     this._regFlags |= this.FLAG_DF_MASK;
                     this._regIP += 1;
                     break;
+
+                /**
+                 * Instruction : STOSB
+                 * Meaning     : Store byte in AL into ES:[DI]. Update DI.
+                 * Notes       : This instruction uses the following algorithm
+                 *               - ES:[DI] = AX
+                 *               - If DF = 0
+                 *                    - DI = DI + 2
+                 *               - else
+                 *                    - DI = DI - 2
+                 */
+                case 0xAA:
+                    this._memoryV[this.segment2absolute(this._regES, this._regDI)] = this._regAL;
+
+                    if (this._regFlags & this.FLAG_DF_MASK) self._regDI += 1;
+                    else self._regDI -= 1;
+
+                    this._regIP += 1;
+
+                    break;
+
+                /**
+                 * Instruction : STOSW
+                 * Meaning     : Store word in AX into ES:[DI]. Update DI.
+                 * Notes       : This instruction uses the following algorithm
+                 *               - ES:[DI] = AX
+                 *               - If DF = 0
+                 *                    - DI = DI + 2
+                 *               - else
+                 *                    - DI = DI - 2
+                 */
+                case 0xAB:
+                    this._memoryV[this.segment2absolute(this._regES, this._regDI)] = this._regAL;
+                    this._memoryV[this.segment2absolute(this._regES, this._regDI) + 1] = this._regAH;
+
+                    if (this._regFlags & this.FLAG_DF_MASK) self._regDI += 2;
+                    else self._regDI -= 2;
+
+                    this._regIP += 1;
+
+                    break;
+
 
                 /**
                  * Instruction : SUB

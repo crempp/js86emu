@@ -301,105 +301,105 @@ describe('Emu.Cpu.8086', function () {
                 // R/M Table (no displacement)
                 // mod=00, rm=000
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("00000000")))
-                    .should.equal(m(_regBX() + cpu8086._regSI));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, _regBX() + cpu8086._regSI)));
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
                 // mod=00, rm=001
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("00000001")))
-                    .should.equal(m(_regBX() + cpu8086._regDI));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, _regBX() + cpu8086._regDI)));
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
                 // mod=00, rm=010
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("00000010")))
-                    .should.equal(m(cpu8086._regBP + cpu8086._regSI));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regBP + cpu8086._regSI)));
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
                 // mod=00, rm=011
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("00000011")))
-                    .should.equal(m(cpu8086._regBP + cpu8086._regDI));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regBP + cpu8086._regDI)));
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
                 // mod=00, rm=100
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("00000100")))
-                    .should.equal(m(cpu8086._regSI));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regSI)));
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
                 // mod=00, rm=101
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("00000101")))
-                    .should.equal(m(cpu8086._regDI));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regDI)));
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
                 // mod=00, rm=110
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("00000110")))
-                    .should.equal(m(m(cpu8086._regIP + 2)));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regIP + 2)))));
                 cpu8086.t_getTmpIPAndReset().should.equal((w === 0) ? 1 : 2);
                 // mod=00, rm=111
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("00000111")))
-                    .should.equal(m(_regBX()));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, _regBX())));
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
 
                 // R/M Table (with byte displacement)
                 disp8 = cpu8086._memoryV[cpu8086._regIP + 2];
                 // mod=01, rm=000
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("01000000")))
-                    .should.equal(m(_regBX() + cpu8086._regSI + disp8));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, _regBX() + cpu8086._regSI + disp8)));
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
                 // mod=01, rm=001
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("01000001")))
-                    .should.equal(m(_regBX() + cpu8086._regDI + disp8));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, _regBX() + cpu8086._regDI + disp8)));
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
                 // mod=01, rm=010
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("01000010")))
-                    .should.equal(m(cpu8086._regBP + cpu8086._regSI + disp8));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regBP + cpu8086._regSI + disp8)));
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
                 // mod=01, rm=011
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("01000011")))
-                    .should.equal(m(cpu8086._regBP + cpu8086._regDI + disp8));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regBP + cpu8086._regDI + disp8)));
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
                 // mod=01, rm=100
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("01000100")))
-                    .should.equal(m(cpu8086._regSI + disp8));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regSI + disp8)));
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
                 // mod=01, rm=101
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("01000101")))
-                    .should.equal(m(cpu8086._regDI + disp8));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regDI + disp8)));
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
                 // mod=01, rm=110
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("01000110")))
-                    .should.equal(m(cpu8086._regBP + +disp8));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regBP + +disp8)));
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
                 // mod=01, rm=111
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("01000111")))
-                    .should.equal(m(_regBX() + disp8));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, _regBX() + disp8)));
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
 
                 // R/M Table (with byte displacement)
                 disp16 = ( (cpu8086._memoryV[cpu8086._regIP + 3] << 8) | cpu8086._memoryV[cpu8086._regIP + 2] );
                 // mod=10, rm=000
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000000")))
-                    .should.equal(m(_regBX() + cpu8086._regSI + disp16));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, _regBX() + cpu8086._regSI + disp16)));
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
                 // mod=10, rm=001
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000001")))
-                    .should.equal(m(_regBX() + cpu8086._regDI + disp16));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, _regBX() + cpu8086._regDI + disp16)));
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
                 // mod=10, rm=010
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000010")))
-                    .should.equal(m(cpu8086._regBP + cpu8086._regSI + disp16));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regBP + cpu8086._regSI + disp16)));
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
                 // mod=10, rm=011
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000011")))
-                    .should.equal(m(cpu8086._regBP + cpu8086._regDI + disp16));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regBP + cpu8086._regDI + disp16)));
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
                 // mod=10, rm=100
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000100")))
-                    .should.equal(m(cpu8086._regSI + disp16));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regSI + disp16)));
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
                 // mod=10, rm=101
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000101")))
-                    .should.equal(m(cpu8086._regDI + disp16));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regDI + disp16)));
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
                 // mod=10, rm=110
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000110")))
-                    .should.equal(m(cpu8086._regBP + +disp16));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regBP + +disp16)));
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
                 // mod=10, rm=111
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000111")))
-                    .should.equal(m(_regBX() + disp16));
+                    .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, _regBX() + disp16)));
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
 
                 // Reg Table
@@ -555,42 +555,42 @@ describe('Emu.Cpu.8086', function () {
                 // R/M Table (no displacement)
                 // mod=00, rm=000
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("00000000")), testValue);
-                m(_regBX() + cpu8086._regSI).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, _regBX() + cpu8086._regSI)).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
                 cpu8086.clearMemory();
                 // mod=00, rm=001
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("00000001")), testValue);
-                m(_regBX() + cpu8086._regDI).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, _regBX() + cpu8086._regDI)).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
                 cpu8086.clearMemory();
                 // mod=00, rm=010
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("00000010")), testValue);
-                m(cpu8086._regBP + cpu8086._regSI).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regBP + cpu8086._regSI)).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
                 cpu8086.clearMemory();
                 // mod=00, rm=011
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("00000011")), testValue);
-                m(cpu8086._regBP + cpu8086._regDI).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regBP + cpu8086._regDI)).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
                 cpu8086.clearMemory();
                 // mod=00, rm=100
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("00000100")), testValue);
-                m(cpu8086._regSI).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regSI)).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
                 cpu8086.clearMemory();
                 // mod=00, rm=101
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("00000101")), testValue);
-                m(cpu8086._regDI).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regDI)).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
                 cpu8086.clearMemory();
                 // mod=00, rm=110
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("00000110")), testValue);
-                m(m(cpu8086._regIP + 2)).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regIP + 2)))).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal((w === 0) ? 1 : 2);
                 cpu8086.clearMemory();
                 // mod=00, rm=111
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("00000111")), testValue);
-                m(_regBX()).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, _regBX())).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(0);
                 cpu8086.clearMemory();
 
@@ -598,42 +598,42 @@ describe('Emu.Cpu.8086', function () {
                 disp8 = cpu8086._memoryV[cpu8086._regIP + 2];
                 // mod=01, rm=000
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("01000000")), testValue);
-                m(_regBX() + cpu8086._regSI + disp8).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, _regBX() + cpu8086._regSI + disp8)).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
                 cpu8086.clearMemory();
                 // mod=01, rm=000
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("01000001")), testValue);
-                m(_regBX() + cpu8086._regDI + disp8).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, _regBX() + cpu8086._regDI + disp8)).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
                 cpu8086.clearMemory();
                 // mod=01, rm=000
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("01000010")), testValue);
-                m(cpu8086._regBP + cpu8086._regSI + disp8).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regBP + cpu8086._regSI + disp8)).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
                 cpu8086.clearMemory();
                 // mod=01, rm=000
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("01000011")), testValue);
-                m(cpu8086._regBP + cpu8086._regDI + disp8).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regBP + cpu8086._regDI + disp8)).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
                 cpu8086.clearMemory();
                 // mod=01, rm=000
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("01000100")), testValue);
-                m(cpu8086._regSI + disp8).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regSI + disp8)).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
                 cpu8086.clearMemory();
                 // mod=01, rm=000
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("01000101")), testValue);
-                m(cpu8086._regDI + disp8).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regDI + disp8)).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
                 cpu8086.clearMemory();
                 // mod=01, rm=000
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("01000110")), testValue);
-                m(cpu8086._regBP + +disp8).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regBP + +disp8)).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
                 cpu8086.clearMemory();
                 // mod=01, rm=000
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("01000111")), testValue);
-                m(_regBX() + disp8).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, _regBX() + disp8)).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(1);
                 cpu8086.clearMemory();
 
@@ -641,42 +641,42 @@ describe('Emu.Cpu.8086', function () {
                 disp16 = ( (cpu8086._memoryV[cpu8086._regIP + 3] << 8) | cpu8086._memoryV[cpu8086._regIP + 2] );
                 // mod=10, rm=000
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000000")), testValue);
-                m(_regBX() + cpu8086._regSI + disp16).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, _regBX() + cpu8086._regSI + disp16)).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
                 cpu8086.clearMemory();
                 // mod=10, rm=001
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000001")), testValue);
-                m(_regBX() + cpu8086._regDI + disp16).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, _regBX() + cpu8086._regDI + disp16)).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
                 cpu8086.clearMemory();
                 // mod=10, rm=010
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000010")), testValue);
-                m(cpu8086._regBP + cpu8086._regSI + disp16).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regBP + cpu8086._regSI + disp16)).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
                 cpu8086.clearMemory();
                 // mod=10, rm=011
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000011")), testValue);
-                m(cpu8086._regBP + cpu8086._regDI + disp16).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regBP + cpu8086._regDI + disp16)).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
                 cpu8086.clearMemory();
                 // mod=10, rm=100
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000100")), testValue);
-                m(cpu8086._regSI + disp16).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regSI + disp16)).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
                 cpu8086.clearMemory();
                 // mod=10, rm=101
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000101")), testValue);
-                m(cpu8086._regDI + disp16).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regDI + disp16)).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
                 cpu8086.clearMemory();
                 // mod=10, rm=110
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000110")), testValue);
-                m(cpu8086._regBP + +disp16).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regBP + +disp16)).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
                 cpu8086.clearMemory();
                 // mod=10, rm=111
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("10000111")), testValue);
-                m(_regBX() + disp16).should.equal(testValue);
+                m(cpu8086.segment2absolute(cpu8086._regCS, _regBX() + disp16)).should.equal(testValue);
                 cpu8086.t_getTmpIPAndReset().should.equal(2);
                 cpu8086.clearMemory();
 
@@ -755,14 +755,14 @@ describe('Emu.Cpu.8086', function () {
             cpu8086.clearMemory();
             starting_SP = cpu8086._regSP;
             cpu8086._push(0xFF);
-            m8(cpu8086._regSP).should.equal(0xFF);
+            m8(cpu8086.segment2absolute(cpu8086._regSS, cpu8086._regSP)).should.equal(0xFF);
             cpu8086._regSP.should.equal(starting_SP - 2);
 
             // Push a word
             cpu8086.clearMemory();
             starting_SP = cpu8086._regSP;
             cpu8086._push(0xFFFF);
-            m16(cpu8086._regSP).should.equal(0xFFFF);
+            m16(cpu8086.segment2absolute(cpu8086._regSS, cpu8086._regSP)).should.equal(0xFFFF);
             cpu8086._regSP.should.equal(starting_SP - 2);
 
             // On the 8086, a PUSH instruction or implicit stack push will
@@ -793,7 +793,7 @@ describe('Emu.Cpu.8086', function () {
 
             // Cram some values onto the stack
             for (var i = 0; i < 16; i++) {
-                cpu8086._memoryV[cpu8086._regSP + i] = i;
+                cpu8086._memoryV[cpu8086.segment2absolute(cpu8086._regSS, cpu8086._regSP + i)] = i;
             }
 
             cpu8086._pop().should.equal((0x01 << 8) | 0x00);
@@ -805,16 +805,16 @@ describe('Emu.Cpu.8086', function () {
 
         it('should execute short jump', function () {
             // Jump 3 bytes forward
-            cpu8086._memoryV[cpu8086._regIP + 1] = u.Bin2Hex("00000011");
-            var offset = cpu8086._memoryV[cpu8086._regIP + 1];
+            cpu8086._memoryV[cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regIP + 1)] = u.Bin2Hex("00000011");
+            var offset = cpu8086._memoryV[cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regIP + 1)];
             cpu8086._shortJump();
             cpu8086._regIP.should.equal(0x12);
 
             u.setRegisterIdent(cpu8086);
 
             // Jump 3 bytes backward
-            cpu8086._memoryV[cpu8086._regIP + 1] = u.Bin2Hex("11111101");
-            var offset = cpu8086._memoryV[cpu8086._regIP + 1];
+            cpu8086._memoryV[cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regIP + 1)] = u.Bin2Hex("11111101");
+            var offset = cpu8086._memoryV[cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regIP + 1)];
             cpu8086._shortJump();
             cpu8086._regIP.should.equal(0x0C);
         });

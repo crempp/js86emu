@@ -69,8 +69,8 @@ describe('Emu.Cpu.8086.regression', function () {
             tmp_cpu.initIP(0x0164); // 356
 
             // Set the next instruction to be a JNZ with an offset of -14
-            tmp_cpu._memoryV[0x164] = 0x75;
-            tmp_cpu._memoryV[0x165] = 0xF2;
+            tmp_cpu._memoryV[cpu8086.segment2absolute(cpu8086._regCS, 0x164)] = 0x75;
+            tmp_cpu._memoryV[cpu8086.segment2absolute(cpu8086._regCS, 0x165)] = 0xF2;
 
             tmp_cpu.emulateCycle();
 
