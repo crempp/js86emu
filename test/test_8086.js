@@ -60,6 +60,7 @@ describe('Emu.Cpu.8086', function () {
 
             tmp_cpu.configure(u.buildCPUMock(), tmp_settings, u.buildGUIMock());
             tmp_cpu.initializeMemory();
+            tmp_cpu.initializePorts();
             tmp_cpu.clearMemory();
             tmp_cpu.clearRegisters();
 
@@ -217,6 +218,7 @@ describe('Emu.Cpu.8086', function () {
 
         before(function(){
             cpu8086.initializeMemory();
+            cpu8086.initializePorts();
         });
 
         beforeEach(function(){
@@ -326,7 +328,7 @@ describe('Emu.Cpu.8086', function () {
                 // mod=00, rm=110
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("00000110")))
                     .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regIP + 2)))));
-                cpu8086.t_getTmpIPAndReset().should.equal((w === 0) ? 1 : 2);
+                cpu8086.t_getTmpIPAndReset().should.equal(2);
                 // mod=00, rm=111
                 cpu8086._getRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000"+ws), u.Bin2Hex("00000111")))
                     .should.equal(m(cpu8086.segment2absolute(cpu8086._regCS, _regBX())));
@@ -586,7 +588,7 @@ describe('Emu.Cpu.8086', function () {
                 // mod=00, rm=110
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("00000110")), testValue);
                 m(cpu8086.segment2absolute(cpu8086._regCS, m(cpu8086.segment2absolute(cpu8086._regCS, cpu8086._regIP + 2)))).should.equal(testValue);
-                cpu8086.t_getTmpIPAndReset().should.equal((w === 0) ? 1 : 2);
+                cpu8086.t_getTmpIPAndReset().should.equal(2);
                 cpu8086.clearMemory();
                 // mod=00, rm=111
                 cpu8086._setRMValueForOp(cpu8086._decode(u.Bin2Hex("0000000" + ws), u.Bin2Hex("00000111")), testValue);
@@ -863,6 +865,7 @@ describe('Emu.Cpu.8086', function () {
         beforeEach("State Setup", function(){
             cpu8086.configure(u.buildCPUMock(), u.buildSettingsMock(), u.buildGUIMock());
             cpu8086.initializeMemory();
+            cpu8086.initializePorts();
             cpu8086.clearRegisters();
             cpu8086.initIP();
             cpu8086.clearMemory();

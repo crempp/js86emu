@@ -59,6 +59,7 @@ describe('Emu.Cpu.8086.regression', function () {
 
             tmp_cpu.configure(u.buildCPUMock(), tmp_settings, u.buildGUIMock());
             tmp_cpu.initializeMemory();
+            tmp_cpu.initializePorts();
             tmp_cpu.clearMemory();
             tmp_cpu.clearRegisters();
 

@@ -87,6 +87,9 @@ function(
                     // Initialize memory
                     _cpu.initializeMemory();
 
+                    // Initialize ports
+                    _cpu.initializePorts();
+
                     // Configure BIOS
                     _Bios = Bios;
                     _Bios.Gfx = Gfx;
@@ -112,13 +115,26 @@ function(
          */
         clearMemory : function ()
         {
-            //console.info("Cpu::clearMemory");
-
-            var _this = this;
-
             var _clear = function (resolve, reject)
             {
                 _cpu.clearMemory();
+
+                resolve();
+            }
+
+            return new Promise(_clear);
+        },
+
+        /**
+         * Clear the ports
+         *
+         * @returns {Promise}
+         */
+        clearPorts : function ()
+        {
+            var _clear = function (resolve, reject)
+            {
+                _cpu.clearPorts();
 
                 resolve();
             }

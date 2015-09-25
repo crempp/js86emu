@@ -77,6 +77,9 @@ function(
         _memory  : null,
         _memoryV : null,
 
+        _ports   : null,
+        _portsV  : null,
+
         //halt     : false,
 
         // Main Registers
@@ -260,17 +263,11 @@ function(
                         addr = ( this._regDI );
                         break;
                     case 6 : // Drc't Add
-                        if (0 === opcode.w) // Byte
-                        {
-                            _tempIP += 1;
-                            addr = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)];
-                        }
-                        else // Word
-                        {
-                            _tempIP += 2;
-                            addr = (this._memoryV[this.segment2absolute(this._regCS, this._regIP + 3)] << 8) |
-                                    this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)];
-                        }
+                        // Direct address is always 2 bytes
+                        // yoshicapstonememo.googlecode.com/svn/trunk/4_2_86.pdf
+                        _tempIP += 2;
+                        addr = (this._memoryV[this.segment2absolute(this._regCS, this._regIP + 3)] << 8) |
+                                this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)];
                         break;
                     case 7 : // [BX]
                         addr = ( (this._regBH << 8) | this._regBL );
@@ -471,17 +468,11 @@ function(
                         addr = ( this._regDI );
                         break;
                     case 6 : // 110b Drc't Add
-                        if (0 === opcode.w) // Byte
-                        {
-                            addr = this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)];
-                            _tempIP += 1;
-                        }
-                        else // Word
-                        {
-                            var addr = ( (this._memoryV[this.segment2absolute(this._regCS, this._regIP + 3)] << 8) |
-                                          this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)] );
-                            _tempIP += 2;
-                        }
+                        // Direct address is always 2 bytes
+                        // yoshicapstonememo.googlecode.com/svn/trunk/4_2_86.pdf
+                        var addr = ( (this._memoryV[this.segment2absolute(this._regCS, this._regIP + 3)] << 8) |
+                                      this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)] );
+                        _tempIP += 2;
                         break;
                     case 7 : // 111b [BX]
                         addr = ( (this._regBH << 8) | this._regBL );
@@ -632,6 +623,15 @@ function(
         },
 
         /**
+         * Create the ports array.
+         */
+        initializePorts : function()
+        {
+            this._ports  = new ArrayBuffer(1048576); // 1,048,576 bytes (1MB)
+            this._portsV = new Uint8Array(this._memory);
+        },
+
+        /**
          * Reset the registers to the values defined in the settings.
          */
         clearRegisters : function ()
@@ -697,6 +697,18 @@ function(
             for (var i = 0; i < this._memoryV.length; i++)
             {
                 this._memoryV[i] = 0;
+            }
+        },
+
+        /**
+         * Zero out the ports
+         */
+        clearPorts : function ()
+        {
+            // Zero ports
+            for (var i = 0; i < this._portsV.length; i++)
+            {
+                this._portsV[i] = 0;
             }
         },
 
@@ -3000,6 +3012,34 @@ function(
 
                     this._regIP += 3;
 
+                    break;
+
+                /**
+                 * Instruction : OUT
+                 * Meaning     : Output from AL or AX to port.
+                 * Notes       : First operand is a port number. If required to
+                 *               access port number over 255 - DX register
+                 *               should be used.
+                 */
+                case 0xE6:
+                    var port = this._memoryV[this._regIP + 1];
+                    this._portsV[port] = this._regAL;
+                    this._regIP += 2;
+                    break;
+                case 0xE7:
+                    var port = this._memoryV[this._regIP + 1];
+                    this._portsV[port] = ((this._regH << 8) | this._regAL);
+                    this._regIP += 2;
+                    break;
+                case 0xEE:
+                    var port = ((this._regDH << 8) | this._regDL);
+                    this._portsV[port] = this._regAL;
+                    this._regIP += 1;
+                    break;
+                case 0xEF:
+                    var port = ((this._regDH << 8) | this._regDL);
+                    this._portsV[port] = ((this._regH << 8) | this._regAL);
+                    this._regIP += 1;
                     break;
 
                 /**
