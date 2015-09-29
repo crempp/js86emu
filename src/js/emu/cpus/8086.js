@@ -1731,8 +1731,7 @@ function(
 
                     if (0x80 === opcode_byte)
                     {
-                        //valSrc = ((this._memoryV[this._regIP + ipRMInc + 3] << 8) | this._memoryV[this._regIP + ipRMInc + 2]);
-                        valSrc = (this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 2)]);
+                        valSrc = (this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 3)]);
 
                         // Clamp source to byte
                         valSrc = valSrc & 0x00FF;
