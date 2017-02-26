@@ -59,6 +59,7 @@ Currently I'm a one-man development team. I have no plan to enlist the help of o
 ``` 
    $ npm install -g mocha
    $ npm install -g istanbul
+   $ npm install -g grunt-cli
 ```
 * Install node dependencies
   ```
