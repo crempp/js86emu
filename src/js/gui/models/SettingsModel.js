@@ -43,7 +43,7 @@ define(["backbone"], function(Backbone)
                     "name"     : ""
                 },
                 "breakOnError"      : true,
-                "startInDebug"      : true,
+                "startInDebug"      : false,
                 "decodeToConsole"   : false,
                 "registerToConsole" : false
             },

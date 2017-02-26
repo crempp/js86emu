@@ -744,7 +744,7 @@ function(
         emulateCycle : function ()
         {
             // Some common variables
-            var valSrc, valDst, valResult, regX;
+            var valSrc, valDst, valResult, regX, addr, ipRMInc;
 
             // Reset IP counter
             _tempIP = 0;
@@ -922,7 +922,7 @@ function(
 
                     break;
                 case 0x14 :
-                    var ipRMInc = this._getRMIncIP(opcode);
+                    ipRMInc = this._getRMIncIP(opcode);
 
                     valDst = this._regAL;
                     valSrc = this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 1)];
@@ -950,7 +950,7 @@ function(
 
                     break;
                 case 0x15 :
-                    var ipRMInc = this._getRMIncIP(opcode);
+                    ipRMInc = this._getRMIncIP(opcode);
 
                     valDst = ((this._regAH << 8) | this._regAL);
                     valSrc = ((this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 2)] << 8) |
@@ -1475,7 +1475,7 @@ function(
                         "w",
                         "sub");
 
-                    this._regIP += w;
+                    this._regIP += 3;
 
                     break;
 
@@ -1727,7 +1727,7 @@ function(
                     valDst = this._getRMValueForOp({mod: opcode.mod, w:opcode.w, d:opcode.d, reg:opcode.rm, rm:opcode.rm});
                     var clampMask;
                     var size;
-                    var ipRMInc = this._getRMIncIP(opcode);
+                    ipRMInc = this._getRMIncIP(opcode);
 
                     if (0x80 === opcode_byte)
                     {
@@ -2712,7 +2712,7 @@ function(
                  *               incremented. Use with REP prefixes.
                  */
                 case 0xAC:
-                    var addr = this._regDI + this._regSI;
+                    addr = this._regDI + this._regSI;
                     //this._regAH = 0;
                     this._regAL = this._memoryV[this.segment2absolute(this._regDS, addr)];
 
@@ -2733,7 +2733,7 @@ function(
                  *               incremented. Use with REP prefixes.
                  */
                 case 0xAD:
-                    var addr = this._regDI + this._regSI;
+                    addr = this._regDI + this._regSI;
                     this._regAH = this._memoryV[this.segment2absolute(this._regDS, addr + 1)];
                     this._regAL = this._memoryV[this.segment2absolute(this._regDS, addr)];
 
@@ -2779,44 +2779,39 @@ function(
                     break;
                 // Move with displacement ???
                 case 0xA0:
-                    if (_breakOnError) _Cpu.halt({
-                        error      : true,
-                        enterDebug : true,
-                        message    : "[c:" + _Cpu._cycles + "] Opcode not implemented! [0x" + opcode_byte.toString(16) + "]",
-                        decObj     : opcode,
-                        regObj     : this._bundleRegisters(),
-                        memObj     : this._memoryV
-                    });
+                    addr = (this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)] << 8) |
+                            this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
+                    this._regAL = this._memoryV[this.segment2absolute(this._regCS, addr)];
+
+                    this._regIP += 3;
                     break;
                 case 0xA1:
-                    if (_breakOnError) _Cpu.halt({
-                        error      : true,
-                        enterDebug : true,
-                        message    : "[c:" + _Cpu._cycles + "] Opcode not implemented! [0x" + opcode_byte.toString(16) + "]",
-                        decObj     : opcode,
-                        regObj     : this._bundleRegisters(),
-                        memObj     : this._memoryV
-                    });
+                    addr = (this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)] << 8) |
+                            this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
+                    valSrc = (this._memoryV[this.segment2absolute(this._regCS, addr + 1)] << 8) |
+                              this._memoryV[this.segment2absolute(this._regCS, addr)];
+
+                    this._regAH = ((valSrc >> 8) & 0x0FF);
+                    this._regAL = (valSrc & 0x00FF);
+
+                    this._regIP += 3;
                     break;
                 case 0xA2:
-                    if (_breakOnError) _Cpu.halt({
-                        error      : true,
-                        enterDebug : true,
-                        message    : "[c:" + _Cpu._cycles + "] Opcode not implemented! [0x" + opcode_byte.toString(16) + "]",
-                        decObj     : opcode,
-                        regObj     : this._bundleRegisters(),
-                        memObj     : this._memoryV
-                    });
+                    addr = (this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)] << 8) |
+                            this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
+
+                    this._memoryV[this.segment2absolute(this._regCS, addr)] = (this._regAL & 0x00FF);
+
+                    this._regIP += 3;
                     break;
                 case 0xA3:
-                    if (_breakOnError) _Cpu.halt({
-                        error      : true,
-                        enterDebug : true,
-                        message    : "[c:" + _Cpu._cycles + "] Opcode not implemented! [0x" + opcode_byte.toString(16) + "]",
-                        decObj     : opcode,
-                        regObj     : this._bundleRegisters(),
-                        memObj     : this._memoryV
-                    });
+                    addr = (this._memoryV[this.segment2absolute(this._regCS, this._regIP + 2)] << 8) |
+                            this._memoryV[this.segment2absolute(this._regCS, this._regIP + 1)];
+
+                    this._memoryV[this.segment2absolute(this._regCS, addr)]     = (this._regAL & 0x00FF);
+                    this._memoryV[this.segment2absolute(this._regCS, addr + 1)] = ((this._regAH >> 8) & 0x00FF);
+
+                    this._regIP += 3;
                     break;
                 // Move Immediate byte into register (e.g, MOV AL Ib)
                 case 0xB0:
@@ -2893,13 +2888,13 @@ function(
                     this._regIP += 3;
                     break;
                 case 0xC6:
-                    var ipRMInc = this._getRMIncIP(opcode);
+                    ipRMInc = this._getRMIncIP(opcode);
                     valSrc = this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 2)];
                     this._setRMValueForOp(opcode, valSrc);
                     this._regIP += (_tempIP + 3);
                     break;
                 case 0xC7:
-                    var ipRMInc = this._getRMIncIP(opcode);
+                    ipRMInc = this._getRMIncIP(opcode);
                     valSrc = (this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 3)] << 8) |
                               this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 2)];
                     this._setRMValueForOp(opcode, valSrc);
@@ -3318,7 +3313,7 @@ function(
 
                     break;
                 case 0x1C :
-                    var ipRMInc = this._getRMIncIP(opcode);
+                    ipRMInc = this._getRMIncIP(opcode);
 
                     valDst = this._regAL;
                     valSrc = this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 1)];
@@ -3352,7 +3347,7 @@ function(
 
                     break;
                 case 0x1D :
-                    var ipRMInc = this._getRMIncIP(opcode);
+                    ipRMInc = this._getRMIncIP(opcode);
 
                     valDst = ((this._regAH << 8) | this._regAL);
                     valSrc = ((this._memoryV[this.segment2absolute(this._regCS, this._regIP + ipRMInc + 2)] << 8) |
@@ -3904,7 +3899,38 @@ function(
                     this._regIP += 3;
 
                     break;
-
+                // x86 does not have instructions for all possible opcodes
+                case 0x60:
+                case 0x61:
+                case 0x62:
+                case 0x63:
+                case 0x64:
+                case 0x65:
+                case 0x66:
+                case 0x67:
+                case 0xC0:
+                case 0xC1:
+                case 0xC8:
+                case 0xC9:
+                case 0xD6:
+                case 0xD8:
+                case 0xD9:
+                case 0xDA:
+                case 0xDB:
+                case 0xDC:
+                case 0xDD:
+                case 0xDE:
+                case 0xDF:
+                case 0xF1:
+                    if (_breakOnError) _Cpu.halt({
+                        error      : true,
+                        enterDebug : true,
+                        message    : "[c:" + _Cpu._cycles + "] Invalid opcode [0x" + opcode_byte.toString(16) + "]",
+                        decObj     : opcode,
+                        regObj     : this._bundleRegisters(),
+                        memObj     : this._memoryV
+                    });
+                    break;
                 default :
                     if (_breakOnError) _Cpu.halt({
                         error      : true,
