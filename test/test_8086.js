@@ -8,7 +8,7 @@
  */
 var path = require('path');
 var requirejs = require('requirejs');
-var assert = require("assert")
+var assert = require("assert");
 var should = require('should');
 var deepcopy = require('deepcopy');
 var u = require('./utils');
