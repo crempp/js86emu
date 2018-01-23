@@ -13,8 +13,10 @@
   "scripts": {
     "build": "grunt",
     "build:watch": "grunt watch",
-    "test": "jest || true ",
-    "cli": "babel-node"
+    "test": "jest --verbose || true ",
+    "testcov": "jest --verbose --coverage || true ",
+    "cli": "babel-node",
+    "doc": "documentation build ./src/jsemu/* -c documentation.yml -o ./build/docs -f html"
   },
   "dependencies": {},
   "devDependencies": {
@@ -22,6 +24,7 @@
     "backbone": "1.1.2",
     "connect": "3.3.5",
     "deepcopy": "0.4.0",
+    "documentation": "^4.0.0-beta.18",
     "grunt": "~0.4.4",
     "grunt-babel": "^6.0.0",
     "grunt-contrib-copy": "~0.4.1",

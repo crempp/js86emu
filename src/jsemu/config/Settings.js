@@ -2,6 +2,8 @@ import DefaultSettings from './defaults/settings'
 
 export default class Settings {
   constructor () {
-    this.settings = DefaultSettings
+    let settings = DefaultSettings
+
+    this["name"] = "blah";
   }
 }
