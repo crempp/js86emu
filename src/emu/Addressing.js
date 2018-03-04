@@ -18,80 +18,73 @@ export default class Addressing {
     this.mem16 = cpu.mem16;
   }
 
-  // if (value || value === 0) {
-  //   winston.log("debug", "addressing - Ib - set");
-  // } else {
-  //   winston.log("debug", "addressing - Ib - get");
-  //   return 0
-  // }
-
-  AX () {
+  AX (value = null) {
     winston.log("debug", "addressing - AX(" + value + ")");
   }
-  AH () {
+  AH (value = null) {
     winston.log("debug", "addressing - AH(" + value + ")");
   }
-  AL () {
+  AL (value = null) {
     winston.log("debug", "addressing - AL(" + value + ")");
   }
-  BX () {
+  BX (value = null) {
     winston.log("debug", "addressing - BX(" + value + ")");
   }
-  BH () {
+  BH (value = null) {
     winston.log("debug", "addressing - BH(" + value + ")");
   }
-  BL () {
+  BL (value = null) {
     winston.log("debug", "addressing - BL(" + value + ")");
   }
-  CX () {
+  CX (value = null) {
     winston.log("debug", "addressing - CX(" + value + ")");
   }
-  CH () {
+  CH (value = null) {
     winston.log("debug", "addressing - CH(" + value + ")");
   }
-  CL () {
+  CL (value = null) {
     winston.log("debug", "addressing - CL(" + value + ")");
   }
-  DX () {
+  DX (value = null) {
     winston.log("debug", "addressing - DX(" + value + ")");
   }
-  DH () {
+  DH (value = null) {
     winston.log("debug", "addressing - DH(" + value + ")");
   }
-  DL () {
+  DL (value = null) {
     winston.log("debug", "addressing - DL(" + value + ")");
   }
 
-  SI () {
+  SI (value = null) {
     winston.log("debug", "addressing - SI(" + value + ")");
   }
-  DI () {
+  DI (value = null) {
     winston.log("debug", "addressing - DI(" + value + ")");
   }
-  BP () {
+  BP (value = null) {
     winston.log("debug", "addressing - BP(" + value + ")");
   }
-  SP () {
+  SP (value = null) {
     winston.log("debug", "addressing - SP(" + value + ")");
   }
 
-  CS () {
+  CS (value = null) {
     winston.log("debug", "addressing - CS(" + value + ")");
   }
-  DS () {
+  DS (value = null) {
     winston.log("debug", "addressing - DS(" + value + ")");
   }
-  ES () {
+  ES (value = null) {
     winston.log("debug", "addressing - ES(" + value + ")");
   }
-  SS () {
+  SS (value = null) {
     winston.log("debug", "addressing - SS(" + value + ")");
   }
 
-  Ap () {
+  Ap (value = null) {
     winston.log("debug", "addressing - Ap(" + value + ")");
   }
-  Eb () {
+  Eb (value = null) {
     winston.log("debug", "addressing - Eb(" + value + ")");
   }
   Ev (value = null) {
@@ -104,19 +97,19 @@ export default class Addressing {
     if (value || value === 0) return this.writeWordToAddress(addr, value);
     else return this.readWordFromAddress(addr);
   }
-  Ew () {
+  Ew (value = null) {
     winston.log("debug", "addressing - Ew(" + value + ")");
   }
-  Gb () {
+  Gb (value = null) {
     winston.log("debug", "addressing - Gb(" + value + ")");
   }
-  Gv () {
+  Gv (value = null) {
     winston.log("debug", "addressing - Gv(" + value + ")");
   }
-  I0 () {
+  I0 (value = null) {
     winston.log("debug", "addressing - I0(" + value + ")");
   }
-  Ib () {
+  Ib (value = null) {
     winston.log("debug", "addressing - Ib(" + value + ")");
   }
   Iv (value = null) {
@@ -126,28 +119,28 @@ export default class Addressing {
 
 
   }
-  Iw () {
+  Iw (value = null) {
     winston.log("debug", "addressing - Iw(" + value + ")");
   }
-  Jb () {
+  Jb (value = null) {
     winston.log("debug", "addressing - Jb(" + value + ")");
   }
-  Jv () {
+  Jv (value = null) {
     winston.log("debug", "addressing - Jv(" + value + ")");
   }
-  M () {
+  M (value = null) {
     winston.log("debug", "addressing - M(" + value + ")");
   }
-  Mp () {
+  Mp (value = null) {
     winston.log("debug", "addressing - Mp(" + value + ")");
   }
-  Ob () {
+  Ob (value = null) {
     winston.log("debug", "addressing - Ob(" + value + ")");
   }
-  Ov () {
+  Ov (value = null) {
     winston.log("debug", "addressing - Ov(" + value + ")");
   }
-  Sw () {
+  Sw (value = null) {
     winston.log("debug", "addressing - Sw(" + value + ")");
   }
 

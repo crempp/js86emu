@@ -69,78 +69,90 @@ export default class CPU8086 {
     let oper = new Operations(this);
 
     winston.log("debug", "8086: Creating instruction table");
+
     let grp1 = (dst, src) => {
-      console.log("grp1");
-
-      let instr = [];
-      instr[0] = inst(oper.add, dst, src);
-      instr[1] = inst(oper.or,  dst, src);
-      instr[2] = inst(oper.adc, dst, src);
-      instr[3] = inst(oper.sbb, dst, src);
-      instr[4] = inst(oper.and, dst, src);
-      instr[5] = inst(oper.sub, dst, src);
-      instr[6] = inst(oper.xor, dst, src);
-      instr[7] = inst(oper.cmp, dst.bind(addr), src.bind(addr));
-
-      // Need to return a function. The function runs the correct op with dst, src
-      // In this case we don't know the correct op until we decode the reg component
-      // at runtime
+      let inst_g1 = [];
+      inst_g1[0] = inst(oper.add, dst.bind(addr), src.bind(addr));
+      inst_g1[1] = inst(oper.or,  dst.bind(addr), src.bind(addr));
+      inst_g1[2] = inst(oper.adc, dst.bind(addr), src.bind(addr));
+      inst_g1[3] = inst(oper.sbb, dst.bind(addr), src.bind(addr));
+      inst_g1[4] = inst(oper.and, dst.bind(addr), src.bind(addr));
+      inst_g1[5] = inst(oper.sub, dst.bind(addr), src.bind(addr));
+      inst_g1[6] = inst(oper.xor, dst.bind(addr), src.bind(addr));
+      inst_g1[7] = inst(oper.cmp, dst.bind(addr), src.bind(addr));
       return () => {
-        console.log("  in anon inst executor - reg:", this.opcode.reg);
-        return instr[this.opcode.reg](dst, src);
+        return inst_g1[this.opcode.reg](dst, src);
       };
     };
-    let grp2 = () => {
-      // GRP2/0 ROL
-      // GRP2/1 ROR
-      // GRP2/2 RCL
-      // GRP2/3 RCR
-      // GRP2/4 SHL
-      // GRP2/5 SHR
-      // GRP2/6 --
-      // GRP2/7 SAR
+    let grp2 = (dst, src) => {
+      let inst_g2 = [];
+      inst_g2[0] = inst(oper.rol,    dst.bind(addr), src.bind(addr));
+      inst_g2[1] = inst(oper.ror,    dst.bind(addr), src.bind(addr));
+      inst_g2[2] = inst(oper.rcl,    dst.bind(addr), src.bind(addr));
+      inst_g2[3] = inst(oper.rcr,    dst.bind(addr), src.bind(addr));
+      inst_g2[4] = inst(oper.shl,    dst.bind(addr), src.bind(addr));
+      inst_g2[5] = inst(oper.shr,    dst.bind(addr), src.bind(addr));
+      inst_g2[6] = inst(oper.notimp, dst.bind(addr), src.bind(addr));
+      inst_g2[7] = inst(oper.sar,    dst.bind(addr), src.bind(addr));
+      return () => {
+        return inst_g2[this.opcode.reg]();
+      };
     };
-    let grp3a = () => {
-      // GRP3a/0 T"ES"T "Eb, Ib);
-      // GRP3a/1 --
-      // GRP3a/2 NOT
-      // GRP3a/3 NEG
-      // GRP3a/4 MUL
-      // GRP3a/5 IMUL
-      // GRP3a/6 D"Iv);
-      // GRP3a/7 ID"Iv);
-      // GRP3b/0 T"ES"T "Ev, Iv);
+    let grp3a = (dst, src) => {
+      let inst_g3a = [];
+      inst_g3a[0] = inst(oper.test,   addr.Eb,        addr.Ib);
+      inst_g3a[1] = inst(oper.notimp, dst.bind(addr), src.bind(addr));
+      inst_g3a[2] = inst(oper.not,    dst.bind(addr), src.bind(addr));
+      inst_g3a[3] = inst(oper.neg,    dst.bind(addr), src.bind(addr));
+      inst_g3a[4] = inst(oper.mul,    dst.bind(addr), src.bind(addr));
+      inst_g3a[5] = inst(oper.imul,   dst.bind(addr), src.bind(addr));
+      inst_g3a[6] = inst(oper.div,    dst.bind(addr), src.bind(addr));
+      inst_g3a[7] = inst(oper.idiv,   dst.bind(addr), src.bind(addr));
+      return () => {
+        return inst_g3a[this.opcode.reg]();
+      };
     };
-    let grp3b = () => {
-      // GRP3b/1 --
-      // GRP3b/2 NOT
-      // GRP3b/3 NEG
-      // GRP3b/4 MUL
-      // GRP3b/5 IMUL
-      // GRP3b/6 D"Iv);
-      // GRP3b/7 ID"Iv);
+    let grp3b = (dst, src) => {
+      let inst_g3b = [];
+      inst_g3b[0] = inst(oper.test,   addr.Ev,        addr.Iv);
+      inst_g3b[1] = inst(oper.notimp, dst.bind(addr), src.bind(addr));
+      inst_g3b[2] = inst(oper.not,    dst.bind(addr), src.bind(addr));
+      inst_g3b[3] = inst(oper.neg,    dst.bind(addr), src.bind(addr));
+      inst_g3b[4] = inst(oper.mul,    dst.bind(addr), src.bind(addr));
+      inst_g3b[5] = inst(oper.imul,   dst.bind(addr), src.bind(addr));
+      inst_g3b[6] = inst(oper.div,    dst.bind(addr), src.bind(addr));
+      inst_g3b[7] = inst(oper.idiv,   dst.bind(addr), src.bind(addr));
+      return () => {
+        return inst_g3b[this.opcode.reg]();
+      };
     };
-    let grp4 = () => {
-      // GRP4/0 INC
-      // GRP4/1 DEC
-      // GRP4/2 --
-      // GRP4/3 --
-      // GRP4/4 --
-      // GRP4/5 --
-      // GRP4/6 --
-      // GRP4/7 --
+    let grp4 = (dst, src) => {
+      let inst_g4 = [];
+      inst_g4[0] = inst(oper.inc,    dst.bind(addr), src.bind(addr));
+      inst_g4[1] = inst(oper.dec,    dst.bind(addr), src.bind(addr));
+      inst_g4[2] = inst(oper.notimp);
+      inst_g4[3] = inst(oper.notimp);
+      inst_g4[4] = inst(oper.notimp);
+      inst_g4[5] = inst(oper.notimp);
+      inst_g4[6] = inst(oper.notimp);
+      inst_g4[7] = inst(oper.notimp);
+      return () => {
+        return inst_g4[this.opcode.reg]();
+      };
     };
-    let grp5 = () => {
-      let instr = [];
-      instr[0] = inst(oper.inc);
-      instr[1] = inst(oper.dec);
-      instr[2] = inst(oper.call);
-      instr[3] = inst(oper.call, addr.Mp);
-      instr[4] = inst(oper.jmp);
-      instr[5] = inst(oper.jmp, addr.Mp);
-      instr[6] = inst(oper.push);
-      instr[7] = inst(oper.notimp);
-      return () => op(dst, src);
+    let grp5 = (dst, src) => {
+      let inst_g5 = [];
+      inst_g5[0] = inst(oper.inc,  dst.bind(addr), src.bind(addr));
+      inst_g5[1] = inst(oper.dec,  dst.bind(addr), src.bind(addr));
+      inst_g5[2] = inst(oper.call, dst.bind(addr), src.bind(addr));
+      inst_g5[3] = inst(oper.call, addr.Mp);
+      inst_g5[4] = inst(oper.jmp,  dst.bind(addr), src.bind(addr));
+      inst_g5[5] = inst(oper.jmp,  addr.Mp);
+      inst_g5[6] = inst(oper.push, dst.bind(addr), src.bind(addr));
+      inst_g5[7] = inst(oper.notimp);
+      return () => {
+        return inst_g5[this.opcode.reg]();
+      };
     };
 
     this.inst = [];
