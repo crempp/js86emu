@@ -1,19 +1,24 @@
 {
   "name": "js86emu",
-  "version": "0.0.1",
+  "version": "0.3.0",
   "description": "x86 emulator written in Javascript.",
-  "main": "Gruntfile.js",
   "author": "Chad Rempp",
-  "license": "GPL",
+  "license": "GPL-2.0",
+  "repository": "https://github.com/crempp/js86emu",
+  "main": "compiled.js",
+  "dependencies": {
+    "winston": "^2.4.0"
+  },
   "devDependencies": {
-    "grunt-contrib-concat": "~0.3.0",
-    "grunt-contrib-uglify": "~0.2.4",
-    "grunt-contrib-jshint": "~0.6.4",
-    "grunt-contrib-watch": "~0.4.4",
-    "grunt-contrib-copy": "~0.4.1",
-    "grunt-contrib-sass": "~0.5.0",
-    "grunt-contrib-jst" : "~0.6.0",
-    "grunt": "~0.4.4",
-    "jshint": "~2.1.11"
+    "babel-cli": "^6.22.2",
+    "babel-plugin-transform-builtin-extend": "^1.1.2",
+    "babel-preset-env": "^1.1.8",
+    "jest": "^19.0.2"
+  },
+  "scripts": {
+    "build": "babel src -d dist",
+    "build:watch": "npm run build -- -w",
+    "test": "jest",
+    "runner": "node ./dist/runner.js"
   }
 }

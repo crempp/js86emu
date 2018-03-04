@@ -59,3 +59,28 @@ References
 Notes
 -----
 * http://forum.osdev.org/viewtopic.php?f=13&t=26986
+
+# v0.3 Notes
+
+## build
+
+```
+$ npm run build
+```
+
+or 
+
+```
+$ npm run build:watch
+```
+
+## test 
+```
+$ npm test
+```
+
+## Notes
+npm install git+https://github.com/sweet-js/sweet.js.git
+
+./node_modules/.bin/jest tests/8086.test.js 
+node dist/runner.js
