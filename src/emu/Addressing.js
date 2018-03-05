@@ -198,10 +198,10 @@ export default class Addressing {
       case 0b110 : // Direct Address
         // Direct address is always 2 bytes
         //   - yoshicapstonememo.googlecode.com/svn/trunk/4_2_86.pdf
-        addr = (this.cpu.mem8[this.seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 3)] << 8) |
-          this.cpu.mem8[this.seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 2)];
+        addr = (this.cpu.mem8[this.seg2abs(regCS, this.cpu.reg16[regIP] + 3)] << 8) |
+          this.cpu.mem8[this.seg2abs(regCS, this.cpu.reg16[regIP] + 2)];
         // TODO: I can make this simpler using mem16, test this.
-        // addr = this.cpu.mem16[this.seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 2)];
+        // addr = this.cpu.mem16[this.seg2abs(regCS, this.cpu.reg16[regIP] + 2)];
         break;
       case 0b111 : // [BX]
         addr = this.cpu.reg16[regBX];
@@ -209,12 +209,12 @@ export default class Addressing {
     }
     switch (this.cpu.opcode.w) {
       case 0:
-        return (this.cpu.mem8[this.seg2abs(this.cpu.reg16[regCS], addr)]);
+        return (this.cpu.mem8[this.seg2abs(regCS, addr)]);
       case 1:
-        return ((this.cpu.mem8[this.seg2abs(this.cpu.reg16[regCS], addr + 1)] << 8) |
-          this.cpu.mem8[this.seg2abs(this.cpu.reg16[regCS], addr)]);
+        return ((this.cpu.mem8[this.seg2abs(regCS, addr + 1)] << 8) |
+          this.cpu.mem8[this.seg2abs(regCS, addr)]);
       // TODO: I can make this simpler using mem16, test this.
-      // return this.cpu.mem16[this.seg2abs(this.cpu.reg16[regCS], addr)]
+      // return this.cpu.mem16[this.seg2abs(regCS, addr)]
     }
   }
 
@@ -224,13 +224,13 @@ export default class Addressing {
 
     switch (this.cpu.opcode.mod) {
       case 0b01: // Use R/M Tablae 2 with 8-bit displacement
-        disp = this.cpu.mem8[this.seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 2)];
+        disp = this.cpu.mem8[this.seg2abs(regCS, this.cpu.reg16[regIP] + 2)];
       case 0b10: // Use R/M Table 2 with 16-bit displacement
         disp = disp ||
-          ((this.cpu.mem8[this.seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 3)] << 8) |
-            this.cpu.mem8[this.seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 2)] );
+          ((this.cpu.mem8[this.seg2abs(regCS, this.cpu.reg16[regIP] + 3)] << 8) |
+            this.cpu.mem8[this.seg2abs(regCS, this.cpu.reg16[regIP] + 2)] );
         // TODO: I can make this simpler using mem16, test this.
-        // disp = disp || this.cpu.mem16[this.seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 2)];
+        // disp = disp || this.cpu.mem16[this.seg2abs(regCS, this.cpu.reg16[regIP] + 2)];
 
         switch (opcode.rm)
         {
@@ -445,130 +445,51 @@ export default class Addressing {
 
   calcImmAddr () {
     winston.log("debug", "Addressing.calcImmAddr() : ()");
-    return this.seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + this.cpu.cycleIP);
+    return this.seg2abs(regCS, this.cpu.reg16[regIP] + this.cpu.cycleIP);
   }
 
   readMem8 (addr) {
     winston.log("debug", "Addressing.readMem8() : addr=" + addr);
-    return (this.cpu.mem8[this.seg2abs(this.cpu.reg16[regCS], addr)]);
+    return (this.cpu.mem8[this.seg2abs(regCS, addr)]);
   }
 
   readMem16 (addr) {
     winston.log("debug", "Addressing.readMem16() : (addr=" + addr + ")");
-    return ((this.cpu.mem8[this.seg2abs(this.cpu.reg16[regCS], addr + 1)] << 8) |
-             this.cpu.mem8[this.seg2abs(this.cpu.reg16[regCS], addr)]);
+    return ((this.cpu.mem8[this.seg2abs(regCS, addr + 1)] << 8) |
+             this.cpu.mem8[this.seg2abs(regCS, addr)]);
     // TODO: I can make this simpler using mem16, test this.
-    // return this.cpu.mem16[this.seg2abs(this.cpu.reg16[regCS], addr)]
+    // return this.cpu.mem16[this.seg2abs(regCS, addr)]
   }
 
   writeMem8 (addr, value) {
     winston.log("debug", "Addressing.writeMem8() : (addr=" + addr + ", value=" + value + ")");
-    this.cpu.mem8[this.seg2abs(this.cpu.reg16[regCS], addr)] = (value & 0x00FF);
+    this.cpu.mem8[this.seg2abs(regCS, addr)] = (value & 0x00FF);
   }
 
   writeMem16 (addr, value) {
     winston.log("debug", "Addressing.writeMem16() : (addr=" + addr + ", value=" + value + ")");
-    this.cpu.mem16[this.seg2abs(this.cpu.reg16[regCS], addr)] = (value);
+    this.cpu.mem16[this.seg2abs(regCS, addr)] = (value);
   }
 
-  seg2abs (segment, offset) {
+  /**
+   * seg2abs
+   *
+   * Convert a segmented (seg:offset) memory address into an absolute address.
+   *
+   * https://en.wikibooks.org/wiki/X86_Assembly/16_32_and_64_Bits#Example
+   *
+   * @param {number} segReg Segment register
+   * @param {number} offset Offset amount from segment
+   * @return {number} Absolute memory address
+   */
+  seg2abs (segReg, offset) {
+    let segment = this.cpu.reg16[segReg];
     // Handle segment overrides
-    if      (this.cpu.CS_OVERRIDE) segment = this._regCS;
-    else if (this.cpu.DS_OVERRIDE) segment = this._regDS;
-    else if (this.cpu.ES_OVERRIDE) segment = this._regES;
-    else if (this.cpu.SS_OVERRIDE) segment = this._regSS;
+    if      (this.cpu.CS_OVERRIDE) segment = this.cpu.reg16[regCS];
+    else if (this.cpu.DS_OVERRIDE) segment = this.cpu.reg16[regDS];
+    else if (this.cpu.ES_OVERRIDE) segment = this.cpu.reg16[regES];
+    else if (this.cpu.SS_OVERRIDE) segment = this.cpu.reg16[regSS];
+
     return (segment * 16) + offset;
   }
-
-  // calcRMAddr () {
-  //   winston.log("debug", "Addressing.calcRMAddr()  : ()");
-  //   let addr, disp;
-  //
-  //   switch (this.cpu.opcode.mod) {
-  //     case 0b00: // Use R/M Table 1 for R/M operand
-  //       switch (this.cpu.opcode.rm)
-  //       {
-  //         case 0b000 : // [BX + SI]
-  //           addr = this.cpu.reg16[regBX] + this.cpu.reg16[regSI];
-  //           break;
-  //         case 0b001 : // [BX + DI]
-  //           addr = this.cpu.reg16[regBX] + this.cpu.reg16[regDI];
-  //           break;
-  //         case 0b010 : // [BP + SI]
-  //           addr = this.cpu.reg16[regBP] + this.cpu.reg16[regSI];
-  //           break;
-  //         case 0b011 : // [BP + DI]
-  //           addr = this.cpu.reg16[regBP] + this.cpu.reg16[regDI];
-  //           break;
-  //         case 0b100 : // [SI]
-  //           addr = this.cpu.reg16[regSI];
-  //           break;
-  //         case 0b101 : // [DI]
-  //           addr = this.cpu.reg16[regDI];
-  //           break;
-  //         case 0b110 : // Direct Address
-  //           // Direct address is always 2 bytes
-  //           //   - yoshicapstonememo.googlecode.com/svn/trunk/4_2_86.pdf
-  //           addr = (this.cpu.mem8[this.seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 3)] << 8) |
-  //             this.cpu.mem8[this.seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 2)];
-  //           // TODO: I can make this simpler using mem16, test this.
-  //           // addr = this.cpu.mem16[this.seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 2)];
-  //           break;
-  //         case 0b111 : // [BX]
-  //           addr = this.cpu.reg16[regBX];
-  //           break;
-  //       }
-  //       switch (this.cpu.opcode.w) {
-  //         case 0:
-  //           return (this.cpu.mem8[this.seg2abs(this.cpu.reg16[regCS], addr)]);
-  //         case 1:
-  //           return ((this.cpu.mem8[this.seg2abs(this.cpu.reg16[regCS], addr + 1)] << 8) |
-  //             this.cpu.mem8[this.seg2abs(this.cpu.reg16[regCS], addr)]);
-  //         // TODO: I can make this simpler using mem16, test this.
-  //         // return this.cpu.mem16[this.seg2abs(this.cpu.reg16[regCS], addr)]
-  //       }
-  //       break;
-  //     case 0b01: // Use R/M Table 2 with 8-bit displacement
-  //       disp = this.cpu.mem8[this.seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 2)];
-  //     case 0b10: // Use R/M Table 2 with 16-bit displacement
-  //       disp = disp ||
-  //         ((this.cpu.mem8[this.seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 3)] << 8) |
-  //           this.cpu.mem8[this.seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 2)] );
-  //       // TODO: I can make this simpler using mem16, test this.
-  //       // disp = disp || this.cpu.mem16[this.seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 2)];
-  //
-  //       switch (opcode.rm)
-  //       {
-  //         case 0b000 : // [BX + SI]
-  //           addr = this.cpu.reg16[regBX] + this.cpu.reg16[regSI] + disp;
-  //           break;
-  //         case 0b001 : // [BX + DI]
-  //           addr = this.cpu.reg16[regBX] + this.cpu.reg16[regDI] + disp;
-  //           break;
-  //         case 0b010 : // [BP + SI]
-  //           addr = this.cpu.reg16[regBP] + this.cpu.reg16[regSI] + disp;
-  //           break;
-  //         case 0b011 : // [BP + DI]
-  //           addr = this.cpu.reg16[regBP] + this.cpu.reg16[regDI] + disp;
-  //           break;
-  //         case 0b100 : // [SI]
-  //           addr = this.cpu.reg16[regSI];
-  //           break;
-  //         case 0b101 : // [DI]
-  //           addr = this.cpu.reg16[regDI];
-  //           break;
-  //         case 0b110 : // [BP]
-  //           addr = this.cpu.reg16[regBP];
-  //           break;
-  //         case 0b111 : // [BX]
-  //           addr = this.cpu.reg16[regBX];
-  //           break;
-  //       }
-  //       break;
-  //     case 0b11: // Two register instruction; use REG table
-  //       addr = this.readRegVal();
-  //       break;
-  //   }
-  //   return addr;
-  // }
 }
