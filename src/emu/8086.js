@@ -14,13 +14,14 @@ import {
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
 } from './Constants';
-import { binString8, binString16, hexString8, hexString16,
-  formatOpcode, formatMemory
+import {
+  binString8, binString16, hexString8, hexString16, formatOpcode,
+  formatMemory, formatFlags
 } from './Debug'
 
 export default class CPU8086 {
   constructor(config) {
-    winston.log("debug", "8086: constructor()");
+    winston.log("debug", "8086.constructor()       :");
 
     // Validate config
     if (!(config instanceof CPUConfig)) {
@@ -42,7 +43,7 @@ export default class CPU8086 {
     this.mem16 = new Uint16Array(this.mem8.buffer);
 
     // Registers
-    this.reg8 = new Uint8Array(14 * 2);
+    this.reg8 = new Uint8Array(15 * 2);
     this.reg16 = new Uint16Array(this.reg8.buffer);
     this.reg16[regAX] = 0x0;
     this.reg16[regBX] = 0x0;
@@ -61,14 +62,17 @@ export default class CPU8086 {
     // Flags
     this.reg16[regFlags] = 0x0;
 
+
     // Opcode
     this.opcode = 0x00;
+
+    this.cycleIP = 0;
 
     // Supporting modules
     let addr = new Addressing(this);
     let oper = new Operations(this);
 
-    winston.log("debug", "8086: Creating instruction table");
+    winston.log("debug", "8086.constructor()       : Creating instruction table");
 
     let grp1 = (dst, src) => {
       let inst_g1 = [];
@@ -79,9 +83,9 @@ export default class CPU8086 {
       inst_g1[4] = inst(oper.and, dst.bind(addr), src.bind(addr));
       inst_g1[5] = inst(oper.sub, dst.bind(addr), src.bind(addr));
       inst_g1[6] = inst(oper.xor, dst.bind(addr), src.bind(addr));
-      inst_g1[7] = inst(oper.cmp, dst.bind(addr), src.bind(addr));
+      inst_g1[7] = inst(oper.cmp.bind(oper), dst.bind(addr), src.bind(addr));
       return () => {
-        return inst_g1[this.opcode.reg](dst, src);
+        return inst_g1[this.opcode.reg]();
       };
     };
     let grp2 = (dst, src) => {
@@ -432,17 +436,61 @@ export default class CPU8086 {
   }
 
   cycle () {
+    winston.log("debug", "8086.cycle()             : Running instruction cycle [" + this.reg16[regIP] + "]");
+    // Reset the instruction cycle counter
+    this.cycleIP = 0;
+
     let ip = this.reg16[regIP];
-    console.log("IP: " + hexString16(ip));
-    console.log();
-    console.log(formatMemory(this.mem8, ip, ip + 7));
-    console.log();
+    winston.log("debug", "8086.cycle()             :     IP: " + hexString16(ip));
+    winston.log("debug", "8086.cycle()             :     MEMORY\n" + formatMemory(this.mem8, ip, ip + 7, 34));
 
     this.decode();
-    console.log(formatOpcode(this.opcode));
-    // console.log( this.inst[this.opcode.opcode_byte]);
-    console.log("executing");
+    winston.log("debug", "8086.cycle()             :     OPCODE\n" + formatOpcode(this.opcode, 34));
+    winston.log("debug", "8086.cycle()             :     FLAGS\n" + formatFlags(this.reg16[regFlags], 34));
     this.inst[this.opcode.opcode_byte]();
+
+    this.reg16[regIP] += this.cycleIP;
+  }
+
+  setAF_FLAG_sub (operand1, operand2) {
+    if ((operand1 & 0x0F) < (operand2 & 0x0F)) this.reg16[regFlags] |= FLAG_AF_MASK;
+    else this.reg16[regFlags] &= ~FLAG_AF_MASK;
+  }
+
+  setCF_FLAG_sub (operand1, operand2) {
+    if (operand1 < operand2) this.reg16[regFlags] |= FLAG_CF_MASK;
+  }
+
+  setOF_FLAG (operand1, operand2, result) {
+    let shift;
+    let size = this.opcode.w;
+    if (1 === size) shift = 15; else shift = 7;
+
+    if ( 1 === (operand1 >> shift) && 1 === (operand2 >> shift) && 0 === (result >> shift) ||
+         0 === (operand1 >> shift) && 0 === (operand2 >> shift) && 1 === (result >> shift))
+      this.reg16[regFlags] = this.reg16[regFlags] | FLAG_OF_MASK;
+    else this.reg16[regFlags] &= ~FLAG_OF_MASK;
+  }
+
+  setPF_FLAG (result) {
+    let bitRep = result.toString(2);
+    let bitCnt = 0;
+    for (let b in bitRep) { if ("1" === bitRep[b]) bitCnt++; }
+
+    if (0 === (bitCnt % 2)) this.reg16[regFlags] |= FLAG_PF_MASK;
+    else this.reg16[regFlags] &= ~FLAG_PF_MASK;
+  }
+
+  setSF_FLAG (result) {
+    let size = this.opcode.w;
+    if (0 === size && (result & 0xFF) >> 7) this.reg16[regFlags] |= FLAG_SF_MASK;
+    else if (1 === size && (result & 0xFFFF) >> 15) this.reg16[regFlags] |= FLAG_SF_MASK;
+    else this.reg16[regFlags] &= ~FLAG_SF_MASK;
+  }
+
+  setZF_FLAG (result) {
+    if (0 === result) this.reg16[regFlags] |= FLAG_ZF_MASK;
+    else this.reg16[regFlags] &= ~FLAG_ZF_MASK;
   }
 
   saveState () {

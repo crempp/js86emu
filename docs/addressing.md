@@ -1,3 +1,5 @@
+# x86 Addressing
+
 ### A
 Direct Address. The instruction has no ModR/M byte; the address of the operand is encoded
 in the instruction; and no base register, index register, or scaling factor can be
@@ -78,3 +80,11 @@ Memory addressed by the ES:DI register pair (for example, MOVS, CMPS, INS,
 STOS, or SCAS).
 
 * Source - [3] p.A-1
+
+
+
+
+// Use R/M Table 2 with 8-bit displacement
+
+
+

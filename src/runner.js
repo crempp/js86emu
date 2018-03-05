@@ -65,7 +65,4 @@ cpu.reg16[regIP] = 0;
 cpu.reg16[regSP] = 0x100;
 
 cpu.cycle();
-
-
-// cpu.inst[0x04]();
-// cpu.inst[0x00]();
+// cpu.cycle();
