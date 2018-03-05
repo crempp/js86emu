@@ -88,8 +88,9 @@ export default class Addressing {
     winston.log("debug", "Addressing.Eb()          : (value=" + hexString16(value) + ")");
 
     let result;
-    if (value || value === 0) result = this.writeRMReg8(value);
-    else result = this.readRMReg8();
+    let segment = this.cpu.reg16[regCS];
+    if (value || value === 0) result = this.writeRMReg8(segment, value);
+    else result = this.readRMReg8(segment);
 
     winston.log("debug", "Addressing.Ev()          :     result=" + hexString16(result));
 
@@ -100,8 +101,9 @@ export default class Addressing {
     winston.log("debug", "Addressing.Ev()          : (value=" + hexString16(value) + ")");
 
     let result;
-    if (value || value === 0) result = this.writeRMReg16(value);
-    else result = this.readRMReg16();
+    let segment = this.cpu.reg16[regCS];
+    if (value || value === 0) result = this.writeRMReg16(segment, value);
+    else result = this.readRMReg16(segment);
 
     winston.log("debug", "Addressing.Ev()          :     result=" + hexString16(result));
 
@@ -123,10 +125,11 @@ export default class Addressing {
   Ib (value = null) {
     winston.log("debug", "Addressing.Ib()          : (value=" + hexString16(value) + ")");
     let result;
-    let addr = this.calcImmAddr();
+    let segment = this.cpu.reg16[regCS];
+    let offset = this.calcImmAddr(segment);
 
-    if (value || value === 0) result = this.writeMem8(addr, value);
-    else result = this.readMem8(addr);
+    if (value || value === 0) result = this.writeMem8(segment, offset, value);
+    else result = this.readMem8(segment, offset);
 
     winston.log("debug", "Addressing.Ev()          :     result=" + hexString16(result));
 
@@ -136,10 +139,11 @@ export default class Addressing {
   Iv (value = null) {
     winston.log("debug", "Addressing.Iv()          : (value=" + hexString16(value) + ")");
     let result;
-    let addr = this.calcImmAddr();
+    let segment = this.cpu.reg16[regCS];
+    let offset = this.calcImmAddr(segment);
 
-    if (value || value === 0) result = this.writeMem16(addr, value);
-    else result = this.readMem16(addr);
+    if (value || value === 0) result = this.writeMem16(segment, offset, value);
+    else result = this.readMem16(segment, offset);
 
     winston.log("debug", "Addressing.Ev()          :     result=" + hexString16(result));
 
@@ -263,72 +267,77 @@ export default class Addressing {
     }
   }
 
-  readRMReg8 () {
+  calcImmAddr (segment) {
+    winston.log("debug", "Addressing.calcImmAddr() : ()");
+    return this.seg2abs(segment, this.cpu.reg16[regIP] + this.cpu.cycleIP);
+  }
+
+  readRMReg8 (segment) {
     winston.log("debug", "Addressing.readRMReg8()  : ()");
-    let addr;
+    let offset;
     switch (this.cpu.opcode.mod) {
       case 0b00: // Use R/M Table 1 for R/M operand
-        addr = this.calcRMAddr();
-        return this.readMem8(addr);
+        offset = this.calcRMAddr();
+        return this.readMem8(segment, offset);
       case 0b01: // Use R/M Table 2 with 8-bit displacement
       case 0b10: // Use R/M Table 2 with 16-bit displacement
-        addr = this.calcRMDispAddr();
-        return this.readMem8(addr);
+        offset = this.calcRMDispAddr();
+        return this.readMem8(segment, offset);
       case 0b11: // Two register instruction; use REG table
         return this.readRegVal(true);
     }
-    return addr;
+    return offset;
   }
 
-  readRMReg16 () {
+  readRMReg16 (segment) {
     winston.log("debug", "Addressing.readRMReg16() : ()");
-    let addr;
+    let offset;
     switch (this.cpu.opcode.mod) {
       case 0b00: // Use R/M Table 1 for R/M operand
-        addr = this.calcRMAddr();
-        return this.readMem16(addr);
+        offset = this.calcRMAddr();
+        return this.readMem16(segment, offset);
       case 0b01: // Use R/M Table 2 with 8-bit displacement
       case 0b10: // Use R/M Table 2 with 16-bit displacement
-        addr = this.calcRMDispAddr();
-        return this.readMem16(addr);
+        offset = this.calcRMDispAddr();
+        return this.readMem16(segment, offset);
       case 0b11: // Two register instruction; use REG table
         return this.readRegVal(true);
     }
-    return addr;
+    return offset;
   }
 
-  writeRMReg8 (value) {
+  writeRMReg8(segment, value) {
     winston.log("debug", "Addressing.writeRMReg8() : (value=" + value + ")");
-    let addr;
+    let offset;
     switch (this.cpu.opcode.mod) {
       case 0b00: // Use R/M Table 1 for R/M operand
-        addr = this.calcRMAddr();
-        return this.writeMem8(addr, value);
+        offset = this.calcRMAddr();
+        return this.writeMem8(segment, offset, value);
       case 0b01: // Use R/M Table 2 with 8-bit displacement
       case 0b10: // Use R/M Table 2 with 16-bit displacement
-        addr = this.calcRMDispAddr();
-        return this.writeMem8(addr, value);
+        offset = this.calcRMDispAddr();
+        return this.writeMem8(segment, offset, value);
       case 0b11: // Two register instruction; use REG table
         return this.writeRegVal(value, true);
     }
-    return addr;
+    return offset;
   }
 
-  writeRMReg16 (value) {
+  writeRMReg16(segment, value) {
     winston.log("debug", "Addressing.writeRMReg16(): (value=" + value + ")");
-    let addr;
+    let offset;
     switch (this.cpu.opcode.mod) {
       case 0b00: // Use R/M Table 1 for R/M operand
-        addr = this.calcRMAddr();
-        return this.writeMem16(addr, value);
+        offset = this.calcRMAddr();
+        return this.writeMem16(segment, offset, value);
       case 0b01: // Use R/M Table 2 with 8-bit displacement
       case 0b10: // Use R/M Table 2 with 16-bit displacement
-        addr = this.calcRMDispAddr();
-        return this.writeMem16(addr, value);
+        offset = this.calcRMDispAddr();
+        return this.writeMem16(segment, offset, value);
       case 0b11: // Two register instruction; use REG table
         return this.writeRegVal(value, true);
     }
-    return addr;
+    return offset;
   }
 
   readRegVal (useRM = false) {
@@ -443,47 +452,62 @@ export default class Addressing {
     }
   }
 
-  calcImmAddr () {
-    winston.log("debug", "Addressing.calcImmAddr() : ()");
-    return this.seg2abs(regCS, this.cpu.reg16[regIP] + this.cpu.cycleIP);
-  }
-
-  readMem8 (addr) {
-    winston.log("debug", "Addressing.readMem8() : addr=" + addr);
-    return (this.cpu.mem8[this.seg2abs(regCS, addr)]);
-  }
-
-  readMem16 (addr) {
-    winston.log("debug", "Addressing.readMem16() : (addr=" + addr + ")");
-    return ((this.cpu.mem8[this.seg2abs(regCS, addr + 1)] << 8) |
-             this.cpu.mem8[this.seg2abs(regCS, addr)]);
-    // TODO: I can make this simpler using mem16, test this.
-    // return this.cpu.mem16[this.seg2abs(regCS, addr)]
-  }
-
-  writeMem8 (addr, value) {
-    winston.log("debug", "Addressing.writeMem8() : (addr=" + addr + ", value=" + value + ")");
-    this.cpu.mem8[this.seg2abs(regCS, addr)] = (value & 0x00FF);
-  }
-
-  writeMem16 (addr, value) {
-    winston.log("debug", "Addressing.writeMem16() : (addr=" + addr + ", value=" + value + ")");
-    this.cpu.mem16[this.seg2abs(regCS, addr)] = (value);
+  /**
+   * Read a byte from a segment:offset location in memory
+   *
+   * @param {number} segment
+   * @param {number} offset
+   * @return {number} Value from memory as a byte
+   */
+  readMem8(segment, offset) {
+    return (this.cpu.mem8[this.seg2abs(segment, offset)]);
   }
 
   /**
-   * seg2abs
+   * Read a word from a segment:offset location in memory
    *
+   * @param {number} segment
+   * @param {number} offset
+   * @return {number} Value from memory as a word
+   */
+  readMem16(segment, offset) {
+    return ((this.cpu.mem8[this.seg2abs(segment, offset + 1)] << 8) |
+             this.cpu.mem8[this.seg2abs(segment, offset)]);
+  }
+
+  /**
+   * Write a byte to a segment:offset location in memory
+   *
+   * @param {number} segment
+   * @param {number} offset
+   * @param {number} value
+   */
+  writeMem8(segment, offset, value) {
+    this.cpu.mem8[this.seg2abs(segment, offset)] = (value & 0x00FF);
+  }
+
+  /**
+   * Write a word to a segment:offset location in memory
+   *
+   * @param {number} segment
+   * @param {number} offset
+   * @param {number} value
+   */
+  writeMem16(segment, offset, value) {
+    this.cpu.mem8[this.seg2abs(segment, offset)] = (value & 0x00FF);
+    this.cpu.mem8[this.seg2abs(segment, offset + 1)] = (value >> 8 & 0x00FF);
+  }
+
+  /**
    * Convert a segmented (seg:offset) memory address into an absolute address.
    *
    * https://en.wikibooks.org/wiki/X86_Assembly/16_32_and_64_Bits#Example
    *
-   * @param {number} segReg Segment register
+   * @param {number} segment Segment register
    * @param {number} offset Offset amount from segment
    * @return {number} Absolute memory address
    */
-  seg2abs (segReg, offset) {
-    let segment = this.cpu.reg16[segReg];
+  seg2abs (segment, offset) {
     // Handle segment overrides
     if      (this.cpu.CS_OVERRIDE) segment = this.cpu.reg16[regCS];
     else if (this.cpu.DS_OVERRIDE) segment = this.cpu.reg16[regDS];
