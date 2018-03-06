@@ -43,24 +43,24 @@ export default class CPU8086 {
     this.mem16 = new Uint16Array(this.mem8.buffer);
 
     // Registers
-    this.reg8 = new Uint8Array(15 * 2);
+    this.reg8 = new Uint8Array(14 * 2);
     this.reg16 = new Uint16Array(this.reg8.buffer);
-    this.reg16[regAX] = 0x0;
-    this.reg16[regBX] = 0x0;
-    this.reg16[regCX] = 0x0;
-    this.reg16[regDX] = 0x0;
-    this.reg16[regSI] = 0x0;
-    this.reg16[regDI] = 0x0;
-    this.reg16[regBP] = 0x0;
-    this.reg16[regSP] = 0x0;
-    this.reg16[regIP] = 0x0;
-    this.reg16[regCS] = 0x0;
-    this.reg16[regDS] = 0x0;
-    this.reg16[regES] = 0x0;
-    this.reg16[regSS] = 0x0;
+    this.reg16[regAX] = 0x0000;
+    this.reg16[regBX] = 0x0000;
+    this.reg16[regCX] = 0x0000;
+    this.reg16[regDX] = 0x0000;
+    this.reg16[regSI] = 0x0000;
+    this.reg16[regDI] = 0x0000;
+    this.reg16[regBP] = 0x0000;
+    this.reg16[regSP] = 0x0000;
+    this.reg16[regIP] = 0x0000;
+    this.reg16[regCS] = 0x0000;
+    this.reg16[regDS] = 0x0000;
+    this.reg16[regES] = 0x0000;
+    this.reg16[regSS] = 0x0000;
 
     // Flags
-    this.reg16[regFlags] = 0x0;
+    this.reg16[regFlags] = 0x0000;
 
 
     // Opcode

@@ -340,9 +340,14 @@ export default class Addressing {
     return offset;
   }
 
+  /**
+   * Read a byte or a word from a register determined by the rm or reg value
+   * and the reg lookup table.
+   *
+   * @param {boolean} useRM Use the RM value rather than the default REG value
+   * @returns {number} The value of the register
+   */
   readRegVal (useRM = false) {
-    winston.log("debug", "Addressing.readRegVal()  : (useRM=" + useRM + ")");
-
     let rmReg = useRM ? this.cpu.opcode.rm : this.cpu.opcode.reg;
     switch (this.cpu.opcode.w) {
       case 0:
@@ -371,7 +376,7 @@ export default class Addressing {
             return this.cpu.reg16[regAX];
           case 0b001:
             return this.cpu.reg16[regCX];
-          case 0b10:
+          case 0b010:
             return this.cpu.reg16[regDX];
           case 0b011:
             return this.cpu.reg16[regBX];
@@ -388,9 +393,15 @@ export default class Addressing {
     }
   }
 
-  writeRegVal (value, useRM = false) {
-    winston.log("debug", "Addressing.writeRegVal()  : (value=" + value + ")");
 
+  /**
+   * Write a byte or a word to a register determined by the rm or reg value
+   * and the reg lookup table.
+   *
+   * @param value Value to write to the register
+   * @param {boolean} useRM Use the RM value rather than the default REG value
+   */
+  writeRegVal (value, useRM = false) {
     let rmReg = useRM ? this.cpu.opcode.rm : this.cpu.opcode.reg;
     switch (this.cpu.opcode.w) {
       case 0:

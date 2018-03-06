@@ -12,6 +12,9 @@ import {
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
 } from '../../src/emu/Constants';
+import {
+  formatOpcode, hexString8, hexString16
+} from "../../src/emu/Debug";
 
 winston.level = 'warn';
 
@@ -349,12 +352,563 @@ describe('Memory access methods', () => {
 });
 
 describe('Register access methods', () => {
-  describe('readRegVal()', () => {
+  let addr, cpu;
 
+  beforeEach(() => {
+    cpu = new CPU8086(new CPUConfig({
+        memory: 262399
+    }));
+    addr = new Addressing(cpu);
+    cpu.reg16[regAX] = 0x1234;
+    cpu.reg16[regBX] = 0x2345;
+    cpu.reg16[regCX] = 0x3456;
+    cpu.reg16[regDX] = 0x4567;
+
+    cpu.reg16[regSP] = 0x89AB;
+    cpu.reg16[regBP] = 0x789A;
+    cpu.reg16[regSI] = 0x5678;
+    cpu.reg16[regDI] = 0x6789;
+
+    cpu.reg16[regCS] = 0xABCD;
+    cpu.reg16[regDS] = 0xBCD0;
+    cpu.reg16[regES] = 0xCD01;
+    cpu.reg16[regSS] = 0xD012;
+
+    cpu.reg16[regIP] = 0x0000;
+  });
+
+  //   7                           0
+  // +---+---+---+---+---+---+---+---+
+  // |          opcode       | d | w |
+  // +---+---+---+---+---+---+---+---+
+  //   0   0   0   0   0   0   0   1
+  //
+  //   7                           0
+  // +---+---+---+---+---+---+---+---+
+  // |  mod  |    reg    |     rm    |
+  // +---+---+---+---+---+---+---+---+
+  //   0   0   0   0   0   0   0   0
+  //
+  //
+  // mod = 00 register indirect
+  // mod = 11 register direct
+  //
+  // cpu.mem8[0x0000] = 0x00; // inst (byte)
+  // cpu.mem8[0x0000] = 0x01; // inst (word)
+  //
+  // console.log(formatOpcode(cpu.opcode));
+  // console.log(hexString8(addr.readRegVal()));
+  //
+  // let str = "";
+  // cpu.reg8.forEach((val) => {
+  //   str += hexString8(val) + "\n";
+  // });
+  // console.log(str);
+  // str = "";
+  // cpu.reg16.forEach((val) => {
+  //   str += hexString16(val) + "\n";
+  // });
+  // console.log(str);
+
+  describe('readRegVal()', () => {
+    test('read byte from AL', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00000000; // addr
+      cpu.decode();
+      expect(addr.readRegVal()).toBe(0x12);
+    });
+
+    test('read byte from CL', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00001000; // addr
+      cpu.decode();
+      expect(addr.readRegVal()).toBe(0x34);
+    });
+
+    test('read byte from DL', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00010000; // addr
+      cpu.decode();
+      expect(addr.readRegVal()).toBe(0x45);
+    });
+
+    test('read byte from BL', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00011000; // addr
+      cpu.decode();
+      expect(addr.readRegVal()).toBe(0x23);
+    });
+
+    test('read byte from AH', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00100000; // addr
+      cpu.decode();
+      expect(addr.readRegVal()).toBe(0x34);
+    });
+
+    test('read byte from CH', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00101000; // addr
+      cpu.decode();
+      expect(addr.readRegVal()).toBe(0x56);
+    });
+
+    test('read byte from DH', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00110000; // addr
+      cpu.decode();
+      expect(addr.readRegVal()).toBe(0x67);
+    });
+
+    test('read byte from BH', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00111000; // addr
+      cpu.decode();
+      expect(addr.readRegVal()).toBe(0x45);
+    });
+
+    test('read word from AX', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00000000; // addr
+      cpu.decode();
+      expect(addr.readRegVal()).toBe(0x1234);
+    });
+
+    test('read word from CX', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00001000; // addr
+      cpu.decode();
+      expect(addr.readRegVal()).toBe(0x3456);
+    });
+
+    test('read word from DX', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00010000; // addr
+      cpu.decode();
+      expect(addr.readRegVal()).toBe(0x4567);
+    });
+
+    test('read word from BX', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00011000; // addr
+      cpu.decode();
+      expect(addr.readRegVal()).toBe(0x2345);
+    });
+
+    test('read word from SP', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00100000; // addr
+      cpu.decode();
+      expect(addr.readRegVal()).toBe(0x89AB);
+    });
+
+    test('read word from BP', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00101000; // addr
+      cpu.decode();
+      expect(addr.readRegVal()).toBe(0x789A);
+    });
+
+    test('read word from SI', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00110000; // addr
+      cpu.decode();
+      expect(addr.readRegVal()).toBe(0x5678);
+    });
+
+    test('read word from DI', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00111000; // addr
+      cpu.decode();
+      expect(addr.readRegVal()).toBe(0x6789);
+    });
+
+    test('read byte from AL using RM', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00111000; // addr
+      cpu.decode();
+      expect(addr.readRegVal(true)).toBe(0x12);
+    });
+
+    test('read byte from CL using RM', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00111001; // addr
+      cpu.decode();
+      expect(addr.readRegVal(true)).toBe(0x34);
+    });
+
+    test('read byte from DL using RM', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00111010; // addr
+      cpu.decode();
+      expect(addr.readRegVal(true)).toBe(0x45);
+    });
+
+    test('read byte from BL using RM', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00111011; // addr
+      cpu.decode();
+      expect(addr.readRegVal(true)).toBe(0x23);
+    });
+
+    test('read byte from AH using RM', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00111100; // addr
+      cpu.decode();
+      expect(addr.readRegVal(true)).toBe(0x34);
+    });
+
+    test('read byte from CH using RM', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00111101; // addr
+      cpu.decode();
+      expect(addr.readRegVal(true)).toBe(0x56);
+    });
+
+    test('read byte from DH using RM', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00111110; // addr
+      cpu.decode();
+      expect(addr.readRegVal(true)).toBe(0x67);
+    });
+
+    test('read byte from BH using RM', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00000111; // addr
+      cpu.decode();
+      expect(addr.readRegVal(true)).toBe(0x45);
+    });
+
+    test('read word from AX using RM', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00111000; // addr
+      cpu.decode();
+      expect(addr.readRegVal(true)).toBe(0x1234);
+    });
+
+    test('read word from CX using RM', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00111001; // addr
+      cpu.decode();
+      expect(addr.readRegVal(true)).toBe(0x3456);
+    });
+
+    test('read word from DX using RM', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00111010; // addr
+      cpu.decode();
+      expect(addr.readRegVal(true)).toBe(0x4567);
+    });
+
+    test('read word from BX using RM', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00111011; // addr
+      cpu.decode();
+      expect(addr.readRegVal(true)).toBe(0x2345);
+    });
+
+    test('read word from SP using RM', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00111100; // addr
+      cpu.decode();
+      expect(addr.readRegVal(true)).toBe(0x89AB);
+    });
+
+    test('read word from BP using RM', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00111101; // addr
+      cpu.decode();
+      expect(addr.readRegVal(true)).toBe(0x789A);
+    });
+
+    test('read word from SI using RM', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00111110; // addr
+      cpu.decode();
+      expect(addr.readRegVal(true)).toBe(0x5678);
+    });
+
+    test('read word from DI using RM', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00000111; // addr
+      cpu.decode();
+      expect(addr.readRegVal(true)).toBe(0x6789);
+    });
   });
 
   describe('writeRegVal()', () => {
+    beforeEach(() => {
+      cpu.reg16[regAX] = 0x0000;
+      cpu.reg16[regBX] = 0x0000;
+      cpu.reg16[regCX] = 0x0000;
+      cpu.reg16[regDX] = 0x0000;
 
+      cpu.reg16[regSP] = 0x0000;
+      cpu.reg16[regBP] = 0x0000;
+      cpu.reg16[regSI] = 0x0000;
+      cpu.reg16[regDI] = 0x0000;
+
+      cpu.reg16[regCS] = 0x0000;
+      cpu.reg16[regDS] = 0x0000;
+      cpu.reg16[regES] = 0x0000;
+      cpu.reg16[regSS] = 0x0000;
+    });
+
+    test('write byte to AL', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00000000; // addr
+      cpu.decode();
+      addr.writeRegVal(0x12);
+      expect(cpu.reg8[regAL]).toBe(0x12);
+    });
+
+    test('write byte to CL', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00001000; // addr
+      cpu.decode();
+      addr.writeRegVal(0x12);
+      expect(cpu.reg8[regCL]).toBe(0x12);
+    });
+
+    test('write byte to DL', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00010000; // addr
+      cpu.decode();
+      addr.writeRegVal(0x12);
+      expect(cpu.reg8[regDL]).toBe(0x12);
+    });
+
+    test('write byte to BL', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00011000; // addr
+      cpu.decode();
+      addr.writeRegVal(0x12);
+      expect(cpu.reg8[regBL]).toBe(0x12);
+    });
+
+    test('write byte to AH', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00100000; // addr
+      cpu.decode();
+      addr.writeRegVal(0x12);
+      expect(cpu.reg8[regAH]).toBe(0x12);
+    });
+
+    test('write byte to CH', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00101000; // addr
+      cpu.decode();
+      addr.writeRegVal(0x12);
+      expect(cpu.reg8[regCH]).toBe(0x12);
+    });
+
+    test('write byte to DH', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00110000; // addr
+      cpu.decode();
+      addr.writeRegVal(0x12);
+      expect(cpu.reg8[regDH]).toBe(0x12);
+    });
+
+    test('write byte to BH', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00111000; // addr
+      cpu.decode();
+      addr.writeRegVal(0x12);
+      expect(cpu.reg8[regBH]).toBe(0x12);
+    });
+
+    test('write byte to AX', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00000000; // addr
+      cpu.decode();
+      addr.writeRegVal(0x1234);
+      expect(cpu.reg16[regAX]).toBe(0x1234);
+    });
+
+    test('write byte to CX', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00001000; // addr
+      cpu.decode();
+      addr.writeRegVal(0x1234);
+      expect(cpu.reg16[regCX]).toBe(0x1234);
+    });
+
+    test('write byte to DX', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00010000; // addr
+      cpu.decode();
+      addr.writeRegVal(0x1234);
+      expect(cpu.reg16[regDX]).toBe(0x1234);
+    });
+
+    test('write byte to BX', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00011000; // addr
+      cpu.decode();
+      addr.writeRegVal(0x1234);
+      expect(cpu.reg16[regBX]).toBe(0x1234);
+    });
+
+    test('write byte to SP', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00100000; // addr
+      cpu.decode();
+      addr.writeRegVal(0x1234);
+      expect(cpu.reg16[regSP]).toBe(0x1234);
+    });
+
+    test('write byte to BP', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00101000; // addr
+      cpu.decode();
+      addr.writeRegVal(0x1234);
+      expect(cpu.reg16[regBP]).toBe(0x1234);
+    });
+
+    test('write byte to SI', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00110000; // addr
+      cpu.decode();
+      addr.writeRegVal(0x1234);
+      expect(cpu.reg16[regSI]).toBe(0x1234);
+    });
+
+    test('write byte to DI', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00111000; // addr
+      cpu.decode();
+      addr.writeRegVal(0x1234);
+      expect(cpu.reg16[regDI]).toBe(0x1234);
+    });
+
+    test('write byte to AL using RM', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00111000; // addr
+      cpu.decode();
+      addr.writeRegVal(0x12, true);
+      expect(cpu.reg8[regAL]).toBe(0x12);
+    });
+
+    test('write byte to CL using RM', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00111001; // addr
+      cpu.decode();
+      addr.writeRegVal(0x12, true);
+      expect(cpu.reg8[regCL]).toBe(0x12);
+    });
+
+    test('write byte to DL using RM', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00111010; // addr
+      cpu.decode();
+      addr.writeRegVal(0x12, true);
+      expect(cpu.reg8[regDL]).toBe(0x12);
+    });
+
+    test('write byte to BL using RM', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00111011; // addr
+      cpu.decode();
+      addr.writeRegVal(0x12, true);
+      expect(cpu.reg8[regBL]).toBe(0x12);
+    });
+
+    test('write byte to AH using RM', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00111100; // addr
+      cpu.decode();
+      addr.writeRegVal(0x12, true);
+      expect(cpu.reg8[regAH]).toBe(0x12);
+    });
+
+    test('write byte to CH using RM', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00111101; // addr
+      cpu.decode();
+      addr.writeRegVal(0x12, true);
+      expect(cpu.reg8[regCH]).toBe(0x12);
+    });
+
+    test('write byte to DH using RM', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00111110; // addr
+      cpu.decode();
+      addr.writeRegVal(0x12, true);
+      expect(cpu.reg8[regDH]).toBe(0x12);
+    });
+
+    test('write byte to BH using RM', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00000111; // addr
+      cpu.decode();
+      addr.writeRegVal(0x12, true);
+      expect(cpu.reg8[regBH]).toBe(0x12);
+    });
+
+    test('write byte to AX using RM', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00111000; // addr
+      cpu.decode();
+      addr.writeRegVal(0x1234, true);
+      expect(cpu.reg16[regAX]).toBe(0x1234);
+    });
+
+    test('write byte to CX using RM', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00111001; // addr
+      cpu.decode();
+      addr.writeRegVal(0x1234, true);
+      expect(cpu.reg16[regCX]).toBe(0x1234);
+    });
+
+    test('write byte to DX using RM', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00111010; // addr
+      cpu.decode();
+      addr.writeRegVal(0x1234, true);
+      expect(cpu.reg16[regDX]).toBe(0x1234);
+    });
+
+    test('write byte to BX using RM', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00111011; // addr
+      cpu.decode();
+      addr.writeRegVal(0x1234, true);
+      expect(cpu.reg16[regBX]).toBe(0x1234);
+    });
+
+    test('write byte to SP using RM', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00111100; // addr
+      cpu.decode();
+      addr.writeRegVal(0x1234, true);
+      expect(cpu.reg16[regSP]).toBe(0x1234);
+    });
+
+    test('write byte to BP using RM', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00111101; // addr
+      cpu.decode();
+      addr.writeRegVal(0x1234, true);
+      expect(cpu.reg16[regBP]).toBe(0x1234);
+    });
+
+    test('write byte to SI using RM', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00111110; // addr
+      cpu.decode();
+      addr.writeRegVal(0x1234, true);
+      expect(cpu.reg16[regSI]).toBe(0x1234);
+    });
+
+    test('write byte to DI using RM', () => {
+      cpu.mem8[0x0000] = 0x01; // inst (word)
+      cpu.mem8[0x0001] = 0b00000111; // addr
+      cpu.decode();
+      addr.writeRegVal(0x1234, true);
+      expect(cpu.reg16[regDI]).toBe(0x1234);
+    });
   });
 });
 
