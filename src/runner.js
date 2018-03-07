@@ -64,5 +64,9 @@ for (let i = 0; i < codegolf.length; i++) {
 cpu.reg16[regIP] = 0;
 cpu.reg16[regSP] = 0x100;
 
+winston.log("debug", "-".repeat(80));
 cpu.cycle();
-// cpu.cycle();
+winston.log("debug", "-".repeat(80));
+cpu.cycle();
+winston.log("debug", "-".repeat(80));
+cpu.cycle();

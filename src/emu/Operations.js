@@ -1,7 +1,16 @@
 import winston from 'winston';
 
+import { seg2abs } from "./Utils";
+import {
+  regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
+  regAX, regBX, regCX, regDX,
+  regSI, regDI, regBP, regSP, regIP,
+  regCS, regDS, regES, regSS,
+  regFlags,
+  FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
+  FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
+} from './Constants';
 import { formatFlags, hexString16 } from "./Debug";
-import { FLAG_CF_MASK, regFlags } from "./Constants";
 
 export default class Operations {
   constructor(cpu) {
@@ -91,6 +100,8 @@ export default class Operations {
     this.cpu.setOF_FLAG(d, s, result);
     this.cpu.setSF_FLAG(result);
     this.cpu.setZF_FLAG(result);
+
+    return result;
   }
   cmpsb (dst, src) {
     winston.log("debug", "Operations.cmpsb         : (dst=" + dst.name + ", src=" + src.name + ")");
@@ -133,7 +144,7 @@ export default class Operations {
     this.cpu.cycleIP += 1;
   }
   hlt (dst, src) {
-    winston.log("debug", "Operations.hlt           : (dst=" + dst.name + ", src=" + src.name + ")");
+    winston.log("debug", "Operations.hlt           : (dst=, src=)");
     this.cpu.cycleIP += 1;
   }
   idiv (dst, src) {
@@ -237,8 +248,16 @@ export default class Operations {
     this.cpu.cycleIP += 1;
   }
   jz (dst, src) {
-    winston.log("debug", "Operations.jz            : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+    winston.log("debug", "Operations.jz            : (dst=" + dst.name + ")");
+    this.cpu.cycleIP += 2;
+
+    if (1 === (this.cpu.reg16[regFlags] & FLAG_ZF_MASK)) {
+      this.shortJump();
+      return true;
+    }
+    else {
+      return false;
+    }
   }
   lahf (dst, src) {
     winston.log("debug", "Operations.lahf          : (dst=" + dst.name + ", src=" + src.name + ")");
@@ -448,6 +467,22 @@ export default class Operations {
   notimp () {
     winston.log("info", "Operations - Instruction not implemented");
   };
+
+  shortJump () {
+    // The jump address is a signed (twos complement) offset from the
+    // current location.
+    let offset = this.cpu.mem8[this.cpu.reg16[regIP] + 1]
+    // let offset = this.cpu.mem8[seg2abs(this._regCS, this.cpu.mem8[this._regIP], cpu)];
+
+    // One-byte twos-complement conversion
+    // It seems Javascript does not do ~ (bitwise not) correctly
+    let negative = ((offset >> 7) === 1);
+    offset = negative ? (-1 * (offset >> 7)) * ((offset ^ 0xFF) + 1) : offset;
+
+    // We must skip the last byte of this instruction
+    // this._regIP += (offset + 2);
+    this.cpu.reg16[regIP] += offset;
+  }
 }
 
 

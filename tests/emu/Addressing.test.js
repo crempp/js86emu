@@ -1,8 +1,8 @@
 import winston from 'winston';
 
 import CPU8086 from '../../src/emu/8086';
-import Addressing from '../../src/emu/addressing'
-import CPUConfig from '../../src/emu/CPUConfig'
+import Addressing from '../../src/emu/addressing';
+import CPUConfig from '../../src/emu/CPUConfig';
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
   regAX, regBX, regCX, regDX,
@@ -17,136 +17,6 @@ import {
 } from "../../src/emu/Debug";
 
 winston.level = 'warn';
-
-describe('seg2abs() Segment to absolute memory address conversion', () => {
-  let addr, cpu;
-
-  beforeEach(() => {
-    cpu = new CPU8086(new CPUConfig({
-      memory: 1024
-    }));
-    addr = new Addressing(cpu);
-    cpu.reg16[regCS] = 0x0000;
-    cpu.reg16[regDS] = 0x0000;
-    cpu.reg16[regES] = 0x0000;
-    cpu.reg16[regSS] = 0x0000;
-  });
-
-  test('No segmentation returns same value as input', () => {
-    expect(addr.seg2abs(cpu.reg16[regCS], 0x0100)).toBe(0x0100);
-    expect(addr.seg2abs(cpu.reg16[regDS], 0x0100)).toBe(0x0100);
-    expect(addr.seg2abs(cpu.reg16[regES], 0x0100)).toBe(0x0100);
-    expect(addr.seg2abs(cpu.reg16[regSS], 0x0100)).toBe(0x0100);
-  });
-
-  test('CS segmentation returns correct absolute address',  () => {
-    cpu.reg16[regCS] = 0x0004;
-    expect(addr.seg2abs(cpu.reg16[regCS], 0x0100)).toBe(0x000140);
-    cpu.reg16[regCS] = 0x258C;
-    expect(addr.seg2abs(cpu.reg16[regCS], 0x0012)).toBe(0x0258D2);
-    cpu.reg16[regCS] = 0xFFF0;
-    expect(addr.seg2abs(cpu.reg16[regCS], 0x00FF)).toBe(0x00FFFFF);
-    cpu.reg16[regCS] = 0xFFFF;
-    expect(addr.seg2abs(cpu.reg16[regCS], 0x0000)).toBe(0x00FFFF0);
-    cpu.reg16[regCS] = 0xFFFF;
-    expect(addr.seg2abs(cpu.reg16[regCS], 0xFFFF)).toBe(0x10FFEF);
-  });
-
-  test('DS segmentation returns correct absolute address',  () => {
-    cpu.reg16[regDS] = 0x0004;
-    expect(addr.seg2abs(cpu.reg16[regDS], 0x0100)).toBe(0x000140);
-    cpu.reg16[regDS] = 0x258C;
-    expect(addr.seg2abs(cpu.reg16[regDS], 0x0012)).toBe(0x0258D2);
-    cpu.reg16[regDS] = 0xFFF0;
-    expect(addr.seg2abs(cpu.reg16[regDS], 0x00FF)).toBe(0x00FFFFF);
-    cpu.reg16[regDS] = 0xFFFF;
-    expect(addr.seg2abs(cpu.reg16[regDS], 0x0000)).toBe(0x00FFFF0);
-    cpu.reg16[regDS] = 0xFFFF;
-    expect(addr.seg2abs(cpu.reg16[regDS], 0xFFFF)).toBe(0x10FFEF);
-  });
-
-  test('ES segmentation returns correct absolute address',  () => {
-    cpu.reg16[regES] = 0x0004;
-    expect(addr.seg2abs(cpu.reg16[regES], 0x0100)).toBe(0x000140);
-    cpu.reg16[regES] = 0x258C;
-    expect(addr.seg2abs(cpu.reg16[regES], 0x0012)).toBe(0x0258D2);
-    cpu.reg16[regES] = 0xFFF0;
-    expect(addr.seg2abs(cpu.reg16[regES], 0x00FF)).toBe(0x00FFFFF);
-    cpu.reg16[regES] = 0xFFFF;
-    expect(addr.seg2abs(cpu.reg16[regES], 0x0000)).toBe(0x00FFFF0);
-    cpu.reg16[regES] = 0xFFFF;
-    expect(addr.seg2abs(cpu.reg16[regES], 0xFFFF)).toBe(0x10FFEF);
-  });
-
-  test('SS segmentation returns correct absolute address',  () => {
-    cpu.reg16[regSS] = 0x0004;
-    expect(addr.seg2abs(cpu.reg16[regSS], 0x0100)).toBe(0x000140);
-    cpu.reg16[regSS] = 0x258C;
-    expect(addr.seg2abs(cpu.reg16[regSS], 0x0012)).toBe(0x0258D2);
-    cpu.reg16[regSS] = 0xFFF0;
-    expect(addr.seg2abs(cpu.reg16[regSS], 0x00FF)).toBe(0x00FFFFF);
-    cpu.reg16[regSS] = 0xFFFF;
-    expect(addr.seg2abs(cpu.reg16[regSS], 0x0000)).toBe(0x00FFFF0);
-    cpu.reg16[regSS] = 0xFFFF;
-    expect(addr.seg2abs(cpu.reg16[regSS], 0xFFFF)).toBe(0x10FFEF);
-  });
-
-  test('CS override returns correct absolute address',  () => {
-    cpu.CS_OVERRIDE = true;
-    cpu.reg16[regCS] = 0x0004;
-    expect(addr.seg2abs(cpu.reg16[regDS], 0x0100)).toBe(0x000140);
-    cpu.reg16[regCS] = 0x258C;
-    expect(addr.seg2abs(cpu.reg16[regES], 0x0012)).toBe(0x0258D2);
-    cpu.reg16[regCS] = 0xFFF0;
-    expect(addr.seg2abs(cpu.reg16[regSS], 0x00FF)).toBe(0x00FFFFF);
-    cpu.reg16[regCS] = 0xFFFF;
-    expect(addr.seg2abs(cpu.reg16[regDS], 0x0000)).toBe(0x00FFFF0);
-    cpu.reg16[regCS] = 0xFFFF;
-    expect(addr.seg2abs(cpu.reg16[regES], 0xFFFF)).toBe(0x10FFEF);
-  });
-
-  test('DS override returns correct absolute address',  () => {
-    cpu.DS_OVERRIDE = true;
-    cpu.reg16[regDS] = 0x0004;
-    expect(addr.seg2abs(cpu.reg16[regCS], 0x0100)).toBe(0x000140);
-    cpu.reg16[regDS] = 0x258C;
-    expect(addr.seg2abs(cpu.reg16[regES], 0x0012)).toBe(0x0258D2);
-    cpu.reg16[regDS] = 0xFFF0;
-    expect(addr.seg2abs(cpu.reg16[regSS], 0x00FF)).toBe(0x00FFFFF);
-    cpu.reg16[regDS] = 0xFFFF;
-    expect(addr.seg2abs(cpu.reg16[regCS], 0x0000)).toBe(0x00FFFF0);
-    cpu.reg16[regDS] = 0xFFFF;
-    expect(addr.seg2abs(cpu.reg16[regES], 0xFFFF)).toBe(0x10FFEF);
-  });
-
-  test('ES override returns correct absolute address',  () => {
-    cpu.ES_OVERRIDE = true;
-    cpu.reg16[regES] = 0x0004;
-    expect(addr.seg2abs(cpu.reg16[regCS], 0x0100)).toBe(0x000140);
-    cpu.reg16[regES] = 0x258C;
-    expect(addr.seg2abs(cpu.reg16[regDS], 0x0012)).toBe(0x0258D2);
-    cpu.reg16[regES] = 0xFFF0;
-    expect(addr.seg2abs(cpu.reg16[regSS], 0x00FF)).toBe(0x00FFFFF);
-    cpu.reg16[regES] = 0xFFFF;
-    expect(addr.seg2abs(cpu.reg16[regCS], 0x0000)).toBe(0x00FFFF0);
-    cpu.reg16[regES] = 0xFFFF;
-    expect(addr.seg2abs(cpu.reg16[regDS], 0xFFFF)).toBe(0x10FFEF);
-  });
-
-  test('SS override returns correct absolute address',  () => {
-    cpu.SS_OVERRIDE = true;
-    cpu.reg16[regSS] = 0x0004;
-    expect(addr.seg2abs(cpu.reg16[regCS], 0x0100)).toBe(0x000140);
-    cpu.reg16[regSS] = 0x258C;
-    expect(addr.seg2abs(cpu.reg16[regDS], 0x0012)).toBe(0x0258D2);
-    cpu.reg16[regSS] = 0xFFF0;
-    expect(addr.seg2abs(cpu.reg16[regES], 0x00FF)).toBe(0x00FFFFF);
-    cpu.reg16[regSS] = 0xFFFF;
-    expect(addr.seg2abs(cpu.reg16[regCS], 0x0000)).toBe(0x00FFFF0);
-    cpu.reg16[regSS] = 0xFFFF;
-    expect(addr.seg2abs(cpu.reg16[regDS], 0xFFFF)).toBe(0x10FFEF);
-  });
-});
 
 describe('Memory access methods', () => {
   let addr, cpu;
@@ -376,39 +246,6 @@ describe('Register access methods', () => {
 
     cpu.reg16[regIP] = 0x0000;
   });
-
-  //   7                           0
-  // +---+---+---+---+---+---+---+---+
-  // |          opcode       | d | w |
-  // +---+---+---+---+---+---+---+---+
-  //   0   0   0   0   0   0   0   1
-  //
-  //   7                           0
-  // +---+---+---+---+---+---+---+---+
-  // |  mod  |    reg    |     rm    |
-  // +---+---+---+---+---+---+---+---+
-  //   0   0   0   0   0   0   0   0
-  //
-  //
-  // mod = 00 register indirect
-  // mod = 11 register direct
-  //
-  // cpu.mem8[0x0000] = 0x00; // inst (byte)
-  // cpu.mem8[0x0000] = 0x01; // inst (word)
-  //
-  // console.log(formatOpcode(cpu.opcode));
-  // console.log(hexString8(addr.readRegVal()));
-  //
-  // let str = "";
-  // cpu.reg8.forEach((val) => {
-  //   str += hexString8(val) + "\n";
-  // });
-  // console.log(str);
-  // str = "";
-  // cpu.reg16.forEach((val) => {
-  //   str += hexString16(val) + "\n";
-  // });
-  // console.log(str);
 
   describe('readRegVal()', () => {
     test('read byte from AL', () => {
@@ -913,7 +750,38 @@ describe('Register access methods', () => {
 });
 
 describe('RMReg access methods', () => {
+  let addr, cpu;
+
+  beforeEach(() => {
+    console.log("HERE");
+    cpu = new CPU8086(new CPUConfig({
+      memory: 262399
+    }));
+    addr = new Addressing(cpu);
+    cpu.reg16[regIP] = 0x0000;
+  });
+
+  //   7   6   5   4   3   2   1   0
+  // +---+---+---+---+---+---+---+---+
+  // |     opcode            | d | w |
+  // +---+---+---+---+---+---+---+---+
+  // +---+---+---+---+---+---+---+---+
+  // |  mod  |    reg    |    r/m    |
+  // +---+---+---+---+---+---+---+---+
+
   describe('readRMReg8()', () => {
+    test('read rm byte addr', () => {
+      // cpu.mem8[0x0000] = 0x00; // inst (byte)
+      // cpu.mem8[0x0001] = 0b00000000; // addr
+      //
+      // cpu.mem8[]
+      // cpu.decode();
+      //
+      // console.log(formatOpcode(cpu.opcode));
+      //
+      // let result = addr.readRMReg8(0x01);
+      // console.log(hexString16(result));
+    });
 
   });
 
@@ -931,16 +799,43 @@ describe('RMReg access methods', () => {
 });
 
 describe('Memory addressing mode methods', () => {
-  describe('calcRMAddr', () => {
+  let addr, cpu;
 
+  beforeEach(() => {
+    cpu = new CPU8086(new CPUConfig({
+      memory: 262399
+    }));
+    addr = new Addressing(cpu);
+    cpu.reg16[regIP] = 0x0000;
+  });
+
+  describe('calcRMAddr', () => {
+    //   7   6   5   4   3   2   1   0
+    // +---+---+---+---+---+---+---+---+
+    // |     opcode            | d | w |
+    // +---+---+---+---+---+---+---+---+
+    // +---+---+---+---+---+---+---+---+
+    // |  mod  |    reg    |    r/m    |
+    // +---+---+---+---+---+---+---+---+
+
+    test('asdfasdf', () => {
+      cpu.mem8[0x0000] = 0x00; // inst (byte)
+      cpu.mem8[0x0001] = 0b00000000; // addr
+      cpu.decode();
+
+    })
   });
 
   describe('calcRMDispAddr', () => {
+    test('', () => {
 
+    })
   });
 
   describe('calcImmAddr', () => {
+    test('', () => {
 
+    })
   });
 });
 

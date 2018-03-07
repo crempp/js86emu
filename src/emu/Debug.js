@@ -65,7 +65,7 @@ export function formatFlags(flags, indentSize=0) {
   str += " TF: " + ((flags & FLAG_TF_MASK) >> 8) + "\n";
   str += indent + "IF: " + ((flags & FLAG_IF_MASK) >> 9);
   str += " DF: " + ((flags & FLAG_DF_MASK) >> 10);
-  str += " OF: " + ((flags & FLAG_OF_MASK) >> 11) + "\n";
+  str += " OF: " + ((flags & FLAG_OF_MASK) >> 11);
 
   return str;
 }
