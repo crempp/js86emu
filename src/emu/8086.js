@@ -3,9 +3,10 @@ import winston from 'winston';
 import { inst } from './Instructions.js'
 import Operations from './operations.js'
 import Addressing from './addressing.js'
+import CPU from './CPU';
 import { CPUConfigException } from './Exceptions';
 import CPUConfig from './CPUConfig';
-import { seg2abs } from "./Utils";
+import { seg2abs, segIP } from "./Utils";
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
   regAX, regBX, regCX, regDX,
@@ -20,8 +21,9 @@ import {
   formatMemory, formatFlags
 } from './Debug'
 
-export default class CPU8086 {
+export default class CPU8086 extends CPU {
   constructor(config) {
+    super();
     winston.log("debug", "8086.constructor()       :");
 
     // Validate config
@@ -434,8 +436,8 @@ export default class CPU8086 {
   }
 
   decode () {
-    let opcode_byte = this.mem8[this.reg16[regIP]];
-    let addressing_byte = this.mem8[this.reg16[regIP] + 1];
+    let opcode_byte = this.mem8[segIP(this)];
+    let addressing_byte = this.mem8[segIP(this) + 1];
     this.opcode = {
       opcode_byte     : opcode_byte,
       addressing_byte : addressing_byte,
@@ -460,8 +462,8 @@ export default class CPU8086 {
     this.cycleIP = 0;
     this.decode();
 
-    winston.log("debug", "  IP: " + hexString16(this.reg16[regIP]));
-    winston.log("debug", "  MEMORY:\n" + formatMemory(this.mem8, this.reg16[regIP], this.reg16[regIP] + 7, 11));
+    winston.log("debug", "  CS:IP: " + hexString16(this.reg16[regCS]) + ":" + hexString16(this.reg16[regIP]));
+    winston.log("debug", "  MEMORY:\n" + formatMemory(this.mem8, segIP(this), segIP(this) + 7, 11));
     winston.log("debug", "  OPCODE:\n" + formatOpcode(this.opcode, 11));
     winston.log("debug", "  FLAGS:\n" + formatFlags(this.reg16[regFlags], 10));
     winston.log("debug", "  INSTRUCTION: " +  this.opcode.string);
@@ -469,7 +471,7 @@ export default class CPU8086 {
     let result = this.opcode.inst();
     winston.log("debug", "  result: " + hexString16(result));
 
-    this.reg16[regIP] += seg2abs(this.reg16[regCS], this.cycleIP, this);
+    this.reg16[regIP] += this.cycleIP;
   }
 
   setAF_FLAG_sub (operand1, operand2) {

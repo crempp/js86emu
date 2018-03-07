@@ -27,3 +27,7 @@ export function seg2abs (segment, offset, cpu) {
 
   return (segment * 16) + offset;
 }
+
+export function segIP(cpu) {
+  return cpu.reg16[regCS] + cpu.reg16[regIP];
+}

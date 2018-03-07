@@ -479,7 +479,7 @@ export default class Operations {
     let negative = ((offset >> 7) === 1);
     offset = negative ? (-1 * (offset >> 7)) * ((offset ^ 0xFF) + 1) : offset;
 
-    // We must skip the last byte of this instruction
+    // The short jump must be adjusted by the length of the
     // this._regIP += (offset + 2);
     this.cpu.reg16[regIP] += offset;
   }
