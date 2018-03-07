@@ -13,7 +13,7 @@ import {
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
 } from '../../src/emu/Constants';
 import {
-  formatOpcode, hexString8, hexString16
+  formatOpcode, hexString8, hexString16, hexString32
 } from "../../src/emu/Debug";
 
 winston.level = 'warn';
@@ -749,55 +749,6 @@ describe('Register access methods', () => {
   });
 });
 
-describe('RMReg access methods', () => {
-  let addr, cpu;
-
-  beforeEach(() => {
-    console.log("HERE");
-    cpu = new CPU8086(new CPUConfig({
-      memory: 262399
-    }));
-    addr = new Addressing(cpu);
-    cpu.reg16[regIP] = 0x0000;
-  });
-
-  //   7   6   5   4   3   2   1   0
-  // +---+---+---+---+---+---+---+---+
-  // |     opcode            | d | w |
-  // +---+---+---+---+---+---+---+---+
-  // +---+---+---+---+---+---+---+---+
-  // |  mod  |    reg    |    r/m    |
-  // +---+---+---+---+---+---+---+---+
-
-  describe('readRMReg8()', () => {
-    test('read rm byte addr', () => {
-      // cpu.mem8[0x0000] = 0x00; // inst (byte)
-      // cpu.mem8[0x0001] = 0b00000000; // addr
-      //
-      // cpu.mem8[]
-      // cpu.decode();
-      //
-      // console.log(formatOpcode(cpu.opcode));
-      //
-      // let result = addr.readRMReg8(0x01);
-      // console.log(hexString16(result));
-    });
-
-  });
-
-  describe('readRMReg16()', () => {
-
-  });
-
-  describe('writeRMReg8()', () => {
-
-  });
-
-  describe('writeRMReg16()', () => {
-
-  });
-});
-
 describe('Memory addressing mode methods', () => {
   let addr, cpu;
 
@@ -806,6 +757,21 @@ describe('Memory addressing mode methods', () => {
       memory: 262399
     }));
     addr = new Addressing(cpu);
+    cpu.reg16[regAX] = 0x1234;
+    cpu.reg16[regBX] = 0x2345;
+    cpu.reg16[regCX] = 0x3456;
+    cpu.reg16[regDX] = 0x4567;
+
+    cpu.reg16[regSP] = 0x89AB;
+    cpu.reg16[regBP] = 0x789A;
+    cpu.reg16[regSI] = 0x5678;
+    cpu.reg16[regDI] = 0x6789;
+
+    cpu.reg16[regCS] = 0xABCD;
+    cpu.reg16[regDS] = 0xBCD0;
+    cpu.reg16[regES] = 0xCD01;
+    cpu.reg16[regSS] = 0xD012;
+
     cpu.reg16[regIP] = 0x0000;
   });
 
@@ -818,185 +784,326 @@ describe('Memory addressing mode methods', () => {
     // |  mod  |    reg    |    r/m    |
     // +---+---+---+---+---+---+---+---+
 
-    test('asdfasdf', () => {
-      cpu.mem8[0x0000] = 0x00; // inst (byte)
-      cpu.mem8[0x0001] = 0b00000000; // addr
+    test('[BX + SI] byte', () => {
+      cpu.mem8[0xABCD] = 0x00; // inst (byte)
+      cpu.mem8[0xABCE] = 0b00000000; // addr
+      let segment = cpu.reg16[regCS];
       cpu.decode();
 
-    })
+      // (CS     * 0x10) + (  BX   +   SI  ) =
+      // (0xABCD * 0x10) + (0x2345 + 0x5678) =
+      //    0xABCD0    +      0x79BD       = 0xB368D
+      expect(addr.calcRMAddr(segment)).toBe(0xB368D);
+    });
+    test('[BX + DI] byte', () => {
+      cpu.mem8[0xABCD] = 0x00; // inst (byte)
+      cpu.mem8[0xABCE] = 0b00000001; // addr
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + (  BX   +   DI  ) =
+      // (0xABCD * 0x10) + (0x2345 + 0x6789) =
+      //    0xABCD0    +      0x8ACE       = 0xB479E
+      expect(addr.calcRMAddr(segment)).toBe(0xB479E);
+    });
+    test('[BP + SI] byte', () => {
+      cpu.mem8[0xABCD] = 0x00; // inst (byte)
+      cpu.mem8[0xABCE] = 0b00000010; // addr
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + (  BP   +   SI  ) =
+      // (0xABCD * 0x10) + (0x789A + 0x5678) =
+      //    0xABCD0    +      0xCF12       = 0xB8BE2
+      expect(addr.calcRMAddr(segment)).toBe(0xB8BE2);
+    });
+    test('[BP + DI] byte', () => {
+      cpu.mem8[0xABCD] = 0x00; // inst (byte)
+      cpu.mem8[0xABCE] = 0b00000011; // addr
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + (  BP   +   DI  ) =
+      // (0xABCD * 0x10) + (0x789A + 0x6789) =
+      //    0xABCD0    +      0xE023       = 0xB9CF3
+      expect(addr.calcRMAddr(segment)).toBe(0xB9CF3);
+    });
+    test('[SI] byte', () => {
+      cpu.mem8[0xABCD] = 0x00; // inst (byte)
+      cpu.mem8[0xABCE] = 0b00000100; // addr
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + (  SI  ) =
+      // (0xABCD * 0x10) + (0x5678) =
+      //    0xABCD0    +    0x5678  = 0xB368D
+      expect(addr.calcRMAddr(segment)).toBe(0xB1348);
+    });
+    test('[DI] byte', () => {
+      cpu.mem8[0xABCD] = 0x00; // inst (byte)
+      cpu.mem8[0xABCE] = 0b00000101; // addr
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + (  DI  ) =
+      // (0xABCD * 0x10) + (0x6789) =
+      //    0xABCD0    +    0x6789  = 0xB2459
+      expect(addr.calcRMAddr(segment)).toBe(0xB2459);
+    });
+    test('Direct Address byte', () => {
+      cpu.mem8[0xABCD] = 0x00; // inst (byte)
+      cpu.mem8[0xABCE] = 0b00000110; // addr
+      cpu.mem8[0xABCF] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABD0] = 0b00010010; // d2 (0x12)
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + ( d1:d0) =
+      // (0xABCD * 0x10) + (0x5612) =
+      //    0xABCD0    +    0x5612  = 0xB12E2
+      expect(addr.calcRMAddr(segment)).toBe(0xB12E2);
+    });
+    test('[BX] byte', () => {
+      cpu.mem8[0xABCD] = 0x00; // inst (byte)
+      cpu.mem8[0xABCE] = 0b00000111; // addr
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + (  BX  ) =
+      // (0xABCD * 0x10) + (0x2345) =
+      //    0xABCD0    +    0x2345  = 0xAE015
+      expect(addr.calcRMAddr(segment)).toBe(0xAE015);
+    });
   });
 
-  describe('calcRMDispAddr', () => {
-    test('', () => {
-
-    })
-  });
-
-  describe('calcImmAddr', () => {
-    test('', () => {
-
-    })
-  });
+  // describe('calcRMDispAddr', () => {
+  //   test('', () => {
+  //
+  //   })
+  // });
+  //
+  // describe('calcImmAddr', () => {
+  //   test('', () => {
+  //
+  //   })
+  // });
 });
 
-describe('Addressing Modes', () => {
-  let addr, cpu;
-
-  beforeEach(() => {
-    cpu = new CPU8086(new CPUConfig({
-      memory: 1024
-    }));
-    addr = new Addressing(cpu);
-  });
-
-  describe('AX', () => {
-
-  });
-
-  describe('AH', () => {
-
-  });
-
-  describe('AL', () => {
-
-  });
-
-  describe('BX', () => {
-
-  });
-
-  describe('BH', () => {
-
-  });
-
-  describe('BL', () => {
-
-  });
-
-  describe('CX', () => {
-
-  });
-
-  describe('CH', () => {
-
-  });
-
-  describe('CL', () => {
-
-  });
-
-  describe('DX', () => {
-
-  });
-
-  describe('DH', () => {
-
-  });
-
-  describe('DL', () => {
-
-  });
-
-  describe('SI', () => {
-
-  });
-
-  describe('DI', () => {
-
-  });
-
-  describe('BP', () => {
-
-  });
-
-  describe('SP', () => {
-
-  });
-
-  describe('CS', () => {
-
-  });
-
-  describe('DS', () => {
-
-  });
-
-  describe('ES', () => {
-
-  });
-
-  describe('SS', () => {
-
-  });
-
-  describe('Ap', () => {
-
-  });
-
-  describe('Eb', () => {
-
-  });
-
-  describe('Ev', () => {
-
-  });
-
-  describe('Ew', () => {
-
-  });
-
-  describe('Gb', () => {
-
-  });
-
-  describe('Gv', () => {
-
-  });
-
-  describe('I0', () => {
-
-  });
-
-  describe('Ib', () => {
-
-  });
-
-  describe('Iv', () => {
-
-  });
-
-  describe('Iw', () => {
-
-  });
-
-  describe('Jb', () => {
-
-  });
-
-  describe('Jv', () => {
-
-  });
-
-  describe('M', () => {
-
-  });
-
-  describe('Mp', () => {
-
-  });
-
-  describe('Ob', () => {
-
-  });
-
-  describe('Ov', () => {
-
-  });
-
-  describe('Sw', () => {
-
-  });
-});
+// describe('RMReg access methods', () => {
+//   let addr, cpu;
+//
+//   beforeEach(() => {
+//     cpu = new CPU8086(new CPUConfig({
+//       memory: 262399
+//     }));
+//     addr = new Addressing(cpu);
+//     cpu.reg16[regCS] = 0x0000;
+//     cpu.reg16[regIP] = 0x0000;
+//   });
+//
+//   //   7   6   5   4   3   2   1   0
+//   // +---+---+---+---+---+---+---+---+
+//   // |     opcode            | d | w |
+//   // +---+---+---+---+---+---+---+---+
+//   // +---+---+---+---+---+---+---+---+
+//   // |  mod  |    reg    |    r/m    |
+//   // +---+---+---+---+---+---+---+---+
+//
+//   describe('readRMReg8()', () => {
+//     test('read rm byte addr', () => {
+//       cpu.mem8[0x0000] = 0x00; // inst (byte)
+//       cpu.mem8[0x0001] = 0b00000000; // addr
+//
+//       // cpu.mem8[]
+//       cpu.decode();
+//
+//       console.log(formatOpcode(cpu.opcode));
+//
+//       let result = addr.readRMReg8(0x01);
+//       console.log(hexString16(result));
+//     });
+//
+//
+//     // Use R/M Table 2 with 8-bit displacement
+//
+//     // Use R/M Table 2 with 16-bit displacement
+//
+//     // Two register instruction; use REG table
+//       // Ensure that tests with reg value set and it uses rm
+//
+//   });
+//
+//   describe('readRMReg16()', () => {
+//
+//   });
+//
+//   describe('writeRMReg8()', () => {
+//
+//   });
+//
+//   describe('writeRMReg16()', () => {
+//
+//   });
+// });
+
+// describe('Addressing Modes', () => {
+//   let addr, cpu;
+//
+//   beforeEach(() => {
+//     cpu = new CPU8086(new CPUConfig({
+//       memory: 1024
+//     }));
+//     addr = new Addressing(cpu);
+//   });
+//
+//   describe('AX', () => {
+//
+//   });
+//
+//   describe('AH', () => {
+//
+//   });
+//
+//   describe('AL', () => {
+//
+//   });
+//
+//   describe('BX', () => {
+//
+//   });
+//
+//   describe('BH', () => {
+//
+//   });
+//
+//   describe('BL', () => {
+//
+//   });
+//
+//   describe('CX', () => {
+//
+//   });
+//
+//   describe('CH', () => {
+//
+//   });
+//
+//   describe('CL', () => {
+//
+//   });
+//
+//   describe('DX', () => {
+//
+//   });
+//
+//   describe('DH', () => {
+//
+//   });
+//
+//   describe('DL', () => {
+//
+//   });
+//
+//   describe('SI', () => {
+//
+//   });
+//
+//   describe('DI', () => {
+//
+//   });
+//
+//   describe('BP', () => {
+//
+//   });
+//
+//   describe('SP', () => {
+//
+//   });
+//
+//   describe('CS', () => {
+//
+//   });
+//
+//   describe('DS', () => {
+//
+//   });
+//
+//   describe('ES', () => {
+//
+//   });
+//
+//   describe('SS', () => {
+//
+//   });
+//
+//   describe('Ap', () => {
+//
+//   });
+//
+//   describe('Eb', () => {
+//
+//   });
+//
+//   describe('Ev', () => {
+//
+//   });
+//
+//   describe('Ew', () => {
+//
+//   });
+//
+//   describe('Gb', () => {
+//
+//   });
+//
+//   describe('Gv', () => {
+//
+//   });
+//
+//   describe('I0', () => {
+//
+//   });
+//
+//   describe('Ib', () => {
+//
+//   });
+//
+//   describe('Iv', () => {
+//
+//   });
+//
+//   describe('Iw', () => {
+//
+//   });
+//
+//   describe('Jb', () => {
+//
+//   });
+//
+//   describe('Jv', () => {
+//
+//   });
+//
+//   describe('M', () => {
+//
+//   });
+//
+//   describe('Mp', () => {
+//
+//   });
+//
+//   describe('Ob', () => {
+//
+//   });
+//
+//   describe('Ov', () => {
+//
+//   });
+//
+//   describe('Sw', () => {
+//
+//   });
+// });
 
 
 

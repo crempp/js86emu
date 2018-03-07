@@ -13,6 +13,11 @@ export function binString16 (value) {
   else return String("0000000000000000" + value.toString(2)).slice(-16);
 }
 
+export function binString32 (value) {
+  if (value === null || value === undefined) return "NULL";
+  else return String("00000000000000000000000000000000" + value.toString(2)).slice(-32);
+}
+
 export function hexString8 (value) {
   if (value === null || value === undefined) return "NULL";
   else return "0x" + String("00" + value.toString(16).toUpperCase()).slice(-2);
@@ -21,6 +26,11 @@ export function hexString8 (value) {
 export function hexString16 (value) {
   if (value === null || value === undefined) return "NULL";
   else return "0x" + String("0000" + value.toString(16).toUpperCase()).slice(-4);
+}
+
+export function hexString32 (value) {
+  if (value === null || value === undefined) return "NULL";
+  else return "0x" + String("00000000" + value.toString(16).toUpperCase()).slice(-8);
 }
 
 export function formatOpcode(opcode, indentSize=0) {

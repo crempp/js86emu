@@ -195,11 +195,11 @@ export default class Addressing {
     let offset;
     switch (this.cpu.opcode.mod) {
       case 0b00: // Use R/M Table 1 for R/M operand
-        offset = this.calcRMAddr();
+        offset = this.calcRMAddr(segment);
         return this.readMem8(segment, offset);
       case 0b01: // Use R/M Table 2 with 8-bit displacement
       case 0b10: // Use R/M Table 2 with 16-bit displacement
-        offset = this.calcRMDispAddr();
+        offset = this.calcRMDispAddr(segment);
         return this.readMem8(segment, offset);
       case 0b11: // Two register instruction; use REG table
         return this.readRegVal(true);
@@ -211,11 +211,11 @@ export default class Addressing {
     let offset;
     switch (this.cpu.opcode.mod) {
       case 0b00: // Use R/M Table 1 for R/M operand
-        offset = this.calcRMAddr();
+        offset = this.calcRMAddr(segment);
         return this.readMem16(segment, offset);
       case 0b01: // Use R/M Table 2 with 8-bit displacement
       case 0b10: // Use R/M Table 2 with 16-bit displacement
-        offset = this.calcRMDispAddr();
+        offset = this.calcRMDispAddr(segment);
         return this.readMem16(segment, offset);
       case 0b11: // Two register instruction; use REG table
         return this.readRegVal(true);
@@ -227,11 +227,11 @@ export default class Addressing {
     let offset;
     switch (this.cpu.opcode.mod) {
       case 0b00: // Use R/M Table 1 for R/M operand
-        offset = this.calcRMAddr();
+        offset = this.calcRMAddr(segment);
         return this.writeMem8(segment, offset, value);
       case 0b01: // Use R/M Table 2 with 8-bit displacement
       case 0b10: // Use R/M Table 2 with 16-bit displacement
-        offset = this.calcRMDispAddr();
+        offset = this.calcRMDispAddr(segment);
         return this.writeMem8(segment, offset, value);
       case 0b11: // Two register instruction; use REG table
         return this.writeRegVal(value, true);
@@ -243,11 +243,11 @@ export default class Addressing {
     let offset;
     switch (this.cpu.opcode.mod) {
       case 0b00: // Use R/M Table 1 for R/M operand
-        offset = this.calcRMAddr();
+        offset = this.calcRMAddr(segment);
         return this.writeMem16(segment, offset, value);
       case 0b01: // Use R/M Table 2 with 8-bit displacement
       case 0b10: // Use R/M Table 2 with 16-bit displacement
-        offset = this.calcRMDispAddr();
+        offset = this.calcRMDispAddr(segment);
         return this.writeMem16(segment, offset, value);
       case 0b11: // Two register instruction; use REG table
         return this.writeRegVal(value, true);
@@ -255,10 +255,12 @@ export default class Addressing {
   }
 
   /**
+   * Calculate an address in RM addressing mode
    *
-   * @return {number} Caclulated address
+   * @param {number} segment Memory segment
+   * @return {number} Calculated address
    */
-  calcRMAddr () {
+  calcRMAddr (segment) {
     let addr;
 
     switch (this.cpu.opcode.rm)
@@ -284,8 +286,17 @@ export default class Addressing {
       case 0b110 : // Direct Address
         // Direct address is always 2 bytes
         //   - yoshicapstonememo.googlecode.com/svn/trunk/4_2_86.pdf
-        addr = (this.cpu.mem8[seg2abs(regCS, this.cpu.reg16[regIP] + 3, this.cpu)] << 8) |
-                this.cpu.mem8[seg2abs(regCS, this.cpu.reg16[regIP] + 2, this.cpu)];
+
+        // console.log(this.cpu.reg16[regIP]);
+        // 0xABCD
+
+        console.log(hexString16(seg2abs(segment, this.cpu.reg16[regIP] + 3, this.cpu)));
+        console.log(hexString16(seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)));
+        console.log(hexString16(this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 3, this.cpu)]));
+        console.log(hexString16(this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)]));
+
+        addr = (this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 3, this.cpu)] << 8) |
+                this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)];
         break;
       case 0b111 : // [BX]
         addr = this.cpu.reg16[regBX];
@@ -293,10 +304,11 @@ export default class Addressing {
     }
     switch (this.cpu.opcode.w) {
       case 0:
-        return (this.cpu.mem8[seg2abs(regCS, addr, this.cpu)]);
+        return seg2abs(segment, addr, this.cpu);
       case 1:
-        return ((this.cpu.mem8[seg2abs(regCS, addr + 1, this.cpu)] << 8) |
-                 this.cpu.mem8[seg2abs(regCS, addr, this.cpu)]);
+        // return (seg2abs(segment, addr + 1, this.cpu) << 8) |
+        //         seg2abs(segment, addr, this.cpu);
+        return seg2abs(segment, addr, this.cpu)
     }
   }
 

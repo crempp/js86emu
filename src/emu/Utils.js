@@ -7,6 +7,7 @@ import {
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
 } from './Constants';
+import { hexString16, hexString32 } from "./Debug";
 
 /**
  * Convert a segmented (seg:offset) memory address into an absolute address.
@@ -25,7 +26,7 @@ export function seg2abs (segment, offset, cpu) {
   else if (cpu.ES_OVERRIDE) segment = cpu.reg16[regES];
   else if (cpu.SS_OVERRIDE) segment = cpu.reg16[regSS];
 
-  return (segment * 16) + offset;
+  return (segment * 0x10) + offset;
 }
 
 export function segIP(cpu) {
