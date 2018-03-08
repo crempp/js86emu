@@ -1,4 +1,8 @@
 import {
+  regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
+  regAX, regBX, regCX, regDX,
+  regSI, regDI, regBP, regSP, regIP,
+  regCS, regDS, regES, regSS,
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
 } from './Constants';
@@ -56,9 +60,48 @@ export function formatMemory(mem8, from, to, indentSize=0) {
 
   let count = 1;
   for (let i = from; i <= to; i++) {
-    str += "[" + hexString16(i) + "]: " + binString8(mem8[i]) + "(" + hexString8(mem8[i]) + ") ";
+    str += "[" + hexString32(i) + "]: " + binString8(mem8[i]) + "(" + hexString8(mem8[i]) + ") ";
     if (count++ % 4 === 0 && i !== to) str += "\n" + indent;
   }
+
+  return str;
+}
+
+export function formatRegisters(cpu, indentSize) {
+  let str = "";
+  let indent = " ".repeat(indentSize);
+
+  str += indent;
+  str += "AX: " + hexString16(cpu.reg16[regAX]) + " ";
+  str += "AL: " + hexString8(cpu.reg8[regAL]) + " ";
+  str += "AH: " + hexString8(cpu.reg8[regAH]) + "\n";
+  str += indent;
+  str += "BX: " + hexString16(cpu.reg16[regBX]) + " ";
+  str += "BL: " + hexString8(cpu.reg8[regBL]) + " ";
+  str += "BH: " + hexString8(cpu.reg8[regBH]) + "\n";
+  str += indent;
+  str += "CX: " + hexString16(cpu.reg16[regCX]) + " ";
+  str += "CL: " + hexString8(cpu.reg8[regCL]) + " ";
+  str += "CH: " + hexString8(cpu.reg8[regCH]) + "\n";
+  str += indent;
+  str += "DX: " + hexString16(cpu.reg16[regDX]) + " ";
+  str += "DL: " + hexString8(cpu.reg8[regDL]) + " ";
+  str += "DH: " + hexString8(cpu.reg8[regDH]) + "\n";
+
+  str += indent;
+  str += "SI: " + hexString16(cpu.reg16[regSI]) + " ";
+  str += "DI: " + hexString16(cpu.reg16[regSI]) + " ";
+  str += "BP: " + hexString16(cpu.reg16[regSI]) + " ";
+  str += "SP: " + hexString16(cpu.reg16[regSI]) + "\n";
+
+  str += indent;
+  str += "CS: " + hexString16(cpu.reg16[regCS]) + " ";
+  str += "DS: " + hexString16(cpu.reg16[regDS]) + " ";
+  str += "ES: " + hexString16(cpu.reg16[regES]) + " ";
+  str += "SS: " + hexString16(cpu.reg16[regSS]) + "\n";
+
+  str += indent;
+  str += "IP: " + hexString16(cpu.reg16[regIP]);
 
   return str;
 }

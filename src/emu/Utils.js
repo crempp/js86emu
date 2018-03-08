@@ -29,6 +29,15 @@ export function seg2abs (segment, offset, cpu) {
   return (segment * 0x10) + offset;
 }
 
+/**
+ * Calculate the absolute memory address of the instruction pointer.
+ *
+ * Note that the IP always uses the CS register for the segment (verify and
+ * source this).
+ *
+ * @param {Cpu} cpu Cpu instance to perform conversion for
+ * @returns {number} Absolute memory address
+ */
 export function segIP(cpu) {
-  return cpu.reg16[regCS] + cpu.reg16[regIP];
+  return (cpu.reg16[regCS] * 0x10) + cpu.reg16[regIP];
 }

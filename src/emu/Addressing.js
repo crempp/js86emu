@@ -10,7 +10,7 @@ import {
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
 } from './Constants';
-import {hexString16} from "./Debug";
+import {hexString16, hexString32} from "./Debug";
 
 export default class Addressing {
   constructor(cpu) {
@@ -290,13 +290,21 @@ export default class Addressing {
         // console.log(this.cpu.reg16[regIP]);
         // 0xABCD
 
-        console.log(hexString16(seg2abs(segment, this.cpu.reg16[regIP] + 3, this.cpu)));
-        console.log(hexString16(seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)));
-        console.log(hexString16(this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 3, this.cpu)]));
-        console.log(hexString16(this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)]));
+        let arg1Loc = seg2abs(segment, this.cpu.reg16[regIP] + 3, this.cpu);
+        let arg2loc = seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu);
+        let arg1memval = this.cpu.mem8[arg1Loc];
+        let arg2memval = this.cpu.mem8[arg2loc];
 
-        addr = (this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 3, this.cpu)] << 8) |
-                this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)];
+        console.log("segment=" + hexString16(segment));
+        console.log("arg1loc=" + hexString16(arg1Loc));
+        console.log("arg2loc=" + hexString16(arg2Loc));
+        console.log("arg1memval=" + hexString16(arg1memval));
+        console.log("arg2memval=" + hexString16(arg2memval));
+
+        let result = (this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 3, this.cpu)] << 8) |
+                      this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)];
+        console.log("result = " + hexString32(result));
+        addr = result;
         break;
       case 0b111 : // [BX]
         addr = this.cpu.reg16[regBX];

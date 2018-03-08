@@ -453,7 +453,7 @@ export default class CPU8086 extends CPU {
     };
 
     this.opcode.inst = this.inst[this.opcode.opcode_byte];
-    this.opcode.string = this.opcode.inst.name
+    this.opcode.string = this.opcode.inst ? this.opcode.inst.name : "Not in table";
   }
 
   cycle () {

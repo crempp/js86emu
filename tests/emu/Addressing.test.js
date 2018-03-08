@@ -13,8 +13,9 @@ import {
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
 } from '../../src/emu/Constants';
 import {
-  formatOpcode, hexString8, hexString16, hexString32
+  formatOpcode, hexString8, hexString16, hexString32, formatFlags, formatMemory, formatRegisters
 } from "../../src/emu/Debug";
+import {segIP} from "../../src/emu/Utils";
 
 winston.level = 'warn';
 
@@ -23,7 +24,7 @@ describe('Memory access methods', () => {
 
   beforeEach(() => {
     cpu = new CPU8086(new CPUConfig({
-      memory: 262399
+      memorySize: 262400
     }));
     addr = new Addressing(cpu);
     cpu.reg16[regCS] = 0x0001;
@@ -31,6 +32,16 @@ describe('Memory access methods', () => {
     cpu.reg16[regES] = 0x0300;
     cpu.reg16[regSS] = 0x0400;
   });
+
+
+  // console.log("opcode_byte: " + hexString16(cpu.mem8[segIP(cpu)]));
+  // console.log("CS:IP: " + hexString16(cpu.reg16[regCS]) + ":" + hexString16(cpu.reg16[regIP]) +  " -> " + hexString32(segIP(cpu)) + "\n" +
+  //   "MEMORY:\n" + formatMemory(cpu.mem8, segIP(cpu), segIP(cpu) + 7, 11) + "\n" +
+  //   "OPCODE:\n" + formatOpcode(cpu.opcode, 11) + "\n" +
+  //   "REGISTERS\n" + formatRegisters(cpu, 11)  + "\n" +
+  //   "FLAGS:\n" + formatFlags(cpu.reg16[regFlags], 10) + "\n" +
+  //   "INSTRUCTION: " +  cpu.opcode.string);
+  // console.log("result: " + hexString16(addr.readRegVal()));
 
   // TODO: Write mem16 and read mem8 - should be the same
 
@@ -226,7 +237,7 @@ describe('Register access methods', () => {
 
   beforeEach(() => {
     cpu = new CPU8086(new CPUConfig({
-        memory: 262399
+        memorySize: 1048576
     }));
     addr = new Addressing(cpu);
     cpu.reg16[regAX] = 0x1234;
@@ -249,225 +260,225 @@ describe('Register access methods', () => {
 
   describe('readRegVal()', () => {
     test('read byte from AL', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00000000; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00000000; // addr
       cpu.decode();
       expect(addr.readRegVal()).toBe(0x12);
     });
 
     test('read byte from CL', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00001000; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00001000; // addr
       cpu.decode();
       expect(addr.readRegVal()).toBe(0x34);
     });
 
     test('read byte from DL', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00010000; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00010000; // addr
       cpu.decode();
       expect(addr.readRegVal()).toBe(0x45);
     });
 
     test('read byte from BL', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00011000; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00011000; // addr
       cpu.decode();
       expect(addr.readRegVal()).toBe(0x23);
     });
 
     test('read byte from AH', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00100000; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00100000; // addr
       cpu.decode();
       expect(addr.readRegVal()).toBe(0x34);
     });
 
     test('read byte from CH', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00101000; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00101000; // addr
       cpu.decode();
       expect(addr.readRegVal()).toBe(0x56);
     });
 
     test('read byte from DH', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00110000; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00110000; // addr
       cpu.decode();
       expect(addr.readRegVal()).toBe(0x67);
     });
 
     test('read byte from BH', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00111000; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00111000; // addr
       cpu.decode();
       expect(addr.readRegVal()).toBe(0x45);
     });
 
     test('read word from AX', () => {
-      cpu.mem8[0xABCD] = 0x01; // inst (word)
-      cpu.mem8[0xABCE] = 0b00000000; // addr
+      cpu.mem8[0xABCD0] = 0x01; // inst (word)
+      cpu.mem8[0xABCD1] = 0b00000000; // addr
       cpu.decode();
       expect(addr.readRegVal()).toBe(0x1234);
     });
 
     test('read word from CX', () => {
-      cpu.mem8[0xABCD] = 0x01; // inst (word)
-      cpu.mem8[0xABCE] = 0b00001000; // addr
+      cpu.mem8[0xABCD0] = 0x01; // inst (word)
+      cpu.mem8[0xABCD1] = 0b00001000; // addr
       cpu.decode();
       expect(addr.readRegVal()).toBe(0x3456);
     });
 
     test('read word from DX', () => {
-      cpu.mem8[0xABCD] = 0x01; // inst (word)
-      cpu.mem8[0xABCE] = 0b00010000; // addr
+      cpu.mem8[0xABCD0] = 0x01; // inst (word)
+      cpu.mem8[0xABCD1] = 0b00010000; // addr
       cpu.decode();
       expect(addr.readRegVal()).toBe(0x4567);
     });
 
     test('read word from BX', () => {
-      cpu.mem8[0xABCD] = 0x01; // inst (word)
-      cpu.mem8[0xABCE] = 0b00011000; // addr
+      cpu.mem8[0xABCD0] = 0x01; // inst (word)
+      cpu.mem8[0xABCD1] = 0b00011000; // addr
       cpu.decode();
       expect(addr.readRegVal()).toBe(0x2345);
     });
 
     test('read word from SP', () => {
-      cpu.mem8[0xABCD] = 0x01; // inst (word)
-      cpu.mem8[0xABCE] = 0b00100000; // addr
+      cpu.mem8[0xABCD0] = 0x01; // inst (word)
+      cpu.mem8[0xABCD1] = 0b00100000; // addr
       cpu.decode();
       expect(addr.readRegVal()).toBe(0x89AB);
     });
 
     test('read word from BP', () => {
-      cpu.mem8[0xABCD] = 0x01; // inst (word)
-      cpu.mem8[0xABCE] = 0b00101000; // addr
+      cpu.mem8[0xABCD0] = 0x01; // inst (word)
+      cpu.mem8[0xABCD1] = 0b00101000; // addr
       cpu.decode();
       expect(addr.readRegVal()).toBe(0x789A);
     });
 
     test('read word from SI', () => {
-      cpu.mem8[0xABCD] = 0x01; // inst (word)
-      cpu.mem8[0xABCE] = 0b00110000; // addr
+      cpu.mem8[0xABCD0] = 0x01; // inst (word)
+      cpu.mem8[0xABCD1] = 0b00110000; // addr
       cpu.decode();
       expect(addr.readRegVal()).toBe(0x5678);
     });
 
     test('read word from DI', () => {
-      cpu.mem8[0xABCD] = 0x01; // inst (word)
-      cpu.mem8[0xABCE] = 0b00111000; // addr
+      cpu.mem8[0xABCD0] = 0x01; // inst (word)
+      cpu.mem8[0xABCD1] = 0b00111000; // addr
       cpu.decode();
       expect(addr.readRegVal()).toBe(0x6789);
     });
 
     test('read byte from AL using RM', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00111000; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00111000; // addr
       cpu.decode();
       expect(addr.readRegVal(true)).toBe(0x12);
     });
 
     test('read byte from CL using RM', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00111001; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00111001; // addr
       cpu.decode();
       expect(addr.readRegVal(true)).toBe(0x34);
     });
 
     test('read byte from DL using RM', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00111010; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00111010; // addr
       cpu.decode();
       expect(addr.readRegVal(true)).toBe(0x45);
     });
 
     test('read byte from BL using RM', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00111011; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00111011; // addr
       cpu.decode();
       expect(addr.readRegVal(true)).toBe(0x23);
     });
 
     test('read byte from AH using RM', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00111100; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00111100; // addr
       cpu.decode();
       expect(addr.readRegVal(true)).toBe(0x34);
     });
 
     test('read byte from CH using RM', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00111101; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00111101; // addr
       cpu.decode();
       expect(addr.readRegVal(true)).toBe(0x56);
     });
 
     test('read byte from DH using RM', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00111110; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00111110; // addr
       cpu.decode();
       expect(addr.readRegVal(true)).toBe(0x67);
     });
 
     test('read byte from BH using RM', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00000111; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00000111; // addr
       cpu.decode();
       expect(addr.readRegVal(true)).toBe(0x45);
     });
 
     test('read word from AX using RM', () => {
-      cpu.mem8[0xABCD] = 0x01; // inst (word)
-      cpu.mem8[0xABCE] = 0b00111000; // addr
+      cpu.mem8[0xABCD0] = 0x01; // inst (word)
+      cpu.mem8[0xABCD1] = 0b00111000; // addr
       cpu.decode();
       expect(addr.readRegVal(true)).toBe(0x1234);
     });
 
     test('read word from CX using RM', () => {
-      cpu.mem8[0xABCD] = 0x01; // inst (word)
-      cpu.mem8[0xABCE] = 0b00111001; // addr
+      cpu.mem8[0xABCD0] = 0x01; // inst (word)
+      cpu.mem8[0xABCD1] = 0b00111001; // addr
       cpu.decode();
       expect(addr.readRegVal(true)).toBe(0x3456);
     });
 
     test('read word from DX using RM', () => {
-      cpu.mem8[0xABCD] = 0x01; // inst (word)
-      cpu.mem8[0xABCE] = 0b00111010; // addr
+      cpu.mem8[0xABCD0] = 0x01; // inst (word)
+      cpu.mem8[0xABCD1] = 0b00111010; // addr
       cpu.decode();
       expect(addr.readRegVal(true)).toBe(0x4567);
     });
 
     test('read word from BX using RM', () => {
-      cpu.mem8[0xABCD] = 0x01; // inst (word)
-      cpu.mem8[0xABCE] = 0b00111011; // addr
+      cpu.mem8[0xABCD0] = 0x01; // inst (word)
+      cpu.mem8[0xABCD1] = 0b00111011; // addr
       cpu.decode();
       expect(addr.readRegVal(true)).toBe(0x2345);
     });
 
     test('read word from SP using RM', () => {
-      cpu.mem8[0xABCD] = 0x01; // inst (word)
-      cpu.mem8[0xABCE] = 0b00111100; // addr
+      cpu.mem8[0xABCD0] = 0x01; // inst (word)
+      cpu.mem8[0xABCD1] = 0b00111100; // addr
       cpu.decode();
       expect(addr.readRegVal(true)).toBe(0x89AB);
     });
 
     test('read word from BP using RM', () => {
-      cpu.mem8[0xABCD] = 0x01; // inst (word)
-      cpu.mem8[0xABCE] = 0b00111101; // addr
+      cpu.mem8[0xABCD0] = 0x01; // inst (word)
+      cpu.mem8[0xABCD1] = 0b00111101; // addr
       cpu.decode();
       expect(addr.readRegVal(true)).toBe(0x789A);
     });
 
     test('read word from SI using RM', () => {
-      cpu.mem8[0xABCD] = 0x01; // inst (word)
-      cpu.mem8[0xABCE] = 0b00111110; // addr
+      cpu.mem8[0xABCD0] = 0x01; // inst (word)
+      cpu.mem8[0xABCD1] = 0b00111110; // addr
       cpu.decode();
       expect(addr.readRegVal(true)).toBe(0x5678);
     });
 
     test('read word from DI using RM', () => {
-      cpu.mem8[0xABCD] = 0x01; // inst (word)
-      cpu.mem8[0xABCE] = 0b00000111; // addr
+      cpu.mem8[0xABCD0] = 0x01; // inst (word)
+      cpu.mem8[0xABCD1] = 0b00000111; // addr
       cpu.decode();
       expect(addr.readRegVal(true)).toBe(0x6789);
     });
@@ -754,7 +765,7 @@ describe('Memory addressing mode methods', () => {
 
   beforeEach(() => {
     cpu = new CPU8086(new CPUConfig({
-      memory: 262399
+      memorySize: 262400
     }));
     addr = new Addressing(cpu);
     cpu.reg16[regAX] = 0x1234;
@@ -796,10 +807,19 @@ describe('Memory addressing mode methods', () => {
       expect(addr.calcRMAddr(segment)).toBe(0xB368D);
     });
     test('[BX + DI] byte', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00000001; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00000001; // addr
       let segment = cpu.reg16[regCS];
       cpu.decode();
+
+      console.log("opcode_byte: " + hexString16(cpu.mem8[segIP(cpu)]));
+      console.log("CS:IP: " + hexString16(cpu.reg16[regCS]) + ":" + hexString16(cpu.reg16[regIP]) +  " -> " + hexString32(segIP(cpu)) + "\n" +
+        "MEMORY:\n" + formatMemory(cpu.mem8, segIP(cpu), segIP(cpu) + 7, 11) + "\n" +
+        "OPCODE:\n" + formatOpcode(cpu.opcode, 11) + "\n" +
+        "REGISTERS\n" + formatRegisters(cpu, 11)  + "\n" +
+        "FLAGS:\n" + formatFlags(cpu.reg16[regFlags], 10) + "\n" +
+        "INSTRUCTION: " +  cpu.opcode.string);
+      console.log("result: " + hexString16(addr.calcRMAddr(segment)));
 
       // (CS     * 0x10) + (  BX   +   DI  ) =
       // (0xABCD * 0x10) + (0x2345 + 0x6789) =
@@ -894,7 +914,7 @@ describe('Memory addressing mode methods', () => {
 //
 //   beforeEach(() => {
 //     cpu = new CPU8086(new CPUConfig({
-//       memory: 262399
+//       memorySize: 262400
 //     }));
 //     addr = new Addressing(cpu);
 //     cpu.reg16[regCS] = 0x0000;
@@ -951,7 +971,7 @@ describe('Memory addressing mode methods', () => {
 //
 //   beforeEach(() => {
 //     cpu = new CPU8086(new CPUConfig({
-//       memory: 1024
+//       memorySize: 1024
 //     }));
 //     addr = new Addressing(cpu);
 //   });
