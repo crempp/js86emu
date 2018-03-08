@@ -286,25 +286,8 @@ export default class Addressing {
       case 0b110 : // Direct Address
         // Direct address is always 2 bytes
         //   - yoshicapstonememo.googlecode.com/svn/trunk/4_2_86.pdf
-
-        // console.log(this.cpu.reg16[regIP]);
-        // 0xABCD
-
-        let arg1Loc = seg2abs(segment, this.cpu.reg16[regIP] + 3, this.cpu);
-        let arg2loc = seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu);
-        let arg1memval = this.cpu.mem8[arg1Loc];
-        let arg2memval = this.cpu.mem8[arg2loc];
-
-        console.log("segment=" + hexString16(segment));
-        console.log("arg1loc=" + hexString16(arg1Loc));
-        console.log("arg2loc=" + hexString16(arg2Loc));
-        console.log("arg1memval=" + hexString16(arg1memval));
-        console.log("arg2memval=" + hexString16(arg2memval));
-
-        let result = (this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 3, this.cpu)] << 8) |
-                      this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)];
-        console.log("result = " + hexString32(result));
-        addr = result;
+        addr = (this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 3, this.cpu)] << 8) |
+                this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)];
         break;
       case 0b111 : // [BX]
         addr = this.cpu.reg16[regBX];

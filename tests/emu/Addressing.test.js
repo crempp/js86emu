@@ -765,7 +765,7 @@ describe('Memory addressing mode methods', () => {
 
   beforeEach(() => {
     cpu = new CPU8086(new CPUConfig({
-      memorySize: 262400
+      memorySize: 1048576
     }));
     addr = new Addressing(cpu);
     cpu.reg16[regAX] = 0x1234;
@@ -796,8 +796,8 @@ describe('Memory addressing mode methods', () => {
     // +---+---+---+---+---+---+---+---+
 
     test('[BX + SI] byte', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00000000; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00000000; // addr
       let segment = cpu.reg16[regCS];
       cpu.decode();
 
@@ -812,23 +812,14 @@ describe('Memory addressing mode methods', () => {
       let segment = cpu.reg16[regCS];
       cpu.decode();
 
-      console.log("opcode_byte: " + hexString16(cpu.mem8[segIP(cpu)]));
-      console.log("CS:IP: " + hexString16(cpu.reg16[regCS]) + ":" + hexString16(cpu.reg16[regIP]) +  " -> " + hexString32(segIP(cpu)) + "\n" +
-        "MEMORY:\n" + formatMemory(cpu.mem8, segIP(cpu), segIP(cpu) + 7, 11) + "\n" +
-        "OPCODE:\n" + formatOpcode(cpu.opcode, 11) + "\n" +
-        "REGISTERS\n" + formatRegisters(cpu, 11)  + "\n" +
-        "FLAGS:\n" + formatFlags(cpu.reg16[regFlags], 10) + "\n" +
-        "INSTRUCTION: " +  cpu.opcode.string);
-      console.log("result: " + hexString16(addr.calcRMAddr(segment)));
-
       // (CS     * 0x10) + (  BX   +   DI  ) =
       // (0xABCD * 0x10) + (0x2345 + 0x6789) =
       //    0xABCD0    +      0x8ACE       = 0xB479E
       expect(addr.calcRMAddr(segment)).toBe(0xB479E);
     });
     test('[BP + SI] byte', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00000010; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00000010; // addr
       let segment = cpu.reg16[regCS];
       cpu.decode();
 
@@ -838,8 +829,8 @@ describe('Memory addressing mode methods', () => {
       expect(addr.calcRMAddr(segment)).toBe(0xB8BE2);
     });
     test('[BP + DI] byte', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00000011; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00000011; // addr
       let segment = cpu.reg16[regCS];
       cpu.decode();
 
@@ -849,8 +840,8 @@ describe('Memory addressing mode methods', () => {
       expect(addr.calcRMAddr(segment)).toBe(0xB9CF3);
     });
     test('[SI] byte', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00000100; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00000100; // addr
       let segment = cpu.reg16[regCS];
       cpu.decode();
 
@@ -860,8 +851,8 @@ describe('Memory addressing mode methods', () => {
       expect(addr.calcRMAddr(segment)).toBe(0xB1348);
     });
     test('[DI] byte', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00000101; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00000101; // addr
       let segment = cpu.reg16[regCS];
       cpu.decode();
 
@@ -871,21 +862,21 @@ describe('Memory addressing mode methods', () => {
       expect(addr.calcRMAddr(segment)).toBe(0xB2459);
     });
     test('Direct Address byte', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00000110; // addr
-      cpu.mem8[0xABCF] = 0b01010110; // d1 (0x56)
-      cpu.mem8[0xABD0] = 0b00010010; // d2 (0x12)
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00000110; // addr
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
       let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (CS     * 0x10) + ( d1:d0) =
-      // (0xABCD * 0x10) + (0x5612) =
-      //    0xABCD0    +    0x5612  = 0xB12E2
-      expect(addr.calcRMAddr(segment)).toBe(0xB12E2);
+      // (0xABCD * 0x10) + (0x1256) =
+      //    0xABCD0    +    0x1256  = 0xACF26
+      expect(addr.calcRMAddr(segment)).toBe(0xACF26);
     });
     test('[BX] byte', () => {
-      cpu.mem8[0xABCD] = 0x00; // inst (byte)
-      cpu.mem8[0xABCE] = 0b00000111; // addr
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00000111; // addr
       let segment = cpu.reg16[regCS];
       cpu.decode();
 
