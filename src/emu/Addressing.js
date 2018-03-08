@@ -10,7 +10,7 @@ import {
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
 } from './Constants';
-import {hexString16, hexString32} from "./Debug";
+import {formatOpcode, hexString16, hexString32} from "./Debug";
 
 export default class Addressing {
   constructor(cpu) {
@@ -257,6 +257,9 @@ export default class Addressing {
   /**
    * Calculate an address in RM addressing mode
    *
+   * I don't think there's a difference between the functionality for a byte
+   * or a word for calcRMAddr. If I'm wrong come back to this.
+   *
    * @param {number} segment Memory segment
    * @return {number} Calculated address
    */
@@ -293,54 +296,54 @@ export default class Addressing {
         addr = this.cpu.reg16[regBX];
         break;
     }
-    switch (this.cpu.opcode.w) {
-      case 0:
-        return seg2abs(segment, addr, this.cpu);
-      case 1:
-        // return (seg2abs(segment, addr + 1, this.cpu) << 8) |
-        //         seg2abs(segment, addr, this.cpu);
-        return seg2abs(segment, addr, this.cpu)
-    }
+    return seg2abs(segment, addr, this.cpu);
   }
 
+  /**
+   * Calculate an address in RM addressing mode with a displacement word
+   *
+   * @param {number} segment Memory segment
+   * @return {number} Calculated address
+   */
   calcRMDispAddr (segment) {
-    let addr;
+    let addr, disp;
 
     switch (this.cpu.opcode.mod) {
-      case 0b01: // Use R/M Tablae 2 with 8-bit displacement
+      case 0b01: // Use R/M table 2 with 8-bit displacement
         disp = this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)];
-      case 0b10: // Use R/M Table 2 with 16-bit displacement
+      case 0b10: // Use R/M table 2 with 16-bit displacement
         disp = disp ||
           ((this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 3, this.cpu)] << 8) |
             this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)] );
     }
-    switch (opcode.rm) {
-      case 0b000 : // [BX + SI]
+
+    switch (this.cpu.opcode.rm) {
+      case 0b000 : // [BX + SI] + disp
         addr = this.cpu.reg16[regBX] + this.cpu.reg16[regSI] + disp;
         break;
-      case 0b001 : // [BX + DI]
+      case 0b001 : // [BX + DI] + disp
         addr = this.cpu.reg16[regBX] + this.cpu.reg16[regDI] + disp;
         break;
-      case 0b010 : // [BP + SI]
+      case 0b010 : // [BP + SI] + disp
         addr = this.cpu.reg16[regBP] + this.cpu.reg16[regSI] + disp;
         break;
-      case 0b011 : // [BP + DI]
+      case 0b011 : // [BP + DI] + disp
         addr = this.cpu.reg16[regBP] + this.cpu.reg16[regDI] + disp;
         break;
-      case 0b100 : // [SI]
-        addr = this.cpu.reg16[regSI];
+      case 0b100 : // [SI] + disp
+        addr = this.cpu.reg16[regSI] + disp;
         break;
-      case 0b101 : // [DI]
-        addr = this.cpu.reg16[regDI];
+      case 0b101 : // [DI] + disp
+        addr = this.cpu.reg16[regDI] + disp;
         break;
-      case 0b110 : // [BP]
-        addr = this.cpu.reg16[regBP];
+      case 0b110 : // [BP] + disp
+        addr = this.cpu.reg16[regBP] + disp;
         break;
-      case 0b111 : // [BX]
-        addr = this.cpu.reg16[regBX];
+      case 0b111 : // [BX] + disp
+        addr = this.cpu.reg16[regBX] + disp;
         break;
     }
-    return addr;
+    return seg2abs(segment, addr, this.cpu);
   }
 
   /**

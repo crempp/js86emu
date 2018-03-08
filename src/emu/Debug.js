@@ -90,9 +90,9 @@ export function formatRegisters(cpu, indentSize) {
 
   str += indent;
   str += "SI: " + hexString16(cpu.reg16[regSI]) + " ";
-  str += "DI: " + hexString16(cpu.reg16[regSI]) + " ";
-  str += "BP: " + hexString16(cpu.reg16[regSI]) + " ";
-  str += "SP: " + hexString16(cpu.reg16[regSI]) + "\n";
+  str += "DI: " + hexString16(cpu.reg16[regDI]) + " ";
+  str += "BP: " + hexString16(cpu.reg16[regBP]) + " ";
+  str += "SP: " + hexString16(cpu.reg16[regSP]) + "\n";
 
   str += indent;
   str += "CS: " + hexString16(cpu.reg16[regCS]) + " ";

@@ -19,6 +19,31 @@ import {segIP} from "../../src/emu/Utils";
 
 winston.level = 'warn';
 
+// TODO: writeMem8 and readMem8 - should be the same
+// TODO: writeMem16 and readMem16 - should be the same
+
+//   7   6   5   4   3   2   1   0
+// +---+---+---+---+---+---+---+---+
+// |     opcode            | d | w |
+// +---+---+---+---+---+---+---+---+
+// +---+---+---+---+---+---+---+---+
+// |  mod  |    reg    |    r/m    |
+// +---+---+---+---+---+---+---+---+
+// console.log("opcode_byte: " + hexString16(cpu.mem8[segIP(cpu)]));
+// console.log("CS:IP: " + hexString16(cpu.reg16[regCS]) + ":" + hexString16(cpu.reg16[regIP]) +  " -> " + hexString32(segIP(cpu)) + "\n" +
+//   "MEMORY:\n" + formatMemory(cpu.mem8, segIP(cpu), segIP(cpu) + 7, 11) + "\n" +
+//   "OPCODE:\n" + formatOpcode(cpu.opcode, 11) + "\n" +
+//   "REGISTERS\n" + formatRegisters(cpu, 11)  + "\n" +
+//   "FLAGS:\n" + formatFlags(cpu.reg16[regFlags], 10) + "\n" +
+//   "INSTRUCTION: " +  cpu.opcode.string);
+// console.log("result: " + hexString32(addr.calcRMDispAddr(segment)));
+// console.log("CS:        " + hexString16(cpu.reg16[regCS]) + "\n" +
+//   "CS * 0x10: " + hexString32(cpu.reg16[regCS]*0x10) + "\n" +
+//   "BP:        " + hexString16(cpu.reg16[regBP]) + "\n" +
+//   "DI:        " + hexString16(cpu.reg16[regDI]) + "\n" +
+//   "BP + DI:   " + hexString32(cpu.reg16[regBP]+cpu.reg16[regDI]));
+
+
 describe('Memory access methods', () => {
   let addr, cpu;
 
@@ -32,18 +57,6 @@ describe('Memory access methods', () => {
     cpu.reg16[regES] = 0x0300;
     cpu.reg16[regSS] = 0x0400;
   });
-
-
-  // console.log("opcode_byte: " + hexString16(cpu.mem8[segIP(cpu)]));
-  // console.log("CS:IP: " + hexString16(cpu.reg16[regCS]) + ":" + hexString16(cpu.reg16[regIP]) +  " -> " + hexString32(segIP(cpu)) + "\n" +
-  //   "MEMORY:\n" + formatMemory(cpu.mem8, segIP(cpu), segIP(cpu) + 7, 11) + "\n" +
-  //   "OPCODE:\n" + formatOpcode(cpu.opcode, 11) + "\n" +
-  //   "REGISTERS\n" + formatRegisters(cpu, 11)  + "\n" +
-  //   "FLAGS:\n" + formatFlags(cpu.reg16[regFlags], 10) + "\n" +
-  //   "INSTRUCTION: " +  cpu.opcode.string);
-  // console.log("result: " + hexString16(addr.readRegVal()));
-
-  // TODO: Write mem16 and read mem8 - should be the same
 
   describe('readMem8()', () => {
     test('Memory reads correctly memory', () => {
@@ -787,15 +800,10 @@ describe('Memory addressing mode methods', () => {
   });
 
   describe('calcRMAddr', () => {
-    //   7   6   5   4   3   2   1   0
-    // +---+---+---+---+---+---+---+---+
-    // |     opcode            | d | w |
-    // +---+---+---+---+---+---+---+---+
-    // +---+---+---+---+---+---+---+---+
-    // |  mod  |    reg    |    r/m    |
-    // +---+---+---+---+---+---+---+---+
+    // I don't think there's a difference between the functionality for a byte
+    // or a word for calcRMAddr. If I'm wrong come back to this.
 
-    test('[BX + SI] byte', () => {
+    test('[BX + SI]', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000000; // addr
       let segment = cpu.reg16[regCS];
@@ -806,7 +814,7 @@ describe('Memory addressing mode methods', () => {
       //    0xABCD0    +      0x79BD       = 0xB368D
       expect(addr.calcRMAddr(segment)).toBe(0xB368D);
     });
-    test('[BX + DI] byte', () => {
+    test('[BX + DI]', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000001; // addr
       let segment = cpu.reg16[regCS];
@@ -817,7 +825,7 @@ describe('Memory addressing mode methods', () => {
       //    0xABCD0    +      0x8ACE       = 0xB479E
       expect(addr.calcRMAddr(segment)).toBe(0xB479E);
     });
-    test('[BP + SI] byte', () => {
+    test('[BP + SI]', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000010; // addr
       let segment = cpu.reg16[regCS];
@@ -828,7 +836,7 @@ describe('Memory addressing mode methods', () => {
       //    0xABCD0    +      0xCF12       = 0xB8BE2
       expect(addr.calcRMAddr(segment)).toBe(0xB8BE2);
     });
-    test('[BP + DI] byte', () => {
+    test('[BP + DI]', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000011; // addr
       let segment = cpu.reg16[regCS];
@@ -839,7 +847,7 @@ describe('Memory addressing mode methods', () => {
       //    0xABCD0    +      0xE023       = 0xB9CF3
       expect(addr.calcRMAddr(segment)).toBe(0xB9CF3);
     });
-    test('[SI] byte', () => {
+    test('[SI]', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000100; // addr
       let segment = cpu.reg16[regCS];
@@ -850,7 +858,7 @@ describe('Memory addressing mode methods', () => {
       //    0xABCD0    +    0x5678  = 0xB368D
       expect(addr.calcRMAddr(segment)).toBe(0xB1348);
     });
-    test('[DI] byte', () => {
+    test('[DI]', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000101; // addr
       let segment = cpu.reg16[regCS];
@@ -861,7 +869,7 @@ describe('Memory addressing mode methods', () => {
       //    0xABCD0    +    0x6789  = 0xB2459
       expect(addr.calcRMAddr(segment)).toBe(0xB2459);
     });
-    test('Direct Address byte', () => {
+    test('Direct Address', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000110; // addr
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
@@ -874,7 +882,7 @@ describe('Memory addressing mode methods', () => {
       //    0xABCD0    +    0x1256  = 0xACF26
       expect(addr.calcRMAddr(segment)).toBe(0xACF26);
     });
-    test('[BX] byte', () => {
+    test('[BX]', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000111; // addr
       let segment = cpu.reg16[regCS];
@@ -887,11 +895,219 @@ describe('Memory addressing mode methods', () => {
     });
   });
 
-  // describe('calcRMDispAddr', () => {
-  //   test('', () => {
-  //
-  //   })
-  // });
+  describe('calcRMDispAddr', () => {
+    test('[BX + SI] + disp (byte)', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b01000000; // addr
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + (  BX   +   SI  ) + disp =
+      // (0xABCD * 0x10) + (0x2345 + 0x5678) + 0x56 =
+      //    0xABCD0    +         0x79BD      + 0x56 = 0xB36E3
+      expect(addr.calcRMDispAddr(segment)).toBe(0xB36E3);
+    });
+    test('[BX + DI] + disp (byte)', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b01000001; // addr
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + (  BX   +   DI  ) + disp =
+      // (0xABCD * 0x10) + (0x2345 + 0x6789) + 0x56 =
+      //    0xABCD0    +         0x8ACE      + 0x56 = 0xB47F4
+      expect(addr.calcRMDispAddr(segment)).toBe(0xB47F4);
+    });
+    test('[BP + SI] + disp (byte)', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b01000010; // addr
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + (  BP   +   SI  ) + disp =
+      // (0xABCD * 0x10) + (0x789A + 0x5678) + 0x56 =
+      //    0xABCD0    +         0xCF12      + 0x56 = 0xB8C38
+      expect(addr.calcRMDispAddr(segment)).toBe(0xB8C38);
+    });
+    test('[BP + DI] + disp (byte)', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b01000011; // addr
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + (  BP   +   DI  ) + disp =
+      // (0xABCD * 0x10) + (0x789A + 0x6789) + 0x56 =
+      //    0xABCD0    +      0xE023         + 0x56 = 0xB9D49
+      expect(addr.calcRMDispAddr(segment)).toBe(0xB9D49);
+    });
+    test('[SI] + disp (byte)', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b01000100; // addr
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + (  SI  ) + disp =
+      // (0xABCD * 0x10) + (0x5678) + 0x56 =
+      //    0xABCD0    +    0x5678  + 0x56 = 0xB139E
+      expect(addr.calcRMDispAddr(segment)).toBe(0xB139E);
+    });
+    test('[DI] + disp (byte)', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b01000101; // addr
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + (  DI  ) + disp =
+      // (0xABCD * 0x10) + (0x6789) + 0x56 =
+      //    0xABCD0    +    0x6789  + 0x56 = 0xB24AF
+      expect(addr.calcRMDispAddr(segment)).toBe(0xB24AF);
+    });
+    test('[BP] + disp (byte)', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b01000110; // addr
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + (  BP  ) + disp =
+      // (0xABCD * 0x10) + (0x789A) + 0x56 =
+      //    0xABCD0    +    0x789A  + 0x56 = 0xB35C0
+      expect(addr.calcRMDispAddr(segment)).toBe(0xB35C0);
+    });
+    test('[BX] + disp (byte)', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b01000111; // addr
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + (  BX  ) + disp =
+      // (0xABCD * 0x10) + (0x2345) + 0x56 =
+      //    0xABCD0    +    0x2345  + 0x56 = 0xAE06B
+      expect(addr.calcRMDispAddr(segment)).toBe(0xAE06B);
+    });
+
+
+
+    test('[BX + SI] + disp (word)', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b10000000; // addr
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + (  BX   +   SI  ) + disp   =
+      // (0xABCD * 0x10) + (0x2345 + 0x5678) + 0x1256 =
+      //    0xABCD0    +         0x79BD      + 0x1256 = 0xB48E3
+      expect(addr.calcRMDispAddr(segment)).toBe(0xB48E3);
+    });
+    test('[BX + DI] + disp (word)', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b10000001; // addr
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + (  BX   +   DI  ) + disp   =
+      // (0xABCD * 0x10) + (0x2345 + 0x6789) + 0x1256 =
+      //    0xABCD0    +         0x8ACE      + 0x1256 = 0xB59F4
+      expect(addr.calcRMDispAddr(segment)).toBe(0xB59F4);
+    });
+    test('[BP + SI] + disp (word)', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b10000010; // addr
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + (  BP   +   SI  ) + disp   =
+      // (0xABCD * 0x10) + (0x789A + 0x5678) + 0x1256 =
+      //    0xABCD0    +         0xCF12      + 0x1256 = 0xB9E38
+      expect(addr.calcRMDispAddr(segment)).toBe(0xB9E38);
+    });
+    test('[BP + DI] + disp (word)', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b10000011; // addr
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + (  BP   +   DI  ) + disp   =
+      // (0xABCD * 0x10) + (0x789A + 0x6789) + 0x1256 =
+      //    0xABCD0    +      0xE023         + 0x1256 = 0xBAF49
+      expect(addr.calcRMDispAddr(segment)).toBe(0xBAF49);
+    });
+    test('[SI] + disp (word)', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b10000100; // addr
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + (  SI  ) + disp   =
+      // (0xABCD * 0x10) + (0x5678) + 0x1256 =
+      //    0xABCD0    +    0x5678  + 0x1256 = 0xB259E
+      expect(addr.calcRMDispAddr(segment)).toBe(0xB259E);
+    });
+    test('[DI] + disp (word)', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b10000101; // addr
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + (  DI  ) + disp   =
+      // (0xABCD * 0x10) + (0x6789) + 0x1256 =
+      //    0xABCD0    +    0x6789  + 0x1256 = 0xB36AF
+      expect(addr.calcRMDispAddr(segment)).toBe(0xB36AF);
+    });
+    test('[BP] + disp (word)', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b10000110; // addr
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + (  BP  ) + disp   =
+      // (0xABCD * 0x10) + (0x789A) + 0x1256 =
+      //    0xABCD0    +    0x789A  + 0x1256 = 0xB47C0
+      expect(addr.calcRMDispAddr(segment)).toBe(0xB47C0);
+    });
+    test('[BX] + disp (word)', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b10000111; // addr
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+
+      // (CS     * 0x10) + (  BX  ) + disp   =
+      // (0xABCD * 0x10) + (0x2345) + 0x1256 =
+      //    0xABCD0    +    0x2345  + 0x1256 = 0xAF26B
+      expect(addr.calcRMDispAddr(segment)).toBe(0xAF26B);
+    });
+  });
   //
   // describe('calcImmAddr', () => {
   //   test('', () => {
