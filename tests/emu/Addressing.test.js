@@ -1108,12 +1108,6 @@ describe('Memory addressing mode methods', () => {
       expect(addr.calcRMDispAddr(segment)).toBe(0xAF26B);
     });
   });
-  //
-  // describe('calcImmAddr', () => {
-  //   test('', () => {
-  //
-  //   })
-  // });
 });
 
 // describe('RMReg access methods', () => {

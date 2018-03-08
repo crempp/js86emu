@@ -135,7 +135,7 @@ export default class Addressing {
     winston.log("debug", "Addressing.Ib()          : (value=" + hexString16(value) + ")");
     let result;
     let segment = this.cpu.reg16[regCS];
-    let offset = this.calcImmAddr(segment);
+    let offset = seg2abs(segment, this.cpu.reg16[regIP] + this.cpu.cycleIP, this.cpu);
 
     if (value || value === 0) result = this.writeMem8(segment, offset, value);
     else result = this.readMem8(segment, offset);
@@ -149,7 +149,7 @@ export default class Addressing {
     winston.log("debug", "Addressing.Iv()          : (value=" + hexString16(value) + ")");
     let result;
     let segment = this.cpu.reg16[regCS];
-    let offset = this.calcImmAddr(segment);
+    let offset = seg2abs(segment, this.cpu.reg16[regIP] + this.cpu.cycleIP, this.cpu)
 
     if (value || value === 0) result = this.writeMem16(segment, offset, value);
     else result = this.readMem16(segment, offset);
@@ -344,16 +344,6 @@ export default class Addressing {
         break;
     }
     return seg2abs(segment, addr, this.cpu);
-  }
-
-  /**
-   * TODO: Write this - not sure if it's right
-   *
-   * @param {number} segment Memory segment
-   * @return {number} Absolute memory address
-   */
-  calcImmAddr (segment) {
-    return seg2abs(segment, this.cpu.reg16[regIP] + this.cpu.cycleIP, this.cpu);
   }
 
   /**
