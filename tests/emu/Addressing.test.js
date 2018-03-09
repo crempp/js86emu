@@ -1150,7 +1150,6 @@ describe('rm/reg access methods', () => {
 
       let segment = cpu.reg16[regCS];
       cpu.decode();
-      let result = addr.readRMReg8(segment)
       expect(addr.readRMReg8(segment)).toBe(0x42);
     });
     test('use R/M Table 2 with 16-bit displacement (word disp)', () => {
@@ -1168,24 +1167,69 @@ describe('rm/reg access methods', () => {
       cpu.decode();
       expect(addr.readRMReg8(segment)).toBe(0x42);
     });
-    test('two register instruction; use R/M bits with REG table (byte)', () => {
+    test('two register instruction; use R/M bits with REG table', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b11111110; // addr mode
       let segment = cpu.reg16[regCS];
       cpu.decode();
       expect(addr.readRMReg8(segment)).toBe(0x67);
     });
-    test('two register instruction; use R/M bits with REG table (word)', () => {
+  });
+
+  describe('readRMReg16()', () => {
+    test('use R/M Table 1 for R/M operand', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00000000; // addr mode
+
+      // (CS     * 0x10) + (  BX   +   SI  ) =
+      // (0xABCD * 0x10) + (0x2345 + 0x5678) =
+      //    0xABCD0    +         0x79BD      = 0xB368D
+      cpu.mem8[0xB368D] = 0x42;
+      cpu.mem8[0xB368E] = 0x21;
+
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+      expect(addr.readRMReg16(segment)).toBe(0x2142);
+    });
+    test('use R/M Table 2 with 8-bit displacement', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b01000000; // addr mode
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+
+      // (CS     * 0x10) + (  BX   +   SI  ) + disp  =
+      // (0xABCD * 0x10) + (0x2345 + 0x5678) + 0x56 =
+      //    0xABCD0    +         0x79BD      + 0x56 = 0xB36E3
+      cpu.mem8[0xB36E3] = 0x42;
+      cpu.mem8[0xB36E4] = 0x21;
+
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+      expect(addr.readRMReg16(segment)).toBe(0x2142);
+    });
+    test('use R/M Table 2 with 16-bit displacement (word disp)', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b10000000; // addr mode
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+
+      // (CS     * 0x10) + (  BX   +   SI  ) + disp  =
+      // (0xABCD * 0x10) + (0x2345 + 0x5678) + 0x1256 =
+      //    0xABCD0    +         0x79BD      + 0x1256 = 0xB48E3
+      cpu.mem8[0xB48E3] = 0x42;
+      cpu.mem8[0xB48E4] = 0x21;
+
+      let segment = cpu.reg16[regCS];
+      cpu.decode();
+      expect(addr.readRMReg16(segment)).toBe(0x2142);
+    });
+    test('two register instruction; use R/M bits with REG table', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
       cpu.mem8[0xABCD1] = 0b11111110; // addr mode
       let segment = cpu.reg16[regCS];
       cpu.decode();
-      expect(addr.readRMReg8(segment)).toBe(0x5678);
+      expect(addr.readRMReg16(segment)).toBe(0x5678);
     });
-  });
-
-  describe('readRMReg16()', () => {
-
   });
 
   describe('writeRMReg8()', () => {
