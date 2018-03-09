@@ -191,7 +191,6 @@ export default class Addressing {
    * @param {number} segment
    */
   readRMReg8 (segment) {
-    winston.log("debug", "Addressing.readRMReg8()  : ()");
     let offset;
     switch (this.cpu.opcode.mod) {
       case 0b00: // Use R/M Table 1 for R/M operand
@@ -255,10 +254,13 @@ export default class Addressing {
   }
 
   /**
-   * Calculate an address in RM addressing mode
+   * Calculate an offset address in RM addressing mode
    *
    * I don't think there's a difference between the functionality for a byte
    * or a word for calcRMAddr. If I'm wrong come back to this.
+   *
+   * Note: This returns an offset, this address does not account for segment.
+   * Use seg2abs() to get the segmented address.
    *
    * @param {number} segment Memory segment
    * @return {number} Calculated address
@@ -296,11 +298,14 @@ export default class Addressing {
         addr = this.cpu.reg16[regBX];
         break;
     }
-    return seg2abs(segment, addr, this.cpu);
+    return addr;
   }
 
   /**
-   * Calculate an address in RM addressing mode with a displacement word
+   * Calculate an offset address in RM addressing mode with a displacement word
+   *
+   * Note: This returns an offset, this address does not account for segment.
+   * Use seg2abs() to get the segmented address.
    *
    * @param {number} segment Memory segment
    * @return {number} Calculated address
@@ -311,6 +316,7 @@ export default class Addressing {
     switch (this.cpu.opcode.mod) {
       case 0b01: // Use R/M table 2 with 8-bit displacement
         disp = this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)];
+        break;
       case 0b10: // Use R/M table 2 with 16-bit displacement
         disp = disp ||
           ((this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 3, this.cpu)] << 8) |
@@ -343,7 +349,7 @@ export default class Addressing {
         addr = this.cpu.reg16[regBX] + disp;
         break;
     }
-    return seg2abs(segment, addr, this.cpu);
+    return addr;
   }
 
   /**
@@ -476,7 +482,7 @@ export default class Addressing {
    * @return {number} Value from memory as a byte
    */
   readMem8(segment, offset) {
-    return (this.cpu.mem8[seg2abs(segment, offset, this.cpu)]);
+    return this.cpu.mem8[seg2abs(segment, offset, this.cpu)];
   }
 
   /**
