@@ -89,9 +89,11 @@ export default class Operations {
   cmp (dst, src) {
     winston.log("debug", "Operations.cmp()         : (dst=" + dst.name + ", src=" + src.name + ")");
 
+    let segment = this.cpu.reg16[regCS];
+
     this.cpu.cycleIP += 1;
-    let d = dst();
-    let s = src();
+    let d = dst(segment, null);
+    let s = src(segment, null);
     let result = d - s;
 
     this.cpu.setAF_FLAG_sub(d, s);
@@ -471,7 +473,7 @@ export default class Operations {
   shortJump () {
     // The jump address is a signed (twos complement) offset from the
     // current location.
-    let offset = this.cpu.mem8[this.cpu.reg16[regIP] + 1]
+    let offset = this.cpu.mem8[this.cpu.reg16[regIP] + 1];
     // let offset = this.cpu.mem8[seg2abs(this._regCS, this.cpu.mem8[this._regIP], cpu)];
 
     // One-byte twos-complement conversion

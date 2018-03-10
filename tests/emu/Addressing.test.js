@@ -12,6 +12,7 @@ import {
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
 } from '../../src/emu/Constants';
+import { ValueOverflowException } from "../../src/emu/Exceptions";
 import {
   formatOpcode, hexString8, hexString16, hexString32, formatFlags,
   formatMemory, formatRegisters
@@ -1341,11 +1342,12 @@ describe('Addressing Modes', () => {
 
     segment = cpu.reg16[regCS];
     cpu.cycleIP = 0;
+    cpu.decode();
   });
 
   describe('_1', () => {
     test('read', () => {
-      expect(addr._1()).toBe(0x01);
+      expect(addr._1(null, null)).toBe(0x01);
       expect(cpu.cycleIP).toBe(0);
     });
     // TODO: Do we need a write test?
@@ -1353,7 +1355,7 @@ describe('Addressing Modes', () => {
 
   describe('_3', () => {
     test('read', () => {
-      expect(addr._3()).toBe(0x03);
+      expect(addr._3(null, null)).toBe(0x03);
       expect(cpu.cycleIP).toBe(0);
     });
     // TODO: Do we need a write test?
@@ -1361,409 +1363,569 @@ describe('Addressing Modes', () => {
 
   describe('AX', () => {
     test('read', () => {
-      expect(addr.AX()).toBe(0x1234);
+      expect(addr.AX(null, null)).toBe(0x1234);
     });
     test('read cycles', () => {
-      addr.AX();
-      expect(cpu.cycleIP).toBe(1);
+      addr.AX(null, null);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('write', () => {
-      let result = addr.AX(0xFFFF);
+      let result = addr.AX(null, 0xFFFF);
       expect(cpu.reg16[regAX]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
     test('write cycles', () => {
-      addr.AX(0xFFFF);
-      expect(cpu.cycleIP).toBe(1);
+      addr.AX(null, 0xFFFF);
+      expect(cpu.cycleIP).toBe(0);
     });
   });
 
   describe('AH', () => {
     test('read', () => {
-      addr.AH();
+      addr.AH(null, null);
       expect(addr.AH()).toBe(0x34);
     });
     test('read cycles', () => {
-      addr.AH();
-      expect(cpu.cycleIP).toBe(1);
+      addr.AH(null, null);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('write', () => {
-      let result = addr.AH(0xFF);
+      let result = addr.AH(null, 0xFF);
       expect(cpu.reg8[regAH]).toBe(0xFF);
       expect(result).toBe(0xFF);
     });
     test('write cycles', () => {
-      addr.AH(0xFF);
-      expect(cpu.cycleIP).toBe(1);
+      addr.AH(null, 0xFF);
+      expect(cpu.cycleIP).toBe(0);
     });
   });
 
   describe('AL', () => {
     test('read', () => {
-      expect(addr.AL()).toBe(0x12);
+      expect(addr.AL(null, null)).toBe(0x12);
     });
     test('read cycles', () => {
-      addr.AL();
-      expect(cpu.cycleIP).toBe(1);
+      addr.AL(null, null);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('write', () => {
-      let result = addr.AL(0xFF);
+      let result = addr.AL(null, 0xFF);
       expect(cpu.reg8[regAL]).toBe(0xFF);
       expect(result).toBe(0xFF);
     });
     test('write cycles', () => {
-      addr.AL(0xFF);
-      expect(cpu.cycleIP).toBe(1);
+      addr.AL(null, 0xFF);
+      expect(cpu.cycleIP).toBe(0);
     });
   });
 
   describe('BX', () => {
     test('read', () => {
-      expect(addr.BX()).toBe(0x2345);
+      expect(addr.BX(null, null)).toBe(0x2345);
     });
     test('read cycles', () => {
-      addr.BX();
-      expect(cpu.cycleIP).toBe(1);
+      addr.BX(null, null);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('write', () => {
-      let result = addr.BX(0xFFFF);
+      let result = addr.BX(null, 0xFFFF);
       expect(cpu.reg16[regBX]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
     test('write cycles', () => {
-      addr.BX(0xFFFF);
-      expect(cpu.cycleIP).toBe(1);
+      addr.BX(null, 0xFFFF);
+      expect(cpu.cycleIP).toBe(0);
     });
   });
 
   describe('BH', () => {
     test('read', () => {
-      expect(addr.BH()).toBe(0x45);
+      expect(addr.BH(null, null)).toBe(0x45);
     });
     test('read cycles', () => {
-      addr.BH();
-      expect(cpu.cycleIP).toBe(1);
+      addr.BH(null, null);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('write', () => {
-      let result = addr.BH(0xFF);
+      let result = addr.BH(null, 0xFF);
       expect(cpu.reg8[regBH]).toBe(0xFF);
       expect(result).toBe(0xFF);
     });
     test('write cycles', () => {
-      addr.BH(0xFF);
-      expect(cpu.cycleIP).toBe(1);
+      addr.BH(null, 0xFF);
+      expect(cpu.cycleIP).toBe(0);
     });
   });
 
   describe('BL', () => {
     test('read', () => {
-      expect(addr.BL()).toBe(0x23);
+      expect(addr.BL(null, null)).toBe(0x23);
     });
     test('read cycles', () => {
-      addr.BL();
-      expect(cpu.cycleIP).toBe(1);
+      addr.BL(null, null);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('write', () => {
-      let result = addr.BL(0xFF);
+      let result = addr.BL(null, 0xFF);
       expect(cpu.reg8[regBL]).toBe(0xFF);
       expect(result).toBe(0xFF);
     });
     test('write cycles', () => {
-      addr.BL(0xFF);
-      expect(cpu.cycleIP).toBe(1);
+      addr.BL(null, 0xFF);
+      expect(cpu.cycleIP).toBe(0);
     });
   });
 
   describe('CX', () => {
     test('read', () => {
-      expect(addr.CX()).toBe(0x3456);
+      expect(addr.CX(null, null)).toBe(0x3456);
     });
     test('read cycles', () => {
-      addr.CX();
-      expect(cpu.cycleIP).toBe(1);
+      addr.CX(null, null);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('write', () => {
-      let result = addr.CX(0xFFFF);
+      let result = addr.CX(null, 0xFFFF);
       expect(cpu.reg16[regCX]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
     test('write cycles', () => {
-      addr.CX(0xFFFF);
-      expect(cpu.cycleIP).toBe(1);
+      addr.CX(null, 0xFFFF);
+      expect(cpu.cycleIP).toBe(0);
     });
   });
 
   describe('CH', () => {
     test('read', () => {
-      expect(addr.CH()).toBe(0x56);
+      expect(addr.CH(null, null)).toBe(0x56);
     });
     test('read cycles', () => {
-      addr.CH();
-      expect(cpu.cycleIP).toBe(1);
+      addr.CH(null, null);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('write', () => {
-      let result = addr.CH(0xFF);
+      let result = addr.CH(null, 0xFF);
       expect(cpu.reg8[regCH]).toBe(0xFF);
       expect(result).toBe(0xFF);
     });
     test('write cycles', () => {
-      addr.CH(0xFF);
-      expect(cpu.cycleIP).toBe(1);
+      addr.CH(null, 0xFF);
+      expect(cpu.cycleIP).toBe(0);
     });
   });
 
   describe('CL', () => {
     test('read', () => {
-      expect(addr.CL()).toBe(0x34);
+      expect(addr.CL(null, null)).toBe(0x34);
     });
     test('read cycles', () => {
-      addr.CL();
-      expect(cpu.cycleIP).toBe(1);
+      addr.CL(null, null);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('write', () => {
-      let result = addr.CL(0xFF);
+      let result = addr.CL(null, 0xFF);
       expect(cpu.reg8[regCL]).toBe(0xFF);
       expect(result).toBe(0xFF);
     });
     test('write cycles', () => {
-      addr.CL(0xFF);
-      expect(cpu.cycleIP).toBe(1);
+      addr.CL(null, 0xFF);
+      expect(cpu.cycleIP).toBe(0);
     });
   });
 
   describe('DX', () => {
     test('read', () => {
-      expect(addr.DX()).toBe(0x4567);
+      expect(addr.DX(null, null)).toBe(0x4567);
     });
     test('read cycles', () => {
-      addr.DX();
-      expect(cpu.cycleIP).toBe(1);
+      addr.DX(null, null);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('write', () => {
-      let result = addr.DX(0xFFFF);
+      let result = addr.DX(null, 0xFFFF);
       expect(cpu.reg16[regDX]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
     test('write cycles', () => {
-      addr.DX(0xFFFF);
-      expect(cpu.cycleIP).toBe(1);
+      addr.DX(null, 0xFFFF);
+      expect(cpu.cycleIP).toBe(0);
     });
   });
 
   describe('DH', () => {
     test('read', () => {
-      expect(addr.DH()).toBe(0x67);
+      expect(addr.DH(null, null)).toBe(0x67);
     });
     test('read cycles', () => {
-      addr.DH();
-      expect(cpu.cycleIP).toBe(1);
+      addr.DH(null, null);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('write', () => {
-      let result = addr.DH(0xFF);
+      let result = addr.DH(null, 0xFF);
       expect(cpu.reg8[regDH]).toBe(0xFF);
       expect(result).toBe(0xFF);
     });
     test('write cycles', () => {
-      addr.DH(0xFF);
-      expect(cpu.cycleIP).toBe(1);
+      addr.DH(null, 0xFF);
+      expect(cpu.cycleIP).toBe(0);
     });
   });
 
   describe('DL', () => {
     test('read', () => {
-      expect(addr.DL()).toBe(0x45);
+      expect(addr.DL(null, null)).toBe(0x45);
     });
     test('read cycles', () => {
-      addr.DL();
-      expect(cpu.cycleIP).toBe(1);
+      addr.DL(null, null);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('write', () => {
-      let result = addr.DL(0xFF);
+      let result = addr.DL(null, 0xFF);
       expect(cpu.reg8[regDL]).toBe(0xFF);
       expect(result).toBe(0xFF);
     });
     test('write cycles', () => {
-      addr.DL(0xFF);
-      expect(cpu.cycleIP).toBe(1);
+      addr.DL(null, 0xFF);
+      expect(cpu.cycleIP).toBe(0);
     });
   });
 
   describe('SI', () => {
     test('read', () => {
-      expect(addr.SI()).toBe(0x5678);
+      expect(addr.SI(null, null)).toBe(0x5678);
     });
     test('read cycles', () => {
-      addr.SI();
-      expect(cpu.cycleIP).toBe(1);
+      addr.SI(null, null);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('write', () => {
-      let result = addr.SI(0xFFFF);
+      let result = addr.SI(null, 0xFFFF);
       expect(cpu.reg16[regSI]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
     test('write cycles', () => {
-      addr.SI(0xFFFF);
-      expect(cpu.cycleIP).toBe(1);
+      addr.SI(null, 0xFFFF);
+      expect(cpu.cycleIP).toBe(0);
     });
   });
 
   describe('DI', () => {
     test('read', () => {
-      expect(addr.DI()).toBe(0x6789);
+      expect(addr.DI(null, null)).toBe(0x6789);
     });
     test('read cycles', () => {
-      addr.DI();
-      expect(cpu.cycleIP).toBe(1);
+      addr.DI(null, null);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('write', () => {
-      let result = addr.DI(0xFFFF);
+      let result = addr.DI(null, 0xFFFF);
       expect(cpu.reg16[regDI]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
     test('write cycles', () => {
-      addr.DI(0xFFFF);
-      expect(cpu.cycleIP).toBe(1);
+      addr.DI(null, 0xFFFF);
+      expect(cpu.cycleIP).toBe(0);
     });
   });
 
   describe('BP', () => {
     test('read', () => {
-      expect(addr.BP()).toBe(0x789A);
+      expect(addr.BP(null, null)).toBe(0x789A);
     });
     test('read cycles', () => {
-      addr.BP();
-      expect(cpu.cycleIP).toBe(1);
+      addr.BP(null, null);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('write', () => {
-      let result = addr.BP(0xFFFF);
+      let result = addr.BP(null, 0xFFFF);
       expect(cpu.reg16[regBP]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
     test('write cycles', () => {
-      addr.BP(0xFFFF);
-      expect(cpu.cycleIP).toBe(1);
+      addr.BP(null, 0xFFFF);
+      expect(cpu.cycleIP).toBe(0);
     });
   });
 
   describe('SP', () => {
     test('read', () => {
-      expect(addr.SP()).toBe(0x89AB);
+      expect(addr.SP(null, null)).toBe(0x89AB);
     });
     test('read cycles', () => {
-      addr.SP();
-      expect(cpu.cycleIP).toBe(1);
+      addr.SP(null, null);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('write', () => {
-      let result = addr.SP(0xFFFF);
+      let result = addr.SP(null, 0xFFFF);
       expect(cpu.reg16[regSP]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
     test('write cycles', () => {
-      addr.SP(0xFFFF);
-      expect(cpu.cycleIP).toBe(1);
+      addr.SP(null, 0xFFFF);
+      expect(cpu.cycleIP).toBe(0);
     });
   });
 
   describe('CS', () => {
     test('read', () => {
-      expect(addr.CS()).toBe(0xABCD);
+      expect(addr.CS(null, null)).toBe(0xABCD);
     });
     test('read cycles', () => {
-      addr.CS();
-      expect(cpu.cycleIP).toBe(1);
+      addr.CS(null, null);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('write', () => {
-      let result = addr.CS(0xFFFF);
+      let result = addr.CS(null, 0xFFFF);
       expect(cpu.reg16[regCS]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
     test('write cycles', () => {
-      addr.CS(0xFFFF);
-      expect(cpu.cycleIP).toBe(1);
+      addr.CS(null, 0xFFFF);
+      expect(cpu.cycleIP).toBe(0);
     });
   });
 
   describe('DS', () => {
     test('read', () => {
-      expect(addr.DS()).toBe(0xBCD0);
+      expect(addr.DS(null, null)).toBe(0xBCD0);
     });
     test('read cycles', () => {
-      addr.DS();
-      expect(cpu.cycleIP).toBe(1);
+      addr.DS(null, null);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('write', () => {
-      let result = addr.DS(0xFFFF);
+      let result = addr.DS(null, 0xFFFF);
       expect(cpu.reg16[regDS]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
     test('write cycles', () => {
-      addr.DS(0xFFFF);
-      expect(cpu.cycleIP).toBe(1);
+      addr.DS(null, 0xFFFF);
+      expect(cpu.cycleIP).toBe(0);
     });
   });
 
   describe('ES', () => {
     test('read', () => {
-      expect(addr.ES()).toBe(0xCD01);
+      expect(addr.ES(null, null)).toBe(0xCD01);
     });
     test('read cycles', () => {
-      addr.ES();
-      expect(cpu.cycleIP).toBe(1);
+      addr.ES(null, null);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('write', () => {
-      let result = addr.ES(0xFFFF);
+      let result = addr.ES(null, 0xFFFF);
       expect(cpu.reg16[regES]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
     test('write cycles', () => {
-      addr.ES(0xFFFF);
-      expect(cpu.cycleIP).toBe(1);
+      addr.ES(null, 0xFFFF);
+      expect(cpu.cycleIP).toBe(0);
     });
   });
 
   describe('SS', () => {
     test('read', () => {
-      expect(addr.SS()).toBe(0xD012);
+      expect(addr.SS(null, null)).toBe(0xD012);
     });
     test('read cycles', () => {
-      addr.SS();
-      expect(cpu.cycleIP).toBe(1);
+      addr.SS(null, null);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('write', () => {
-      let result = addr.SS(0xFFFF);
+      let result = addr.SS(null, 0xFFFF);
       expect(cpu.reg16[regSS]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
     test('write cycles', () => {
-      addr.SS(0xFFFF);
-      expect(cpu.cycleIP).toBe(1);
+      addr.SS(null, 0xFFFF);
+      expect(cpu.cycleIP).toBe(0);
     });
   });
 
-  // describe('Ap', () => {
-  //
-  // });
-  //
-  // describe('Eb', () => {
-  //
-  // });
-  //
-  // describe('Ev', () => {
-  //
-  // });
-  //
-  // describe('Ew', () => {
-  //
-  // });
-  //
-  // describe('Gb', () => {
-  //
-  // });
-  //
-  // describe('Gv', () => {
-  //
-  // });
-  //
+  describe('Ap', () => {
+    beforeEach(() => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b01000000; // addr mode
+      cpu.mem8[0xABCD2] = 0x34; // segment byte high
+      cpu.mem8[0xABCD3] = 0x12; // segment byte low
+      cpu.mem8[0xABCD4] = 0x78; // offset byte high
+      cpu.mem8[0xABCD5] = 0x56; // offset byte low
+
+      // (CS     * 0x10) + ( offs ) =
+      // (0x1234 * 0x10) + (0x5678) =
+      //    0x12340      +  0x5678  = 0x179B8
+      cpu.mem8[0x179B8] = 0x90;
+    });
+
+    test('read', () => {
+      expect(addr.Ap(segment, null)).toBe(0x90);
+    });
+    test('read cycles', () => {
+      addr.Ap(segment, null);
+      expect(cpu.cycleIP).toBe(0);
+    });
+    test('write', () => {
+      addr.Ap(segment, 0xFFFF);
+      expect(cpu.mem8[0x179B8]).toBe(0xFF);
+      expect(cpu.mem8[0x179B9]).toBe(0xFF);
+    });
+    test('write cycles', () => {
+      addr.Ap(segment, 0xFFFF);
+      expect(cpu.cycleIP).toBe(0);
+    });
+  });
+
+  describe('Eb', () => {
+    beforeEach(() => {
+      cpu.mem8[0xB36E3] = 0x90;
+    });
+    test('read', () => {
+      expect(addr.Eb(segment, null)).toBe(0x90);
+    });
+    test('read cycles', () => {
+      addr.Eb(segment, null);
+      expect(cpu.cycleIP).toBe(0);
+    });
+    test('write', () => {
+      addr.Eb(segment, 0xFF);
+      expect(cpu.mem8[0xB36E3]).toBe(0xFF);
+    });
+    test('write cycles', () => {
+      addr.Eb(segment, 0xFF);
+      expect(cpu.cycleIP).toBe(0);
+    });
+    test('overflow throws', () => {
+      expect(() => {
+        addr.Eb(segment, 0xFFFF);
+      }).toThrowError(ValueOverflowException);
+    });
+    test('addressing mode overrides operand-size bit', () => {
+      cpu.mem8[0xABCD0] = 0x01; // inst (byte)
+      cpu.decode();
+      expect(addr.Eb(segment, null)).toBe(0x90);
+    });
+  });
+
+  describe('Ev', () => {
+    beforeEach(() => {
+      cpu.mem8[0xB36E3] = 0x90;
+      cpu.mem8[0xB36E4] = 0x90;
+    });
+    test('read', () => {
+      expect(addr.Ev(segment, null)).toBe(0x9090);
+    });
+    test('read cycles', () => {
+      addr.Ev(segment, null);
+      expect(cpu.cycleIP).toBe(0);
+    });
+    test('write', () => {
+      addr.Ev(segment, 0xFFFF);
+      expect(cpu.mem8[0xB36E3]).toBe(0xFF);
+      expect(cpu.mem8[0xB36E4]).toBe(0xFF);
+    });
+    test('write cycles', () => {
+      addr.Ev(segment, 0xFFFF);
+      expect(cpu.cycleIP).toBe(0);
+    });
+    test('overflow throws', () => {
+      expect(() => {
+        addr.Ev(segment, 0xFFFFFFFFF);
+      }).toThrowError(ValueOverflowException);
+    });
+  });
+
+  describe('Ew', () => {
+    beforeEach(() => {
+      cpu.mem8[0xB36E3] = 0x90;
+      cpu.mem8[0xB36E4] = 0x90;
+
+      cpu.mem8[0xABCD0] = 0x01; // inst (byte)
+      cpu.decode();
+    });
+    test('read', () => {
+      expect(addr.Ew(segment, null)).toBe(0x9090);
+    });
+    test('read cycles', () => {
+      addr.Ew(segment, null);
+      expect(cpu.cycleIP).toBe(0);
+    });
+    test('write', () => {
+      addr.Ew(segment, 0xFFFF);
+      expect(cpu.mem8[0xB36E3]).toBe(0xFF);
+      expect(cpu.mem8[0xB36E4]).toBe(0xFF);
+    });
+    test('write cycles', () => {
+      addr.Ew(segment, 0xFFFF);
+      expect(cpu.cycleIP).toBe(0);
+    });
+    test('overflow throws', () => {
+      expect(() => {
+        addr.Ew(segment, 0xFFFFFF);
+      }).toThrowError(ValueOverflowException);
+    });
+    test('addressing mode overrides operand-size bit', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.decode();
+      expect(addr.Ew(segment, null)).toBe(0x9090);
+    });
+  });
+
+  describe('Gb', () => {
+    test('read', () => {
+      expect(addr.Gb(segment, null)).toBe(0x12);
+    });
+    test('read cycles', () => {
+      addr.Gb(segment, null);
+      expect(cpu.cycleIP).toBe(0);
+    });
+    test('write', () => {
+      addr.Gb(segment, 0xFF);
+      expect(cpu.reg8[regAL]).toBe(0xFF);
+    });
+    test('write cycles', () => {
+      addr.Gb(segment, 0xFF);
+      expect(cpu.cycleIP).toBe(0);
+    });
+    test('overflow throws', () => {
+      expect(() => {
+        addr.Gb(segment, 0xFFFF);
+      }).toThrowError(ValueOverflowException);
+    });
+    test('addressing mode overrides operand-size bit', () => {
+      cpu.mem8[0xABCD0] = 0x01; // inst (byte)
+      cpu.decode();
+      expect(addr.Gb(segment, null)).toBe(0x12);
+    });
+  });
+
+  describe('Gv', () => {
+    beforeEach(() => {
+      cpu.mem8[0xABCD0] = 0x01; // inst (byte)
+      cpu.decode();
+    });
+    test('read', () => {
+      addr.Gv(segment, null);
+      expect(addr.Gv(segment, null)).toBe(0x1234);
+    });
+    test('read cycles', () => {
+      addr.Gv(segment, null);
+      expect(cpu.cycleIP).toBe(0);
+    });
+    test('write', () => {
+      addr.Gv(segment, 0xFFFF);
+      expect(cpu.reg16[regAX]).toBe(0xFFFF);
+    });
+    test('write cycles', () => {
+      addr.Gv(segment, 0xFFFF);
+      expect(cpu.cycleIP).toBe(0);
+    });
+    test('overflow throws', () => {
+      expect(() => {
+        addr.Gv(segment, 0xFFFFFFFFF);
+      }).toThrowError(ValueOverflowException);
+    });
+  });
+
   // describe('I0', () => {
   //
   // });

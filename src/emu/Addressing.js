@@ -22,450 +22,581 @@ export default class Addressing {
 
   /**
    *
-   * @param value Not used
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value - Not used in this addressing mode
    * @return {number} Returns 0x01
    */
-  _1 (value = null) {
+  _1 (segment, value) {
     return 0x01;
   }
 
   /**
    *
-   * @param value Not used
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value - Not used in this addressing mode
    * @return {number} Returns 0x03
    */
-  _3 (value = null) {
+  _3 (segment, value) {
     return 0x03;
   }
 
   /**
    * Read or write a word value from/to the AX register.
    *
-   * @param value Value to write (word)
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value Value to write (word)
    * @return {number} For a read operation the value from the register is
    *  returned. For a write operation the same value provided is returned.
    */
-  AX (value = null) {
+  AX (segment, value) {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regAX] = value;
     else result = this.cpu.reg16[regAX];
 
-    this.cpu.cycleIP += 1;
+    this.cpu.cycleIP += 0;
     return result;
   }
 
   /**
    * Read or write a byte value from/to the AH register.
    *
-   * @param value Value to write (word)
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value Value to write (word)
    * @return {number} For a read operation the value from the register is
    *  returned. For a write operation the same value provided is returned.
    */
-  AH (value = null) {
+  AH (segment, value) {
     let result;
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
     if (value || value === 0) result =  this.cpu.reg8[regAH] = value;
     else result = this.cpu.reg8[regAH];
 
-    this.cpu.cycleIP += 1;
+    this.cpu.cycleIP += 0;
     return result;
   }
 
   /**
    * Read or write a byte value from/to the AL register.
    *
-   * @param value Value to write (word)
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value Value to write (word)
    * @return {number} For a read operation the value from the register is
    *  returned. For a write operation the same value provided is returned.
    */
-  AL (value = null) {
+  AL (segment, value) {
     let result;
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
     if (value || value === 0) result =  this.cpu.reg8[regAL] = value;
     else result = this.cpu.reg8[regAL];
 
-    this.cpu.cycleIP += 1;
+    this.cpu.cycleIP += 0;
     return result;
   }
 
   /**
    * Read or write a word value from/to the BX register.
    *
-   * @param value Value to write (word)
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value Value to write (word)
    * @return {number} For a read operation the value from the register is
    *  returned. For a write operation the same value provided is returned.
    */
-  BX (value = null) {
+  BX (segment, value) {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regBX] = value;
     else result = this.cpu.reg16[regBX];
 
-    this.cpu.cycleIP += 1;
+    this.cpu.cycleIP += 0;
     return result;
   }
 
   /**
    * Read or write a byte value from/to the BH register.
    *
-   * @param value Value to write (word)
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value Value to write (word)
    * @return {number} For a read operation the value from the register is
    *  returned. For a write operation the same value provided is returned.
    */
-  BH (value = null) {
+  BH (segment, value) {
     let result;
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
     if (value || value === 0) result =  this.cpu.reg8[regBH] = value;
     else result = this.cpu.reg8[regBH];
 
-    this.cpu.cycleIP += 1;
+    this.cpu.cycleIP += 0;
     return result;
   }
 
   /**
    * Read or write a byte value from/to the BL register.
    *
-   * @param value Value to write (word)
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value Value to write (word)
    * @return {number} For a read operation the value from the register is
    *  returned. For a write operation the same value provided is returned.
    */
-  BL (value = null) {
+  BL (segment, value) {
     let result;
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
     if (value || value === 0) result =  this.cpu.reg8[regBL] = value;
     else result = this.cpu.reg8[regBL];
 
-    this.cpu.cycleIP += 1;
+    this.cpu.cycleIP += 0;
     return result;
   }
 
   /**
    * Read or write a word value from/to the CX register.
    *
-   * @param value Value to write (word)
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value Value to write (word)
    * @return {number} For a read operation the value from the register is
    *  returned. For a write operation the same value provided is returned.
    */
-  CX (value = null) {
+  CX (segment, value) {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regCX] = value;
     else result = this.cpu.reg16[regCX];
 
-    this.cpu.cycleIP += 1;
+    this.cpu.cycleIP += 0;
     return result;
   }
 
   /**
    * Read or write a byte value from/to the CH register.
    *
-   * @param value Value to write (word)
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value Value to write (word)
    * @return {number} For a read operation the value from the register is
    *  returned. For a write operation the same value provided is returned.
    */
-  CH (value = null) {
+  CH (segment, value) {
     let result;
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
     if (value || value === 0) result =  this.cpu.reg8[regCH] = value;
     else result = this.cpu.reg8[regCH];
 
-    this.cpu.cycleIP += 1;
+    this.cpu.cycleIP += 0;
     return result;
   }
 
   /**
    * Read or write a byte value from/to the CL register.
    *
-   * @param value Value to write (word)
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value Value to write (word)
    * @return {number} For a read operation the value from the register is
    *  returned. For a write operation the same value provided is returned.
    */
-  CL (value = null) {
+  CL (segment, value) {
     let result;
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
     if (value || value === 0) result =  this.cpu.reg8[regCL] = value;
     else result = this.cpu.reg8[regCL];
 
-    this.cpu.cycleIP += 1;
+    this.cpu.cycleIP += 0;
     return result;
   }
 
   /**
    * Read or write a word value from/to the DX register.
    *
-   * @param value Value to write (word)
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value Value to write (word)
    * @return {number} For a read operation the value from the register is
    *  returned. For a write operation the same value provided is returned.
    */
-  DX (value = null) {
+  DX (segment, value) {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regDX] = value;
     else result = this.cpu.reg16[regDX];
 
-    this.cpu.cycleIP += 1;
+    this.cpu.cycleIP += 0;
     return result;
   }
 
   /**
    * Read or write a byte value from/to the DH register.
    *
-   * @param value Value to write (word)
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value Value to write (word)
    * @return {number} For a read operation the value from the register is
    *  returned. For a write operation the same value provided is returned.
    */
-  DH (value = null) {
+  DH (segment, value) {
     let result;
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
     if (value || value === 0) result =  this.cpu.reg8[regDH] = value;
     else result = this.cpu.reg8[regDH];
 
-    this.cpu.cycleIP += 1;
+    this.cpu.cycleIP += 0;
     return result;
   }
 
   /**
    * Read or write a byte value from/to the DL register.
    *
-   * @param value Value to write (word)
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value Value to write (word)
    * @return {number} For a read operation the value from the register is
    *  returned. For a write operation the same value provided is returned.
    */
-  DL (value = null) {
+  DL (segment, value) {
     let result;
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
     if (value || value === 0) result =  this.cpu.reg8[regDL] = value;
     else result = this.cpu.reg8[regDL];
 
-    this.cpu.cycleIP += 1;
+    this.cpu.cycleIP += 0;
     return result;
   }
 
   /**
    * Read or write a word value from/to the SI register.
    *
-   * @param value Value to write (word)
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value Value to write (word)
    * @return {number} For a read operation the value from the register is
    *  returned. For a write operation the same value provided is returned.
    */
-  SI (value = null) {
+  SI (segment, value) {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regSI] = value;
     else result = this.cpu.reg16[regSI];
 
-    this.cpu.cycleIP += 1;
+    this.cpu.cycleIP += 0;
     return result;
   }
 
   /**
    * Read or write a word value from/to the DI register.
    *
-   * @param value Value to write (word)
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value Value to write (word)
    * @return {number} For a read operation the value from the register is
    *  returned. For a write operation the same value provided is returned.
    */
-  DI (value = null) {
+  DI (segment, value) {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regDI] = value;
     else result = this.cpu.reg16[regDI];
 
-    this.cpu.cycleIP += 1;
+    this.cpu.cycleIP += 0;
     return result;
   }
 
   /**
    * Read or write a word value from/to the BP register.
    *
-   * @param value Value to write (word)
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value Value to write (word)
    * @return {number} For a read operation the value from the register is
    *  returned. For a write operation the same value provided is returned.
    */
-  BP (value = null) {
+  BP (segment, value) {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regBP] = value;
     else result = this.cpu.reg16[regBP];
 
-    this.cpu.cycleIP += 1;
+    this.cpu.cycleIP += 0;
     return result;
   }
 
   /**
    * Read or write a word value from/to the SP register.
    *
-   * @param value Value to write (word)
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value Value to write (word)
    * @return {number} For a read operation the value from the register is
    *  returned. For a write operation the same value provided is returned.
    */
-  SP (value = null) {
+  SP (segment, value) {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regSP] = value;
     else result = this.cpu.reg16[regSP];
 
-    this.cpu.cycleIP += 1;
+    this.cpu.cycleIP += 0;
     return result;
   }
 
   /**
    * Read or write a word value from/to the CS register.
    *
-   * @param value Value to write (word)
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value Value to write (word)
    * @return {number} For a read operation the value from the register is
    *  returned. For a write operation the same value provided is returned.
    */
-  CS (value = null) {
+  CS (segment, value) {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regCS] = value;
     else result = this.cpu.reg16[regCS];
 
-    this.cpu.cycleIP += 1;
+    this.cpu.cycleIP += 0;
     return result;
   }
 
   /**
    * Read or write a word value from/to the DS register.
    *
-   * @param value Value to write (word)
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value Value to write (word)
    * @return {number} For a read operation the value from the register is
    *  returned. For a write operation the same value provided is returned.
    */
-  DS (value = null) {
+  DS (segment, value) {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regDS] = value;
     else result = this.cpu.reg16[regDS];
 
-    this.cpu.cycleIP += 1;
+    this.cpu.cycleIP += 0;
     return result;
   }
 
   /**
    * Read or write a word value from/to the ES register.
    *
-   * @param value Value to write (word)
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value Value to write (word)
    * @return {number} For a read operation the value from the register is
    *  returned. For a write operation the same value provided is returned.
    */
-  ES (value = null) {
+  ES (segment, value) {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regES] = value;
     else result = this.cpu.reg16[regES];
 
-    this.cpu.cycleIP += 1;
+    this.cpu.cycleIP += 0;
     return result;
   }
 
   /**
    * Read or write a word value from/to the SS register.
    *
-   * @param value Value to write (word)
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value Value to write (word)
    * @return {number} For a read operation the value from the register is
    *  returned. For a write operation the same value provided is returned.
    */
-  SS (value = null) {
+  SS (segment, value) {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regSS] = value;
     else result = this.cpu.reg16[regSS];
 
-    this.cpu.cycleIP += 1;
+    this.cpu.cycleIP += 0;
     return result;
   }
 
-
-  Ap (value = null) {
-    winston.log("debug", "Addressing.Ap()          : (value=" + hexString16(value) + ")");
-  }
-  Eb (value = null) {
-    winston.log("debug", "Addressing.Eb()          : (value=" + hexString16(value) + ")");
-
+  /**
+   * Direct address. The instruction has no ModR/M byte; the address of the
+   * operand is encoded in the instruction; and no base register, index
+   * register, or scaling factor can be applied (for example, far JMP (EA))
+   *
+   * The opperand is a 32-bit segment:offset pointer.
+   *
+   * For example:
+   * 0x9A 0x12 0x34 0x56 0x78
+   *
+   * @param {number|null} segment Memory segment
+   * @param {number|null} value Value to write (word)
+   * @return {number} For a read operation the value from the address is
+   *  returned.
+   */
+  Ap (segment, value) {
     let result;
-    let segment = this.cpu.reg16[regCS];
+
+    // Get the 32bit far address (segment:offset) from the instruction argument
+    let s = (this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 3, this.cpu)] << 8) |
+             this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)];
+    let o = (this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 5, this.cpu)] << 8) |
+             this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 4, this.cpu)];
+
+    if (value || value === 0) this.writeMem16(s, o, value);
+    else result = this.readMem16(s, o);
+
+    this.cpu.cycleIP += 0;
+    return result;
+  }
+
+  /**
+   * A ModR/M byte follows the opcode and specifies the operand. The operand
+   * is either a general-purpose register or a memory address. If it is a
+   * memory address, the address is computed from a segment register and any
+   * of the following values: a base register, an index register, a scaling
+   * factor, a displacement.
+   *
+   * The operand is a byte, regardless of operand-size attribute.
+   *
+   * @param {number|null} segment Memory segment
+   * @param {number|null} value Value to write (byte)
+   * @return {number} For a read operation the value from the address is
+   *  returned. For a write operation the same value provided is returned.
+   */
+  Eb (segment, value) {
+    let result;
+    if (value !== null && value > 0xFF) throw new ValueOverflowException("Value too large for memory addressing mode");
+    this.cpu.opcode.w = 0; // Override opcode w bit
     if (value || value === 0) result = this.writeRMReg8(segment, value);
     else result = this.readRMReg8(segment);
-
-    winston.log("debug", "Addressing.Ev()          :     result=" + hexString16(result));
-
-    this.cpu.cycleIP += 1;
+    this.cpu.cycleIP += 0;
     return result;
   }
-  Ev (value = null) {
-    winston.log("debug", "Addressing.Ev()          : (value=" + hexString16(value) + ")");
 
+  /**
+   * A ModR/M byte follows the opcode and specifies the operand. The operand
+   * is either a general-purpose register or a memory address. If it is a
+   * memory address, the address is computed from a segment register and any
+   * of the following values: a base register, an index register, a scaling
+   * factor, a displacement.
+   *
+   * The operand is a word or doubleword, depending on operand-size attribute.
+   *
+   * @param {number|null} segment Memory segment
+   * @param {number|null} value Value to write (word|doubleword)
+   * @return {number} For a read operation the value from the address is
+   *  returned. For a write operation the same value provided is returned.
+   */
+  Ev (segment, value) {
     let result;
-    let segment = this.cpu.reg16[regCS];
+    if (value !== null && value > 0xFFFFFFFF) throw new ValueOverflowException("Value too large for memory addressing mode");
     if (value || value === 0) result = this.writeRMReg16(segment, value);
     else result = this.readRMReg16(segment);
 
-    winston.log("debug", "Addressing.Ev()          :     result=" + hexString16(result));
-
-    this.cpu.cycleIP += 1;
+    this.cpu.cycleIP += 0;
     return result;
   }
-  Ew (value = null) {
-    winston.log("debug", "Addressing.Ew()          : (value=" + hexString16(value) + ")");
-  }
-  Gb (value = null) {
-    winston.log("debug", "Addressing.Gb()          : (value=" + hexString16(value) + ")");
-  }
-  Gv (value = null) {
-    winston.log("debug", "Addressing.Gv()          : (value=" + hexString16(value) + ")");
-  }
-  I0 (value = null) {
-    winston.log("debug", "Addressing.I0()          : (value=" + hexString16(value) + ")");
-  }
-  Ib (value = null) {
-    winston.log("debug", "Addressing.Ib()          : (value=" + hexString16(value) + ")");
+
+  /**
+   * A ModR/M byte follows the opcode and specifies the operand. The operand
+   * is either a general-purpose register or a memory address. If it is a
+   * memory address, the address is computed from a segment register and any
+   * of the following values: a base register, an index register, a scaling
+   * factor, a displacement.
+   *
+   * The operand is a word, regardless of operand-size attribute.
+   *
+   * @param {number|null} segment Memory segment
+   * @param {number|null} value Value to write (word)
+   * @return {number} For a read operation the value from the address is
+   *  returned. For a write operation the same value provided is returned.
+   */
+  Ew (segment, value) {
     let result;
-    let segment = this.cpu.reg16[regCS];
+    if (value !== null && value > 0xFFFF) throw new ValueOverflowException("Value too large for memory addressing mode");
+    this.cpu.opcode.w = 1; // Override opcode w bit
+    if (value || value === 0) result = this.writeRMReg16(segment, value);
+    else result = this.readRMReg16(segment);
+
+    this.cpu.cycleIP += 0;
+    return result;
+  }
+
+  /**
+   * The reg field of the ModR/M byte selects a general register (for example,
+   * AX (000)).
+   *
+   * The operand is a byte, regardless of operand-size attribute.
+   *
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value Value to write (byte)
+   * @return {number} For a read operation the value from the address is
+   *  returned. For a write operation the same value provided is returned.
+   */
+  Gb (segment, value) {
+    let result;
+    if (value !== null && value > 0xFF) throw new ValueOverflowException("Value too large for memory addressing mode");
+    this.cpu.opcode.w = 0; // Override opcode w bit
+    if (value || value === 0) result = this.writeRegVal(value);
+    else result = this.readRegVal();
+
+    this.cpu.cycleIP += 0;
+    return result;
+  }
+
+  /**
+   * The reg field of the ModR/M byte selects a general register (for example,
+   * AX (000)).
+   *
+   * The operand is a word or doubleword, depending on operand-size attribute.
+   *
+   * @param {number|null} segment Memory segment - Not used in this addressing mode
+   * @param {number|null} value Value to write (word|doubleword)
+   * @return {number} For a read operation the value from the address is
+   *  returned. For a write operation the same value provided is returned.
+   */
+  Gv (segment, value) {
+    let result;
+    if (value !== null && value > 0xFFFFFFFF) throw new ValueOverflowException("Value too large for memory addressing mode");
+    if (value || value === 0) result = this.writeRegVal(value);
+    else result = this.readRegVal();
+
+    this.cpu.cycleIP += 0;
+    return result;
+  }
+  I0 (segment, value) {
+
+  }
+
+  Ib (segment, value) {
+    let result;
     let offset = seg2abs(segment, this.cpu.reg16[regIP] + this.cpu.cycleIP, this.cpu);
 
     if (value || value === 0) result = this.writeMem8(segment, offset, value);
     else result = this.readMem8(segment, offset);
 
-    winston.log("debug", "Addressing.Ev()          :     result=" + hexString16(result));
-
-    this.cpu.cycleIP += 2;
+    this.cpu.cycleIP += 0;
     return result;
   }
-  Iv (value = null) {
-    winston.log("debug", "Addressing.Iv()          : (value=" + hexString16(value) + ")");
+
+  Iv (segment, value) {
     let result;
-    let segment = this.cpu.reg16[regCS];
     let offset = seg2abs(segment, this.cpu.reg16[regIP] + this.cpu.cycleIP, this.cpu)
 
     if (value || value === 0) result = this.writeMem16(segment, offset, value);
     else result = this.readMem16(segment, offset);
 
-    winston.log("debug", "Addressing.Ev()          :     result=" + hexString16(result));
-
-    this.cpu.cycleIP += 2;
+    this.cpu.cycleIP += 0;
     return result;
   }
-  Iw (value = null) {
-    winston.log("debug", "Addressing.Iw()          : (value=" + hexString16(value) + ")");
+
+  Iw (segment, value) {
+
   }
-  Jb (value = null) {
-    winston.log("debug", "Addressing.Jb()          : (value=" + hexString16(value) + ")");
+
+  Jb (segment, value) {
+
   }
-  Jv (value = null) {
-    winston.log("debug", "Addressing.Jv()          : (value=" + hexString16(value) + ")");
+
+  Jv (segment, value) {
+
   }
-  M (value = null) {
-    winston.log("debug", "Addressing.M()          : (value=" + hexString16(value) + ")");
+
+  M (segment, value) {
+
   }
-  Mp (value = null) {
-    winston.log("debug", "Addressing.Mp()          : (value=" + hexString16(value) + ")");
+
+  Mp (segment, value) {
+
   }
-  Ob (value = null) {
-    winston.log("debug", "Addressing.Ob()          : (value=" + hexString16(value) + ")");
+
+  Ob (segment, value) {
+
   }
-  Ov (value = null) {
-    winston.log("debug", "Addressing.Ov()          : (value=" + hexString16(value) + ")");
+
+  Ov (segment, value) {
+
   }
-  Sw (value = null) {
-    winston.log("debug", "Addressing.Sw()          : (value=" + hexString16(value) + ")");
+
+  Sw (segment, value) {
+
   }
 
   /**
    * Read a byte from memory or a register as specified by the addressing
    * mode determined by the mod, reg and r/m values.
    *
-   * @param {number} segment Memory segment
+   * @param {number|null} segment Memory segment
    */
   readRMReg8 (segment) {
     let offset;
@@ -703,7 +834,7 @@ export default class Addressing {
    * Write a byte or a word to a register determined by the rm or reg value
    * and the reg lookup table.
    *
-   * @param value Value to write to the register
+   * @param {number} value Value to write to the register
    * @param {boolean} useRM Use the RM value rather than the default REG value
    */
   writeRegVal (value, useRM = false) {
