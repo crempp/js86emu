@@ -45,3 +45,12 @@ test('memory size too large throws', () => {
     config.validate();
   }).toThrowError(CPUConfigException);
 });
+
+test('non-number memory size throws', () => {
+  expect(() => {
+    let config = new CPUConfig({
+      memorySize: "2097152"
+    });
+    config.validate();
+  }).toThrowError(CPUConfigException);
+});
