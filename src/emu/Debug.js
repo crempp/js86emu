@@ -6,34 +6,47 @@ import {
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
 } from './Constants';
+import { ValueOverflowException, ValueUnderflowException } from "./Exceptions";
 
 export function binString8 (value) {
-  if (value === null || value === undefined) return "NULL";
+  if (value > 0xFF) throw new ValueOverflowException("Value too large for binString8()");
+  else if (value < 0) throw new ValueUnderflowException("Value can not be negative for binString8()");
+  else if (value === null || value === undefined) return "NULL";
   else return String("00000000" + value.toString(2)).slice(-8);
 }
 
 export function binString16 (value) {
-  if (value === null || value === undefined) return "NULL";
+  if (value > 0xFFFF) throw new ValueOverflowException("Value too large for binString16()");
+  else if (value < 0) throw new ValueUnderflowException("Value can not be negative for binString16()");
+  else if (value === null || value === undefined) return "NULL";
   else return String("0000000000000000" + value.toString(2)).slice(-16);
 }
 
 export function binString32 (value) {
-  if (value === null || value === undefined) return "NULL";
+  if (value > 0xFFFFFFFF) throw new ValueOverflowException("Value too large for binString32()");
+  else if (value < 0) throw new ValueUnderflowException("Value can not be negative for binString32()");
+  else if (value === null || value === undefined) return "NULL";
   else return String("00000000000000000000000000000000" + value.toString(2)).slice(-32);
 }
 
 export function hexString8 (value) {
-  if (value === null || value === undefined) return "NULL";
+  if (value > 0xFF) throw new ValueOverflowException("Value too large for hexString8()");
+  else if (value < 0) throw new ValueUnderflowException("Value can not be negative for hexString8()");
+  else if (value === null || value === undefined) return "NULL";
   else return "0x" + String("00" + value.toString(16).toUpperCase()).slice(-2);
 }
 
 export function hexString16 (value) {
-  if (value === null || value === undefined) return "NULL";
+  if (value > 0xFFFF) throw new ValueOverflowException("Value too large for hexString16()");
+  else if (value < 0) throw new ValueUnderflowException("Value can not be negative for hexString16()");
+  else if (value === null || value === undefined) return "NULL";
   else return "0x" + String("0000" + value.toString(16).toUpperCase()).slice(-4);
 }
 
 export function hexString32 (value) {
-  if (value === null || value === undefined) return "NULL";
+  if (value > 0xFFFFFFFF) throw new ValueOverflowException("Value too large for hexString32()");
+  else if (value < 0) throw new ValueUnderflowException("Value can not be negative for hexString32()");
+  else if (value === null || value === undefined) return "NULL";
   else return "0x" + String("00000000" + value.toString(16).toUpperCase()).slice(-8);
 }
 
@@ -60,14 +73,15 @@ export function formatMemory(mem8, from, to, indentSize=0) {
 
   let count = 1;
   for (let i = from; i <= to; i++) {
-    str += "[" + hexString32(i) + "]: " + binString8(mem8[i]) + "(" + hexString8(mem8[i]) + ") ";
+    str += "[" + hexString32(i) + "]: " + binString8(mem8[i]) + "(" + hexString8(mem8[i]) + ")";
     if (count++ % 4 === 0 && i !== to) str += "\n" + indent;
+    else if (i !== to) str += " ";
   }
 
   return str;
 }
 
-export function formatRegisters(cpu, indentSize) {
+export function formatRegisters(cpu, indentSize=0) {
   let str = "";
   let indent = " ".repeat(indentSize);
 
