@@ -774,7 +774,7 @@ describe('Register access methods', () => {
 });
 
 describe('Memory addressing mode methods', () => {
-  let addr, cpu;
+  let addr, cpu, segment;
 
   beforeEach(() => {
     cpu = new CPU8086(new CPUConfig({
@@ -797,6 +797,7 @@ describe('Memory addressing mode methods', () => {
     cpu.reg16[regSS] = 0xD012;
 
     cpu.reg16[regIP] = 0x0000;
+    segment = cpu.reg16[regCS];
   });
 
   describe('calcRMAddr', () => {
@@ -806,7 +807,6 @@ describe('Memory addressing mode methods', () => {
     test('[BX + SI]', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000000; // addr mode
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  BX   +   SI  ) =
@@ -816,7 +816,6 @@ describe('Memory addressing mode methods', () => {
     test('[BX + DI]', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000001; // addr mode
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  BX   +   DI  ) =
@@ -826,7 +825,6 @@ describe('Memory addressing mode methods', () => {
     test('[BP + SI]', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000010; // addr mode
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  BP   +   SI  ) =
@@ -836,7 +834,6 @@ describe('Memory addressing mode methods', () => {
     test('[BP + DI]', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000011; // addr mode
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  BP   +   DI  ) =
@@ -846,7 +843,6 @@ describe('Memory addressing mode methods', () => {
     test('[SI]', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000100; // addr mode
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  SI  ) =
@@ -856,7 +852,6 @@ describe('Memory addressing mode methods', () => {
     test('[DI]', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000101; // addr mode
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  DI  ) =
@@ -868,7 +863,6 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD1] = 0b00000110; // addr mode
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // ( d1:d0) =
@@ -878,7 +872,6 @@ describe('Memory addressing mode methods', () => {
     test('[BX]', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000111; // addr mode
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  BX  ) =
@@ -893,7 +886,6 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD1] = 0b01000000; // addr mode
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  BX   +   SI  ) + disp =
@@ -906,7 +898,6 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD1] = 0b01000001; // addr mode
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  BX   +   DI  ) + disp =
@@ -919,7 +910,6 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD1] = 0b01000010; // addr mode
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  BP   +   SI  ) + disp =
@@ -932,7 +922,6 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD1] = 0b01000011; // addr mode
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  BP   +   DI  ) + disp =
@@ -945,7 +934,6 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD1] = 0b01000100; // addr mode
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  SI  ) + disp =
@@ -957,7 +945,6 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD1] = 0b01000101; // addr mode
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  DI  ) + disp =
@@ -969,7 +956,6 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD1] = 0b01000110; // addr mode
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  BP  ) + disp =
@@ -981,7 +967,6 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD1] = 0b01000111; // addr mode
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  BX  ) + disp =
@@ -994,7 +979,6 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD1] = 0b10000000; // addr mode
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  BX   +   SI  ) + disp   =
@@ -1007,7 +991,6 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD1] = 0b10000001; // addr mode
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  BX   +   DI  ) + disp   =
@@ -1020,7 +1003,6 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD1] = 0b10000010; // addr mode
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  BP   +   SI  ) + disp   =
@@ -1033,7 +1015,6 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD1] = 0b10000011; // addr mode
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  BP   +   DI  ) + disp   =
@@ -1046,7 +1027,6 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD1] = 0b10000100; // addr mode
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  SI  ) + disp   =
@@ -1058,7 +1038,6 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD1] = 0b10000101; // addr mode
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  DI  ) + disp   =
@@ -1070,7 +1049,6 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD1] = 0b10000110; // addr mode
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  BP  ) + disp   =
@@ -1082,7 +1060,6 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD1] = 0b10000111; // addr mode
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
-      let segment = cpu.reg16[regCS];
       cpu.decode();
 
       // (  BX  ) + disp   =
@@ -1093,7 +1070,7 @@ describe('Memory addressing mode methods', () => {
 });
 
 describe('rm/reg access methods', () => {
-  let addr, cpu;
+  let addr, cpu, segment;
 
   beforeEach(() => {
     cpu = new CPU8086(new CPUConfig({
@@ -1121,6 +1098,8 @@ describe('rm/reg access methods', () => {
     cpu.mem8[0xABCD1] = 0b01000000; // addr mode
     cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
     cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+
+    segment = cpu.reg16[regCS];
   });
 
   describe('readRMReg8()', () => {
@@ -1133,7 +1112,6 @@ describe('rm/reg access methods', () => {
       //    0xABCD0    +         0x79BD      = 0xB368D
       cpu.mem8[0xB368D] = 0x42;
 
-      let segment = cpu.reg16[regCS];
       cpu.decode();
       expect(addr.readRMReg8(segment)).toBe(0x42);
     });
@@ -1148,7 +1126,6 @@ describe('rm/reg access methods', () => {
       //    0xABCD0    +         0x79BD      + 0x56 = 0xB36E3
       cpu.mem8[0xB36E3] = 0x42;
 
-      let segment = cpu.reg16[regCS];
       cpu.decode();
       expect(addr.readRMReg8(segment)).toBe(0x42);
     });
@@ -1163,14 +1140,12 @@ describe('rm/reg access methods', () => {
       //    0xABCD0    +         0x79BD      + 0x1256 = 0xB48E3
       cpu.mem8[0xB48E3] = 0x42;
 
-      let segment = cpu.reg16[regCS];
       cpu.decode();
       expect(addr.readRMReg8(segment)).toBe(0x42);
     });
     test('two register instruction; use R/M bits with REG table', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b11111110; // addr mode
-      let segment = cpu.reg16[regCS];
       cpu.decode();
       expect(addr.readRMReg8(segment)).toBe(0x67);
     });
@@ -1178,7 +1153,7 @@ describe('rm/reg access methods', () => {
 
   describe('readRMReg16()', () => {
     test('use R/M Table 1 for R/M operand', () => {
-      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD0] = 0x01; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000000; // addr mode
 
       // (CS     * 0x10) + (  BX   +   SI  ) =
@@ -1187,12 +1162,11 @@ describe('rm/reg access methods', () => {
       cpu.mem8[0xB368D] = 0x42;
       cpu.mem8[0xB368E] = 0x21;
 
-      let segment = cpu.reg16[regCS];
       cpu.decode();
       expect(addr.readRMReg16(segment)).toBe(0x2142);
     });
     test('use R/M Table 2 with 8-bit displacement', () => {
-      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD0] = 0x01; // inst (byte)
       cpu.mem8[0xABCD1] = 0b01000000; // addr mode
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
@@ -1203,12 +1177,11 @@ describe('rm/reg access methods', () => {
       cpu.mem8[0xB36E3] = 0x42;
       cpu.mem8[0xB36E4] = 0x21;
 
-      let segment = cpu.reg16[regCS];
       cpu.decode();
       expect(addr.readRMReg16(segment)).toBe(0x2142);
     });
     test('use R/M Table 2 with 16-bit displacement (word disp)', () => {
-      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD0] = 0x01; // inst (byte)
       cpu.mem8[0xABCD1] = 0b10000000; // addr mode
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
@@ -1219,25 +1192,112 @@ describe('rm/reg access methods', () => {
       cpu.mem8[0xB48E3] = 0x42;
       cpu.mem8[0xB48E4] = 0x21;
 
-      let segment = cpu.reg16[regCS];
       cpu.decode();
       expect(addr.readRMReg16(segment)).toBe(0x2142);
     });
     test('two register instruction; use R/M bits with REG table', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
       cpu.mem8[0xABCD1] = 0b11111110; // addr mode
-      let segment = cpu.reg16[regCS];
       cpu.decode();
       expect(addr.readRMReg16(segment)).toBe(0x5678);
     });
   });
 
   describe('writeRMReg8()', () => {
+    test('use R/M Table 1 for R/M operand', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00000000; // addr mode
+      cpu.decode();
+      addr.writeRMReg8(segment, 0x42);
 
+      // (CS     * 0x10) + (  BX   +   SI  ) =
+      // (0xABCD * 0x10) + (0x2345 + 0x5678) =
+      //    0xABCD0    +         0x79BD      = 0xB368D
+      expect(cpu.mem8[0xB368D]).toBe(0x42);
+    });
+    test('use R/M Table 2 with 8-bit displacement', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b01000000; // addr mode
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+      cpu.decode();
+      addr.writeRMReg8(segment, 0x42);
+
+      // (CS     * 0x10) + (  BX   +   SI  ) + disp  =
+      // (0xABCD * 0x10) + (0x2345 + 0x5678) + 0x56 =
+      //    0xABCD0    +         0x79BD      + 0x56 = 0xB36E3
+      expect(cpu.mem8[0xB36E3]).toBe(0x42);
+    });
+    test('use R/M Table 2 with 16-bit displacement (word disp)', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b10000000; // addr mode
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+      cpu.decode();
+      addr.writeRMReg8(segment, 0x42);
+
+      // (CS     * 0x10) + (  BX   +   SI  ) + disp  =
+      // (0xABCD * 0x10) + (0x2345 + 0x5678) + 0x1256 =
+      //    0xABCD0    +         0x79BD      + 0x1256 = 0xB48E3
+      expect(cpu.mem8[0xB48E3]).toBe(0x42);
+    });
+    test('two register instruction; use R/M bits with REG table', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b11111110; // addr mode
+      cpu.decode();
+      addr.writeRMReg8(segment, 0x67);
+      expect(cpu.reg8[regDH]).toBe(0x67);
+    });
   });
 
   describe('writeRMReg16()', () => {
+    test('use R/M Table 1 for R/M operand', () => {
+      cpu.mem8[0xABCD0] = 0x01; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00000000; // addr mode
+      cpu.decode();
+      addr.writeRMReg16(segment, 0x2142);
 
+      // (CS     * 0x10) + (  BX   +   SI  ) =
+      // (0xABCD * 0x10) + (0x2345 + 0x5678) =
+      //    0xABCD0    +         0x79BD      = 0xB368D
+      expect(cpu.mem8[0xB368D]).toBe(0x42);
+      expect(cpu.mem8[0xB368E]).toBe(0x21)
+    });
+    test('use R/M Table 2 with 8-bit displacement', () => {
+      cpu.mem8[0xABCD0] = 0x01; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b01000000; // addr mode
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+      cpu.decode();
+      addr.writeRMReg16(segment, 0x2142);
+
+      // (CS     * 0x10) + (  BX   +   SI  ) + disp  =
+      // (0xABCD * 0x10) + (0x2345 + 0x5678) + 0x56 =
+      //    0xABCD0    +         0x79BD      + 0x56 = 0xB36E3
+      expect(cpu.mem8[0xB36E3]).toBe(0x42);
+      expect(cpu.mem8[0xB36E4]).toBe(0x21);
+    });
+    test('use R/M Table 2 with 16-bit displacement (word disp)', () => {
+      cpu.mem8[0xABCD0] = 0x01; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b10000000; // addr mode
+      cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+      cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+      cpu.decode();
+      addr.writeRMReg16(segment, 0x2142);
+
+      // (CS     * 0x10) + (  BX   +   SI  ) + disp  =
+      // (0xABCD * 0x10) + (0x2345 + 0x5678) + 0x1256 =
+      //    0xABCD0    +         0x79BD      + 0x1256 = 0xB48E3
+      expect(cpu.mem8[0xB48E3]).toBe(0x42);
+      expect(cpu.mem8[0xB48E4]).toBe(0x21);
+    });
+    test('two register instruction; use R/M bits with REG table', () => {
+      cpu.mem8[0xABCD0] = 0x01; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b11111110; // addr mode
+      cpu.decode();
+      addr.writeRMReg16(segment, 0x5678);
+      expect(cpu.reg16[regSI]).toBe(0x5678);
+    });
   });
 });
 

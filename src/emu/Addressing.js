@@ -185,7 +185,7 @@ export default class Addressing {
   }
 
   /**
-   * Read a value from memory or a register as specified by the addressing
+   * Read a byte from memory or a register as specified by the addressing
    * mode determined by the mod, reg and r/m values.
    *
    * @param {number} segment
@@ -205,8 +205,13 @@ export default class Addressing {
     }
   }
 
+  /**
+   * Read a word from memory or a register as specified by the addressing
+   * mode determined by the mod, reg and r/m values.
+   *
+   * @param {number} segment
+   */
   readRMReg16 (segment) {
-    winston.log("debug", "Addressing.readRMReg16() : ()");
     let offset;
     switch (this.cpu.opcode.mod) {
       case 0b00: // Use R/M Table 1 for R/M operand
