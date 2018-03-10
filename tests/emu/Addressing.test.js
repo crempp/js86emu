@@ -13,7 +13,8 @@ import {
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
 } from '../../src/emu/Constants';
 import {
-  formatOpcode, hexString8, hexString16, hexString32, formatFlags, formatMemory, formatRegisters
+  formatOpcode, hexString8, hexString16, hexString32, formatFlags,
+  formatMemory, formatRegisters
 } from "../../src/emu/Debug";
 import {segIP} from "../../src/emu/Utils";
 
@@ -43,6 +44,13 @@ winston.level = 'warn';
 //   "DI:        " + hexString16(cpu.reg16[regDI]) + "\n" +
 //   "BP + DI:   " + hexString32(cpu.reg16[regBP]+cpu.reg16[regDI]));
 
+test('Addressing object constructs', () => {
+  let cpu = new CPU8086(new CPUConfig({
+    memorySize: 1048576
+  }));
+  let addr = new Addressing(cpu);
+  expect(addr).toBeInstanceOf(Addressing);
+});
 
 describe('Memory access methods', () => {
   let addr, cpu;
@@ -1301,164 +1309,505 @@ describe('rm/reg access methods', () => {
   });
 });
 
-// describe('Addressing Modes', () => {
-//   let addr, cpu;
-//
-//   beforeEach(() => {
-//     cpu = new CPU8086(new CPUConfig({
-//       memorySize: 1024
-//     }));
-//     addr = new Addressing(cpu);
-//   });
-//
-//   describe('AX', () => {
-//
-//   });
-//
-//   describe('AH', () => {
-//
-//   });
-//
-//   describe('AL', () => {
-//
-//   });
-//
-//   describe('BX', () => {
-//
-//   });
-//
-//   describe('BH', () => {
-//
-//   });
-//
-//   describe('BL', () => {
-//
-//   });
-//
-//   describe('CX', () => {
-//
-//   });
-//
-//   describe('CH', () => {
-//
-//   });
-//
-//   describe('CL', () => {
-//
-//   });
-//
-//   describe('DX', () => {
-//
-//   });
-//
-//   describe('DH', () => {
-//
-//   });
-//
-//   describe('DL', () => {
-//
-//   });
-//
-//   describe('SI', () => {
-//
-//   });
-//
-//   describe('DI', () => {
-//
-//   });
-//
-//   describe('BP', () => {
-//
-//   });
-//
-//   describe('SP', () => {
-//
-//   });
-//
-//   describe('CS', () => {
-//
-//   });
-//
-//   describe('DS', () => {
-//
-//   });
-//
-//   describe('ES', () => {
-//
-//   });
-//
-//   describe('SS', () => {
-//
-//   });
-//
-//   describe('Ap', () => {
-//
-//   });
-//
-//   describe('Eb', () => {
-//
-//   });
-//
-//   describe('Ev', () => {
-//
-//   });
-//
-//   describe('Ew', () => {
-//
-//   });
-//
-//   describe('Gb', () => {
-//
-//   });
-//
-//   describe('Gv', () => {
-//
-//   });
-//
-//   describe('I0', () => {
-//
-//   });
-//
-//   describe('Ib', () => {
-//
-//   });
-//
-//   describe('Iv', () => {
-//
-//   });
-//
-//   describe('Iw', () => {
-//
-//   });
-//
-//   describe('Jb', () => {
-//
-//   });
-//
-//   describe('Jv', () => {
-//
-//   });
-//
-//   describe('M', () => {
-//
-//   });
-//
-//   describe('Mp', () => {
-//
-//   });
-//
-//   describe('Ob', () => {
-//
-//   });
-//
-//   describe('Ov', () => {
-//
-//   });
-//
-//   describe('Sw', () => {
-//
-//   });
-// });
+describe('Addressing Modes', () => {
+  let addr, cpu, segment;
+
+  beforeEach(() => {
+    cpu = new CPU8086(new CPUConfig({
+      memorySize: 1048576
+    }));
+    addr = new Addressing(cpu);
+    cpu.reg16[regAX] = 0x1234;
+    cpu.reg16[regBX] = 0x2345;
+    cpu.reg16[regCX] = 0x3456;
+    cpu.reg16[regDX] = 0x4567;
+
+    cpu.reg16[regSP] = 0x89AB;
+    cpu.reg16[regBP] = 0x789A;
+    cpu.reg16[regSI] = 0x5678;
+    cpu.reg16[regDI] = 0x6789;
+
+    cpu.reg16[regCS] = 0xABCD;
+    cpu.reg16[regDS] = 0xBCD0;
+    cpu.reg16[regES] = 0xCD01;
+    cpu.reg16[regSS] = 0xD012;
+
+    cpu.reg16[regIP] = 0x0000;
+
+    cpu.mem8[0xABCD0] = 0x00;       // inst (byte)
+    cpu.mem8[0xABCD1] = 0b01000000; // addr mode
+    cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
+    cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
+
+    segment = cpu.reg16[regCS];
+    cpu.cycleIP = 0;
+  });
+
+  describe('_1', () => {
+    test('read', () => {
+      expect(addr._1()).toBe(0x01);
+      expect(cpu.cycleIP).toBe(0);
+    });
+    // TODO: Do we need a write test?
+  });
+
+  describe('_3', () => {
+    test('read', () => {
+      expect(addr._3()).toBe(0x03);
+      expect(cpu.cycleIP).toBe(0);
+    });
+    // TODO: Do we need a write test?
+  });
+
+  describe('AX', () => {
+    test('read', () => {
+      expect(addr.AX()).toBe(0x1234);
+    });
+    test('read cycles', () => {
+      addr.AX();
+      expect(cpu.cycleIP).toBe(1);
+    });
+    test('write', () => {
+      let result = addr.AX(0xFFFF);
+      expect(cpu.reg16[regAX]).toBe(0xFFFF);
+      expect(result).toBe(0xFFFF);
+    });
+    test('write cycles', () => {
+      addr.AX(0xFFFF);
+      expect(cpu.cycleIP).toBe(1);
+    });
+  });
+
+  describe('AH', () => {
+    test('read', () => {
+      addr.AH();
+      expect(addr.AH()).toBe(0x34);
+    });
+    test('read cycles', () => {
+      addr.AH();
+      expect(cpu.cycleIP).toBe(1);
+    });
+    test('write', () => {
+      let result = addr.AH(0xFF);
+      expect(cpu.reg8[regAH]).toBe(0xFF);
+      expect(result).toBe(0xFF);
+    });
+    test('write cycles', () => {
+      addr.AH(0xFF);
+      expect(cpu.cycleIP).toBe(1);
+    });
+  });
+
+  describe('AL', () => {
+    test('read', () => {
+      expect(addr.AL()).toBe(0x12);
+    });
+    test('read cycles', () => {
+      addr.AL();
+      expect(cpu.cycleIP).toBe(1);
+    });
+    test('write', () => {
+      let result = addr.AL(0xFF);
+      expect(cpu.reg8[regAL]).toBe(0xFF);
+      expect(result).toBe(0xFF);
+    });
+    test('write cycles', () => {
+      addr.AL(0xFF);
+      expect(cpu.cycleIP).toBe(1);
+    });
+  });
+
+  describe('BX', () => {
+    test('read', () => {
+      expect(addr.BX()).toBe(0x2345);
+    });
+    test('read cycles', () => {
+      addr.BX();
+      expect(cpu.cycleIP).toBe(1);
+    });
+    test('write', () => {
+      let result = addr.BX(0xFFFF);
+      expect(cpu.reg16[regBX]).toBe(0xFFFF);
+      expect(result).toBe(0xFFFF);
+    });
+    test('write cycles', () => {
+      addr.BX(0xFFFF);
+      expect(cpu.cycleIP).toBe(1);
+    });
+  });
+
+  describe('BH', () => {
+    test('read', () => {
+      expect(addr.BH()).toBe(0x45);
+    });
+    test('read cycles', () => {
+      addr.BH();
+      expect(cpu.cycleIP).toBe(1);
+    });
+    test('write', () => {
+      let result = addr.BH(0xFF);
+      expect(cpu.reg8[regBH]).toBe(0xFF);
+      expect(result).toBe(0xFF);
+    });
+    test('write cycles', () => {
+      addr.BH(0xFF);
+      expect(cpu.cycleIP).toBe(1);
+    });
+  });
+
+  describe('BL', () => {
+    test('read', () => {
+      expect(addr.BL()).toBe(0x23);
+    });
+    test('read cycles', () => {
+      addr.BL();
+      expect(cpu.cycleIP).toBe(1);
+    });
+    test('write', () => {
+      let result = addr.BL(0xFF);
+      expect(cpu.reg8[regBL]).toBe(0xFF);
+      expect(result).toBe(0xFF);
+    });
+    test('write cycles', () => {
+      addr.BL(0xFF);
+      expect(cpu.cycleIP).toBe(1);
+    });
+  });
+
+  describe('CX', () => {
+    test('read', () => {
+      expect(addr.CX()).toBe(0x3456);
+    });
+    test('read cycles', () => {
+      addr.CX();
+      expect(cpu.cycleIP).toBe(1);
+    });
+    test('write', () => {
+      let result = addr.CX(0xFFFF);
+      expect(cpu.reg16[regCX]).toBe(0xFFFF);
+      expect(result).toBe(0xFFFF);
+    });
+    test('write cycles', () => {
+      addr.CX(0xFFFF);
+      expect(cpu.cycleIP).toBe(1);
+    });
+  });
+
+  describe('CH', () => {
+    test('read', () => {
+      expect(addr.CH()).toBe(0x56);
+    });
+    test('read cycles', () => {
+      addr.CH();
+      expect(cpu.cycleIP).toBe(1);
+    });
+    test('write', () => {
+      let result = addr.CH(0xFF);
+      expect(cpu.reg8[regCH]).toBe(0xFF);
+      expect(result).toBe(0xFF);
+    });
+    test('write cycles', () => {
+      addr.CH(0xFF);
+      expect(cpu.cycleIP).toBe(1);
+    });
+  });
+
+  describe('CL', () => {
+    test('read', () => {
+      expect(addr.CL()).toBe(0x34);
+    });
+    test('read cycles', () => {
+      addr.CL();
+      expect(cpu.cycleIP).toBe(1);
+    });
+    test('write', () => {
+      let result = addr.CL(0xFF);
+      expect(cpu.reg8[regCL]).toBe(0xFF);
+      expect(result).toBe(0xFF);
+    });
+    test('write cycles', () => {
+      addr.CL(0xFF);
+      expect(cpu.cycleIP).toBe(1);
+    });
+  });
+
+  describe('DX', () => {
+    test('read', () => {
+      expect(addr.DX()).toBe(0x4567);
+    });
+    test('read cycles', () => {
+      addr.DX();
+      expect(cpu.cycleIP).toBe(1);
+    });
+    test('write', () => {
+      let result = addr.DX(0xFFFF);
+      expect(cpu.reg16[regDX]).toBe(0xFFFF);
+      expect(result).toBe(0xFFFF);
+    });
+    test('write cycles', () => {
+      addr.DX(0xFFFF);
+      expect(cpu.cycleIP).toBe(1);
+    });
+  });
+
+  describe('DH', () => {
+    test('read', () => {
+      expect(addr.DH()).toBe(0x67);
+    });
+    test('read cycles', () => {
+      addr.DH();
+      expect(cpu.cycleIP).toBe(1);
+    });
+    test('write', () => {
+      let result = addr.DH(0xFF);
+      expect(cpu.reg8[regDH]).toBe(0xFF);
+      expect(result).toBe(0xFF);
+    });
+    test('write cycles', () => {
+      addr.DH(0xFF);
+      expect(cpu.cycleIP).toBe(1);
+    });
+  });
+
+  describe('DL', () => {
+    test('read', () => {
+      expect(addr.DL()).toBe(0x45);
+    });
+    test('read cycles', () => {
+      addr.DL();
+      expect(cpu.cycleIP).toBe(1);
+    });
+    test('write', () => {
+      let result = addr.DL(0xFF);
+      expect(cpu.reg8[regDL]).toBe(0xFF);
+      expect(result).toBe(0xFF);
+    });
+    test('write cycles', () => {
+      addr.DL(0xFF);
+      expect(cpu.cycleIP).toBe(1);
+    });
+  });
+
+  describe('SI', () => {
+    test('read', () => {
+      expect(addr.SI()).toBe(0x5678);
+    });
+    test('read cycles', () => {
+      addr.SI();
+      expect(cpu.cycleIP).toBe(1);
+    });
+    test('write', () => {
+      let result = addr.SI(0xFFFF);
+      expect(cpu.reg16[regSI]).toBe(0xFFFF);
+      expect(result).toBe(0xFFFF);
+    });
+    test('write cycles', () => {
+      addr.SI(0xFFFF);
+      expect(cpu.cycleIP).toBe(1);
+    });
+  });
+
+  describe('DI', () => {
+    test('read', () => {
+      expect(addr.DI()).toBe(0x6789);
+    });
+    test('read cycles', () => {
+      addr.DI();
+      expect(cpu.cycleIP).toBe(1);
+    });
+    test('write', () => {
+      let result = addr.DI(0xFFFF);
+      expect(cpu.reg16[regDI]).toBe(0xFFFF);
+      expect(result).toBe(0xFFFF);
+    });
+    test('write cycles', () => {
+      addr.DI(0xFFFF);
+      expect(cpu.cycleIP).toBe(1);
+    });
+  });
+
+  describe('BP', () => {
+    test('read', () => {
+      expect(addr.BP()).toBe(0x789A);
+    });
+    test('read cycles', () => {
+      addr.BP();
+      expect(cpu.cycleIP).toBe(1);
+    });
+    test('write', () => {
+      let result = addr.BP(0xFFFF);
+      expect(cpu.reg16[regBP]).toBe(0xFFFF);
+      expect(result).toBe(0xFFFF);
+    });
+    test('write cycles', () => {
+      addr.BP(0xFFFF);
+      expect(cpu.cycleIP).toBe(1);
+    });
+  });
+
+  describe('SP', () => {
+    test('read', () => {
+      expect(addr.SP()).toBe(0x89AB);
+    });
+    test('read cycles', () => {
+      addr.SP();
+      expect(cpu.cycleIP).toBe(1);
+    });
+    test('write', () => {
+      let result = addr.SP(0xFFFF);
+      expect(cpu.reg16[regSP]).toBe(0xFFFF);
+      expect(result).toBe(0xFFFF);
+    });
+    test('write cycles', () => {
+      addr.SP(0xFFFF);
+      expect(cpu.cycleIP).toBe(1);
+    });
+  });
+
+  describe('CS', () => {
+    test('read', () => {
+      expect(addr.CS()).toBe(0xABCD);
+    });
+    test('read cycles', () => {
+      addr.CS();
+      expect(cpu.cycleIP).toBe(1);
+    });
+    test('write', () => {
+      let result = addr.CS(0xFFFF);
+      expect(cpu.reg16[regCS]).toBe(0xFFFF);
+      expect(result).toBe(0xFFFF);
+    });
+    test('write cycles', () => {
+      addr.CS(0xFFFF);
+      expect(cpu.cycleIP).toBe(1);
+    });
+  });
+
+  describe('DS', () => {
+    test('read', () => {
+      expect(addr.DS()).toBe(0xBCD0);
+    });
+    test('read cycles', () => {
+      addr.DS();
+      expect(cpu.cycleIP).toBe(1);
+    });
+    test('write', () => {
+      let result = addr.DS(0xFFFF);
+      expect(cpu.reg16[regDS]).toBe(0xFFFF);
+      expect(result).toBe(0xFFFF);
+    });
+    test('write cycles', () => {
+      addr.DS(0xFFFF);
+      expect(cpu.cycleIP).toBe(1);
+    });
+  });
+
+  describe('ES', () => {
+    test('read', () => {
+      expect(addr.ES()).toBe(0xCD01);
+    });
+    test('read cycles', () => {
+      addr.ES();
+      expect(cpu.cycleIP).toBe(1);
+    });
+    test('write', () => {
+      let result = addr.ES(0xFFFF);
+      expect(cpu.reg16[regES]).toBe(0xFFFF);
+      expect(result).toBe(0xFFFF);
+    });
+    test('write cycles', () => {
+      addr.ES(0xFFFF);
+      expect(cpu.cycleIP).toBe(1);
+    });
+  });
+
+  describe('SS', () => {
+    test('read', () => {
+      expect(addr.SS()).toBe(0xD012);
+    });
+    test('read cycles', () => {
+      addr.SS();
+      expect(cpu.cycleIP).toBe(1);
+    });
+    test('write', () => {
+      let result = addr.SS(0xFFFF);
+      expect(cpu.reg16[regSS]).toBe(0xFFFF);
+      expect(result).toBe(0xFFFF);
+    });
+    test('write cycles', () => {
+      addr.SS(0xFFFF);
+      expect(cpu.cycleIP).toBe(1);
+    });
+  });
+
+  // describe('Ap', () => {
+  //
+  // });
+  //
+  // describe('Eb', () => {
+  //
+  // });
+  //
+  // describe('Ev', () => {
+  //
+  // });
+  //
+  // describe('Ew', () => {
+  //
+  // });
+  //
+  // describe('Gb', () => {
+  //
+  // });
+  //
+  // describe('Gv', () => {
+  //
+  // });
+  //
+  // describe('I0', () => {
+  //
+  // });
+  //
+  // describe('Ib', () => {
+  //
+  // });
+  //
+  // describe('Iv', () => {
+  //
+  // });
+  //
+  // describe('Iw', () => {
+  //
+  // });
+  //
+  // describe('Jb', () => {
+  //
+  // });
+  //
+  // describe('Jv', () => {
+  //
+  // });
+  //
+  // describe('M', () => {
+  //
+  // });
+  //
+  // describe('Mp', () => {
+  //
+  // });
+  //
+  // describe('Ob', () => {
+  //
+  // });
+  //
+  // describe('Ov', () => {
+  //
+  // });
+  //
+  // describe('Sw', () => {
+  //
+  // });
+});
 
 
 

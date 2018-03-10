@@ -10,7 +10,8 @@ import {
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
 } from './Constants';
-import {formatOpcode, hexString16, hexString32} from "./Debug";
+import { formatOpcode, hexString16, hexString32 } from "./Debug";
+import { ValueOverflowException } from "./Exceptions";
 
 export default class Addressing {
   constructor(cpu) {
@@ -19,76 +20,352 @@ export default class Addressing {
     this.mem16 = cpu.mem16;
   }
 
+  /**
+   *
+   * @param value Not used
+   * @return {number} Returns 0x01
+   */
   _1 (value = null) {
-    return 1;
+    return 0x01;
   }
 
+  /**
+   *
+   * @param value Not used
+   * @return {number} Returns 0x03
+   */
   _3 (value = null) {
-    return 3;
+    return 0x03;
   }
 
+  /**
+   * Read or write a word value from/to the AX register.
+   *
+   * @param value Value to write (word)
+   * @return {number} For a read operation the value from the register is
+   *  returned. For a write operation the same value provided is returned.
+   */
   AX (value = null) {
-    winston.log("debug", "Addressing.AX()          : (value=" + hexString16(value) + ")");
+    let result;
+    if (value || value === 0) result =  this.cpu.reg16[regAX] = value;
+    else result = this.cpu.reg16[regAX];
+
+    this.cpu.cycleIP += 1;
+    return result;
   }
+
+  /**
+   * Read or write a byte value from/to the AH register.
+   *
+   * @param value Value to write (word)
+   * @return {number} For a read operation the value from the register is
+   *  returned. For a write operation the same value provided is returned.
+   */
   AH (value = null) {
-    winston.log("debug", "Addressing.AH()          : (value=" + hexString16(value) + ")");
+    let result;
+    if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
+    if (value || value === 0) result =  this.cpu.reg8[regAH] = value;
+    else result = this.cpu.reg8[regAH];
+
+    this.cpu.cycleIP += 1;
+    return result;
   }
+
+  /**
+   * Read or write a byte value from/to the AL register.
+   *
+   * @param value Value to write (word)
+   * @return {number} For a read operation the value from the register is
+   *  returned. For a write operation the same value provided is returned.
+   */
   AL (value = null) {
-    winston.log("debug", "Addressing.AL()          : (value=" + hexString16(value) + ")");
+    let result;
+    if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
+    if (value || value === 0) result =  this.cpu.reg8[regAL] = value;
+    else result = this.cpu.reg8[regAL];
+
+    this.cpu.cycleIP += 1;
+    return result;
   }
+
+  /**
+   * Read or write a word value from/to the BX register.
+   *
+   * @param value Value to write (word)
+   * @return {number} For a read operation the value from the register is
+   *  returned. For a write operation the same value provided is returned.
+   */
   BX (value = null) {
-    winston.log("debug", "Addressing.BX()          : (value=" + hexString16(value) + ")");
+    let result;
+    if (value || value === 0) result =  this.cpu.reg16[regBX] = value;
+    else result = this.cpu.reg16[regBX];
+
+    this.cpu.cycleIP += 1;
+    return result;
   }
+
+  /**
+   * Read or write a byte value from/to the BH register.
+   *
+   * @param value Value to write (word)
+   * @return {number} For a read operation the value from the register is
+   *  returned. For a write operation the same value provided is returned.
+   */
   BH (value = null) {
-    winston.log("debug", "Addressing.BH()          : (value=" + hexString16(value) + ")");
+    let result;
+    if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
+    if (value || value === 0) result =  this.cpu.reg8[regBH] = value;
+    else result = this.cpu.reg8[regBH];
+
+    this.cpu.cycleIP += 1;
+    return result;
   }
+
+  /**
+   * Read or write a byte value from/to the BL register.
+   *
+   * @param value Value to write (word)
+   * @return {number} For a read operation the value from the register is
+   *  returned. For a write operation the same value provided is returned.
+   */
   BL (value = null) {
-    winston.log("debug", "Addressing.BL()          : (value=" + hexString16(value) + ")");
+    let result;
+    if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
+    if (value || value === 0) result =  this.cpu.reg8[regBL] = value;
+    else result = this.cpu.reg8[regBL];
+
+    this.cpu.cycleIP += 1;
+    return result;
   }
+
+  /**
+   * Read or write a word value from/to the CX register.
+   *
+   * @param value Value to write (word)
+   * @return {number} For a read operation the value from the register is
+   *  returned. For a write operation the same value provided is returned.
+   */
   CX (value = null) {
-    winston.log("debug", "Addressing.CX()          : (value=" + hexString16(value) + ")");
+    let result;
+    if (value || value === 0) result =  this.cpu.reg16[regCX] = value;
+    else result = this.cpu.reg16[regCX];
+
+    this.cpu.cycleIP += 1;
+    return result;
   }
+
+  /**
+   * Read or write a byte value from/to the CH register.
+   *
+   * @param value Value to write (word)
+   * @return {number} For a read operation the value from the register is
+   *  returned. For a write operation the same value provided is returned.
+   */
   CH (value = null) {
-    winston.log("debug", "Addressing.CH()          : (value=" + hexString16(value) + ")");
+    let result;
+    if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
+    if (value || value === 0) result =  this.cpu.reg8[regCH] = value;
+    else result = this.cpu.reg8[regCH];
+
+    this.cpu.cycleIP += 1;
+    return result;
   }
+
+  /**
+   * Read or write a byte value from/to the CL register.
+   *
+   * @param value Value to write (word)
+   * @return {number} For a read operation the value from the register is
+   *  returned. For a write operation the same value provided is returned.
+   */
   CL (value = null) {
-    winston.log("debug", "Addressing.CL()          : (value=" + hexString16(value) + ")");
+    let result;
+    if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
+    if (value || value === 0) result =  this.cpu.reg8[regCL] = value;
+    else result = this.cpu.reg8[regCL];
+
+    this.cpu.cycleIP += 1;
+    return result;
   }
+
+  /**
+   * Read or write a word value from/to the DX register.
+   *
+   * @param value Value to write (word)
+   * @return {number} For a read operation the value from the register is
+   *  returned. For a write operation the same value provided is returned.
+   */
   DX (value = null) {
-    winston.log("debug", "Addressing.DX()          : (value=" + hexString16(value) + ")");
+    let result;
+    if (value || value === 0) result =  this.cpu.reg16[regDX] = value;
+    else result = this.cpu.reg16[regDX];
+
+    this.cpu.cycleIP += 1;
+    return result;
   }
+
+  /**
+   * Read or write a byte value from/to the DH register.
+   *
+   * @param value Value to write (word)
+   * @return {number} For a read operation the value from the register is
+   *  returned. For a write operation the same value provided is returned.
+   */
   DH (value = null) {
-    winston.log("debug", "Addressing.DH()          : (value=" + hexString16(value) + ")");
+    let result;
+    if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
+    if (value || value === 0) result =  this.cpu.reg8[regDH] = value;
+    else result = this.cpu.reg8[regDH];
+
+    this.cpu.cycleIP += 1;
+    return result;
   }
+
+  /**
+   * Read or write a byte value from/to the DL register.
+   *
+   * @param value Value to write (word)
+   * @return {number} For a read operation the value from the register is
+   *  returned. For a write operation the same value provided is returned.
+   */
   DL (value = null) {
-    winston.log("debug", "Addressing.DL()          : (value=" + hexString16(value) + ")");
+    let result;
+    if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
+    if (value || value === 0) result =  this.cpu.reg8[regDL] = value;
+    else result = this.cpu.reg8[regDL];
+
+    this.cpu.cycleIP += 1;
+    return result;
   }
 
+  /**
+   * Read or write a word value from/to the SI register.
+   *
+   * @param value Value to write (word)
+   * @return {number} For a read operation the value from the register is
+   *  returned. For a write operation the same value provided is returned.
+   */
   SI (value = null) {
-    winston.log("debug", "Addressing.SI()          : (value=" + hexString16(value) + ")");
-  }
-  DI (value = null) {
-    winston.log("debug", "Addressing.DI()          : (value=" + hexString16(value) + ")");
-  }
-  BP (value = null) {
-    winston.log("debug", "Addressing.BP()          : (value=" + hexString16(value) + ")");
-  }
-  SP (value = null) {
-    winston.log("debug", "Addressing.SP()          : (value=" + hexString16(value) + ")");
+    let result;
+    if (value || value === 0) result =  this.cpu.reg16[regSI] = value;
+    else result = this.cpu.reg16[regSI];
+
+    this.cpu.cycleIP += 1;
+    return result;
   }
 
+  /**
+   * Read or write a word value from/to the DI register.
+   *
+   * @param value Value to write (word)
+   * @return {number} For a read operation the value from the register is
+   *  returned. For a write operation the same value provided is returned.
+   */
+  DI (value = null) {
+    let result;
+    if (value || value === 0) result =  this.cpu.reg16[regDI] = value;
+    else result = this.cpu.reg16[regDI];
+
+    this.cpu.cycleIP += 1;
+    return result;
+  }
+
+  /**
+   * Read or write a word value from/to the BP register.
+   *
+   * @param value Value to write (word)
+   * @return {number} For a read operation the value from the register is
+   *  returned. For a write operation the same value provided is returned.
+   */
+  BP (value = null) {
+    let result;
+    if (value || value === 0) result =  this.cpu.reg16[regBP] = value;
+    else result = this.cpu.reg16[regBP];
+
+    this.cpu.cycleIP += 1;
+    return result;
+  }
+
+  /**
+   * Read or write a word value from/to the SP register.
+   *
+   * @param value Value to write (word)
+   * @return {number} For a read operation the value from the register is
+   *  returned. For a write operation the same value provided is returned.
+   */
+  SP (value = null) {
+    let result;
+    if (value || value === 0) result =  this.cpu.reg16[regSP] = value;
+    else result = this.cpu.reg16[regSP];
+
+    this.cpu.cycleIP += 1;
+    return result;
+  }
+
+  /**
+   * Read or write a word value from/to the CS register.
+   *
+   * @param value Value to write (word)
+   * @return {number} For a read operation the value from the register is
+   *  returned. For a write operation the same value provided is returned.
+   */
   CS (value = null) {
-    winston.log("debug", "Addressing.CS()          : (value=" + hexString16(value) + ")");
+    let result;
+    if (value || value === 0) result =  this.cpu.reg16[regCS] = value;
+    else result = this.cpu.reg16[regCS];
+
+    this.cpu.cycleIP += 1;
+    return result;
   }
+
+  /**
+   * Read or write a word value from/to the DS register.
+   *
+   * @param value Value to write (word)
+   * @return {number} For a read operation the value from the register is
+   *  returned. For a write operation the same value provided is returned.
+   */
   DS (value = null) {
-    winston.log("debug", "Addressing.DS()          : (value=" + hexString16(value) + ")");
+    let result;
+    if (value || value === 0) result =  this.cpu.reg16[regDS] = value;
+    else result = this.cpu.reg16[regDS];
+
+    this.cpu.cycleIP += 1;
+    return result;
   }
+
+  /**
+   * Read or write a word value from/to the ES register.
+   *
+   * @param value Value to write (word)
+   * @return {number} For a read operation the value from the register is
+   *  returned. For a write operation the same value provided is returned.
+   */
   ES (value = null) {
-    winston.log("debug", "Addressing.ES()          : (value=" + hexString16(value) + ")");
+    let result;
+    if (value || value === 0) result =  this.cpu.reg16[regES] = value;
+    else result = this.cpu.reg16[regES];
+
+    this.cpu.cycleIP += 1;
+    return result;
   }
+
+  /**
+   * Read or write a word value from/to the SS register.
+   *
+   * @param value Value to write (word)
+   * @return {number} For a read operation the value from the register is
+   *  returned. For a write operation the same value provided is returned.
+   */
   SS (value = null) {
-    winston.log("debug", "Addressing.SS()          : (value=" + hexString16(value) + ")");
+    let result;
+    if (value || value === 0) result =  this.cpu.reg16[regSS] = value;
+    else result = this.cpu.reg16[regSS];
+
+    this.cpu.cycleIP += 1;
+    return result;
   }
+
 
   Ap (value = null) {
     winston.log("debug", "Addressing.Ap()          : (value=" + hexString16(value) + ")");
@@ -188,7 +465,7 @@ export default class Addressing {
    * Read a byte from memory or a register as specified by the addressing
    * mode determined by the mod, reg and r/m values.
    *
-   * @param {number} segment
+   * @param {number} segment Memory segment
    */
   readRMReg8 (segment) {
     let offset;
@@ -209,7 +486,7 @@ export default class Addressing {
    * Read a word from memory or a register as specified by the addressing
    * mode determined by the mod, reg and r/m values.
    *
-   * @param {number} segment
+   * @param {number} segment Memory segment
    */
   readRMReg16 (segment) {
     let offset;
@@ -226,8 +503,14 @@ export default class Addressing {
     }
   }
 
+  /**
+   * Write a byte to memory or a register as specified by the addressing
+   * mode determined by the mod, reg and r/m values.
+   *
+   * @param {number} segment Memory segment
+   * @param {number} value Value to write to memory (byte)
+   */
   writeRMReg8(segment, value) {
-    winston.log("debug", "Addressing.writeRMReg8() : (value=" + value + ")");
     let offset;
     switch (this.cpu.opcode.mod) {
       case 0b00: // Use R/M Table 1 for R/M operand
@@ -242,8 +525,14 @@ export default class Addressing {
     }
   }
 
+  /**
+   * Write a word to memory or a register as specified by the addressing
+   * mode determined by the mod, reg and r/m values.
+   *
+   * @param {number} segment Memory segment
+   * @param {number} value Value to write to memory (word)
+   */
   writeRMReg16(segment, value) {
-    winston.log("debug", "Addressing.writeRMReg16(): (value=" + value + ")");
     let offset;
     switch (this.cpu.opcode.mod) {
       case 0b00: // Use R/M Table 1 for R/M operand
