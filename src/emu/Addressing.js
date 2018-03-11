@@ -11,7 +11,7 @@ import {
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
 } from './Constants';
 import { formatOpcode, hexString16, hexString32 } from "./Debug";
-import { ValueOverflowException } from "./Exceptions";
+import { ValueOverflowException, FeatureNotImplementedException } from "./Exceptions";
 
 export default class Addressing {
   constructor(cpu) {
@@ -462,7 +462,6 @@ export default class Addressing {
     if (value !== null && value > 0xFFFFFFFF) throw new ValueOverflowException("Value too large for memory addressing mode");
     if (value || value === 0) result = this.writeRMReg16(segment, value);
     else result = this.readRMReg16(segment);
-
     this.cpu.cycleIP += 0;
     return result;
   }
@@ -487,7 +486,6 @@ export default class Addressing {
     this.cpu.opcode.w = 1; // Override opcode w bit
     if (value || value === 0) result = this.writeRMReg16(segment, value);
     else result = this.readRMReg16(segment);
-
     this.cpu.cycleIP += 0;
     return result;
   }
@@ -509,7 +507,6 @@ export default class Addressing {
     this.cpu.opcode.w = 0; // Override opcode w bit
     if (value || value === 0) result = this.writeRegVal(value);
     else result = this.readRegVal();
-
     this.cpu.cycleIP += 0;
     return result;
   }
@@ -530,38 +527,73 @@ export default class Addressing {
     if (value !== null && value > 0xFFFFFFFF) throw new ValueOverflowException("Value too large for memory addressing mode");
     if (value || value === 0) result = this.writeRegVal(value);
     else result = this.readRegVal();
-
     this.cpu.cycleIP += 0;
     return result;
   }
-  I0 (segment, value) {
 
-  }
-
+  /**
+   * Immediate data. The operand value is encoded in subsequent bytes of the
+   * instruction.
+   *
+   * The operand is a byte, regardless of operand-size attribute.
+   *
+   * @param {number|null} segment Memory segment
+   * @param {number|null} value Value to write (word|doubleword)
+   * @return {number} For a read operation the value from the address is
+   *  returned. For a write operation the same value provided is returned.
+   */
   Ib (segment, value) {
     let result;
-    let offset = seg2abs(segment, this.cpu.reg16[regIP] + this.cpu.cycleIP, this.cpu);
-
-    if (value || value === 0) result = this.writeMem8(segment, offset, value);
+    if (value !== null && value > 0xFF) throw new ValueOverflowException("Value too large for memory addressing mode");
+    this.cpu.opcode.w = 0; // Override opcode w bit
+    let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
+    if (value || value === 0) throw new FeatureNotImplementedException("Writing using this addressing mode is not implemented");
     else result = this.readMem8(segment, offset);
-
     this.cpu.cycleIP += 0;
     return result;
   }
 
+  /**
+   * Immediate data. The operand value is encoded in subsequent bytes of the
+   * instruction.
+   *
+   * The operand is a word or doubleword, depending on operand-size attribute.
+   *
+   * @param {number|null} segment Memory segment
+   * @param {number|null} value Value to write (word|doubleword)
+   * @return {number} For a read operation the value from the address is
+   *  returned. For a write operation the same value provided is returned.
+   */
   Iv (segment, value) {
     let result;
-    let offset = seg2abs(segment, this.cpu.reg16[regIP] + this.cpu.cycleIP, this.cpu)
-
-    if (value || value === 0) result = this.writeMem16(segment, offset, value);
+    if (value !== null && value > 0xFFFFFFFF) throw new ValueOverflowException("Value too large for memory addressing mode");
+    let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
+    if (value || value === 0) throw new FeatureNotImplementedException("Writing using this addressing mode is not implemented");
     else result = this.readMem16(segment, offset);
-
     this.cpu.cycleIP += 0;
     return result;
   }
 
+  /**
+   * Immediate data. The operand value is encoded in subsequent bytes of the
+   * instruction.
+   *
+   * The operand is a word, regardless of operand-size attribute.
+   *
+   * @param {number|null} segment Memory segment
+   * @param {number|null} value Value to write (word|doubleword)
+   * @return {number} For a read operation the value from the address is
+   *  returned. For a write operation the same value provided is returned.
+   */
   Iw (segment, value) {
-
+    let result;
+    if (value !== null && value > 0xFFFF) throw new ValueOverflowException("Value too large for memory addressing mode");
+    this.cpu.opcode.w = 1; // Override opcode w bit
+    let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
+    if (value || value === 0) throw new FeatureNotImplementedException("Writing using this addressing mode is not implemented");
+    else result = this.readMem16(segment, offset);
+    this.cpu.cycleIP += 0;
+    return result;
   }
 
   Jb (segment, value) {

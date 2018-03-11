@@ -18,3 +18,10 @@ export class ValueUnderflowException extends Error {
     Error.captureStackTrace(this, ValueOverflowException);
   }
 }
+
+export class FeatureNotImplementedException extends Error {
+  constructor(...params) {
+    super(...params);
+    Error.captureStackTrace(this, FeatureNotImplementedException);
+  }
+}

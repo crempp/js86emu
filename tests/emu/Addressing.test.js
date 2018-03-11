@@ -1904,7 +1904,6 @@ describe('Addressing Modes', () => {
       cpu.decode();
     });
     test('read', () => {
-      addr.Gv(segment, null);
       expect(addr.Gv(segment, null)).toBe(0x1234);
     });
     test('read cycles', () => {
@@ -1926,22 +1925,108 @@ describe('Addressing Modes', () => {
     });
   });
 
-  // describe('I0', () => {
-  //
-  // });
-  //
-  // describe('Ib', () => {
-  //
-  // });
-  //
-  // describe('Iv', () => {
-  //
-  // });
-  //
-  // describe('Iw', () => {
-  //
-  // });
-  //
+  describe('Ib', () => {
+    beforeEach(() => {
+      cpu.mem8[0xABCD1] = 0x34; // arg1 byte low
+      cpu.mem8[0xABCD2] = 0x12; // arg1 byte high
+      cpu.mem8[0xABCD3] = 0x78; // arg2 byte low
+      cpu.mem8[0xABCD4] = 0x56; // arg2 byte high
+
+      cpu.cycleIP = 1; // usually the operation will do this
+    });
+    test('read', () => {
+      expect(addr.Ib(segment, null)).toBe(0x34);
+    });
+    test('read cycles', () => {
+      addr.Ib(segment, null);
+      expect(cpu.cycleIP).toBe(1);
+    });
+    // TODO: Finish these
+    // test('write', () => {
+    //
+    // });
+    // test('write cycles', () => {
+    //
+    // });
+    test('overflow throws', () => {
+      expect(() => {
+        addr.Ib(segment, 0xFFF);
+      }).toThrowError(ValueOverflowException);
+    });
+    test('addressing mode overrides operand-size bit', () => {
+      cpu.mem8[0xABCD0] = 0x01; // inst (byte)
+      cpu.decode();
+      expect(addr.Ib(segment, null)).toBe(0x34);
+    });
+  });
+
+  describe('Iv', () => {
+    beforeEach(() => {
+      cpu.mem8[0xABCD1] = 0x34; // arg1 byte low
+      cpu.mem8[0xABCD2] = 0x12; // arg1 byte high
+      cpu.mem8[0xABCD3] = 0x78; // arg2 byte low
+      cpu.mem8[0xABCD4] = 0x56; // arg2 byte high
+
+      cpu.mem8[0xABCD0] = 0x01; // inst (byte)
+
+      cpu.cycleIP = 1; // usually the operation will do this
+    });
+    test('read', () => {
+      expect(addr.Iv(segment, null)).toBe(0x1234);
+    });
+    test('read cycles', () => {
+      addr.Iv(segment, null);
+      expect(cpu.cycleIP).toBe(1);
+    });
+    // TODO: Finish these
+    // test('write', () => {
+    //
+    // });
+    // test('write cycles', () => {
+    //
+    // });
+    test('overflow throws', () => {
+      expect(() => {
+        addr.Iv(segment, 0xFFFFFFFFF);
+      }).toThrowError(ValueOverflowException);
+    });
+  });
+
+  describe('Iw', () => {
+    beforeEach(() => {
+      cpu.mem8[0xABCD1] = 0x34; // arg1 byte low
+      cpu.mem8[0xABCD2] = 0x12; // arg1 byte high
+      cpu.mem8[0xABCD3] = 0x78; // arg2 byte low
+      cpu.mem8[0xABCD4] = 0x56; // arg2 byte high
+
+      cpu.cycleIP = 1; // usually the operation will do this
+    });
+    test('read', () => {
+      expect(addr.Iw(segment, null)).toBe(0x1234);
+    });
+    test('read cycles', () => {
+      addr.Iw(segment, null);
+      expect(cpu.cycleIP).toBe(1);
+    });
+    // TODO: Finish these
+    // test('write', () => {
+    //
+    // });
+    // test('write cycles', () => {
+    //
+    // });
+    test('overflow throws', () => {
+      expect(() => {
+        addr.Iw(segment, 0xFFFFF);
+      }).toThrowError(ValueOverflowException);
+    });
+    test('addressing mode overrides operand-size bit', () => {
+      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
+      cpu.decode();
+      expect(addr.Iw(segment, null)).toBe(0x1234);
+    });
+  });
+
   // describe('Jb', () => {
   //
   // });

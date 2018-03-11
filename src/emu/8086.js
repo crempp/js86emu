@@ -389,8 +389,8 @@ export default class CPU8086 extends CPU {
     this.inst[0xD1] = grp2(               addr.Ev, addr._1);
     this.inst[0xD2] = grp2(               addr.Eb, addr.CL);
     this.inst[0xD3] = grp2(               addr.Ev, addr.CL);
-    this.inst[0xD4] = inst_(oper.aam,     addr.I0         );
-    this.inst[0xD5] = inst_(oper.aad,     addr.I0         );
+    this.inst[0xD4] = inst_(oper.aam,     addr.Ib         );
+    this.inst[0xD5] = inst_(oper.aad,     addr.Ib         );
     this.inst[0xD6] = inst_(oper.notimp                   );
     this.inst[0xD7] = inst_(oper.xlat                     );
     this.inst[0xD8] = inst_(oper.notimp                   );
