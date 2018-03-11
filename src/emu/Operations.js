@@ -10,7 +10,7 @@ import {
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
 } from './Constants';
-import { formatFlags, hexString16 } from "./Debug";
+import {binString16, formatFlags, hexString16} from "./Debug";
 
 export default class Operations {
   constructor(cpu) {
@@ -39,8 +39,9 @@ export default class Operations {
   }
   add (dst, src) {
     winston.log("debug", "Operations.add           : (dst=" + dst.name + ", src=" + src.name + ")");
+    let segment = this.cpu.reg16[regCS];
     this.cpu.cycleIP += 1;
-    let val = dst() + src();
+    let val = dst(segment, null) + src(segment, null);
     dst(val);
   };
   and (dst, src) {
@@ -87,8 +88,6 @@ export default class Operations {
    * @param src
    */
   cmp (dst, src) {
-    winston.log("debug", "Operations.cmp()         : (dst=" + dst.name + ", src=" + src.name + ")");
-
     let segment = this.cpu.reg16[regCS];
 
     this.cpu.cycleIP += 1;
@@ -253,8 +252,12 @@ export default class Operations {
     winston.log("debug", "Operations.jz            : (dst=" + dst.name + ")");
     this.cpu.cycleIP += 2;
 
-    if (1 === (this.cpu.reg16[regFlags] & FLAG_ZF_MASK)) {
-      this.shortJump();
+    if ((this.cpu.reg16[regFlags] & FLAG_ZF_MASK) > 0) {
+      // The jump address is a signed (twos complement) offset from the
+      // current location.
+      let offset = this.cpu.mem8[this.cpu.reg16[regIP] + 1];
+
+      this.shortJump(offset);
       return true;
     }
     else {
@@ -470,12 +473,13 @@ export default class Operations {
     winston.log("info", "Operations - Instruction not implemented");
   };
 
-  shortJump () {
-    // The jump address is a signed (twos complement) offset from the
-    // current location.
-    let offset = this.cpu.mem8[this.cpu.reg16[regIP] + 1];
-    // let offset = this.cpu.mem8[seg2abs(this._regCS, this.cpu.mem8[this._regIP], cpu)];
-
+  /**
+   * Perform a short jump to another code location. This jump will not leave
+   * the current segment.
+   *
+   * @param {number} offset The offset for the jump (twos complement)
+   */
+  shortJump (offset) {
     // One-byte twos-complement conversion
     // It seems Javascript does not do ~ (bitwise not) correctly
     let negative = ((offset >> 7) === 1);

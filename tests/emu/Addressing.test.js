@@ -1,7 +1,7 @@
 import winston from 'winston';
 
 import CPU8086 from '../../src/emu/8086';
-import Addressing from '../../src/emu/addressing';
+import Addressing from '../../src/emu/Addressing';
 import CPUConfig from '../../src/emu/CPUConfig';
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
@@ -1762,7 +1762,7 @@ describe('Addressing Modes', () => {
     });
     test('read cycles', () => {
       addr.Ap(segment, null);
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.cycleIP).toBe(4);
     });
     test('write', () => {
       addr.Ap(segment, 0xFFFF);
@@ -1771,7 +1771,7 @@ describe('Addressing Modes', () => {
     });
     test('write cycles', () => {
       addr.Ap(segment, 0xFFFF);
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.cycleIP).toBe(4);
     });
   });
 
@@ -1784,7 +1784,7 @@ describe('Addressing Modes', () => {
     });
     test('read cycles', () => {
       addr.Eb(segment, null);
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.cycleIP).toBe(1);
     });
     test('write', () => {
       addr.Eb(segment, 0xFF);
@@ -1792,7 +1792,7 @@ describe('Addressing Modes', () => {
     });
     test('write cycles', () => {
       addr.Eb(segment, 0xFF);
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.cycleIP).toBe(1);
     });
     test('overflow throws', () => {
       expect(() => {
@@ -1816,7 +1816,7 @@ describe('Addressing Modes', () => {
     });
     test('read cycles', () => {
       addr.Ev(segment, null);
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.cycleIP).toBe(1);
     });
     test('write', () => {
       addr.Ev(segment, 0xFFFF);
@@ -1825,7 +1825,7 @@ describe('Addressing Modes', () => {
     });
     test('write cycles', () => {
       addr.Ev(segment, 0xFFFF);
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.cycleIP).toBe(1);
     });
     test('overflow throws', () => {
       expect(() => {
@@ -1847,7 +1847,7 @@ describe('Addressing Modes', () => {
     });
     test('read cycles', () => {
       addr.Ew(segment, null);
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.cycleIP).toBe(1);
     });
     test('write', () => {
       addr.Ew(segment, 0xFFFF);
@@ -1856,7 +1856,7 @@ describe('Addressing Modes', () => {
     });
     test('write cycles', () => {
       addr.Ew(segment, 0xFFFF);
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.cycleIP).toBe(1);
     });
     test('overflow throws', () => {
       expect(() => {
@@ -1876,7 +1876,7 @@ describe('Addressing Modes', () => {
     });
     test('read cycles', () => {
       addr.Gb(segment, null);
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.cycleIP).toBe(1);
     });
     test('write', () => {
       addr.Gb(segment, 0xFF);
@@ -1884,7 +1884,7 @@ describe('Addressing Modes', () => {
     });
     test('write cycles', () => {
       addr.Gb(segment, 0xFF);
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.cycleIP).toBe(1);
     });
     test('overflow throws', () => {
       expect(() => {
@@ -1908,7 +1908,7 @@ describe('Addressing Modes', () => {
     });
     test('read cycles', () => {
       addr.Gv(segment, null);
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.cycleIP).toBe(1);
     });
     test('write', () => {
       addr.Gv(segment, 0xFFFF);
@@ -1916,7 +1916,7 @@ describe('Addressing Modes', () => {
     });
     test('write cycles', () => {
       addr.Gv(segment, 0xFFFF);
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.cycleIP).toBe(1);
     });
     test('overflow throws', () => {
       expect(() => {
@@ -1939,7 +1939,7 @@ describe('Addressing Modes', () => {
     });
     test('read cycles', () => {
       addr.Ib(segment, null);
-      expect(cpu.cycleIP).toBe(1);
+      expect(cpu.cycleIP).toBe(2);
     });
     // TODO: Finish these
     // test('write', () => {
@@ -1976,7 +1976,7 @@ describe('Addressing Modes', () => {
     });
     test('read cycles', () => {
       addr.Iv(segment, null);
-      expect(cpu.cycleIP).toBe(1);
+      expect(cpu.cycleIP).toBe(3);
     });
     // TODO: Finish these
     // test('write', () => {
@@ -2006,7 +2006,7 @@ describe('Addressing Modes', () => {
     });
     test('read cycles', () => {
       addr.Iw(segment, null);
-      expect(cpu.cycleIP).toBe(1);
+      expect(cpu.cycleIP).toBe(3);
     });
     // TODO: Finish these
     // test('write', () => {
@@ -2027,33 +2027,33 @@ describe('Addressing Modes', () => {
     });
   });
 
-  // describe('Jb', () => {
-  //
-  // });
-  //
-  // describe('Jv', () => {
-  //
-  // });
-  //
-  // describe('M', () => {
-  //
-  // });
-  //
-  // describe('Mp', () => {
-  //
-  // });
-  //
-  // describe('Ob', () => {
-  //
-  // });
-  //
-  // describe('Ov', () => {
-  //
-  // });
-  //
-  // describe('Sw', () => {
-  //
-  // });
+  describe.skip('Jb', () => {
+
+  });
+
+  describe.skip('Jv', () => {
+
+  });
+
+  describe.skip('M', () => {
+
+  });
+
+  describe.skip('Mp', () => {
+
+  });
+
+  describe.skip('Ob', () => {
+
+  });
+
+  describe.skip('Ov', () => {
+
+  });
+
+  describe.skip('Sw', () => {
+
+  });
 });
 
 

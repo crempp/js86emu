@@ -1,5 +1,3 @@
-import winston from 'winston';
-
 import { seg2abs } from "./Utils";
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
@@ -21,6 +19,7 @@ export default class Addressing {
   }
 
   /**
+   * Return a number value of 1.
    *
    * @param {number|null} segment Memory segment - Not used in this addressing mode
    * @param {number|null} value - Not used in this addressing mode
@@ -31,6 +30,7 @@ export default class Addressing {
   }
 
   /**
+   * Return a number value of 3.
    *
    * @param {number|null} segment Memory segment - Not used in this addressing mode
    * @param {number|null} value - Not used in this addressing mode
@@ -393,7 +393,7 @@ export default class Addressing {
    * operand is encoded in the instruction; and no base register, index
    * register, or scaling factor can be applied (for example, far JMP (EA))
    *
-   * The opperand is a 32-bit segment:offset pointer.
+   * The operand is a 32-bit segment:offset pointer.
    *
    * For example:
    * 0x9A 0x12 0x34 0x56 0x78
@@ -415,7 +415,7 @@ export default class Addressing {
     if (value || value === 0) this.writeMem16(s, o, value);
     else result = this.readMem16(s, o);
 
-    this.cpu.cycleIP += 0;
+    this.cpu.cycleIP += 4;
     return result;
   }
 
@@ -439,7 +439,7 @@ export default class Addressing {
     this.cpu.opcode.w = 0; // Override opcode w bit
     if (value || value === 0) result = this.writeRMReg8(segment, value);
     else result = this.readRMReg8(segment);
-    this.cpu.cycleIP += 0;
+    this.cpu.cycleIP += 1;
     return result;
   }
 
@@ -462,7 +462,7 @@ export default class Addressing {
     if (value !== null && value > 0xFFFFFFFF) throw new ValueOverflowException("Value too large for memory addressing mode");
     if (value || value === 0) result = this.writeRMReg16(segment, value);
     else result = this.readRMReg16(segment);
-    this.cpu.cycleIP += 0;
+    this.cpu.cycleIP += 1;
     return result;
   }
 
@@ -486,7 +486,7 @@ export default class Addressing {
     this.cpu.opcode.w = 1; // Override opcode w bit
     if (value || value === 0) result = this.writeRMReg16(segment, value);
     else result = this.readRMReg16(segment);
-    this.cpu.cycleIP += 0;
+    this.cpu.cycleIP += 1;
     return result;
   }
 
@@ -507,7 +507,7 @@ export default class Addressing {
     this.cpu.opcode.w = 0; // Override opcode w bit
     if (value || value === 0) result = this.writeRegVal(value);
     else result = this.readRegVal();
-    this.cpu.cycleIP += 0;
+    this.cpu.cycleIP += 1;
     return result;
   }
 
@@ -527,7 +527,7 @@ export default class Addressing {
     if (value !== null && value > 0xFFFFFFFF) throw new ValueOverflowException("Value too large for memory addressing mode");
     if (value || value === 0) result = this.writeRegVal(value);
     else result = this.readRegVal();
-    this.cpu.cycleIP += 0;
+    this.cpu.cycleIP += 1;
     return result;
   }
 
@@ -549,7 +549,7 @@ export default class Addressing {
     let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
     if (value || value === 0) throw new FeatureNotImplementedException("Writing using this addressing mode is not implemented");
     else result = this.readMem8(segment, offset);
-    this.cpu.cycleIP += 0;
+    this.cpu.cycleIP += 1;
     return result;
   }
 
@@ -570,7 +570,7 @@ export default class Addressing {
     let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
     if (value || value === 0) throw new FeatureNotImplementedException("Writing using this addressing mode is not implemented");
     else result = this.readMem16(segment, offset);
-    this.cpu.cycleIP += 0;
+    this.cpu.cycleIP += 2;
     return result;
   }
 
@@ -592,7 +592,7 @@ export default class Addressing {
     let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
     if (value || value === 0) throw new FeatureNotImplementedException("Writing using this addressing mode is not implemented");
     else result = this.readMem16(segment, offset);
-    this.cpu.cycleIP += 0;
+    this.cpu.cycleIP += 2;
     return result;
   }
 
