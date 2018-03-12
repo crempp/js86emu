@@ -32,12 +32,15 @@ export const regSS = 12;
 // Flag register
 export const regFlags = 13;
 
-export const FLAG_CF_MASK = 0x0001;
-export const FLAG_PF_MASK = 0x0004;
-export const FLAG_AF_MASK = 0x0010;
-export const FLAG_ZF_MASK = 0x0040;
-export const FLAG_SF_MASK = 0x0080;
-export const FLAG_TF_MASK = 0x0100;
-export const FLAG_IF_MASK = 0x0200;
-export const FLAG_DF_MASK = 0x0400;
-export const FLAG_OF_MASK = 0x0800;
+export const FLAG_CF_MASK = 0x0001; // 0
+                                    // 1
+export const FLAG_PF_MASK = 0x0004; // 2
+                                    // 3
+export const FLAG_AF_MASK = 0x0010; // 4
+                                    // 5
+export const FLAG_ZF_MASK = 0x0040; // 6
+export const FLAG_SF_MASK = 0x0080; // 7
+export const FLAG_TF_MASK = 0x0100; // 8
+export const FLAG_IF_MASK = 0x0200; // 9
+export const FLAG_DF_MASK = 0x0400; // 10
+export const FLAG_OF_MASK = 0x0800; // 11

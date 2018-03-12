@@ -84,21 +84,37 @@ export default class Operations {
    * source operand.
    *   - [1] p.2-36
    *
+   * Modifies flags: AF CF OF PF SF ZF
+   *
    * @param dst
    * @param src
    */
   cmp (dst, src) {
-    let segment = this.cpu.reg16[regCS];
-
     this.cpu.cycleIP += 1;
+    let size = this.cpu.opcode.w;
+    let segment = this.cpu.reg16[regCS];
     let d = dst(segment, null);
     let s = src(segment, null);
     let result = d - s;
 
-    this.cpu.setAF_FLAG_sub(d, s);
-    this.cpu.setCF_FLAG_sub(d, s);
+    if (result & (size ? 0xFFFF0000 : 0xFF00)) {
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+    } else {
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+    }
+
+    if ( (result ^ d) & (d ^ s) & 0x8000) {
+      this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
+    } else {
+      this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
+    }
+
+    if ( (d ^ s ^ result) & 0x10) {
+      this.cpu.reg16[regFlags] |= FLAG_AF_MASK;
+    } else {
+      this.cpu.reg16[regFlags] &= ~FLAG_AF_MASK;
+    }
     this.cpu.setPF_FLAG(result);
-    this.cpu.setOF_FLAG(d, s, result);
     this.cpu.setSF_FLAG(result);
     this.cpu.setZF_FLAG(result);
 

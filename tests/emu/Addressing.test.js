@@ -24,27 +24,6 @@ winston.level = 'warn';
 // TODO: writeMem8 and readMem8 - should be the same
 // TODO: writeMem16 and readMem16 - should be the same
 
-//   7   6   5   4   3   2   1   0
-// +---+---+---+---+---+---+---+---+
-// |     opcode            | d | w |
-// +---+---+---+---+---+---+---+---+
-// +---+---+---+---+---+---+---+---+
-// |  mod  |    reg    |    r/m    |
-// +---+---+---+---+---+---+---+---+
-// console.log("opcode_byte: " + hexString16(cpu.mem8[segIP(cpu)]));
-// console.log("CS:IP: " + hexString16(cpu.reg16[regCS]) + ":" + hexString16(cpu.reg16[regIP]) +  " -> " + hexString32(segIP(cpu)) + "\n" +
-//   "MEMORY:\n" + formatMemory(cpu.mem8, segIP(cpu), segIP(cpu) + 7, 11) + "\n" +
-//   "OPCODE:\n" + formatOpcode(cpu.opcode, 11) + "\n" +
-//   "REGISTERS\n" + formatRegisters(cpu, 11)  + "\n" +
-//   "FLAGS:\n" + formatFlags(cpu.reg16[regFlags], 10) + "\n" +
-//   "INSTRUCTION: " +  cpu.opcode.string);
-// console.log("result: " + hexString32(addr.calcRMDispAddr(segment)));
-// console.log("CS:        " + hexString16(cpu.reg16[regCS]) + "\n" +
-//   "CS * 0x10: " + hexString32(cpu.reg16[regCS]*0x10) + "\n" +
-//   "BP:        " + hexString16(cpu.reg16[regBP]) + "\n" +
-//   "DI:        " + hexString16(cpu.reg16[regDI]) + "\n" +
-//   "BP + DI:   " + hexString32(cpu.reg16[regBP]+cpu.reg16[regDI]));
-
 test('Addressing object constructs', () => {
   let cpu = new CPU8086(new CPUConfig({
     memorySize: 1048576
@@ -1942,12 +1921,12 @@ describe('Addressing Modes', () => {
       expect(cpu.cycleIP).toBe(2);
     });
     // TODO: Finish these
-    // test('write', () => {
-    //
-    // });
-    // test('write cycles', () => {
-    //
-    // });
+    test.skip('write', () => {
+
+    });
+    test.skip('write cycles', () => {
+
+    });
     test('overflow throws', () => {
       expect(() => {
         addr.Ib(segment, 0xFFF);
@@ -1979,12 +1958,12 @@ describe('Addressing Modes', () => {
       expect(cpu.cycleIP).toBe(3);
     });
     // TODO: Finish these
-    // test('write', () => {
-    //
-    // });
-    // test('write cycles', () => {
-    //
-    // });
+    test.skip('write', () => {
+
+    });
+    test.skip('write cycles', () => {
+
+    });
     test('overflow throws', () => {
       expect(() => {
         addr.Iv(segment, 0xFFFFFFFFF);
@@ -2009,12 +1988,12 @@ describe('Addressing Modes', () => {
       expect(cpu.cycleIP).toBe(3);
     });
     // TODO: Finish these
-    // test('write', () => {
-    //
-    // });
-    // test('write cycles', () => {
-    //
-    // });
+    test.skip('write', () => {
+
+    });
+    test.skip('write cycles', () => {
+
+    });
     test('overflow throws', () => {
       expect(() => {
         addr.Iw(segment, 0xFFFFF);

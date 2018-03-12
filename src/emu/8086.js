@@ -512,25 +512,27 @@ export default class CPU8086 extends CPU {
     this.reg16[regIP] += this.cycleIP;
   }
 
-  setAF_FLAG_sub (operand1, operand2) {
-    if ((operand1 & 0x0F) < (operand2 & 0x0F)) this.reg16[regFlags] |= FLAG_AF_MASK;
-    else this.reg16[regFlags] &= ~FLAG_AF_MASK;
-  }
-
-  setCF_FLAG_sub (operand1, operand2) {
-    if (operand1 < operand2) this.reg16[regFlags] |= FLAG_CF_MASK;
-  }
-
-  setOF_FLAG (operand1, operand2, result) {
-    let shift;
-    let size = this.opcode.w;
-    if (1 === size) shift = 15; else shift = 7;
-
-    if ( 1 === (operand1 >> shift) && 1 === (operand2 >> shift) && 0 === (result >> shift) ||
-         0 === (operand1 >> shift) && 0 === (operand2 >> shift) && 1 === (result >> shift))
-      this.reg16[regFlags] = this.reg16[regFlags] | FLAG_OF_MASK;
-    else this.reg16[regFlags] &= ~FLAG_OF_MASK;
-  }
+  // TODO: Move these to Operations.js
+  // setAF_FLAG_sub (operand1, operand2) {
+  //   if ((operand1 & 0x0F) < (operand2 & 0x0F)) this.reg16[regFlags] |= FLAG_AF_MASK;
+  //   else this.reg16[regFlags] &= ~FLAG_AF_MASK;
+  // }
+  //
+  // setCF_FLAG_sub (operand1, operand2) {
+  //   if (operand1 < operand2) this.reg16[regFlags] |= FLAG_CF_MASK;
+  //   else this.reg16[regFlags] &= ~FLAG_CF_MASK;
+  // }
+  //
+  // setOF_FLAG (operand1, operand2, result) {
+  //   let shift;
+  //   let size = this.opcode.w;
+  //   if (1 === size) shift = 15; else shift = 7;
+  //
+  //   if ( 1 === (operand1 >> shift) && 1 === (operand2 >> shift) && 0 === (result >> shift) ||
+  //        0 === (operand1 >> shift) && 0 === (operand2 >> shift) && 1 === (result >> shift))
+  //     this.reg16[regFlags] = this.reg16[regFlags] | FLAG_OF_MASK;
+  //   else this.reg16[regFlags] &= ~FLAG_OF_MASK;
+  // }
 
   setPF_FLAG (result) {
     let bitRep = result.toString(2);
