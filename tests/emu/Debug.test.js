@@ -212,7 +212,7 @@ describe('Debug formatters', () => {
         "prefix:  00000000[0x00]    opcode:  00100000[0x20]\n" +
         "d:              0[0x00]    w:              1[0x01]\n" +
         "mod:           10[0x02]    reg:          101[0x05]\n" +
-        "rm:           010[0x02]");
+        "rm:           010[0x02]    size:           v");
     });
 
     test('formatOpcode() should indent formatted string', () => {
@@ -221,7 +221,7 @@ describe('Debug formatters', () => {
         "    prefix:  00000000[0x00]    opcode:  00100000[0x20]\n" +
         "    d:              0[0x00]    w:              1[0x01]\n" +
         "    mod:           10[0x02]    reg:          101[0x05]\n" +
-        "    rm:           010[0x02]");
+        "    rm:           010[0x02]    size:           v");
     });
   });
 

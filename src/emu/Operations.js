@@ -9,8 +9,29 @@ import {
   regFlags,
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
+  b, w, v, u,
 } from './Constants';
 import {binString16, formatFlags, hexString16} from "./Debug";
+
+const PARITY = [
+/*         0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
+/* 0x00 */ 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+/* 0x10 */ 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+/* 0x20 */ 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+/* 0x30 */ 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+/* 0x40 */ 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+/* 0x50 */ 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+/* 0x60 */ 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+/* 0x70 */ 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+/* 0x80 */ 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+/* 0x90 */ 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+/* 0xA0 */ 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+/* 0xB0 */ 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+/* 0xC0 */ 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+/* 0xD0 */ 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+/* 0xE0 */ 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+/* 0xF0 */ 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1
+];
 
 export default class Operations {
   constructor(cpu) {
@@ -18,59 +39,62 @@ export default class Operations {
   }
 
   aaa (dst, src) {
-    winston.log("debug", "Operations.aaa           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   aad (dst, src) {
-    winston.log("debug", "Operations.aad           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   aam (dst, src) {
-    winston.log("debug", "Operations.aam           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
+
+  /**
+   * AAS (ASCII Adjust for Subtraction) corrects the result of a previous
+   * subtraction of two valid unpacked decimal operands (the destination
+   * operand must have been specified as register AL). AAS changes the content
+   * of AL to a valid unpacked decimal number; the high-order halfbyte is
+   * zeroed. AAS updates AF and CF; the content of OF, PF, SF and ZF is
+   * undefined following execution of AAS.
+   *   - [1] p.2-36
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   * @return {number} Result of the operation
+   */
   aas (dst, src) {
-    winston.log("debug", "Operations.aas           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
+
   adc (dst, src) {
-    winston.log("debug", "Operations.adc           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
+
   add (dst, src) {
-    winston.log("debug", "Operations.add           : (dst=" + dst.name + ", src=" + src.name + ")");
     let segment = this.cpu.reg16[regCS];
     this.cpu.cycleIP += 1;
     let val = dst(segment, null) + src(segment, null);
     dst(val);
   };
   and (dst, src) {
-    winston.log("debug", "Operations.and           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   call (dst, src) {
-    winston.log("debug", "Operations.call          : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   cbw (dst, src) {
-    winston.log("debug", "Operations.cbw           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   clc (dst, src) {
-    winston.log("debug", "Operations.clc           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   cld (dst, src) {
-    winston.log("debug", "Operations.cld           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   cli (dst, src) {
-    winston.log("debug", "Operations.cli           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   cmc (dst, src) {
-    winston.log("debug", "Operations.cmc           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
 
   /**
@@ -86,8 +110,9 @@ export default class Operations {
    *
    * Modifies flags: AF CF OF PF SF ZF
    *
-   * @param dst
-   * @param src
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   * @return {number} Result of the operation
    */
   cmp (dst, src) {
     this.cpu.cycleIP += 1;
@@ -97,175 +122,176 @@ export default class Operations {
     let s = src(segment, null);
     let result = d - s;
 
-    if (result & (size ? 0xFFFF0000 : 0xFF00)) {
-      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
-    } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+    // Handle underflow correctly
+    if (result < 0) {
+      if (this.cpu.opcode.addrSize === b)
+        result = 0xFF + 1 + result;
+      else if (this.cpu.opcode.addrSize === w)
+        result = 0xFFFF + 1 + result;
+      else if (this.cpu.opcode.addrSize === v)
+        result = 0xFFFF + 1 + result;
     }
 
-    if ( (result ^ d) & (d ^ s) & 0x8000) {
-      this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
-    } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
-    }
-
-    if ( (d ^ s ^ result) & 0x10) {
-      this.cpu.reg16[regFlags] |= FLAG_AF_MASK;
-    } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_AF_MASK;
-    }
-    this.cpu.setPF_FLAG(result);
-    this.cpu.setSF_FLAG(result);
-    this.cpu.setZF_FLAG(result);
+    this.flagSub(d, s, result);
 
     return result;
   }
   cmpsb (dst, src) {
-    winston.log("debug", "Operations.cmpsb         : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   cmpsw (dst, src) {
-    winston.log("debug", "Operations.cmpsw         : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   cs (dst, src) {
-    winston.log("debug", "Operations.cs            : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   cwd (dst, src) {
-    winston.log("debug", "Operations.cwd           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   daa (dst, src) {
-    winston.log("debug", "Operations.daa           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
+
+  /**
+   * DAS (Decimal Adjust for Subtraction) corrects the result of a previous
+   * subtraction of two valid packed decimal operands (the destination operand
+   * must have been specified as register AL). DAS changes the content of AL
+   * to a pair of valid packed decimal digits. DAS updates AF, CF, PF, SF and
+   * ZF; the content of OF is undefined following execution of DAS.
+   *  - [1] p.2-36
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   * @return {number} Result of the operation
+   */
   das (dst, src) {
-    winston.log("debug", "Operations.das           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
+
+  /**
+   * DEC (Decrement) subtracts one from the destination, which may be a byte or
+   * a word.
+   *   - [1] p.2-36
+   *
+   * Modifies flags: AF, OF, PF, SF, and ZF
+   *
+   * NOTE: DEC does not affect CF.
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   * @return {number} Result of the operation
+   */
   dec (dst, src) {
-    winston.log("debug", "Operations.dec           : (dst=" + dst.name + ", src=" + src.name + ")");
     this.cpu.cycleIP += 1;
+    let segment = this.cpu.reg16[regCS];
+    let d = dst(segment, null);
+    let s = 1;
+    let result = d - s;
+
+    // Handle underflow correctly
+    if (result < 0) {
+      if (this.cpu.opcode.addrSize === b)
+        result = 0xFF + 1 + result;
+      else if (this.cpu.opcode.addrSize === w)
+        result = 0xFFFF + 1 + result;
+      else if (this.cpu.opcode.addrSize === v)
+        result = 0xFFFF + 1 + result;
+    }
+
+    this.flagSub(d, s, result);
+
+    dst(segment, result);
+    return result;
   }
   div (dst, src) {
-    winston.log("debug", "Operations.div           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   ds (dst, src) {
-    winston.log("debug", "Operations.ds            : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   es (dst, src) {
-    winston.log("debug", "Operations.es            : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   hlt (dst, src) {
-    winston.log("debug", "Operations.hlt           : (dst=, src=)");
-    this.cpu.cycleIP += 1;
+
   }
   idiv (dst, src) {
-    winston.log("debug", "Operations.idiv          : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   imul (dst, src) {
-    winston.log("debug", "Operations.imul          : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   in (dst, src) {
-    winston.log("debug", "Operations.in            : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   iin (dst, src) {
-    winston.log("debug", "Operations.iin           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   inc (dst, src) {
-    winston.log("debug", "Operations.inc           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   int (dst, src) {
-    winston.log("debug", "Operations.int           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   into (dst, src) {
-    winston.log("debug", "Operations.into          : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   iret (dst, src) {
-    winston.log("debug", "Operations.iret          : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   ja (dst, src) {
-    winston.log("debug", "Operations.ja            : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   jb (dst, src) {
-    winston.log("debug", "Operations.jb            : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   jbe (dst, src) {
-    winston.log("debug", "Operations.jbe           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   jcxz (dst, src) {
-    winston.log("debug", "Operations.jcxz          : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   jg (dst, src) {
-    winston.log("debug", "Operations.jg            : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   jge (dst, src) {
-    winston.log("debug", "Operations.jge           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   jl (dst, src) {
-    winston.log("debug", "Operations.jl            : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   jle (dst, src) {
-    winston.log("debug", "Operations.jle           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   jmp (dst, src) {
-    winston.log("debug", "Operations.jmp           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   jnb (dst, src) {
-    winston.log("debug", "Operations.jnb           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   jno (dst, src) {
-    winston.log("debug", "Operations.jno           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   jns (dst, src) {
-    winston.log("debug", "Operations.jns           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   jnz (dst, src) {
-    winston.log("debug", "Operations.jnz           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   jo (dst, src) {
-    winston.log("debug", "Operations.jo            : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   jpe (dst, src) {
-    winston.log("debug", "Operations.jpe           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   jpo (dst, src) {
-    winston.log("debug", "Operations.jpo           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   js (dst, src) {
-    winston.log("debug", "Operations.js            : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
+
   jz (dst, src) {
-    winston.log("debug", "Operations.jz            : (dst=" + dst.name + ")");
     this.cpu.cycleIP += 2;
 
     if ((this.cpu.reg16[regFlags] & FLAG_ZF_MASK) > 0) {
@@ -280,209 +306,273 @@ export default class Operations {
       return false;
     }
   }
+
   lahf (dst, src) {
-    winston.log("debug", "Operations.lahf          : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   lds (dst, src) {
-    winston.log("debug", "Operations.lds           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   lea (dst, src) {
-    winston.log("debug", "Operations.lea           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   les (dst, src) {
-    winston.log("debug", "Operations.les           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   lock (dst, src) {
-    winston.log("debug", "Operations.lock          : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   lodsb (dst, src) {
-    winston.log("debug", "Operations.lodsb         : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   lodsw (dst, src) {
-    winston.log("debug", "Operations.lodsw         : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   loopnz (dst, src) {
-    winston.log("debug", "Operations.loopnz        : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   loopz (dst, src) {
-    winston.log("debug", "Operations.loopz         : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   loop (dst, src) {
-    winston.log("debug", "Operations.loop          : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   mov (dst, src) {
-    winston.log("debug", "Operations.mov           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   movb (dst, src) {
-    winston.log("debug", "Operations.movb          : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   movsb (dst, src) {
-    winston.log("debug", "Operations.movsb         : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   movsw (dst, src) {
-    winston.log("debug", "Operations.movsw         : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   mul (dst, src) {
-    winston.log("debug", "Operations.mul           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
+
+  /**
+   * NEG (Negate) subtracts the destination operand, which may be a byte or a
+   * word, from 0 and returns the result to the destination. This forms the
+   * two's complement of the number, effectively reversing the sign of an
+   * integer. If the operand is zero, its sign is not changed. Attempting to
+   * negate a byte containing -128 or a word containing -32,768 causes no
+   * change to the operand and sets OF.
+   *  - [1] p.2-36
+   *
+   * Modifies flags: AF, CF, OF, PF, SF and ZF. CF is always set except when
+   * the operand is zero, in which case it is cleared.
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   * @return {number} Result of the operation
+   */
   neg (dst, src) {
-    winston.log("debug", "Operations.neg           : (dst=" + dst.name + ", src=" + src.name + ")");
     this.cpu.cycleIP += 1;
+    let segment = this.cpu.reg16[regCS];
+    let d = dst(segment, null);
+    let result = 0 - d;
+
+    // Handle underflow correctly
+    if (result < 0) {
+      if (this.cpu.opcode.addrSize === b)
+        result = 0xFF + 1 + result;
+      else if (this.cpu.opcode.addrSize === w)
+        result = 0xFFFF + 1 + result;
+      else if (this.cpu.opcode.addrSize === v)
+        result = 0xFFFF + 1 + result;
+    }
+
+    this.flagSub(0, d, result);
+
+    if (this.cpu.opcode.addrSize === b && d === 0x80) {
+      result = 0x80;
+      this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
+    }
+    else if (d === 0x8000) {
+      result = 0x8000;
+      this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
+    }
+
+    dst(segment, result);
+    return result;
   }
   nop (dst, src) {
-    winston.log("debug", "Operations.nop           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   not (dst, src) {
-    winston.log("debug", "Operations.not           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   or (dst, src) {
-    winston.log("debug", "Operations.or            : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   out (dst, src) {
-    winston.log("debug", "Operations.out           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   pop (dst, src) {
-    winston.log("debug", "Operations.pop           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   popf (dst, src) {
-    winston.log("debug", "Operations.popf          : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   push (dst, src) {
-    winston.log("debug", "Operations.push          : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   pushf (dst, src) {
-    winston.log("debug", "Operations.pushf         : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   rcl (dst, src) {
-    winston.log("debug", "Operations.rcl           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   rcr (dst, src) {
-    winston.log("debug", "Operations.rcr           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   repnz (dst, src) {
-    winston.log("debug", "Operations.repnz         : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   repz (dst, src) {
-    winston.log("debug", "Operations.repz          : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   ret (dst, src) {
-    winston.log("debug", "Operations.ret           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   retf (dst, src) {
-    winston.log("debug", "Operations.retf          : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   rol (dst, src) {
-    winston.log("debug", "Operations.rol           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   ror (dst, src) {
-    winston.log("debug", "Operations.ror           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   sahf (dst, src) {
-    winston.log("debug", "Operations.sahf          : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   sar (dst, src) {
-    winston.log("debug", "Operations.sar           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
+
+  /**
+   * SBB (Subtract with Borrow) subtracts the source from the destination,
+   * subtracts one if CF is set, and returns the result to the destination
+   * operand. Both operands may be bytes or words. Both operands may be signed
+   * or unsigned binary numbers (see AAS and DAS). Since it incorporates a
+   * borrow from a previous operation, SBB may be used to write routines that
+   * subtract numbers longer than 16 bits.
+   *   - [1] p.2-36
+   *
+   * Modifies flags: AF CF OF PF SF ZF
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   * @return {number} Result of the operation
+   */
   sbb (dst, src) {
-    winston.log("debug", "Operations.sbb           : (dst=" + dst.name + ", src=" + src.name + ")");
     this.cpu.cycleIP += 1;
+    let segment = this.cpu.reg16[regCS];
+    let d = dst(segment, null);
+    let s = src(segment, null);
+    let result = d - s - (this.cpu.reg16[regFlags] & FLAG_CF_MASK);
+
+    // Handle underflow correctly
+    if (result < 0) {
+      if (this.cpu.opcode.addrSize === b)
+        result = 0xFF + 1 + result;
+      else if (this.cpu.opcode.addrSize === w)
+        result = 0xFFFF + 1 + result;
+      else if (this.cpu.opcode.addrSize === v)
+        result = 0xFFFF + 1 + result;
+    }
+
+    this.flagSub(d, s, result);
+
+    dst(segment, result);
+    return result;
   }
+
   scasb (dst, src) {
-    winston.log("debug", "Operations.scasb         : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   scasw (dst, src) {
-    winston.log("debug", "Operations.scasw         : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   shl (dst, src) {
-    winston.log("debug", "Operations.shl           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   shr (dst, src) {
-    winston.log("debug", "Operations.shr           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   ss (dst, src) {
-    winston.log("debug", "Operations.ss            : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   stc (dst, src) {
-    winston.log("debug", "Operations.stc           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   std (dst, src) {
-    winston.log("debug", "Operations.std           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   sti (dst, src) {
-    winston.log("debug", "Operations.sti           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   stosb (dst, src) {
-    winston.log("debug", "Operations.stosb         : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   stosw (dst, src) {
-    winston.log("debug", "Operations.stosw         : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
+
+  /**
+   * SUB The source operand is ~ubtracted from the destination operand, and
+   * the result replaces the destination operand. The operands may be bytes or
+   * words. Both operands may be signed or unsigned binary numbers (see AAS
+   * and DAS).
+   *   - [1] p.2-36
+   *
+   * Modifies flags: AF CF OF PF SF ZF
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   * @return {number} Result of the operation
+   */
   sub (dst, src) {
-    winston.log("debug", "Operations.sub           : (dst=" + dst.name + ", src=" + src.name + ")");
     this.cpu.cycleIP += 1;
+    let segment = this.cpu.reg16[regCS];
+    let d = dst(segment, null);
+    let s = src(segment, null);
+    let result = d - s;
+
+    // Handle underflow correctly
+    if (result < 0) {
+      if (this.cpu.opcode.addrSize === b)
+        result = 0xFF + 1 + result;
+      else if (this.cpu.opcode.addrSize === w)
+        result = 0xFFFF + 1 + result;
+      else if (this.cpu.opcode.addrSize === v)
+        result = 0xFFFF + 1 + result;
+    }
+
+    this.flagSub(d, s, result);
+
+    dst(segment, result);
+    return result;
   }
+
   test (dst, src) {
-    winston.log("debug", "Operations.test          : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   wait (dst, src) {
-    winston.log("debug", "Operations.wait          : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   xchg (dst, src) {
-    winston.log("debug", "Operations.xchg          : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   xlat (dst, src) {
-    winston.log("debug", "Operations.xlat          : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
   xor (dst, src) {
-    winston.log("debug", "Operations.xor           : (dst=" + dst.name + ", src=" + src.name + ")");
-    this.cpu.cycleIP += 1;
+
   }
 
   notimp () {
@@ -504,6 +594,130 @@ export default class Operations {
     // The short jump must be adjusted by the length of the
     // this._regIP += (offset + 2);
     this.cpu.reg16[regIP] += offset;
+  }
+
+  /**
+   * PF (parity flag): If the low-order eight bits of an arithmetic or logical
+   * result contain an even number of I-bits, then the parity flag is set;
+   * otherwise it is cleared. PF is provided for 8080/8085 compatibility; it
+   * also can be used to check ASCII characters for correct parity.
+   *   - [1] p.2-35
+   *
+   * @param {number} result Result of the operation to set the flag for
+   */
+  setPF_FLAG (result) {
+    if (PARITY[(result & 0x00FF)]) this.cpu.reg16[regFlags] |= FLAG_PF_MASK;
+    else this.cpu.reg16[regFlags] &= ~FLAG_PF_MASK;
+
+    // let bitRep = (result & 0x00FF).toString(2);
+    // let bitCnt = 0;
+    // for (let b in bitRep) { if ("1" === bitRep[b]) bitCnt++; }
+    //
+    // if (0 === (bitCnt % 2)) this.cpu.reg16[regFlags] |= FLAG_PF_MASK;
+    // else this.cpu.reg16[regFlags] &= ~FLAG_PF_MASK;
+  }
+
+  /**
+   * SF (sign flag): Arithmetic and logical instructions set the sign flag
+   * equal to the high-order bit (bit 7 or 15) of the result. For signed binary
+   * numbers, the sign flag will be a for positive results and 1 for negative
+   * results (so long as overflow does not occur). A conditional jump
+   * instruction can be used following addition or subtraction to alter the
+   * flow of the program depending on the sign of the result. Programs
+   * performing unsigned operations typically ignore SF since the high-order
+   * bit of the result is interpreted as a digit rather than a sign.
+   *   - [1] p.2-35
+   *
+   * @param {number} result Result of the operation to set the flag for
+   * @param {boolean} twosComplement Is the result a twos complement value?
+   */
+  setSF_FLAG (result, twosComplement=true) {
+    if (twosComplement) {
+      let size = this.cpu.opcode.addrSize;
+      if (b === size && (result & 0xFF) >> 7) this.cpu.reg16[regFlags] |= FLAG_SF_MASK;
+      else if ((result & 0xFFFF) >> 15) this.cpu.reg16[regFlags] |= FLAG_SF_MASK;
+      else this.cpu.reg16[regFlags] &= ~FLAG_SF_MASK;
+    }
+    else {
+      if (result < 0) this.cpu.reg16[regFlags] |= FLAG_SF_MASK;
+      else this.cpu.reg16[regFlags] &= ~FLAG_SF_MASK;
+    }
+  }
+
+  /**
+   * ZF (zero flag): If the result of an arithmetic or logical operation is
+   * zero, then ZF is set; otherwise ZF is cleared. A conditional jump
+   * instruction can be used to alter the flow of the program if the result is
+   * or is not zero.
+   *   - [1] p.2-35
+   *
+   * @param {number} result Result of the operation to set the flag for
+   */
+  setZF_FLAG (result) {
+    if (0 === result) this.cpu.reg16[regFlags] |= FLAG_ZF_MASK;
+    else this.cpu.reg16[regFlags] &= ~FLAG_ZF_MASK;
+  }
+
+  /**
+   *
+   * @param v1
+   * @param v2
+   * @param result
+   */
+  flagSub (v1, v2, result) {
+    let size = this.cpu.opcode.addrSize;
+    // let result = v1 - v2;
+
+    // CF (carry flag): If an addition results in a carry out of the high-order
+    // bit of the result, then CF is set; otherwise CF is cleared. If a
+    // subtraction results in a borrow into the highorder bit of the result,
+    // then CF is set; otherwise CF is cleared. Note that a signed carry is
+    // indicated by CF ≠ OF. CF can be used to detect an unsigned overflow.
+    // Two instructions, ADC (add with carry) and SBB (subtract with borrow),
+    // incorporate the carry flag  in their operations and can be used to
+    // perform multibyte (e.g., 32-bit, 64-bit) addition and subtraction.
+    //   - [1] p.2-35
+    if ((v1 - v2) & (size === b ? 0xFF00 : 0xFFFF0000)) {
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+    } else {
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+    }
+
+    // OF (overflow flag): If the result of an operation is too large a
+    // positive number, or too small a negative number to fit in the
+    // destination operand (excluding the sign bit), then OF is set; otherwise
+    // OF is cleared. OF thus indicates signed arithmetic overflow; it can be
+    // tested with a conditional jump or the INTO (interrupt on overflow)
+    // instruction. OF may be ignored when performing unsigned arithmetic.
+    //   - [1] p.2-35
+    if ( (result ^ v1) & (v1 ^ v2) & (size === b ? 0x80 : 0x8000)) {
+      this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
+    } else {
+      this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
+    }
+    // For addition
+    // if ( (result ^ v1) & (result ^ v2) & (size === b ? 0x80 : 0x8000)) {
+    //   this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
+    // } else {
+    //   this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
+    // }
+
+    // AF (auxiliary carry flag): If an addition results in a carry out of the
+    // low-order halfbyte of the result, then AF is set; otherwise AF is
+    // cleared. If a subtraction results in a borrow into the low-order
+    // half-byte of the result, then AF is set; otherwise AF is cleared. The
+    // auxiliary carry flag is provided for the decimal adjust instructions and
+    // ordinarily is not used for any other purpose.
+    //   - [1] p.2-35
+    if ( (v1 ^ v2 ^ result) & 0x10) {
+      this.cpu.reg16[regFlags] |= FLAG_AF_MASK;
+    } else {
+      this.cpu.reg16[regFlags] &= ~FLAG_AF_MASK;
+    }
+
+    this.setPF_FLAG(result);
+    this.setSF_FLAG(result);
+    this.setZF_FLAG(result);
   }
 }
 

@@ -14,6 +14,7 @@ import {
   regFlags,
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
+  b, w, v, u,
 } from './Constants';
 import {
   binString8, binString16, hexString8, hexString16, formatOpcode,
@@ -78,6 +79,10 @@ export default class CPU8086 extends CPU {
     // Wrapper class for instructions. I don't think I can move this to a
     // module because I need to close over oper and addr for binding and I
     // don't want to make the signature messy by passing them in.
+    //
+    // TODO:
+    //   - Add a cycle param
+    //   - Add a size param
     class inst {
       constructor(op, dst, src) {
         this.op = op ? op.bind(oper) : undefined;
@@ -88,10 +93,16 @@ export default class CPU8086 extends CPU {
         return this.op(this.dst, this.src);
       }
       toString() {
-        let opName = typeof this.op === 'function' ? this.op.name.replace("bound ", "") : "[Unknown Op]";
-        let dstName = typeof this.dst === 'function' ? this.dst.name.replace("bound ", "") : "";
-        let srcName = typeof this.src === 'function' ? this.src.name.replace("bound ", "") : "";
-        return opName + " " + dstName + ", " + srcName;
+        return this.opName() + " " + this.dstName() + ", " + this.srcName();
+      }
+      opName () {
+        return typeof this.op === 'function' ? this.op.name.replace("bound ", "") : "[Unknown Op]";
+      }
+      dstName () {
+        return typeof this.dst === 'function' ? this.dst.name.replace("bound ", "") : "";
+      }
+      srcName () {
+        return typeof this.src === 'function' ? this.src.name.replace("bound ", "") : "";
       }
     }
 
@@ -480,16 +491,32 @@ export default class CPU8086 extends CPU {
       rm              : (addressing_byte & 0x07),
       inst            : null,
       string          : "",
+      // addrType        : null,
+      addrSize        : null,
     };
 
+    // Retrieve the operation from the opcode table
     this.opcode.inst = this.inst[this.opcode.opcode_byte];
-    // If the instruction is an array it's a group instruction and we need
-    // to extract further based on the register component of the addressing
-    // byte
     if (this.opcode.inst instanceof Array) {
+      // If the instruction is an array it's a group instruction and we need
+      // to extract further based on the register component of the addressing
+      // byte
       this.opcode.inst = this.opcode.inst[this.opcode.reg];
     }
+
+    // Store the string representation of the operation
     this.opcode.string = this.opcode.inst.toString();
+
+    // Get the size and type of the opcode based on the addressing
+    // TODO: Find a better way to do this.
+    //       I've thought about adding a size parameter to the inst class
+    //       but that'll require some reworking. Maybe do it if/when I add a
+    //       cycle param.
+    let sizeChar = this.opcode.inst.dstName()[1];
+    if (['b', 'L', 'h'].indexOf(sizeChar) >= 0) this.opcode.addrSize = b;
+    else if (['w', 'p', 'X', 'P', 'B', 'I', 'S'].indexOf(sizeChar) >= 0) this.opcode.addrSize = w;
+    else if (sizeChar === 'v') this.opcode.addrSize = v;
+    else this.opcode.addrSize = u;
   }
 
   cycle () {
@@ -510,49 +537,6 @@ export default class CPU8086 extends CPU {
     winston.log("debug", "  result: " + hexString16(result));
 
     this.reg16[regIP] += this.cycleIP;
-  }
-
-  // TODO: Move these to Operations.js
-  // setAF_FLAG_sub (operand1, operand2) {
-  //   if ((operand1 & 0x0F) < (operand2 & 0x0F)) this.reg16[regFlags] |= FLAG_AF_MASK;
-  //   else this.reg16[regFlags] &= ~FLAG_AF_MASK;
-  // }
-  //
-  // setCF_FLAG_sub (operand1, operand2) {
-  //   if (operand1 < operand2) this.reg16[regFlags] |= FLAG_CF_MASK;
-  //   else this.reg16[regFlags] &= ~FLAG_CF_MASK;
-  // }
-  //
-  // setOF_FLAG (operand1, operand2, result) {
-  //   let shift;
-  //   let size = this.opcode.w;
-  //   if (1 === size) shift = 15; else shift = 7;
-  //
-  //   if ( 1 === (operand1 >> shift) && 1 === (operand2 >> shift) && 0 === (result >> shift) ||
-  //        0 === (operand1 >> shift) && 0 === (operand2 >> shift) && 1 === (result >> shift))
-  //     this.reg16[regFlags] = this.reg16[regFlags] | FLAG_OF_MASK;
-  //   else this.reg16[regFlags] &= ~FLAG_OF_MASK;
-  // }
-
-  setPF_FLAG (result) {
-    let bitRep = result.toString(2);
-    let bitCnt = 0;
-    for (let b in bitRep) { if ("1" === bitRep[b]) bitCnt++; }
-
-    if (0 === (bitCnt % 2)) this.reg16[regFlags] |= FLAG_PF_MASK;
-    else this.reg16[regFlags] &= ~FLAG_PF_MASK;
-  }
-
-  setSF_FLAG (result) {
-    let size = this.opcode.w;
-    if (0 === size && (result & 0xFF) >> 7) this.reg16[regFlags] |= FLAG_SF_MASK;
-    else if (1 === size && (result & 0xFFFF) >> 15) this.reg16[regFlags] |= FLAG_SF_MASK;
-    else this.reg16[regFlags] &= ~FLAG_SF_MASK;
-  }
-
-  setZF_FLAG (result) {
-    if (0 === result) this.reg16[regFlags] |= FLAG_ZF_MASK;
-    else this.reg16[regFlags] &= ~FLAG_ZF_MASK;
   }
 
   saveState () {

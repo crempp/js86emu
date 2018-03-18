@@ -5,6 +5,7 @@ import {
   regCS, regDS, regES, regSS,
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
+  b, w, v, u,
 } from './Constants';
 import { ValueOverflowException, ValueUnderflowException } from "./Exceptions";
 
@@ -62,7 +63,13 @@ export function formatOpcode(opcode, indentSize=0) {
   str += "w:       " + "       " + binString8(opcode.w).slice(-1) + "[" + hexString8(opcode.w) + "]\n";
   str += indent + "mod:     " + "      " + binString8(opcode.mod).slice(-2) + "[" + hexString8(opcode.mod) + "]    ";
   str += "reg:     " + "     " + binString8(opcode.reg).slice(-3) + "[" + hexString8(opcode.reg) + "]\n";
-  str += indent + "rm:      " + "     " + binString8(opcode.rm).slice(-3) + "[" + hexString8(opcode.rm) + "]";
+  str += indent + "rm:      " + "     " + binString8(opcode.rm).slice(-3) + "[" + hexString8(opcode.rm) + "]    ";
+  let size;
+  if (opcode.addrSize === b) size = 'b';
+  else if (opcode.addrSize === w) size = 'w';
+  else if (opcode.addrSize === v) size = 'v';
+  else if (opcode.addrSize === u) size = '?';
+  str += "size:           " + size;
 
   return str;
 }

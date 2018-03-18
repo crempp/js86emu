@@ -44,3 +44,9 @@ export const FLAG_TF_MASK = 0x0100; // 8
 export const FLAG_IF_MASK = 0x0200; // 9
 export const FLAG_DF_MASK = 0x0400; // 10
 export const FLAG_OF_MASK = 0x0800; // 11
+
+// Sizes
+export const b = 0; // Byte
+export const w = 1; // Word
+export const v = 2; // Varies
+export const u = 3; // Unknown
