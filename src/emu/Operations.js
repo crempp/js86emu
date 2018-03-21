@@ -57,6 +57,9 @@ export default class Operations {
    * undefined following execution of AAS.
    *   - [1] p.2-36
    *
+   * http://service.scs.carleton.ca/sivarama/asm_book_web/Instructor_copies/ch11_bcd.pdf
+   * https://stackoverflow.com/a/24093050/1436323
+   *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
    * @return {number} Result of the operation
@@ -337,8 +340,21 @@ export default class Operations {
   loop (dst, src) {
 
   }
-  mov (dst, src) {
 
+
+  /**
+   * MOV transfers a byte or a word from the source operand to the destination
+   * operand.
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   * @return {number} Result of the operation
+   */
+  mov (dst, src) {
+    this.cpu.cycleIP += 1;
+    let segment = this.cpu.reg16[regCS];
+    let result = dst(segment, src(segment, null));
+    return result;
   }
   movb (dst, src) {
 
@@ -595,6 +611,8 @@ export default class Operations {
     // this._regIP += (offset + 2);
     this.cpu.reg16[regIP] += offset;
   }
+
+  // https://en.wikipedia.org/wiki/FLAGS_register
 
   /**
    * PF (parity flag): If the low-order eight bits of an arithmetic or logical

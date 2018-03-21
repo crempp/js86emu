@@ -458,11 +458,22 @@ describe('Operation methods', () => {
 
     });
   });
-  describe.skip('mov', () => {
-    test('test 1', () => {
 
+  describe('mov', () => {
+    beforeEach(() => {
+      // MOV AX,iv
+      cpu.mem8[0x00FF] = 0xB8;
+    });
+    test('move word', () => {
+      cpu.mem8[0x0100] = 0x34;
+      cpu.mem8[0x0101] = 0x12;
+      cpu.decode();
+      oper.mov(addr.AX.bind(addr), addr.Iv.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x1234);
     });
   });
+
   describe.skip('movb', () => {
     test('test 1', () => {
 
