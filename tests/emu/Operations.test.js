@@ -328,26 +328,206 @@ describe('Operation methods', () => {
 
     });
   });
-  describe.skip('ja', () => {
-    test('test 1', () => {
 
+  describe('ja', () => {
+    beforeEach(() => {
+      // JA Jb
+      cpu.mem8[0x00FF] = 0x77;
+      cpu.mem8[0x0100] = 0x12;
+    });
+
+    test('jump executes if not equal and above', () => {
+      // ZF = 0, CF = 0
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.ja(addr.Jb.bind(addr), null);
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+    });
+
+    test('jump executes if not equal and below', () => {
+      // ZF = 0, CF = 1
+      cpu.reg16[regFlags] = 0b0000000000000001;
+      cpu.decode();
+      oper.ja(addr.Jb.bind(addr), null);
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+    });
+
+    test('jump executes if equal but CF not set (above)', () => {
+      // ZF = 1, CF = 0
+      cpu.reg16[regFlags] = 0b0000000001000000;
+      cpu.decode();
+      oper.ja(addr.Jb.bind(addr), null);
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+    });
+
+    test('jump does not execute if equal but CF set (below)', () => {
+      // ZF = 1, CF = 1
+      cpu.reg16[regFlags] = 0b0000000001000001;
+      cpu.decode();
+      oper.ja(addr.Jb.bind(addr), null);
+      expect(cpu.reg16[regIP]).toBe(0xFF);
+      expect(cpu.cycleIP).toBe(2);
     });
   });
+
   describe.skip('jb', () => {
-    test('test 1', () => {
+    beforeEach(() => {
+      // JB Jb
+      cpu.mem8[0x00FF] = 0x72;
+      cpu.mem8[0x0100] = 0x12;
+    });
 
+    test('jump executes if below', () => {
+      cpu.reg16[regFlags] = 0b0000000000000001;
+      cpu.decode();
+      oper.jz(addr.Jb.bind(addr));
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+    });
+
+    test('jump does not execute if equal or above', () => {
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.jz(addr.Jb.bind(addr));
+      expect(cpu.reg16[regIP]).toBe(0xFF);
+      expect(cpu.cycleIP).toBe(2);
     });
   });
-  describe.skip('jbe', () => {
-    test('test 1', () => {
 
+  describe('jbe', () => {
+    beforeEach(() => {
+      // JA Jb
+      cpu.mem8[0x00FF] = 0x76;
+      cpu.mem8[0x0100] = 0x12;
+    });
+
+    test('jump does not execute if not equal and above', () => {
+      // ZF = 0, CF = 0
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.jbe(addr.Jb.bind(addr), null);
+      expect(cpu.reg16[regIP]).toBe(0xFF);
+      expect(cpu.cycleIP).toBe(2);
+    });
+
+    test('jump executes if not equal and below', () => {
+      // ZF = 0, CF = 1
+      cpu.reg16[regFlags] = 0b0000000000000001;
+      cpu.decode();
+      oper.jbe(addr.Jb.bind(addr), null);
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+    });
+
+    test('jump executes if equal but CF not set (above)', () => {
+      // ZF = 1, CF = 0
+      cpu.reg16[regFlags] = 0b0000000001000000;
+      cpu.decode();
+      oper.jbe(addr.Jb.bind(addr), null);
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+    });
+
+    test('jump executes if equal but CF set (below)', () => {
+      // ZF = 1, CF = 1
+      cpu.reg16[regFlags] = 0b0000000001000001;
+      cpu.decode();
+      oper.jbe(addr.Jb.bind(addr), null);
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
     });
   });
-  describe.skip('jg', () => {
-    test('test 1', () => {
 
+  describe.skip('jcxz', () => {
+    beforeEach(() => {
+      // JCXZ Jb
+      cpu.mem8[0x00FF] = 0xE3;
+      cpu.mem8[0x0100] = 0x12;
+    });
+
+    test('jump executes if CX is zero', () => {
+      cpu.reg16[regCX] = 0x00;
+      cpu.decode();
+      oper.jcxz(addr.Jb.bind(addr));
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+    });
+
+    test('jump does not execute if equal or above', () => {
+      cpu.reg16[regCX] = 0x01;
+      cpu.decode();
+      oper.jcxz(addr.Jb.bind(addr));
+      expect(cpu.reg16[regIP]).toBe(0xFF);
+      expect(cpu.cycleIP).toBe(2);
     });
   });
+
+  describe('jg', () => {
+    beforeEach(() => {
+      // JA Jb
+      cpu.mem8[0x00FF] = 0x76;
+      cpu.mem8[0x0100] = 0x12;
+    });
+
+    // 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
+    //  1 -- -- -- OF DF IF TF SF ZF -- AF -- PF -- CF
+
+    // OF SF ZF
+    //  0  0  0 j
+    //  0  0  1 j
+    //  0  1  0 j
+    //  0  1  1 j
+    //  1  0  0 j
+    //  1  0  1 j
+    //  1  1  0 -
+    //  1  1  1 j
+
+    test('jump executes if OF=0, SF=0, ZF=0', () => {
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.jg(addr.Jb.bind(addr), null);
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+    });
+
+    test('jump executes if OF=0, SF=0, ZF=1', () => {
+      cpu.reg16[regFlags] = 0b0000000001000000;
+      cpu.decode();
+      oper.jg(addr.Jb.bind(addr), null);
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+    });
+
+    test('jump executes if OF=0, SF=1, ZF=0', () => {
+      cpu.reg16[regFlags] = 0b0000000010000000;
+      cpu.decode();
+      oper.jg(addr.Jb.bind(addr), null);
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+    });
+
+    test('jump does not execute if OF=0, SF=1, ZF=1', () => {
+      cpu.reg16[regFlags] = 0b0000000011000000;
+      cpu.decode();
+      oper.jg(addr.Jb.bind(addr), null);
+      expect(cpu.reg16[regIP]).toBe(0xFF);
+      expect(cpu.cycleIP).toBe(2);
+    });
+
+    test('jump executes if OF=1, SF=0, ZF=0', () => {
+      cpu.reg16[regFlags] = 0b0000100000000000;
+      cpu.decode();
+      oper.jg(addr.Jb.bind(addr), null);
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+    });
+
+    test('jump executes if OF=1, SF=1, ZF=0', () => {
+      cpu.reg16[regFlags] = 0b0000100010000000;
+      cpu.decode();
+      oper.jg(addr.Jb.bind(addr), null);
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+    });
+
+    test('jump executes if OF=1, SF=1, ZF=1', () => {
+      cpu.reg16[regFlags] = 0b0000100011000000;
+      cpu.decode();
+      oper.jg(addr.Jb.bind(addr), null);
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+    });
+  });
+
   describe.skip('jge', () => {
     test('test 1', () => {
 
@@ -408,11 +588,32 @@ describe('Operation methods', () => {
 
     });
   });
-  describe.skip('jz', () => {
-    test('test 1', () => {
 
+
+
+  describe('jz', () => {
+    beforeEach(() => {
+      // JZ Jb
+      cpu.mem8[0x00FF] = 0x74;
+      cpu.mem8[0x0100] = 0x12;
+    });
+
+    test('jump executes if equal', () => {
+      cpu.reg16[regFlags] = 0b0000000001000000;
+      cpu.decode();
+      oper.jz(addr.Jb.bind(addr));
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+    });
+
+    test('jump does not execute if not equal', () => {
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.jz(addr.Jb.bind(addr));
+      expect(cpu.reg16[regIP]).toBe(0xFF);
+      expect(cpu.cycleIP).toBe(2);
     });
   });
+
   describe.skip('lahf', () => {
     test('test 1', () => {
 

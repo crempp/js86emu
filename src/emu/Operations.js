@@ -11,7 +11,8 @@ import {
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
   b, w, v, u,
 } from './Constants';
-import {binString16, formatFlags, hexString16} from "./Debug";
+import { binString16, formatFlags, hexString16 } from "./Debug";
+import { FeatureNotImplementedException } from "./Exceptions";
 
 const PARITY = [
 /*         0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
@@ -39,13 +40,13 @@ export default class Operations {
   }
 
   aaa (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   aad (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   aam (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
 
   /**
@@ -65,39 +66,37 @@ export default class Operations {
    * @return {number} Result of the operation
    */
   aas (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
 
   adc (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
 
   add (dst, src) {
-    let segment = this.cpu.reg16[regCS];
-    this.cpu.cycleIP += 1;
-    let val = dst(segment, null) + src(segment, null);
-    dst(val);
+    throw new FeatureNotImplementedException("Operation not implemented");
   };
-  and (dst, src) {
 
+  and (dst, src) {
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   call (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   cbw (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   clc (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   cld (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   cli (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   cmc (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
 
   /**
@@ -140,19 +139,19 @@ export default class Operations {
     return result;
   }
   cmpsb (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   cmpsw (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   cs (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   cwd (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   daa (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
 
   /**
@@ -168,7 +167,7 @@ export default class Operations {
    * @return {number} Result of the operation
    */
   das (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
 
   /**
@@ -207,56 +206,218 @@ export default class Operations {
     return result;
   }
   div (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   ds (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   es (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   hlt (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   idiv (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   imul (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   in (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   iin (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   inc (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   int (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   into (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   iret (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * JA / JNBE - Jump if above / not below nor equal
+   *
+   * The conditional transfer instructions are jumps that may or may not
+   * transfer control depending on the state of the CPU flags at the time the
+   * instruction is executed. If the condition is "true," then control is
+   * transferred to the target specified in the instruction. If the condition
+   * is "false," then control passes to the instruction that follows the
+   * conditional jump. All conditional jumps are SHORT, that is, the target
+   * must be in the current code segment and within -128 to +127 bytes of the
+   * first byte of the next instruction (JMP OOH jumps to the first byte of
+   * the next instruction). Since the jump is made by adding the relative
+   * displacement of the target to the instruction pointer, all conditional
+   * jumps are self-relative and are appropriate for position-independent
+   * routines.
+   *
+   * CONDITION TESTED: (CF OR ZF)=O
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src NOT USED
+   * @return {boolean} True if the jump was made, false otherwise
+   */
   ja (dst, src) {
+    this.cpu.cycleIP += 1;
 
+    let segment = this.cpu.reg16[regCS];
+    let offset = dst(segment);
+    if ( (this.cpu.reg16[regFlags] & FLAG_ZF_MASK) === 0 ||
+         (this.cpu.reg16[regFlags] & FLAG_CF_MASK) === 0)
+    {
+      this.shortJump(offset);
+      return true;
+    }
+    else {
+      return false;
+    }
   }
+
+  /**
+   * JB / JNAE - Jump if below / not above nor equal
+   *
+   * The conditional transfer instructions are jumps that may or may not
+   * transfer control depending on the state of the CPU flags at the time the
+   * instruction is executed. If the condition is "true," then control is
+   * transferred to the target specified in the instruction. If the condition
+   * is "false," then control passes to the instruction that follows the
+   * conditional jump. All conditional jumps are SHORT, that is, the target
+   * must be in the current code segment and within -128 to +127 bytes of the
+   * first byte of the next instruction (JMP OOH jumps to the first byte of
+   * the next instruction). Since the jump is made by adding the relative
+   * displacement of the target to the instruction pointer, all conditional
+   * jumps are self-relative and are appropriate for position-independent
+   * routines.
+   *
+   * CONDITION TESTED: CF=1
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src NOT USED
+   * @return {boolean} True if the jump was made, false otherwise
+   */
   jb (dst, src) {
+    this.cpu.cycleIP += 1;
 
+    let segment = this.cpu.reg16[regCS];
+    let offset = dst(segment);
+    if ((this.cpu.reg16[regFlags] & FLAG_CF_MASK) > 0) {
+      this.shortJump(offset);
+      return true;
+    }
+    else {
+      return false;
+    }
   }
+
+  /**
+   * JBE / JNA - Jump if below or equal / not above
+   *
+   * The conditional transfer instructions are jumps that may or may not
+   * transfer control depending on the state of the CPU flags at the time the
+   * instruction is executed. If the condition is "true," then control is
+   * transferred to the target specified in the instruction. If the condition
+   * is "false," then control passes to the instruction that follows the
+   * conditional jump. All conditional jumps are SHORT, that is, the target
+   * must be in the current code segment and within -128 to +127 bytes of the
+   * first byte of the next instruction (JMP OOH jumps to the first byte of
+   * the next instruction). Since the jump is made by adding the relative
+   * displacement of the target to the instruction pointer, all conditional
+   * jumps are self-relative and are appropriate for position-independent
+   * routines.
+   *
+   * CONDITION TESTED: (CF OR ZF)=1
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src NOT USED
+   * @return {boolean} True if the jump was made, false otherwise
+   */
   jbe (dst, src) {
+    this.cpu.cycleIP += 1;
 
+    let segment = this.cpu.reg16[regCS];
+    let offset = dst(segment);
+    if ( (this.cpu.reg16[regFlags] & FLAG_ZF_MASK) > 0 ||
+         (this.cpu.reg16[regFlags] & FLAG_CF_MASK) > 0)
+    {
+      this.shortJump(offset);
+      return true;
+    }
+    else {
+      return false;
+    }
   }
+
+  /**
+   * JCXZ (Jump If CX Zero) transfers control to the target operand if CX is O.
+   * This instruction is useful at the beginning of a loop to bypass the loop
+   * if ex has a zero value, i.e., to execute the loop zero times.
+   *
+   * CONDITION TESTED: (CF OR ZF)=1
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src NOT USED
+   * @return {boolean} True if the jump was made, false otherwise
+   */
   jcxz (dst, src) {
+    this.cpu.cycleIP += 1;
 
+    let segment = this.cpu.reg16[regCS];
+    let offset = dst(segment);
+    if ( this.cpu.reg16[regCX] === 0) {
+      this.shortJump(offset);
+      return true;
+    }
+    else {
+      return false;
+    }
   }
+
+  /**
+   * JG / JNLE - Jump if greater / not less nor equal
+   *
+   * The conditional transfer instructions are jumps that may or may not
+   * transfer control depending on the state of the CPU flags at the time the
+   * instruction is executed. If the condition is "true," then control is
+   * transferred to the target specified in the instruction. If the condition
+   * is "false," then control passes to the instruction that follows the
+   * conditional jump. All conditional jumps are SHORT, that is, the target
+   * must be in the current code segment and within -128 to +127 bytes of the
+   * first byte of the next instruction (JMP OOH jumps to the first byte of
+   * the next instruction). Since the jump is made by adding the relative
+   * displacement of the target to the instruction pointer, all conditional
+   * jumps are self-relative and are appropriate for position-independent
+   * routines.
+   *
+   * CONDITION TESTED: ((SF XOR OF) OR ZF)=O
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src NOT USED
+   * @return {boolean} True if the jump was made, false otherwise
+   */
   jg (dst, src) {
+    this.cpu.cycleIP += 1;
 
+    let segment = this.cpu.reg16[regCS];
+    let offset = dst(segment);
+
+    if (((this.cpu.reg16[regFlags] & FLAG_SF_MASK) >> 7) ^ ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) >> 11) === 0 ||
+        (this.cpu.reg16[regFlags] & FLAG_ZF_MASK) === 0)
+    {
+      this.shortJump(offset);
+      return true;
+    }
+    else {
+      return false;
+    }
   }
+
   jge (dst, src) {
 
   }
@@ -294,14 +455,36 @@ export default class Operations {
 
   }
 
+  /**
+   * JZ / JE - Jump if equal/zero
+   *
+   * The conditional transfer instructions are jumps that may or may not
+   * transfer control depending on the state of the CPU flags at the time the
+   * instruction is executed. If the condition is "true," then control is
+   * transferred to the target specified in the instruction. If the condition
+   * is "false," then control passes to the instruction that follows the
+   * conditional jump. All conditional jumps are SHORT, that is, the target
+   * must be in the current code segment and within -128 to +127 bytes of the
+   * first byte of the next instruction (JMP OOH jumps to the first byte of
+   * the next instruction). Since the jump is made by adding the relative
+   * displacement of the target to the instruction pointer, all conditional
+   * jumps are self-relative and are appropriate for position-independent
+   * routines.
+   *
+   * CONDITION TESTED: ZF=O
+   *
+   *   - [1] p.2-44 to 2.46
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   * @return {boolean} True if the jump was made, false otherwise
+   */
   jz (dst, src) {
-    this.cpu.cycleIP += 2;
+    this.cpu.cycleIP += 1;
 
+    let segment = this.cpu.reg16[regCS];
+    let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_ZF_MASK) > 0) {
-      // The jump address is a signed (twos complement) offset from the
-      // current location.
-      let offset = this.cpu.mem8[this.cpu.reg16[regIP] + 1];
-
       this.shortJump(offset);
       return true;
     }
@@ -311,40 +494,40 @@ export default class Operations {
   }
 
   lahf (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   lds (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   lea (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   les (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   lock (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   lodsb (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   lodsw (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   loopnz (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   loopz (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   loop (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
-
 
   /**
    * MOV transfers a byte or a word from the source operand to the destination
    * operand.
+   *  - [1] p.2-31
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
@@ -356,17 +539,18 @@ export default class Operations {
     let result = dst(segment, src(segment, null));
     return result;
   }
-  movb (dst, src) {
 
+  movb (dst, src) {
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   movsb (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   movsw (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   mul (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
 
   /**
@@ -415,59 +599,60 @@ export default class Operations {
     dst(segment, result);
     return result;
   }
-  nop (dst, src) {
 
+  nop (dst, src) {
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   not (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   or (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   out (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   pop (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   popf (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   push (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   pushf (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   rcl (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   rcr (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   repnz (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   repz (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   ret (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   retf (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   rol (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   ror (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   sahf (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   sar (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
 
   /**
@@ -509,34 +694,34 @@ export default class Operations {
   }
 
   scasb (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   scasw (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   shl (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   shr (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   ss (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   stc (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   std (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   sti (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   stosb (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   stosw (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
 
   /**
@@ -576,19 +761,19 @@ export default class Operations {
   }
 
   test (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   wait (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   xchg (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   xlat (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
   xor (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
 
   notimp () {
@@ -598,6 +783,9 @@ export default class Operations {
   /**
    * Perform a short jump to another code location. This jump will not leave
    * the current segment.
+   *
+   * The jump offset is a signed (twos complement) offset from the current
+   * location.
    *
    * @param {number} offset The offset for the jump (twos complement)
    */

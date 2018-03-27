@@ -7,6 +7,7 @@
   "repository": "https://github.com/crempp/js86emu",
   "main": "compiled.js",
   "dependencies": {
+    "readline-sync": "^1.4.9",
     "winston": "^2.4.0"
   },
   "devDependencies": {

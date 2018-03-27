@@ -25,3 +25,10 @@ export class FeatureNotImplementedException extends Error {
     Error.captureStackTrace(this, FeatureNotImplementedException);
   }
 }
+
+export class InvalidAddressModeException extends Error {
+  constructor(...params) {
+    super(...params);
+    Error.captureStackTrace(this, FeatureNotImplementedException);
+  }
+}

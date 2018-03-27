@@ -1,4 +1,5 @@
 import winston from 'winston'
+import * as readlineSync from 'readline-sync';
 import CPUConfig from './emu/CPUConfig'
 import CPU8086 from './emu/8086.js'
 import {
@@ -53,20 +54,22 @@ let codegolf = [
   0x6C, 0x6C, 0x6F, 0x2C, 0x20, 0x77, 0x6F, 0x72, 0x6C, 0x64, 0x21, 0x00, 0x00,
   0x00];
 
+// Setup
 let config = new CPUConfig({
   memorySize: 1024,
 });
 let cpu = new CPU8086(config);
 
+// Load program
 for (let i = 0; i < codegolf.length; i++) {
   cpu.mem8[i] = codegolf[i];
 }
 cpu.reg16[regIP] = 0;
 cpu.reg16[regSP] = 0x100;
 
-winston.log("debug", "-".repeat(80));
-cpu.cycle();
-winston.log("debug", "-".repeat(80));
-cpu.cycle();
-winston.log("debug", "-".repeat(80));
-cpu.cycle();
+// Run
+for (let i = 0; i <= 8; i++) {
+  winston.log("debug", "-".repeat(80));
+  cpu.cycle();
+  readlineSync.question('Continue [ENTER]:');
+}

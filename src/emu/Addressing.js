@@ -9,7 +9,10 @@ import {
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
 } from './Constants';
 import { formatOpcode, hexString16, hexString32 } from "./Debug";
-import { ValueOverflowException, FeatureNotImplementedException } from "./Exceptions";
+import {
+  ValueOverflowException, FeatureNotImplementedException,
+  InvalidAddressModeException
+} from "./Exceptions";
 
 export default class Addressing {
   constructor(cpu) {
@@ -596,12 +599,41 @@ export default class Addressing {
     return result;
   }
 
+  /**
+   * The instruction contains a relative offset to be added to the instruction
+   * pointer register (for example, JMP (0E9), LOOP).
+   *
+   * The operand is a word, regardless of operand-size attribute.
+   *
+   * @param {number|null} segment Memory segment
+   * @param {number|null} value NOT USED
+   * @return {number} The value from the address is returned
+   */
   Jb (segment, value) {
-
+    if (value) throw new InvalidAddressModeException("Jb addressing mode can not set values")
+    this.cpu.opcode.w = 0; // Override opcode w bit
+    let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
+    let result = this.readMem8(segment, offset);
+    this.cpu.cycleIP += 1;
+    return result;
   }
 
+  /**
+   * The instruction contains a relative offset to be added to the instruction
+   * pointer register (for example, JMP (0E9), LOOP).
+   *
+   * The operand is a word or doubleword, depending on operand-size attribute.
+   *
+   * @param {number|null} segment Memory segment
+   * @param {number|null} value NOT USED
+   * @return {number} The value from the address is returned
+   */
   Jv (segment, value) {
-
+    if (value) throw new InvalidAddressModeException("Jv addressing mode can not set values")
+    let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
+    let result = this.readMem16(segment, offset);
+    this.cpu.cycleIP += 2;
+    return result;
   }
 
   M (segment, value) {

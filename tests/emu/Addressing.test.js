@@ -12,7 +12,7 @@ import {
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
 } from '../../src/emu/Constants';
-import { ValueOverflowException } from "../../src/emu/Exceptions";
+import {InvalidAddressModeException, ValueOverflowException} from "../../src/emu/Exceptions";
 import {
   formatOpcode, hexString8, hexString16, hexString32, formatFlags,
   formatMemory, formatRegisters
@@ -2006,12 +2006,58 @@ describe('Addressing Modes', () => {
     });
   });
 
-  describe.skip('Jb', () => {
+  describe('Jb', () => {
+    beforeEach(() => {
+      cpu.mem8[0xABCD1] = 0x34; // arg1 byte low
+      cpu.mem8[0xABCD2] = 0x12; // arg1 byte high
+      cpu.mem8[0xABCD3] = 0x78; // arg2 byte low
+      cpu.mem8[0xABCD4] = 0x56; // arg2 byte high
 
+      cpu.cycleIP = 1; // usually the operation will do this
+    });
+    test('read', () => {
+      expect(addr.Jb(segment, null)).toBe(0x34);
+    });
+    test('read cycles', () => {
+      addr.Jb(segment, null);
+      expect(cpu.cycleIP).toBe(2);
+    });
+    test.skip('write', () => {
+      expect(() => {
+        addr.Jb(segment, 0xFF);
+      }).toThrowError(InvalidAddressModeException);
+
+    });
+    test('addressing mode overrides operand-size bit', () => {
+      cpu.mem8[0xABCD0] = 0x01; // inst (byte)
+      cpu.decode();
+      expect(addr.Jb(segment, null)).toBe(0x34);
+    });
   });
 
-  describe.skip('Jv', () => {
+  describe('Jv', () => {
+    beforeEach(() => {
+      cpu.mem8[0xABCD1] = 0x34; // arg1 byte low
+      cpu.mem8[0xABCD2] = 0x12; // arg1 byte high
+      cpu.mem8[0xABCD3] = 0x78; // arg2 byte low
+      cpu.mem8[0xABCD4] = 0x56; // arg2 byte high
 
+      cpu.mem8[0xABCD0] = 0x01; // inst (byte)
+
+      cpu.cycleIP = 1; // usually the operation will do this
+    });
+    test('read', () => {
+      expect(addr.Jv(segment, null)).toBe(0x1234);
+    });
+    test('read cycles', () => {
+      addr.Jv(segment, null);
+      expect(cpu.cycleIP).toBe(3);
+    });
+    test.skip('write', () => {
+      expect(() => {
+        addr.Jv(segment, 0xFFFF);
+      }).toThrowError(InvalidAddressModeException);
+    });
   });
 
   describe.skip('M', () => {
