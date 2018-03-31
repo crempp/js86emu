@@ -337,32 +337,31 @@ describe('Operation methods', () => {
       cpu.mem8[0x0100] = 0x12;
     });
 
-    test('jump executes if not equal and above', () => {
-      // ZF = 0, CF = 0
+    test('jump executes if ZF = 0, CF = 0', () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.ja(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
 
-    test('jump executes if not equal and below', () => {
-      // ZF = 0, CF = 1
+    test('jump executes if ZF = 0, CF = 1', () => {
       cpu.reg16[regFlags] = 0b0000000000000001;
       cpu.decode();
       oper.ja(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
 
-    test('jump executes if equal but CF not set (above)', () => {
-      // ZF = 1, CF = 0
+    test('jump executes if ZF = 1, CF = 0', () => {
       cpu.reg16[regFlags] = 0b0000000001000000;
       cpu.decode();
       oper.ja(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
 
-    test('jump does not execute if equal but CF set (below)', () => {
-      // ZF = 1, CF = 1
+    test('jump does not execute if ZF = 1, CF = 1', () => {
       cpu.reg16[regFlags] = 0b0000000001000001;
       cpu.decode();
       oper.ja(addr.Jb.bind(addr), null);
@@ -378,14 +377,15 @@ describe('Operation methods', () => {
       cpu.mem8[0x0100] = 0x12;
     });
 
-    test('jump executes if below', () => {
+    test('jump executes if CF=1', () => {
       cpu.reg16[regFlags] = 0b0000000000000001;
       cpu.decode();
       oper.jz(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
 
-    test('jump does not execute if equal or above', () => {
+    test('jump does not execute if CF=0', () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.jz(addr.Jb.bind(addr));
@@ -401,8 +401,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x0100] = 0x12;
     });
 
-    test('jump does not execute if not equal and above', () => {
-      // ZF = 0, CF = 0
+    test('jump does not execute if ZF = 0, CF = 0', () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.jbe(addr.Jb.bind(addr), null);
@@ -410,28 +409,28 @@ describe('Operation methods', () => {
       expect(cpu.cycleIP).toBe(2);
     });
 
-    test('jump executes if not equal and below', () => {
-      // ZF = 0, CF = 1
+    test('jump executes if ZF = 0, CF = 1', () => {
       cpu.reg16[regFlags] = 0b0000000000000001;
       cpu.decode();
       oper.jbe(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
 
-    test('jump executes if equal but CF not set (above)', () => {
-      // ZF = 1, CF = 0
+    test('jump executes if ZF = 1, CF = 0', () => {
       cpu.reg16[regFlags] = 0b0000000001000000;
       cpu.decode();
       oper.jbe(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
 
-    test('jump executes if equal but CF set (below)', () => {
-      // ZF = 1, CF = 1
+    test('jump executes if ZF = 1, CF = 1', () => {
       cpu.reg16[regFlags] = 0b0000000001000001;
       cpu.decode();
       oper.jbe(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
   });
 
@@ -442,14 +441,15 @@ describe('Operation methods', () => {
       cpu.mem8[0x0100] = 0x12;
     });
 
-    test('jump executes if CX is zero', () => {
+    test('jump executes if CX=1', () => {
       cpu.reg16[regCX] = 0x00;
       cpu.decode();
       oper.jcxz(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
 
-    test('jump does not execute if equal or above', () => {
+    test('jump does not execute if CX<>0', () => {
       cpu.reg16[regCX] = 0x01;
       cpu.decode();
       oper.jcxz(addr.Jb.bind(addr));
@@ -470,6 +470,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jg(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
 
     test('jump executes if OF=0, SF=0, ZF=1', () => {
@@ -477,6 +478,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jg(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
 
     test('jump executes if OF=0, SF=1, ZF=0', () => {
@@ -484,6 +486,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jg(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
 
     test('jump does not execute if OF=0, SF=1, ZF=1', () => {
@@ -499,6 +502,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jg(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
 
     test('jump executes if OF=1, SF=1, ZF=0', () => {
@@ -506,6 +510,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jg(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
 
     test('jump executes if OF=1, SF=1, ZF=1', () => {
@@ -513,6 +518,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jg(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
   });
 
@@ -528,6 +534,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jge(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
 
     test('jump does not execute if SF=0, OF=1', () => {
@@ -551,6 +558,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jge(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
   });
 
@@ -574,6 +582,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jl(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
 
     test('jump executes if SF=1, OF=0', () => {
@@ -581,6 +590,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jl(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
 
     test('jump does not execute if SF=1, OF=1', () => {
@@ -593,19 +603,6 @@ describe('Operation methods', () => {
   });
 
   describe('jle', () => {
-    // 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
-    //  1 -- -- -- OF DF IF TF SF ZF -- AF -- PF -- CF
-
-    // SF OF ZF
-    //  0  0  0 -
-    //  0  0  1 j
-    //  0  1  0 j
-    //  0  1  1 j
-    //  1  0  0 j
-    //  1  0  1 j
-    //  1  1  0 -
-    //  1  1  1 j
-
     beforeEach(() => {
       // JLE Jb
       cpu.mem8[0x00FF] = 0x7E;
@@ -625,6 +622,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jle(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
 
     test('jump executes if OF=0, SF=1, ZF=0', () => {
@@ -632,6 +630,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jle(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
 
     test('jump executes if OF=0, SF=1, ZF=1', () => {
@@ -639,6 +638,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jle(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
 
     test('jump executes if OF=1, SF=0, ZF=0', () => {
@@ -646,6 +646,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jle(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
 
     test('jump does not execute if OF=1, SF=1, ZF=0', () => {
@@ -661,6 +662,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jle(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
   });
 
@@ -747,48 +749,202 @@ describe('Operation methods', () => {
       expect(cpu.cycleIP).toBe(5);
     });
   });
-  describe.skip('jnb', () => {
-    test('test 1', () => {
 
+  describe('jnb', () => {
+    beforeEach(() => {
+      // JNB Jb
+      cpu.mem8[0x00FF] = 0x73;
+      cpu.mem8[0x0100] = 0x12;
     });
-  });
-  describe.skip('jno', () => {
-    test('test 1', () => {
 
+    test('jump executes CF=0', () => {
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.jnb(addr.Jb.bind(addr));
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
     });
-  });
-  describe.skip('jns', () => {
-    test('test 1', () => {
 
-    });
-  });
-  describe.skip('jnz', () => {
-    test('test 1', () => {
-
-    });
-  });
-  describe.skip('jo', () => {
-    test('test 1', () => {
-
-    });
-  });
-  describe.skip('jpe', () => {
-    test('test 1', () => {
-
-    });
-  });
-  describe.skip('jpo', () => {
-    test('test 1', () => {
-
-    });
-  });
-  describe.skip('js', () => {
-    test('test 1', () => {
-
+    test('jump does not execute if CF=1', () => {
+      cpu.reg16[regFlags] = 0b0000000000000001;
+      cpu.decode();
+      oper.jnb(addr.Jb.bind(addr));
+      expect(cpu.reg16[regIP]).toBe(0xFF);
+      expect(cpu.cycleIP).toBe(2);
     });
   });
 
+  describe('jno', () => {
+    beforeEach(() => {
+      // JNO Jb
+      cpu.mem8[0x00FF] = 0x71;
+      cpu.mem8[0x0100] = 0x12;
+    });
 
+    test('jump executes OF=0', () => {
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.jno(addr.Jb.bind(addr));
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
+    });
+
+    test('jump does not execute if OF=1', () => {
+      cpu.reg16[regFlags] = 0b0000100000000000;
+      cpu.decode();
+      oper.jno(addr.Jb.bind(addr));
+      expect(cpu.reg16[regIP]).toBe(0xFF);
+      expect(cpu.cycleIP).toBe(2);
+    });
+  });
+
+  describe('jns', () => {
+    beforeEach(() => {
+      // JNS Jb
+      cpu.mem8[0x00FF] = 0x79;
+      cpu.mem8[0x0100] = 0x12;
+    });
+
+    test('jump executes SF=0', () => {
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.jns(addr.Jb.bind(addr));
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
+    });
+
+    test('jump does not execute if SF=1', () => {
+      cpu.reg16[regFlags] = 0b0000000010000000;
+      cpu.decode();
+      oper.jns(addr.Jb.bind(addr));
+      expect(cpu.reg16[regIP]).toBe(0xFF);
+      expect(cpu.cycleIP).toBe(2);
+    });
+  });
+
+  describe('jnz', () => {
+    beforeEach(() => {
+      // JNZ Jb
+      cpu.mem8[0x00FF] = 0x75;
+      cpu.mem8[0x0100] = 0x12;
+    });
+
+    test('jump executes ZF=0', () => {
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.jnz(addr.Jb.bind(addr));
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
+    });
+
+    test('jump does not execute if ZF=1', () => {
+      cpu.reg16[regFlags] = 0b0000000001000000;
+      cpu.decode();
+      oper.jnz(addr.Jb.bind(addr));
+      expect(cpu.reg16[regIP]).toBe(0xFF);
+      expect(cpu.cycleIP).toBe(2);
+    });
+  });
+
+  describe('jo', () => {
+    beforeEach(() => {
+      // JO Jb
+      cpu.mem8[0x00FF] = 0x70;
+      cpu.mem8[0x0100] = 0x12;
+    });
+
+    test('jump executes OF=1', () => {
+      cpu.reg16[regFlags] = 0b0000100000000000;
+      cpu.decode();
+      oper.jo(addr.Jb.bind(addr));
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
+    });
+
+    test('jump does not execute if OF=0', () => {
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.jo(addr.Jb.bind(addr));
+      expect(cpu.reg16[regIP]).toBe(0xFF);
+      expect(cpu.cycleIP).toBe(2);
+    });
+  });
+
+  describe('jpe', () => {
+    beforeEach(() => {
+      // JPE Jb
+      cpu.mem8[0x00FF] = 0x7A;
+      cpu.mem8[0x0100] = 0x12;
+    });
+
+    test('jump executes PF=1', () => {
+      cpu.reg16[regFlags] = 0b0000000000000100;
+      cpu.decode();
+      oper.jpe(addr.Jb.bind(addr));
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
+    });
+
+    test('jump does not execute if PF=0', () => {
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.jpe(addr.Jb.bind(addr));
+      expect(cpu.reg16[regIP]).toBe(0xFF);
+      expect(cpu.cycleIP).toBe(2);
+    });
+  });
+
+  describe('jpo', () => {
+    beforeEach(() => {
+      // JPO Jb
+      cpu.mem8[0x00FF] = 0x7B;
+      cpu.mem8[0x0100] = 0x12;
+    });
+
+    // 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
+    //  1 -- -- -- OF DF IF TF SF ZF -- AF -- PF -- CF
+    test('jump executes PF=0', () => {
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.jpo(addr.Jb.bind(addr));
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
+    });
+
+    test('jump does not execute if PF=1', () => {
+      cpu.reg16[regFlags] = 0b0000000000000100;
+      cpu.decode();
+      oper.jpo(addr.Jb.bind(addr));
+      expect(cpu.reg16[regIP]).toBe(0xFF);
+      expect(cpu.cycleIP).toBe(2);
+    });
+  });
+
+  describe('js', () => {
+    beforeEach(() => {
+      // JS Jb
+      cpu.mem8[0x00FF] = 0x78;
+      cpu.mem8[0x0100] = 0x12;
+    });
+
+    // 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
+    //  1 -- -- -- OF DF IF TF SF ZF -- AF -- PF -- CF
+    test('jump executes SF=1', () => {
+      cpu.reg16[regFlags] = 0b0000000010000000;
+      cpu.decode();
+      oper.js(addr.Jb.bind(addr));
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.cycleIP).toBe(2);
+    });
+
+    test('jump does not execute if SF=0', () => {
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.js(addr.Jb.bind(addr));
+      expect(cpu.reg16[regIP]).toBe(0xFF);
+      expect(cpu.cycleIP).toBe(2);
+    });
+  });
 
   describe('jz', () => {
     beforeEach(() => {
@@ -797,14 +953,14 @@ describe('Operation methods', () => {
       cpu.mem8[0x0100] = 0x12;
     });
 
-    test('jump executes if equal', () => {
+    test('jump executes if ZF=0', () => {
       cpu.reg16[regFlags] = 0b0000000001000000;
       cpu.decode();
       oper.jz(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
     });
 
-    test('jump does not execute if not equal', () => {
+    test('jump does not execute if if ZF=1', () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.jz(addr.Jb.bind(addr));

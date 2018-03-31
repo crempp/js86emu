@@ -614,36 +614,308 @@ export default class Operations {
     return true;
   }
 
+  /**
+   * JAE / JNB Jump if above or equal / not below
+   *
+   * The conditional transfer instructions are jumps that may or may not
+   * transfer control depending on the state of the CPU flags at the time the
+   * instruction is executed. If the condition is "true," then control is
+   * transferred to the target specified in the instruction. If the condition
+   * is "false," then control passes to the instruction that follows the
+   * conditional jump. All conditional jumps are SHORT, that is, the target
+   * must be in the current code segment and within -128 to +127 bytes of the
+   * first byte of the next instruction (JMP OOH jumps to the first byte of
+   * the next instruction). Since the jump is made by adding the relative
+   * displacement of the target to the instruction pointer, all conditional
+   * jumps are self-relative and are appropriate for position-independent
+   * routines.
+   *
+   * CONDITION TESTED: CF=O
+   *
+   *   - [1] p.2-44 to 2.46
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src NOT USED
+   * @return {boolean} True if the jump was made, false otherwise
+   */
   jnb (dst, src) {
+    this.cpu.cycleIP += 1;
 
+    let segment = this.cpu.reg16[regCS];
+    let offset = dst(segment);
+    if ((this.cpu.reg16[regFlags] & FLAG_CF_MASK) === 0) {
+      this.cpu.reg16[regIP] = offset;
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
+  /**
+   * JNO Jump if not overflow
+   *
+   * The conditional transfer instructions are jumps that may or may not
+   * transfer control depending on the state of the CPU flags at the time the
+   * instruction is executed. If the condition is "true," then control is
+   * transferred to the target specified in the instruction. If the condition
+   * is "false," then control passes to the instruction that follows the
+   * conditional jump. All conditional jumps are SHORT, that is, the target
+   * must be in the current code segment and within -128 to +127 bytes of the
+   * first byte of the next instruction (JMP OOH jumps to the first byte of
+   * the next instruction). Since the jump is made by adding the relative
+   * displacement of the target to the instruction pointer, all conditional
+   * jumps are self-relative and are appropriate for position-independent
+   * routines.
+   *
+   * CONDITION TESTED: OF=O
+   *
+   *   - [1] p.2-44 to 2.46
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src NOT USED
+   * @return {boolean} True if the jump was made, false otherwise
+   */
   jno (dst, src) {
+    this.cpu.cycleIP += 1;
 
+    let segment = this.cpu.reg16[regCS];
+    let offset = dst(segment);
+    if ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) === 0) {
+      this.cpu.reg16[regIP] = offset;
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
+  /**
+   * JNS Jump if not sign
+   *
+   * The conditional transfer instructions are jumps that may or may not
+   * transfer control depending on the state of the CPU flags at the time the
+   * instruction is executed. If the condition is "true," then control is
+   * transferred to the target specified in the instruction. If the condition
+   * is "false," then control passes to the instruction that follows the
+   * conditional jump. All conditional jumps are SHORT, that is, the target
+   * must be in the current code segment and within -128 to +127 bytes of the
+   * first byte of the next instruction (JMP OOH jumps to the first byte of
+   * the next instruction). Since the jump is made by adding the relative
+   * displacement of the target to the instruction pointer, all conditional
+   * jumps are self-relative and are appropriate for position-independent
+   * routines.
+   *
+   * CONDITION TESTED: SF=O
+   *
+   *   - [1] p.2-44 to 2.46
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src NOT USED
+   * @return {boolean} True if the jump was made, false otherwise
+   */
   jns (dst, src) {
+    this.cpu.cycleIP += 1;
 
+    let segment = this.cpu.reg16[regCS];
+    let offset = dst(segment);
+    if ((this.cpu.reg16[regFlags] & FLAG_SF_MASK) === 0) {
+      this.cpu.reg16[regIP] = offset;
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
+  /**
+   * JNE / JNZ Jump if not equal / not zero
+   *
+   * The conditional transfer instructions are jumps that may or may not
+   * transfer control depending on the state of the CPU flags at the time the
+   * instruction is executed. If the condition is "true," then control is
+   * transferred to the target specified in the instruction. If the condition
+   * is "false," then control passes to the instruction that follows the
+   * conditional jump. All conditional jumps are SHORT, that is, the target
+   * must be in the current code segment and within -128 to +127 bytes of the
+   * first byte of the next instruction (JMP OOH jumps to the first byte of
+   * the next instruction). Since the jump is made by adding the relative
+   * displacement of the target to the instruction pointer, all conditional
+   * jumps are self-relative and are appropriate for position-independent
+   * routines.
+   *
+   * CONDITION TESTED: ZF=O
+   *
+   *   - [1] p.2-44 to 2.46
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src NOT USED
+   * @return {boolean} True if the jump was made, false otherwise
+   */
   jnz (dst, src) {
+    this.cpu.cycleIP += 1;
 
+    let segment = this.cpu.reg16[regCS];
+    let offset = dst(segment);
+    if ((this.cpu.reg16[regFlags] & FLAG_ZF_MASK) === 0) {
+      this.cpu.reg16[regIP] = offset;
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
+  /**
+   * JO Jump if overflow
+   *
+   * The conditional transfer instructions are jumps that may or may not
+   * transfer control depending on the state of the CPU flags at the time the
+   * instruction is executed. If the condition is "true," then control is
+   * transferred to the target specified in the instruction. If the condition
+   * is "false," then control passes to the instruction that follows the
+   * conditional jump. All conditional jumps are SHORT, that is, the target
+   * must be in the current code segment and within -128 to +127 bytes of the
+   * first byte of the next instruction (JMP OOH jumps to the first byte of
+   * the next instruction). Since the jump is made by adding the relative
+   * displacement of the target to the instruction pointer, all conditional
+   * jumps are self-relative and are appropriate for position-independent
+   * routines.
+   *
+   * CONDITION TESTED: OF=1
+   *
+   *   - [1] p.2-44 to 2.46
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src NOT USED
+   * @return {boolean} True if the jump was made, false otherwise
+   */
   jo (dst, src) {
+    this.cpu.cycleIP += 1;
 
+    let segment = this.cpu.reg16[regCS];
+    let offset = dst(segment);
+    if ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) > 0) {
+      this.cpu.reg16[regIP] = offset;
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
+  /**
+   * JP / JPE Jump if parity / parity even
+   *
+   * The conditional transfer instructions are jumps that may or may not
+   * transfer control depending on the state of the CPU flags at the time the
+   * instruction is executed. If the condition is "true," then control is
+   * transferred to the target specified in the instruction. If the condition
+   * is "false," then control passes to the instruction that follows the
+   * conditional jump. All conditional jumps are SHORT, that is, the target
+   * must be in the current code segment and within -128 to +127 bytes of the
+   * first byte of the next instruction (JMP OOH jumps to the first byte of
+   * the next instruction). Since the jump is made by adding the relative
+   * displacement of the target to the instruction pointer, all conditional
+   * jumps are self-relative and are appropriate for position-independent
+   * routines.
+   *
+   * CONDITION TESTED: PF=1
+   *
+   *   - [1] p.2-44 to 2.46
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src NOT USED
+   * @return {boolean} True if the jump was made, false otherwise
+   */
   jpe (dst, src) {
+    this.cpu.cycleIP += 1;
 
+    let segment = this.cpu.reg16[regCS];
+    let offset = dst(segment);
+    if ((this.cpu.reg16[regFlags] & FLAG_PF_MASK) > 0) {
+      this.cpu.reg16[regIP] = offset;
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
+  /**
+   * JNP / JPO Jump if not parity / parity odd
+   *
+   * The conditional transfer instructions are jumps that may or may not
+   * transfer control depending on the state of the CPU flags at the time the
+   * instruction is executed. If the condition is "true," then control is
+   * transferred to the target specified in the instruction. If the condition
+   * is "false," then control passes to the instruction that follows the
+   * conditional jump. All conditional jumps are SHORT, that is, the target
+   * must be in the current code segment and within -128 to +127 bytes of the
+   * first byte of the next instruction (JMP OOH jumps to the first byte of
+   * the next instruction). Since the jump is made by adding the relative
+   * displacement of the target to the instruction pointer, all conditional
+   * jumps are self-relative and are appropriate for position-independent
+   * routines.
+   *
+   * CONDITION TESTED: PF=O
+   *
+   *   - [1] p.2-44 to 2.46
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src NOT USED
+   * @return {boolean} True if the jump was made, false otherwise
+   */
   jpo (dst, src) {
+    this.cpu.cycleIP += 1;
 
+    let segment = this.cpu.reg16[regCS];
+    let offset = dst(segment);
+    if ((this.cpu.reg16[regFlags] & FLAG_PF_MASK) === 0) {
+      this.cpu.reg16[regIP] = offset;
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
+  /**
+   * JS Jump if sign
+   *
+   * The conditional transfer instructions are jumps that may or may not
+   * transfer control depending on the state of the CPU flags at the time the
+   * instruction is executed. If the condition is "true," then control is
+   * transferred to the target specified in the instruction. If the condition
+   * is "false," then control passes to the instruction that follows the
+   * conditional jump. All conditional jumps are SHORT, that is, the target
+   * must be in the current code segment and within -128 to +127 bytes of the
+   * first byte of the next instruction (JMP OOH jumps to the first byte of
+   * the next instruction). Since the jump is made by adding the relative
+   * displacement of the target to the instruction pointer, all conditional
+   * jumps are self-relative and are appropriate for position-independent
+   * routines.
+   *
+   * CONDITION TESTED: SF=1
+   *
+   *   - [1] p.2-44 to 2.46
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src NOT USED
+   * @return {boolean} True if the jump was made, false otherwise
+   */
   js (dst, src) {
+    this.cpu.cycleIP += 1;
 
+    let segment = this.cpu.reg16[regCS];
+    let offset = dst(segment);
+    if ((this.cpu.reg16[regFlags] & FLAG_SF_MASK) > 0) {
+      this.cpu.reg16[regIP] = offset;
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
   /**

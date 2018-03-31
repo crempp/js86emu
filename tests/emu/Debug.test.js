@@ -223,6 +223,28 @@ describe('Debug formatters', () => {
         "    mod:           10[0x02]    reg:          101[0x05]\n" +
         "    rm:           010[0x02]    size:           v");
     });
+
+    test('formatOpcode() should return correctly formatted string for byte', () => {
+      cpu.mem8[0xABCD0] = 0x88;       // inst (byte)
+      cpu.decode();
+      expect(formatOpcode(cpu.opcode)).toBe(
+        "opcode:  10001000[0x88]    address: 10101010[0xAA]\n" +
+        "prefix:  00000000[0x00]    opcode:  00100010[0x22]\n" +
+        "d:              0[0x00]    w:              0[0x00]\n" +
+        "mod:           10[0x02]    reg:          101[0x05]\n" +
+        "rm:           010[0x02]    size:           b");
+    });
+
+    test('formatOpcode() should return correctly formatted string for word', () => {
+      cpu.mem8[0xABCD0] = 0x8C;       // inst (byte)
+      cpu.decode();
+      expect(formatOpcode(cpu.opcode)).toBe(
+        "opcode:  10001100[0x8C]    address: 10101010[0xAA]\n" +
+        "prefix:  00000000[0x00]    opcode:  00100011[0x23]\n" +
+        "d:              0[0x00]    w:              0[0x00]\n" +
+        "mod:           10[0x02]    reg:          101[0x05]\n" +
+        "rm:           010[0x02]    size:           w");
+    });
   });
 
   describe('formatMemory()', () => {
