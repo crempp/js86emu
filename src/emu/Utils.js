@@ -32,7 +32,7 @@ export function seg2abs (segment, offset, cpu) {
 /**
  * Calculate the absolute memory address of the instruction pointer.
  *
- * Note that the IP always uses the CS register for the segment (verify and
+ * Note: The IP always uses the CS register for the segment (verify and
  * source this).
  *
  * @param {Cpu} cpu Cpu instance to perform conversion for
@@ -40,4 +40,32 @@ export function seg2abs (segment, offset, cpu) {
  */
 export function segIP(cpu) {
   return (cpu.reg16[regCS] * 0x10) + cpu.reg16[regIP];
+}
+
+/**
+ * Convert a one-byte twos complement number to a signed integer.
+ *
+ * Note: It seems Javascript does not do ~ (bitwise not) correctly so we have
+ * to hack it together.
+ *
+ * @param {number} number 8bit twos complement number to convert signed integer
+ * @return {number} Signed integer conversion
+ */
+export function twosComplement2Int8 (number) {
+  let negative = ((number >> 7) === 1);
+  return negative ? (-1 * (number >> 7)) * ((number ^ 0xFF) + 1) : number;
+}
+
+/**
+ * Convert a two-byte twos complement number to a signed integer.
+ *
+ * Note: It seems Javascript does not do ~ (bitwise not) correctly so we have
+ * to hack it together.
+ *
+ * @param {number} number 16bit twos complement number to convert signed integer
+ * @return {number} Signed integer conversion
+ */
+export function twosComplement2Int16 (number) {
+  let negative = ((number >> 15) === 1);
+  return negative ? (-1 * (number >> 15)) * ((number ^ 0xFFFF) + 1) : number;
 }

@@ -1,6 +1,6 @@
 import winston from 'winston';
 
-import { seg2abs } from "./Utils";
+import {seg2abs, twosComplement2Int8} from "./Utils";
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
   regAX, regBX, regCX, regDX,
@@ -118,7 +118,7 @@ export default class Operations {
    */
   cmp (dst, src) {
     this.cpu.cycleIP += 1;
-    let size = this.cpu.opcode.w;
+      let size = this.cpu.opcode.w;
     let segment = this.cpu.reg16[regCS];
     let d = dst(segment, null);
     let s = src(segment, null);
@@ -260,6 +260,8 @@ export default class Operations {
    *
    * CONDITION TESTED: (CF OR ZF)=O
    *
+   *   - [1] p.2-44 to 2.46
+   *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True if the jump was made, false otherwise
@@ -272,7 +274,7 @@ export default class Operations {
     if ( (this.cpu.reg16[regFlags] & FLAG_ZF_MASK) === 0 ||
          (this.cpu.reg16[regFlags] & FLAG_CF_MASK) === 0)
     {
-      this.shortJump(offset);
+      this.cpu.reg16[regIP] = offset;
       return true;
     }
     else {
@@ -298,6 +300,8 @@ export default class Operations {
    *
    * CONDITION TESTED: CF=1
    *
+   *   - [1] p.2-44 to 2.46
+   *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True if the jump was made, false otherwise
@@ -308,7 +312,7 @@ export default class Operations {
     let segment = this.cpu.reg16[regCS];
     let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_CF_MASK) > 0) {
-      this.shortJump(offset);
+      this.cpu.reg16[regIP] = offset;
       return true;
     }
     else {
@@ -334,6 +338,8 @@ export default class Operations {
    *
    * CONDITION TESTED: (CF OR ZF)=1
    *
+   *   - [1] p.2-44 to 2.46
+   *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True if the jump was made, false otherwise
@@ -346,7 +352,7 @@ export default class Operations {
     if ( (this.cpu.reg16[regFlags] & FLAG_ZF_MASK) > 0 ||
          (this.cpu.reg16[regFlags] & FLAG_CF_MASK) > 0)
     {
-      this.shortJump(offset);
+      this.cpu.reg16[regIP] = offset;
       return true;
     }
     else {
@@ -361,6 +367,8 @@ export default class Operations {
    *
    * CONDITION TESTED: (CF OR ZF)=1
    *
+   *   - [1] p.2-44 to 2.46
+   *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True if the jump was made, false otherwise
@@ -371,7 +379,7 @@ export default class Operations {
     let segment = this.cpu.reg16[regCS];
     let offset = dst(segment);
     if ( this.cpu.reg16[regCX] === 0) {
-      this.shortJump(offset);
+      this.cpu.reg16[regIP] = offset;
       return true;
     }
     else {
@@ -397,6 +405,8 @@ export default class Operations {
    *
    * CONDITION TESTED: ((SF XOR OF) OR ZF)=O
    *
+   *   - [1] p.2-44 to 2.46
+   *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True if the jump was made, false otherwise
@@ -408,9 +418,9 @@ export default class Operations {
     let offset = dst(segment);
 
     if (((this.cpu.reg16[regFlags] & FLAG_SF_MASK) >> 7) ^ ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) >> 11) === 0 ||
-        (this.cpu.reg16[regFlags] & FLAG_ZF_MASK) === 0)
+         (this.cpu.reg16[regFlags] & FLAG_ZF_MASK) === 0)
     {
-      this.shortJump(offset);
+      this.cpu.reg16[regIP] = offset;
       return true;
     }
     else {
@@ -418,39 +428,220 @@ export default class Operations {
     }
   }
 
+  /**
+   * JGE / JNL - Jump if greater or equal / not less
+   *
+   * The conditional transfer instructions are jumps that may or may not
+   * transfer control depending on the state of the CPU flags at the time the
+   * instruction is executed. If the condition is "true," then control is
+   * transferred to the target specified in the instruction. If the condition
+   * is "false," then control passes to the instruction that follows the
+   * conditional jump. All conditional jumps are SHORT, that is, the target
+   * must be in the current code segment and within -128 to +127 bytes of the
+   * first byte of the next instruction (JMP OOH jumps to the first byte of
+   * the next instruction). Since the jump is made by adding the relative
+   * displacement of the target to the instruction pointer, all conditional
+   * jumps are self-relative and are appropriate for position-independent
+   * routines.
+   *
+   * CONDITION TESTED: (SF XOR OF)=O
+   *
+   *   - [1] p.2-44 to 2.46
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src NOT USED
+   * @return {boolean} True if the jump was made, false otherwise
+   */
   jge (dst, src) {
+    this.cpu.cycleIP += 1;
 
+    let segment = this.cpu.reg16[regCS];
+    let offset = dst(segment);
+
+    if (((this.cpu.reg16[regFlags] & FLAG_SF_MASK) >> 7) ^
+        ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) >> 11) === 0)
+    {
+      this.cpu.reg16[regIP] = offset;
+      return true;
+    }
+    else {
+      return false;
+    }
   }
+
+  /**
+   * JL / JNGE - Jump if less / not greater nor equal
+   *
+   * The conditional transfer instructions are jumps that may or may not
+   * transfer control depending on the state of the CPU flags at the time the
+   * instruction is executed. If the condition is "true," then control is
+   * transferred to the target specified in the instruction. If the condition
+   * is "false," then control passes to the instruction that follows the
+   * conditional jump. All conditional jumps are SHORT, that is, the target
+   * must be in the current code segment and within -128 to +127 bytes of the
+   * first byte of the next instruction (JMP OOH jumps to the first byte of
+   * the next instruction). Since the jump is made by adding the relative
+   * displacement of the target to the instruction pointer, all conditional
+   * jumps are self-relative and are appropriate for position-independent
+   * routines.
+   *
+   * CONDITION TESTED: (SF XOR OF)=1
+   *
+   *   - [1] p.2-44 to 2.46
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src NOT USED
+   * @return {boolean} True if the jump was made, false otherwise
+   */
   jl (dst, src) {
+    this.cpu.cycleIP += 1;
 
+    let segment = this.cpu.reg16[regCS];
+    let offset = dst(segment);
+
+    if (((this.cpu.reg16[regFlags] & FLAG_SF_MASK) >> 7) ^
+        ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) >> 11) === 1)
+    {
+      this.cpu.reg16[regIP] = offset;
+      return true;
+    }
+    else {
+      return false;
+    }
   }
+
+  /**
+   * JLE / JNG - Jump if less or equal / not greater
+   *
+   * The conditional transfer instructions are jumps that may or may not
+   * transfer control depending on the state of the CPU flags at the time the
+   * instruction is executed. If the condition is "true," then control is
+   * transferred to the target specified in the instruction. If the condition
+   * is "false," then control passes to the instruction that follows the
+   * conditional jump. All conditional jumps are SHORT, that is, the target
+   * must be in the current code segment and within -128 to +127 bytes of the
+   * first byte of the next instruction (JMP OOH jumps to the first byte of
+   * the next instruction). Since the jump is made by adding the relative
+   * displacement of the target to the instruction pointer, all conditional
+   * jumps are self-relative and are appropriate for position-independent
+   * routines.
+   *
+   * CONDITION TESTED: ((SF XOR OF) OR ZF)=1
+   *
+   *   - [1] p.2-44 to 2.46
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src NOT USED
+   * @return {boolean} True if the jump was made, false otherwise
+   */
   jle (dst, src) {
+    this.cpu.cycleIP += 1;
 
+    let segment = this.cpu.reg16[regCS];
+    let offset = dst(segment);
+
+    if (((this.cpu.reg16[regFlags] & FLAG_SF_MASK) >> 7) ^ ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) >> 11) > 0 ||
+        (this.cpu.reg16[regFlags] & FLAG_ZF_MASK) > 0)
+    {
+      this.cpu.reg16[regIP] = offset;
+      return true;
+    }
+    else {
+      return false;
+    }
   }
+
+  /**
+   * JMP unconditionally transfers control to the target location. Unlike a CALL
+   * instruction, JMP does not save any information on the stack, and no return to
+   * the instruction following the JMP is expected. Like CALL, the address of the
+   * target operand may be obtained from the instruction itself (direct JMP) or
+   * from memory or a register referenced by the instruction (indirect JMP).
+   *
+   * An intrasegment direct JMP changes the instruction pointer by adding the
+   * relative displacement of the target from the JMP instruction. If the assembler
+   * can determine that the target is within 127 bytes of the JMP, it automatically
+   * generates a two-byte form of this instruction called a SHORT JMP; otherwise,
+   * it generates a NEAR JMP that can address a target within ±32k. Intrasegment
+   * direct JMPS are self-relative and are appropriate in position-independent
+   * (dynamically relocatable) routines in which the JMP and its target are in the
+   * same segment and are moved together.
+   *
+   * An intrasegment indirect JMP may be made either through memory or through a
+   * 16-bit general register. In the first case, the content of the word referenced
+   * by the instruction replaces the instruction pointer. In the second case, the
+   * new IP value is taken from the register named in the instruction.
+   *
+   * An intersegment direct JMP replaces IP and CS with values contained in the
+   * instruction.
+   *
+   * An intersegment indirect JMP may be made only through memory. The first
+   * word of the doubleword pointer referenced by the instruction replaces IP,
+   * and the second word replaces CS.
+   *   - [1] p.2-45
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src NOT USED
+   * @return {boolean} True
+   */
   jmp (dst, src) {
+    this.cpu.cycleIP += 1;
 
+    let segment = this.cpu.reg16[regCS];
+    let oper = dst(segment);
+
+    switch (this.cpu.opcode.opcode_byte) {
+      case 0xE9: // JMP Jv (near)
+        this.cpu.reg16[regIP] = oper;
+        break;
+      case 0xEA: // JMP Ap (far)
+        this.cpu.reg16[regCS] = oper[0];
+        this.cpu.reg16[regIP] = oper[1];
+        break;
+      case 0xEB: // JMP Jb (short)
+        this.cpu.reg16[regIP] = oper;
+        break;
+      case 0xFF:
+        if (this.cpu.opcode.reg === 4) { // JMP Ev (near)
+          this.cpu.reg16[regIP] = oper;
+        }
+        else if (this.cpu.opcode.reg === 5) { // JMP Mp (far)
+          this.cpu.reg16[regCS] = oper[0];
+          this.cpu.reg16[regIP] = oper[1];
+        }
+        break;
+    }
+    return true;
   }
+
   jnb (dst, src) {
 
   }
+
   jno (dst, src) {
 
   }
+
   jns (dst, src) {
 
   }
+
   jnz (dst, src) {
 
   }
+
   jo (dst, src) {
 
   }
+
   jpe (dst, src) {
 
   }
+
   jpo (dst, src) {
 
   }
+
   js (dst, src) {
 
   }
@@ -485,7 +676,7 @@ export default class Operations {
     let segment = this.cpu.reg16[regCS];
     let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_ZF_MASK) > 0) {
-      this.shortJump(offset);
+      this.cpu.reg16[regIP] = offset;
       return true;
     }
     else {
@@ -536,8 +727,7 @@ export default class Operations {
   mov (dst, src) {
     this.cpu.cycleIP += 1;
     let segment = this.cpu.reg16[regCS];
-    let result = dst(segment, src(segment, null));
-    return result;
+    return dst(segment, src(segment, null));
   }
 
   movb (dst, src) {
@@ -777,6 +967,7 @@ export default class Operations {
   }
 
   notimp () {
+    // noinspection JSUnresolvedFunction
     winston.log("info", "Operations - Instruction not implemented");
   };
 
@@ -787,17 +978,23 @@ export default class Operations {
    * The jump offset is a signed (twos complement) offset from the current
    * location.
    *
-   * @param {number} offset The offset for the jump (twos complement)
+   * @param {number} offset The signed offset for the jump (from twos complement)
    */
   shortJump (offset) {
-    // One-byte twos-complement conversion
-    // It seems Javascript does not do ~ (bitwise not) correctly
-    let negative = ((offset >> 7) === 1);
-    offset = negative ? (-1 * (offset >> 7)) * ((offset ^ 0xFF) + 1) : offset;
+    this.cpu.reg16[regIP] = offset;
+  }
 
-    // The short jump must be adjusted by the length of the
-    // this._regIP += (offset + 2);
-    this.cpu.reg16[regIP] += offset;
+  nearJump (offset) {
+    // 0xE9
+    // oper1 = getmem16 (segregs[regcs], ip);
+    // ip = ip + oper1;
+
+    // 0xFF [4]
+    //ip = oper1;
+  }
+
+  farJump (segment, offset) {
+
   }
 
   // https://en.wikipedia.org/wiki/FLAGS_register

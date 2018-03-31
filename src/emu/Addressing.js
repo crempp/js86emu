@@ -1,4 +1,4 @@
-import { seg2abs } from "./Utils";
+import {seg2abs, twosComplement2Int16, twosComplement2Int8} from "./Utils";
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
   regAX, regBX, regCX, regDX,
@@ -376,6 +376,7 @@ export default class Addressing {
 
   /**
    * Read or write a word value from/to the SS register.
+   *   - [3] p. A-1 to A-3
    *
    * @param {number|null} segment Memory segment - Not used in this addressing mode
    * @param {number|null} value Value to write (word)
@@ -401,25 +402,23 @@ export default class Addressing {
    * For example:
    * 0x9A 0x12 0x34 0x56 0x78
    *
+   * - [3] p. A-1 to A-3
+   *
    * @param {number|null} segment Memory segment
-   * @param {number|null} value Value to write (word)
-   * @return {number} For a read operation the value from the address is
-   *  returned.
+   * @param {number|null} value NOT USED
+   * @return {number[]} An array containing the [segment, offset]
    */
   Ap (segment, value) {
-    let result;
+    if (value) throw new InvalidAddressModeException("Ap addressing mode can not set values")
 
     // Get the 32bit far address (segment:offset) from the instruction argument
-    let s = (this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 3, this.cpu)] << 8) |
-             this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)];
-    let o = (this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 5, this.cpu)] << 8) |
-             this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 4, this.cpu)];
-
-    if (value || value === 0) this.writeMem16(s, o, value);
-    else result = this.readMem16(s, o);
+    let s = (this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)] << 8) |
+             this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 1, this.cpu)];
+    let o = (this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 4, this.cpu)] << 8) |
+             this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 3, this.cpu)];
 
     this.cpu.cycleIP += 4;
-    return result;
+    return [s, o];
   }
 
   /**
@@ -430,6 +429,7 @@ export default class Addressing {
    * factor, a displacement.
    *
    * The operand is a byte, regardless of operand-size attribute.
+   *   - [3] p. A-1 to A-3
    *
    * @param {number|null} segment Memory segment
    * @param {number|null} value Value to write (byte)
@@ -454,6 +454,7 @@ export default class Addressing {
    * factor, a displacement.
    *
    * The operand is a word or doubleword, depending on operand-size attribute.
+   *   - [3] p. A-1 to A-3
    *
    * @param {number|null} segment Memory segment
    * @param {number|null} value Value to write (word|doubleword)
@@ -477,6 +478,7 @@ export default class Addressing {
    * factor, a displacement.
    *
    * The operand is a word, regardless of operand-size attribute.
+   *   - [3] p. A-1 to A-3
    *
    * @param {number|null} segment Memory segment
    * @param {number|null} value Value to write (word)
@@ -498,6 +500,7 @@ export default class Addressing {
    * AX (000)).
    *
    * The operand is a byte, regardless of operand-size attribute.
+   *   - [3] p. A-1 to A-3
    *
    * @param {number|null} segment Memory segment - Not used in this addressing mode
    * @param {number|null} value Value to write (byte)
@@ -519,6 +522,7 @@ export default class Addressing {
    * AX (000)).
    *
    * The operand is a word or doubleword, depending on operand-size attribute.
+   *   - [3] p. A-1 to A-3
    *
    * @param {number|null} segment Memory segment - Not used in this addressing mode
    * @param {number|null} value Value to write (word|doubleword)
@@ -539,6 +543,7 @@ export default class Addressing {
    * instruction.
    *
    * The operand is a byte, regardless of operand-size attribute.
+   *   - [3] p. A-1 to A-3
    *
    * @param {number|null} segment Memory segment
    * @param {number|null} value Value to write (word|doubleword)
@@ -561,6 +566,7 @@ export default class Addressing {
    * instruction.
    *
    * The operand is a word or doubleword, depending on operand-size attribute.
+   *   - [3] p. A-1 to A-3
    *
    * @param {number|null} segment Memory segment
    * @param {number|null} value Value to write (word|doubleword)
@@ -582,6 +588,7 @@ export default class Addressing {
    * instruction.
    *
    * The operand is a word, regardless of operand-size attribute.
+   *   - [3] p. A-1 to A-3
    *
    * @param {number|null} segment Memory segment
    * @param {number|null} value Value to write (word|doubleword)
@@ -604,18 +611,20 @@ export default class Addressing {
    * pointer register (for example, JMP (0E9), LOOP).
    *
    * The operand is a word, regardless of operand-size attribute.
+   *   - [3] p. A-1 to A-3
    *
    * @param {number|null} segment Memory segment
    * @param {number|null} value NOT USED
    * @return {number} The value from the address is returned
    */
   Jb (segment, value) {
-    if (value) throw new InvalidAddressModeException("Jb addressing mode can not set values")
+    if (value) throw new InvalidAddressModeException("Jb addressing mode can not set values");
     this.cpu.opcode.w = 0; // Override opcode w bit
     let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
     let result = this.readMem8(segment, offset);
     this.cpu.cycleIP += 1;
-    return result;
+    let t = twosComplement2Int8(result);
+    return this.cpu.reg16[regIP] + t;
   }
 
   /**
@@ -623,6 +632,7 @@ export default class Addressing {
    * pointer register (for example, JMP (0E9), LOOP).
    *
    * The operand is a word or doubleword, depending on operand-size attribute.
+   *   - [3] p. A-1 to A-3
    *
    * @param {number|null} segment Memory segment
    * @param {number|null} value NOT USED
@@ -633,15 +643,43 @@ export default class Addressing {
     let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
     let result = this.readMem16(segment, offset);
     this.cpu.cycleIP += 2;
-    return result;
+    return this.cpu.reg16[regIP] + twosComplement2Int16(result);
   }
 
   M (segment, value) {
 
   }
 
+  /**
+   * The ModR/M byte may refer only to memory (for example, BOUND, LES, LDS,
+   * LSS, LFS, LGS, CMPXCHG8B).
+   *
+   * 32-bit or 48-bit pointer, depending on operand-size attribute.
+   *   - [3] p. A-1 to A-3
+   *
+   * @param {number|null} segment Memory segment
+   * @param {number|null} value NOT USED
+   * @return {number[]} An array containing the [segment, offset]
+   */
   Mp (segment, value) {
+    if (value) throw new InvalidAddressModeException("Ap addressing mode can not set values")
 
+    let addr;
+    switch (this.cpu.opcode.mod) {
+      case 0b00: // Use R/M Table 1 for R/M operand
+        addr = this.calcRMAddr(segment);
+        break;
+      case 0b01: // Use R/M Table 2 with 8-bit displacement
+      case 0b10: // Use R/M Table 2 with 16-bit displacement
+        addr = this.calcRMDispAddr(segment);
+        break;
+    }
+
+    let o = this.readMem16(segment, addr);
+    let s = this.readMem16(segment, addr + 2);
+
+    this.cpu.cycleIP += 4;
+    return [s, o];
   }
 
   Ob (segment, value) {

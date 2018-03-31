@@ -1724,11 +1724,10 @@ describe('Addressing Modes', () => {
   describe('Ap', () => {
     beforeEach(() => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
-      cpu.mem8[0xABCD1] = 0b01000000; // addr mode
-      cpu.mem8[0xABCD2] = 0x34; // segment byte high
-      cpu.mem8[0xABCD3] = 0x12; // segment byte low
-      cpu.mem8[0xABCD4] = 0x78; // offset byte high
-      cpu.mem8[0xABCD5] = 0x56; // offset byte low
+      cpu.mem8[0xABCD1] = 0x34; // segment byte high
+      cpu.mem8[0xABCD2] = 0x12; // segment byte low
+      cpu.mem8[0xABCD3] = 0x78; // offset byte high
+      cpu.mem8[0xABCD4] = 0x56; // offset byte low
 
       // (CS     * 0x10) + ( offs ) =
       // (0x1234 * 0x10) + (0x5678) =
@@ -1737,20 +1736,17 @@ describe('Addressing Modes', () => {
     });
 
     test('read', () => {
-      expect(addr.Ap(segment, null)).toBe(0x90);
+      // expect(addr.Ap(segment, null)).toBe(0x90);
+      expect(addr.Ap(segment, null)).toEqual([0x1234, 0x5678]);
     });
     test('read cycles', () => {
       addr.Ap(segment, null);
       expect(cpu.cycleIP).toBe(4);
     });
-    test('write', () => {
-      addr.Ap(segment, 0xFFFF);
-      expect(cpu.mem8[0x179B8]).toBe(0xFF);
-      expect(cpu.mem8[0x179B9]).toBe(0xFF);
-    });
-    test('write cycles', () => {
-      addr.Ap(segment, 0xFFFF);
-      expect(cpu.cycleIP).toBe(4);
+    test('write throws', () => {
+      expect(() => {
+        addr.Ap(segment, 0xFF);
+      }).toThrowError(InvalidAddressModeException);
     });
   });
 
@@ -2008,46 +2004,49 @@ describe('Addressing Modes', () => {
 
   describe('Jb', () => {
     beforeEach(() => {
-      cpu.mem8[0xABCD1] = 0x34; // arg1 byte low
-      cpu.mem8[0xABCD2] = 0x12; // arg1 byte high
-      cpu.mem8[0xABCD3] = 0x78; // arg2 byte low
-      cpu.mem8[0xABCD4] = 0x56; // arg2 byte high
+      cpu.mem8[0xABCE2] = 0x34; // arg1 byte low
+      cpu.mem8[0xABCE3] = 0x12; // arg1 byte high
+      cpu.mem8[0xABCE4] = 0x78; // arg2 byte low
+      cpu.mem8[0xABCE5] = 0x56; // arg2 byte high
+
+      cpu.reg16[regIP] = 0x0011;
 
       cpu.cycleIP = 1; // usually the operation will do this
     });
     test('read', () => {
-      expect(addr.Jb(segment, null)).toBe(0x34);
+      expect(addr.Jb(segment, null)).toBe(0x34 + 0x0011);
     });
     test('read cycles', () => {
       addr.Jb(segment, null);
       expect(cpu.cycleIP).toBe(2);
     });
-    test.skip('write', () => {
+    test.skip('write throws', () => {
       expect(() => {
         addr.Jb(segment, 0xFF);
       }).toThrowError(InvalidAddressModeException);
-
     });
     test('addressing mode overrides operand-size bit', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
       cpu.decode();
-      expect(addr.Jb(segment, null)).toBe(0x34);
+      expect(addr.Jb(segment, null)).toBe(0x34 + 0x0011);
     });
   });
 
   describe('Jv', () => {
     beforeEach(() => {
-      cpu.mem8[0xABCD1] = 0x34; // arg1 byte low
-      cpu.mem8[0xABCD2] = 0x12; // arg1 byte high
-      cpu.mem8[0xABCD3] = 0x78; // arg2 byte low
-      cpu.mem8[0xABCD4] = 0x56; // arg2 byte high
+      cpu.mem8[0xABCE2] = 0x34; // arg1 byte low
+      cpu.mem8[0xABCE3] = 0x12; // arg1 byte high
+      cpu.mem8[0xABCE4] = 0x78; // arg2 byte low
+      cpu.mem8[0xABCE5] = 0x56; // arg2 byte high
 
-      cpu.mem8[0xABCD0] = 0x01; // inst (byte)
+      cpu.mem8[0xABCE1] = 0x01; // inst (byte)
+
+      cpu.reg16[regIP] = 0x0011;
 
       cpu.cycleIP = 1; // usually the operation will do this
     });
     test('read', () => {
-      expect(addr.Jv(segment, null)).toBe(0x1234);
+      expect(addr.Jv(segment, null)).toBe(0x1234 + 0x0011);
     });
     test('read cycles', () => {
       addr.Jv(segment, null);
@@ -2064,8 +2063,36 @@ describe('Addressing Modes', () => {
 
   });
 
-  describe.skip('Mp', () => {
+  describe('Mp', () => {
+    beforeEach(() => {
+      cpu.mem8[0xABCD0] = 0xFF; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00000110; // addr mode
+      cpu.mem8[0xABCD2] = 0x34; // segment byte high
+      cpu.mem8[0xABCD3] = 0x12; // segment byte low
 
+      cpu.mem8[0xACF04] = 0x78; // v1 high
+      cpu.mem8[0xACF05] = 0x56; // v1 low
+      cpu.mem8[0xACF06] = 0xBC; // v2 high
+      cpu.mem8[0xACF07] = 0x9A; // v2 low
+
+      // (CS     * 0x10) + ( offs ) =
+      // (0xABCD * 0x10) + (0x5678) =
+      //    0xABCD0      +  0x1234  = 0xACF04
+      cpu.decode();
+    });
+
+    test('read', () => {
+      expect(addr.Mp(segment, null)).toEqual([0x9ABC, 0x5678]);
+    });
+    test('read cycles', () => {
+      addr.Mp(segment, null);
+      expect(cpu.cycleIP).toBe(4);
+    });
+    test('write throws', () => {
+      expect(() => {
+        addr.Mp(segment, 0xFF);
+      }).toThrowError(InvalidAddressModeException);
+    });
   });
 
   describe.skip('Ob', () => {
