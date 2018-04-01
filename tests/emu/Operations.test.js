@@ -474,7 +474,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe.skip('jb', () => {
+  describe('jb', () => {
     beforeEach(() => {
       // JB Jb
       cpu.mem8[0x00FF] = 0x72;
@@ -484,7 +484,7 @@ describe('Operation methods', () => {
     test('jump executes if CF=1', () => {
       cpu.reg16[regFlags] = 0b0000000000000001;
       cpu.decode();
-      oper.jz(addr.Jb.bind(addr));
+      oper.jb(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
       expect(cpu.cycleIP).toBe(2);
     });
@@ -492,7 +492,7 @@ describe('Operation methods', () => {
     test('jump does not execute if CF=0', () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
-      oper.jz(addr.Jb.bind(addr));
+      oper.jb(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF);
       expect(cpu.cycleIP).toBe(2);
     });
@@ -538,7 +538,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe.skip('jcxz', () => {
+  describe('jcxz', () => {
     beforeEach(() => {
       // JCXZ Jb
       cpu.mem8[0x00FF] = 0xE3;
@@ -1108,14 +1108,146 @@ describe('Operation methods', () => {
 
     });
   });
-  describe.skip('loopnz', () => {
-    test('test 1', () => {
 
+  describe('loopnz', () => {
+    beforeEach(() => {
+      // LOOPNZ Jb
+      cpu.mem8[0x00FF] = 0xE0;
+    });
+
+    test('LOOPNZ repeats positive offset', () => {
+      cpu.reg16[regCX] = 0x0009;
+      cpu.mem8[0x0100] = 0x12;
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.loopnz(addr.Jb.bind(addr));
+
+      expect(cpu.reg16[regCX]).toBe(0x0008);
+      expect(cpu.reg16[regIP]).toBe(0x00FF + 0x0012);
+      expect(cpu.cycleIP).toBe(2);
+    });
+    test('LOOPNZ repeats negative offset', () => {
+      cpu.reg16[regCX] = 0x0009;
+      cpu.mem8[0x0100] = 0xF6;
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.loopnz(addr.Jb.bind(addr));
+
+      expect(cpu.reg16[regCX]).toBe(0x0008);
+      expect(cpu.reg16[regIP]).toBe(0x00FF - 0x0A);
+      expect(cpu.cycleIP).toBe(2);
+    });
+    test('LOOPNZ stops repeating if CX reaches 0', () => {
+      cpu.reg16[regCX] = 0x0001;
+      cpu.mem8[0x0100] = 0x12;
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.loopnz(addr.Jb.bind(addr));
+
+      expect(cpu.reg16[regCX]).toBe(0x0000);
+      expect(cpu.reg16[regIP]).toBe(0x00FF);
+      expect(cpu.cycleIP).toBe(2);
+    });
+    test('LOOPNZ stops repeating if ZF is set', () => {
+      cpu.reg16[regCX] = 0x0001;
+      cpu.mem8[0x0100] = 0x12;
+      cpu.reg16[regFlags] = 0b0000000001000000;
+      cpu.decode();
+      oper.loopnz(addr.Jb.bind(addr));
+
+      expect(cpu.reg16[regCX]).toBe(0x0000);
+      expect(cpu.reg16[regIP]).toBe(0x00FF);
+      expect(cpu.cycleIP).toBe(2);
     });
   });
-  describe.skip('loop', () => {
-    test('test 1', () => {
 
+  describe('loopz', () => {
+    beforeEach(() => {
+      // LOOPZ Jb
+      cpu.mem8[0x00FF] = 0xE1;
+    });
+
+    test('LOOPZ repeats positive offset', () => {
+      cpu.reg16[regCX] = 0x0009;
+      cpu.mem8[0x0100] = 0x12;
+      cpu.reg16[regFlags] = 0b0000000001000000;
+      cpu.decode();
+      oper.loopz(addr.Jb.bind(addr));
+
+      expect(cpu.reg16[regCX]).toBe(0x0008);
+      expect(cpu.reg16[regIP]).toBe(0x00FF + 0x0012);
+      expect(cpu.cycleIP).toBe(2);
+    });
+    test('LOOPZ repeats negative offset', () => {
+      cpu.reg16[regCX] = 0x0009;
+      cpu.mem8[0x0100] = 0xF6;
+      cpu.reg16[regFlags] = 0b0000000001000000;
+      cpu.decode();
+      oper.loopz(addr.Jb.bind(addr));
+
+      expect(cpu.reg16[regCX]).toBe(0x0008);
+      expect(cpu.reg16[regIP]).toBe(0x00FF - 0x0A);
+      expect(cpu.cycleIP).toBe(2);
+    });
+    test('LOOPZ stops repeating if CX reaches 0', () => {
+      cpu.reg16[regCX] = 0x0001;
+      cpu.mem8[0x0100] = 0x12;
+      cpu.reg16[regFlags] = 0b0000000001000000;
+      cpu.decode();
+      oper.loopz(addr.Jb.bind(addr));
+
+      expect(cpu.reg16[regCX]).toBe(0x0000);
+      expect(cpu.reg16[regIP]).toBe(0x00FF);
+      expect(cpu.cycleIP).toBe(2);
+    });
+    test('LOOPZ stops repeating if ZF is not set', () => {
+      cpu.reg16[regCX] = 0x0001;
+      cpu.mem8[0x0100] = 0x12;
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.loopz(addr.Jb.bind(addr));
+
+      expect(cpu.reg16[regCX]).toBe(0x0000);
+      expect(cpu.reg16[regIP]).toBe(0x00FF);
+      expect(cpu.cycleIP).toBe(2);
+    });
+  });
+
+  describe('loop', () => {
+    beforeEach(() => {
+      // LOOP Jb
+      cpu.mem8[0x00FF] = 0xE2;
+    });
+
+    test('LOOP repeats positive offset', () => {
+      cpu.reg16[regCX] = 0x0009;
+      cpu.mem8[0x0100] = 0x12;
+      cpu.decode();
+      oper.loop(addr.Jb.bind(addr));
+
+      expect(cpu.reg16[regCX]).toBe(0x0008);
+      expect(cpu.reg16[regIP]).toBe(0x00FF + 0x0012);
+      expect(cpu.cycleIP).toBe(2);
+    });
+    test('LOOP repeats negative offset', () => {
+      cpu.reg16[regCX] = 0x0009;
+      cpu.mem8[0x0100] = 0xF6;
+      cpu.decode();
+      oper.loop(addr.Jb.bind(addr));
+
+      expect(cpu.reg16[regCX]).toBe(0x0008);
+      expect(cpu.reg16[regIP]).toBe(0x00FF - 0x0A);
+      expect(cpu.cycleIP).toBe(2);
+    });
+    test('LOOP stops repeating', () => {
+      cpu.reg16[regCX] = 0x0001;
+      cpu.mem8[0x0100] = 0x12;
+      cpu.decode();
+      oper.loop(addr.Jb.bind(addr));
+
+      expect(cpu.reg16[regCX]).toBe(0x0000);
+      expect(cpu.reg16[regIP]).toBe(0x00FF);
+      expect(cpu.cycleIP).toBe(2);
     });
   });
 
@@ -1301,16 +1433,81 @@ describe('Operation methods', () => {
 
     });
   });
-  describe.skip('ret', () => {
-    test('test 1', () => {
 
+  describe('ret', () => {
+    beforeEach(() => {
+      setMemory(cpu, 0xAA);
+    });
+
+    test('RET Iw', () => {
+      cpu.mem8[0x000FF] = 0xC2; // inst (byte)
+      cpu.mem8[0x00100] = 0x01; // v1 high
+      cpu.mem8[0x00101] = 0x01; // v1 low
+
+      cpu.reg16[regSP] = 0x001E;
+      cpu.mem8[0x401E] = 0x34; // Stack IP high
+      cpu.mem8[0x401F] = 0x12; // Stack IP low
+      cpu.decode();
+      oper.ret(addr.Iw.bind(addr), null);
+
+      expect(cpu.reg16[regIP]).toBe(0x1234 + 0x0101);
+      expect(cpu.reg16[regCS]).toBe(0x0000);
+      expect(cpu.cycleIP).toBe(3);
+    });
+    test('RET', () => {
+      cpu.mem8[0x000FF] = 0xC3; // inst (byte)
+      cpu.reg16[regSP] = 0x001E;
+      cpu.mem8[0x401E] = 0x34; // Stack IP high
+      cpu.mem8[0x401F] = 0x12; // Stack IP low
+      cpu.decode();
+      oper.ret(null, null);
+
+      expect(cpu.reg16[regIP]).toBe(0x1234);
+      expect(cpu.reg16[regCS]).toBe(0x0000);
+      expect(cpu.cycleIP).toBe(1);
     });
   });
-  describe.skip('retf', () => {
-    test('test 1', () => {
 
+  describe('retf', () => {
+    beforeEach(() => {
+      setMemory(cpu, 0xAA);
+    });
+
+    test('RETF Iw', () => {
+      cpu.mem8[0x000FF] = 0xCA; // inst (byte)
+      cpu.mem8[0x00100] = 0x01; // v1 high
+      cpu.mem8[0x00101] = 0x01; // v1 low
+
+      cpu.reg16[regSP] = 0x001C;
+      cpu.mem8[0x401E] = 0x02; // CS high
+      cpu.mem8[0x401F] = 0x02; // CS low
+      cpu.mem8[0x401C] = 0x34; // Stack IP high
+      cpu.mem8[0x401D] = 0x12; // Stack IP low
+      cpu.decode();
+      oper.retf(addr.Iw.bind(addr), null);
+
+      expect(cpu.reg16[regIP]).toBe(0x1234 + 0x0101);
+      expect(cpu.reg16[regCS]).toBe(0x0202);
+      expect(cpu.cycleIP).toBe(3);
+    });
+
+    test('RETF', () => {
+      cpu.mem8[0x000FF] = 0xCB; // inst (byte)
+
+      cpu.reg16[regSP] = 0x001C;
+      cpu.mem8[0x401E] = 0x02; // CS high
+      cpu.mem8[0x401F] = 0x02; // CS low
+      cpu.mem8[0x401C] = 0x34; // Stack IP high
+      cpu.mem8[0x401D] = 0x12; // Stack IP low
+      cpu.decode();
+      oper.retf(null, null);
+
+      expect(cpu.reg16[regIP]).toBe(0x1234);
+      expect(cpu.reg16[regCS]).toBe(0x0202);
+      expect(cpu.cycleIP).toBe(1);
     });
   });
+
   describe.skip('rol', () => {
     test('test 1', () => {
 
@@ -1570,9 +1767,13 @@ describe('Operation methods', () => {
 
     });
   });
-  describe.skip('notimp', () => {
-    test('test 1', () => {
 
+  describe('notimp', () => {
+    test('not implemented instruction moves to next instruction', () => {
+      cpu.mem8[0x00FF] = 0xC8;
+      cpu.decode();
+      oper.notimp();
+      expect(cpu.cycleIP).toBe(1);
     });
   });
 });

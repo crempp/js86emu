@@ -1054,14 +1054,86 @@ export default class Operations {
   lodsw (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * LOOPNE and LOOPNZ (Loop While Not Equal and Loop While Not Zero) are also
+   * synonyms for the same instruction. CX is decremented by 1, and control is
+   * transferred to the target operand if CX is not 0 and if ZF is clear;
+   * otherwise the next sequential instruction is executed.
+   *   - [1] p.2-45
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   * @return {boolean} True if the jump was made, false otherwise
+   */
   loopnz (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.cycleIP += 1;
+
+    this.cpu.reg16[regCX] -= 1;
+
+    let segment = this.cpu.reg16[regCS];
+    let operand = dst(segment);
+
+    if (this.cpu.reg16[regCX] !== 0 &&
+      ((this.cpu.reg16[regFlags] & FLAG_ZF_MASK) === 0))
+    {
+      this.cpu.reg16[regIP] = operand;
+      return true;
+    }
+    return false;
   }
+
+  /**
+   * LOOPE and LOOPZ (Loop While Equal and Loop While Zero) are different
+   * mnemonics for the same instruction (similar to the REPE and REPZ repeat
+   * prefixes). CX is decremented by 1, and control is transferred to the
+   * target operand if CX is not 0 and if ZF is set; otherwise the instruction
+   * following LOOPE/LOOPZ is executed.
+   *   - [1] p.2-45
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   * @return {boolean} True if the jump was made, false otherwise
+   */
   loopz (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.cycleIP += 1;
+
+    this.cpu.reg16[regCX] -= 1;
+
+    let segment = this.cpu.reg16[regCS];
+    let operand = dst(segment);
+
+    if (this.cpu.reg16[regCX] !== 0 &&
+      ((this.cpu.reg16[regFlags] & FLAG_ZF_MASK) > 0))
+    {
+      this.cpu.reg16[regIP] = operand;
+      return true;
+    }
+    return false;
   }
+
+  /**
+   * LOOP decrements CX by 1 and transfers control to the target operand if CX
+   * is not 0; otherwise the instruction following LOOP is executed.
+   *   - [1] p.2-45
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   * @return {boolean} True if the jump was made, false otherwise
+   */
   loop (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.cycleIP += 1;
+
+    this.cpu.reg16[regCX] -= 1;
+
+    let segment = this.cpu.reg16[regCS];
+    let operand = dst(segment);
+
+    if (this.cpu.reg16[regCX] !== 0) {
+      this.cpu.reg16[regIP] = operand;
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -1175,12 +1247,64 @@ export default class Operations {
   repz (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * RET (Return) transfers control from a procedure back to the instruction
+   * following the CALL that activated the procedure. RET pops the word at the
+   * top of the stack (pointed to by register SP) into the instruction pointer
+   * and increments SP by two. If an optional pop value has been specified, RET
+   * adds that value to SP. This feature may be used to discard parameters
+   * pushed onto the stack before the execution of the CALL instruction.
+   *   - [1] p.2-45
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   ret (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.cycleIP += 1;
+
+    switch (this.cpu.opcode.opcode_byte) {
+      case 0xC2: // RET Iw
+        let segment = this.cpu.reg16[regCS];
+        this.cpu.reg16[regIP] = this.pop16() + dst(segment);
+        break;
+      case 0xC3: // RET
+        this.cpu.reg16[regIP] = this.pop16();
+        break;
+    }
   }
+
+  /**
+   * RET (Return) transfers control from a procedure back to the instruction
+   * following the CALL that activated the procedure. RETF pops the word at the
+   * top of the stack (pointed to by register SP) into the instruction pointer
+   * and increments SP by two. Then the word at the new top of stack is popped
+   * into the CS register, and SP is again incremented by two. If an optional
+   * pop value has been specified, RET adds that value to SP. This feature may
+   * be used to discard parameters pushed onto the stack before the execution
+   * of the CALL instruction.
+   *   - [1] p.2-45
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   retf (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.cycleIP += 1;
+
+    switch (this.cpu.opcode.opcode_byte) {
+      case 0xCA: // RETF Iw
+        let segment = this.cpu.reg16[regCS];
+
+        this.cpu.reg16[regIP] = this.pop16() + dst(segment);
+        this.cpu.reg16[regCS] = this.pop16();
+        break;
+      case 0xCB: // RETF
+        this.cpu.reg16[regIP] = this.pop16();
+        this.cpu.reg16[regCS] = this.pop16();
+        break;
+    }
   }
+
   rol (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -1316,6 +1440,7 @@ export default class Operations {
   }
 
   notimp () {
+    this.cpu.cycleIP += 1;
     winston.log("info", "Operations - Instruction not implemented");
   };
 
