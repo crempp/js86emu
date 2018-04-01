@@ -80,9 +80,86 @@ export default class Operations {
   and (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * CALL activates an out-of-line procedure, saving information on the stack
+   * to permit a RET (return) instruction in the procedure to transfer control
+   * back to the instruction following the CALL. The assembler generates a
+   * different type of CALL instruction depending on whether the programmer has
+   * defined the procedure name as NEAR or FAR. For control to return properly,
+   * the type of CALL instruction must match the type of RET instruction that
+   * exits from the procedure. (The potential for a mismatch exists if the
+   * procedure and the CALL are contained in separately assembled programs.)
+   * Different forms of the CALL instruction allow the address of the target
+   * procedure to be obtained from the instruction itself (direct CALL) or from
+   * a memory location or register referenced by the instruction (indirect
+   * CALL). In the following descriptions, bear in mind that the processor
+   * automatically adjusts IP to point to the next instruction to be executed,
+   * before saving it on the stack.
+   *
+   * For an intrasegment direct CALL, SP (the stack pointer) is decremented by
+   * two and IP is pushed onto the stack. The relative displacement (up to
+   * ±32k) of the target procedure from the CALL instruction is then added to
+   * the instruction pointer. This form of the CALL instruction is
+   * "self-relative" and is appropriate for position- independent (dynamically
+   * relocatable) routines in which the CALL and its target are in the same
+   * segment and are moved together.
+   *
+   * An intrasegment indirect CALL may be made through memory or through a
+   * register. SP is decremented by two and IP is pushed onto the stack. The
+   * offset of the target procedure is obtained from the memory word or 16-bit
+   * general register referenced in the instruction and replaces IP.
+   *
+   * For an intersegment direct CALL, SP is decremented by two, and CS is
+   * pushed onto the stack. CS is replaced by the segment word contained in the
+   * instruction. SP again is decremented by two. IP is pushed onto the stack
+   * and is replaced by the offset word contained in the instruction.
+   *
+   * For an intersegment indirect CALL (which only may be made through memory),
+   * SP is decremented by two, and CS is pushed onto the stack. CS is then
+   * replaced by the content of the second word oithe doubleword memory pointer
+   * referenced by the instruction. SP again is decremented by two, and IP is
+   * pushed onto the stack and is replaced by the content of the first word of
+   * the doubleword pointer referenced by the instruction.
+   *
+   *   - [1] p.2-43 to 2.44
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src NOT USED
+   * @return {boolean} True if the jump was made, false otherwise
+   */
   call (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.cycleIP += 1;
+
+    let segment = this.cpu.reg16[regCS];
+    let oper = dst(segment);
+
+    switch (this.cpu.opcode.opcode_byte) {
+      case 0x9A: // CALL Ap (far)
+        this.push16(this.cpu.reg16[regCS]);
+        this.push16(this.cpu.reg16[regIP]);
+        this.cpu.reg16[regCS] = oper[0];
+        this.cpu.reg16[regIP] = oper[1];
+        break;
+      case 0xE8: // CALL Jv (near)
+        this.push16(this.cpu.reg16[regIP]);
+        this.cpu.reg16[regIP] = oper;
+        break;
+      case 0xFF:
+        if (this.cpu.opcode.reg === 2) { // 0xFF (2) CALL Ev (near)
+          this.push16(this.cpu.reg16[regIP]);
+          this.cpu.reg16[regIP] = oper;
+        }
+        else if (this.cpu.opcode.reg === 3) { // 0xFF (3) CALL Mp (far)
+          this.push16(this.cpu.reg16[regCS]);
+          this.push16(this.cpu.reg16[regIP]);
+          this.cpu.reg16[regCS] = oper[0];
+          this.cpu.reg16[regIP] = oper[1];
+        }
+        break;
+    }
   }
+
   cbw (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -1239,34 +1316,37 @@ export default class Operations {
   }
 
   notimp () {
-    // noinspection JSUnresolvedFunction
     winston.log("info", "Operations - Instruction not implemented");
   };
 
   /**
-   * Perform a short jump to another code location. This jump will not leave
-   * the current segment.
+   * Push a value onto the stack. SP is decremented by two and the value is
+   * stored at regSS:regSP
    *
-   * The jump offset is a signed (twos complement) offset from the current
-   * location.
-   *
-   * @param {number} offset The signed offset for the jump (from twos complement)
+   * @param {number} value Word value to push onto the stack
    */
-  shortJump (offset) {
-    this.cpu.reg16[regIP] = offset;
+  push16 (value) {
+    // Update stack pointer
+    this.cpu.reg16[regSP] -= 2;
+
+    this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP], this.cpu)]     = (value & 0x00FF);
+    this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP] + 1, this.cpu)] = (value >> 8);
   }
 
-  nearJump (offset) {
-    // 0xE9
-    // oper1 = getmem16 (segregs[regcs], ip);
-    // ip = ip + oper1;
+  /**
+   * Pop a value off the stack. SP is incremented by two and the value at
+   * regSS:regSP is returned.
+   *
+   * @return {number} Word value popped off the stack
+   */
+  pop16 () {
+    // Get the value from the stack
+    let value = this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP] + 1, this.cpu)] << 8 |
+                this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP], this.cpu)];
 
-    // 0xFF [4]
-    //ip = oper1;
-  }
+    this.cpu.reg16[regSP] += 2;
 
-  farJump (segment, offset) {
-
+    return value;
   }
 
   // https://en.wikipedia.org/wiki/FLAGS_register

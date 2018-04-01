@@ -16,7 +16,7 @@ import {
   formatOpcode, hexString8, hexString16, hexString32, formatFlags,
   formatMemory, formatRegisters
 } from "../../src/emu/Debug";
-import {segIP} from "../../src/emu/Utils";
+import {seg2abs, segIP} from "../../src/emu/Utils";
 
 //   7   6   5   4   3   2   1   0
 // +---+---+---+---+---+---+---+---+
@@ -26,7 +26,7 @@ import {segIP} from "../../src/emu/Utils";
 // |  mod  |    reg    |    r/m    |
 // +---+---+---+---+---+---+---+---+
 // console.log(
-//   "INSTRUCTION: " +  cpu.opcode.string + "\n" +
+//   "INSTRUCTION: " + cpu.opcode.string + "\n" +
 //   "opcode_byte: " + hexString16(cpu.mem8[segIP(cpu)]) + "\n" +
 //   "CS:IP: " + hexString16(cpu.reg16[regCS]) + ":" + hexString16(cpu.reg16[regIP]) +  " -> " + hexString32(segIP(cpu)) + "\n" +
 //   "MEMORY:\n" + formatMemory(cpu.mem8, segIP(cpu), segIP(cpu) + 7, 11) + "\n" +
@@ -34,17 +34,31 @@ import {segIP} from "../../src/emu/Utils";
 //   "REGISTERS\n" + formatRegisters(cpu, 11)  + "\n" +
 //   "FLAGS:\n" + formatFlags(cpu.reg16[regFlags], 10));
 
+function clearMemory(cpu) {
+  for (let i = 0; i < cpu.mem8.length; i++) {
+    cpu.mem8[i] = 0;
+  }
+}
+
+function setMemory(cpu, value) {
+  for (let i = 0; i < cpu.mem8.length; i++) {
+    cpu.mem8[i] = value;
+  }
+}
+
 describe('Operation methods', () => {
   let cpu, addr, oper;
 
   beforeEach(() => {
     cpu = new CPU8086(new CPUConfig({
-      memorySize: 2 ** 16
+      memorySize: 2 ** 20
     }));
     oper = new Operations(cpu);
     addr = new Addressing(cpu);
     cpu.reg16[regIP] = 0x00FF;
     cpu.reg16[regCS] = 0x0000;
+    cpu.reg16[regSS] = 0x0400;
+    cpu.reg16[regSP] = 0x0020;
     cpu.reg16[regFlags] = 0x0000;
   });
 
@@ -83,11 +97,101 @@ describe('Operation methods', () => {
 
     });
   });
-  describe.skip('call', () => {
-    test('test 1', () => {
 
+  describe('call', () => {
+    beforeEach(() => {
+      setMemory(cpu, 0xAA);
+    });
+
+    test('CALL Ap (far)', () => {
+      cpu.mem8[0x000FF] = 0x9A; // inst (byte)
+      cpu.mem8[0x00100] = 0x78; // v1 high
+      cpu.mem8[0x00101] = 0x56; // v1 low
+      cpu.mem8[0x00102] = 0xBC; // v2 high
+      cpu.mem8[0x00103] = 0x9A; // v2 low
+      cpu.decode();
+      oper.call(addr.Ap.bind(addr), null);
+
+      // CS on stack
+      expect(cpu.mem8[0x401E]).toBe(0x00);
+      expect(cpu.mem8[0x401F]).toBe(0x00);
+      // IP on stack
+      expect(cpu.mem8[0x401C]).toBe(0xFF);
+      expect(cpu.mem8[0x401D]).toBe(0x00);
+      // CS and IP updated to called location
+      expect(cpu.reg16[regCS]).toBe(0x5678);
+      expect(cpu.reg16[regIP]).toBe(0x9ABC);
+      expect(cpu.cycleIP).toBe(5);
+    });
+    test('CALL Jv (near) positive offset', () => {
+      cpu.mem8[0x000FF] = 0xE8; // inst (byte)
+      cpu.mem8[0x00100] = 0x34; // segment byte high
+      cpu.mem8[0x00101] = 0x12; // segment byte low
+      cpu.decode();
+      oper.call(addr.Jv.bind(addr), null);
+
+      // IP on stack
+      expect(cpu.mem8[0x401E]).toBe(0xFF);
+      expect(cpu.mem8[0x401F]).toBe(0x00);
+      // CS and IP updated to called location
+      expect(cpu.reg16[regCS]).toBe(0x0000);
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x1234);
+      expect(cpu.cycleIP).toBe(3);
+    });
+    test('CALL Jv (near) negative offset', () => {
+      cpu.mem8[0x000FF] = 0xE8; // inst (byte)
+      cpu.mem8[0x00100] = 0xF6; // segment byte high
+      cpu.mem8[0x00101] = 0xFF; // segment byte low
+      cpu.decode();
+      oper.call(addr.Jv.bind(addr), null);
+
+      // IP on stack
+      expect(cpu.mem8[0x401E]).toBe(0xFF);
+      expect(cpu.mem8[0x401F]).toBe(0x00);
+      // CS and IP updated to called location
+      expect(cpu.reg16[regCS]).toBe(0x0000);
+      expect(cpu.reg16[regIP]).toBe(0xFF - 0x0A);
+      expect(cpu.cycleIP).toBe(3);
+    });
+    test('CALL Ev (near)', () => {
+      cpu.mem8[0x000FF] = 0xFF; // inst (byte)
+      cpu.mem8[0x00100] = 0b11010000; // addr mode
+      cpu.reg16[regAX] = 0x1234;
+      cpu.decode();
+      oper.call(addr.Ev.bind(addr), null);
+
+      // IP on stack
+      expect(cpu.mem8[0x401E]).toBe(0xFF);
+      expect(cpu.mem8[0x401F]).toBe(0x00);
+      // CS and IP updated to called location
+      expect(cpu.reg16[regCS]).toBe(0x0000);
+      expect(cpu.reg16[regIP]).toBe(0x1234);
+      expect(cpu.cycleIP).toBe(2);
+    });
+    test('CALL Mp (far)', () => {
+      cpu.mem8[0x000FF] = 0xFF; // inst (byte)
+      cpu.mem8[0x00100] = 0b00011100; // addr mode
+      cpu.reg16[regSI] = 0x1234;
+      cpu.mem8[0x01234] = 0x78; // v1 high
+      cpu.mem8[0x01235] = 0x56; // v1 low
+      cpu.mem8[0x01236] = 0xBC; // v2 high
+      cpu.mem8[0x01237] = 0x9A; // v2 low
+      cpu.decode();
+      oper.call(addr.Mp.bind(addr), null);
+
+      // CS on stack
+      expect(cpu.mem8[0x401E]).toBe(0x00);
+      expect(cpu.mem8[0x401F]).toBe(0x00);
+      // IP on stack
+      expect(cpu.mem8[0x401C]).toBe(0xFF);
+      expect(cpu.mem8[0x401D]).toBe(0x00);
+      // CS and IP updated to called location
+      expect(cpu.reg16[regIP]).toBe(0x5678);
+      expect(cpu.reg16[regCS]).toBe(0x9ABC);
+      expect(cpu.cycleIP).toBe(5);
     });
   });
+
   describe.skip('cbw', () => {
     test('test 1', () => {
 
@@ -1482,16 +1586,26 @@ describe('Utility methods', () => {
     }));
     oper = new Operations(cpu);
     cpu.reg16[regIP] = 0x00FF;
+    cpu.reg16[regCS] = 0x0000;
+    cpu.reg16[regSS] = 0x0400;
+    cpu.reg16[regSP] = 0x0020;
+
+    setMemory(cpu, 0xAA);
   });
 
-  describe('shortJump()', () => {
-    test('jump forward', () => {
-      oper.shortJump(0x0100);
-      expect(cpu.reg16[regIP]).toBe(0x0100);
-    });
-    test('jump backward', () => {
-      oper.shortJump(0xFE);
-      expect(cpu.reg16[regIP]).toBe(0x00FE);
-    });
+  test('push16()', () => {
+    oper.push16(0x1234);
+
+    expect(cpu.mem8[0x0401E]).toBe(0x34);
+    expect(cpu.mem8[0x0401F]).toBe(0x12);
+    expect(cpu.reg16[regSP]).toBe(0x001E);
+  });
+  test('pop16()', () => {
+    cpu.mem8[0x0401E] = 0x34;
+    cpu.mem8[0x0401F] = 0x12;
+    cpu.reg16[regSP] = 0x001E;
+
+    expect(oper.pop16()).toBe(0x1234);
+    expect(cpu.reg16[regSP]).toBe(0x0020);
   });
 });
