@@ -48,12 +48,12 @@ export function segIP(cpu) {
  * Note: It seems Javascript does not do ~ (bitwise not) correctly so we have
  * to hack it together.
  *
- * @param {number} number 8bit twos complement number to convert signed integer
+ * @param {number} value 8bit twos complement number to convert signed integer
  * @return {number} Signed integer conversion
  */
-export function twosComplement2Int8 (number) {
-  let negative = ((number >> 7) === 1);
-  return negative ? (-1 * (number >> 7)) * ((number ^ 0xFF) + 1) : number;
+export function twosComplement2Int8 (value) {
+  let negative = ((value >> 7) === 1);
+  return negative ? (-1 * (value >> 7)) * ((value ^ 0xFF) + 1) : value;
 }
 
 /**
@@ -62,10 +62,25 @@ export function twosComplement2Int8 (number) {
  * Note: It seems Javascript does not do ~ (bitwise not) correctly so we have
  * to hack it together.
  *
- * @param {number} number 16bit twos complement number to convert signed integer
+ * @param {number} value 16bit twos complement number to convert signed integer
  * @return {number} Signed integer conversion
  */
-export function twosComplement2Int16 (number) {
-  let negative = ((number >> 15) === 1);
-  return negative ? (-1 * (number >> 15)) * ((number ^ 0xFFFF) + 1) : number;
+export function twosComplement2Int16 (value) {
+  let negative = ((value >> 15) === 1);
+  return negative ? (-1 * (value >> 15)) * ((value ^ 0xFFFF) + 1) : value;
+}
+
+/**
+ * Extends a twos complement byte value to a twos complement word value
+ *
+ * @param {number} value The twos complement byte value to sign extend
+ * @return {number} Extended twos complement word value
+ */
+export function signExtend(value) {
+  if ( value <= 0xFF && 1 === ((value & 0x80) >> 7)) {
+    return 0xFF00 | value;
+  }
+  else {
+    return value;
+  }
 }

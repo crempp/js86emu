@@ -1,6 +1,6 @@
 import winston from 'winston';
 
-import {seg2abs, twosComplement2Int8} from "./Utils";
+import {seg2abs, signExtend, twosComplement2Int8} from "./Utils";
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
   regAX, regBX, regCX, regDX,
@@ -195,10 +195,12 @@ export default class Operations {
    */
   cmp (dst, src) {
     this.cpu.cycleIP += 1;
-      let size = this.cpu.opcode.w;
     let segment = this.cpu.reg16[regCS];
     let d = dst(segment, null);
     let s = src(segment, null);
+    if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
+      s = signExtend(s);
+    }
     let result = d - s;
 
     // Handle underflow correctly
@@ -1223,18 +1225,73 @@ export default class Operations {
   out (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * POP transfers the word at the current top of stack (pointed to by SP) to
+   * the destination operand, and then increments SP by two to point to the new
+   * top of stack. POP can be used to move temporary variables from the stack
+   * to registers or memory.
+   *   - [1] p.2-31
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   pop (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.cycleIP += 1;
+    let segment = this.cpu.reg16[regCS];
+    dst(segment, this.pop16());
   }
+
+  /**
+   * POPF transfers specific bits from the word at the current top of stack
+   * (pointed to by register SP) into the 8086/8088 flags, replacing whatever
+   * values the flags previously contained (see figure 2-32). SP is then
+   * incremented by two to point to the new top of stack. PUSHF and POPF allow
+   * a procedure to save and restore a calling program's flags. They also
+   * allow a program to change the setting of TF (there is no instruction for
+   * updating this flag directly). The change is accomplished by pushing the
+   * flags, altering bit 8 of the memory-image and then popping the flags.
+   *   - [1] p.2-31
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   popf (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.cycleIP += 1;
+    this.cpu.reg16[regFlags] = this.pop16();
   }
+
+  /**
+   * PUSH decrements SP (the stack pointer) by two and then transfers a word
+   * from the source operand to the top of stack now pointed to by SP. PUSH
+   * often is used to place parameters on the stack before calling a procedure;
+   * more generally, it is the basic means of storing temporary data on the
+   * stack.
+   *   - [1] p.2-31
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   push (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.cycleIP += 1;
+    let segment = this.cpu.reg16[regCS];
+    this.push16(dst(segment));
   }
+
+  /**
+   * PUSHF decrements SP (the stack pointer) by two and then transfers all
+   * flags to the word at the top of stack pointed to by SP (see figure 2-32).
+   * The flags themselves are not affected.
+   *    - [1] p.2-33
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   pushf (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.cycleIP += 1;
+    this.push16(this.cpu.reg16[regFlags]);
   }
+
   rcl (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -1338,6 +1395,9 @@ export default class Operations {
     let segment = this.cpu.reg16[regCS];
     let d = dst(segment, null);
     let s = src(segment, null);
+    if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
+      s = signExtend(s);
+    }
     let result = d - s - (this.cpu.reg16[regFlags] & FLAG_CF_MASK);
 
     // Handle underflow correctly
@@ -1405,6 +1465,9 @@ export default class Operations {
     let segment = this.cpu.reg16[regCS];
     let d = dst(segment, null);
     let s = src(segment, null);
+    if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
+      s = signExtend(s);
+    }
     let result = d - s;
 
     // Handle underflow correctly

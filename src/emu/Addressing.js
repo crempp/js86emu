@@ -6,7 +6,7 @@ import {
   regCS, regDS, regES, regSS,
   regFlags,
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
-  FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
+  FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK, b,
 } from './Constants';
 import { formatOpcode, hexString16, hexString32 } from "./Debug";
 import {
@@ -439,7 +439,7 @@ export default class Addressing {
   Eb (segment, value) {
     let result;
     if (value !== null && value > 0xFF) throw new ValueOverflowException("Value too large for memory addressing mode");
-    this.cpu.opcode.w = 0; // Override opcode w bit
+    //this.cpu.opcode.w = 0; // Override opcode w bit
     if (value || value === 0) result = this.writeRMReg8(segment, value);
     else result = this.readRMReg8(segment);
     this.cpu.cycleIP += 1;
@@ -488,7 +488,7 @@ export default class Addressing {
   Ew (segment, value) {
     let result;
     if (value !== null && value > 0xFFFF) throw new ValueOverflowException("Value too large for memory addressing mode");
-    this.cpu.opcode.w = 1; // Override opcode w bit
+    // this.cpu.opcode.w = 1; // Override opcode w bit
     if (value || value === 0) result = this.writeRMReg16(segment, value);
     else result = this.readRMReg16(segment);
     this.cpu.cycleIP += 1;
@@ -510,9 +510,9 @@ export default class Addressing {
   Gb (segment, value) {
     let result;
     if (value !== null && value > 0xFF) throw new ValueOverflowException("Value too large for memory addressing mode");
-    this.cpu.opcode.w = 0; // Override opcode w bit
-    if (value || value === 0) result = this.writeRegVal(value);
-    else result = this.readRegVal();
+    // this.cpu.opcode.w = 0; // Override opcode w bit
+    if (value || value === 0) result = this.writeRegVal(value, false, b);
+    else result = this.readRegVal(false, b);
     this.cpu.cycleIP += 1;
     return result;
   }
@@ -553,7 +553,7 @@ export default class Addressing {
   Ib (segment, value) {
     let result;
     if (value !== null && value > 0xFF) throw new ValueOverflowException("Value too large for memory addressing mode");
-    this.cpu.opcode.w = 0; // Override opcode w bit
+    //this.cpu.opcode.w = 0; // Override opcode w bit
     let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
     if (value || value === 0) throw new FeatureNotImplementedException("Writing using this addressing mode is not implemented");
     else result = this.readMem8(segment, offset);
@@ -598,7 +598,7 @@ export default class Addressing {
   Iw (segment, value) {
     let result;
     if (value !== null && value > 0xFFFF) throw new ValueOverflowException("Value too large for memory addressing mode");
-    this.cpu.opcode.w = 1; // Override opcode w bit
+    //this.cpu.opcode.w = 1; // Override opcode w bit
     let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
     if (value || value === 0) throw new FeatureNotImplementedException("Writing using this addressing mode is not implemented");
     else result = this.readMem16(segment, offset);
@@ -619,7 +619,7 @@ export default class Addressing {
    */
   Jb (segment, value) {
     if (value) throw new InvalidAddressModeException("Jb addressing mode can not set values");
-    this.cpu.opcode.w = 0; // Override opcode w bit
+    //this.cpu.opcode.w = 0; // Override opcode w bit
     let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
     let result = this.readMem8(segment, offset);
     this.cpu.cycleIP += 1;
@@ -884,11 +884,20 @@ export default class Addressing {
    * and the reg lookup table.
    *
    * @param {boolean} useRM Use the RM value rather than the default REG value
+   * @param {number} sizeOverride If given override the w bit for the operand size
    * @returns {number} The value of the register
    */
-  readRegVal (useRM = false) {
+  readRegVal (useRM = false, sizeOverride=null) {
     let rmReg = useRM ? this.cpu.opcode.rm : this.cpu.opcode.reg;
-    switch (this.cpu.opcode.w) {
+    let size;
+    if (sizeOverride !== null) {
+      if (sizeOverride === b) size = 0;
+      else size = 1;
+    }
+    else {
+      size = this.cpu.opcode.w;
+    }
+    switch (size) {
       case 0:
         switch (rmReg) {
           case 0b000:
@@ -938,10 +947,19 @@ export default class Addressing {
    *
    * @param {number} value Value to write to the register
    * @param {boolean} useRM Use the RM value rather than the default REG value
+   * @param {number} sizeOverride If given override the w bit for the operand size
    */
-  writeRegVal (value, useRM = false) {
+  writeRegVal (value, useRM = false, sizeOverride=null) {
     let rmReg = useRM ? this.cpu.opcode.rm : this.cpu.opcode.reg;
-    switch (this.cpu.opcode.w) {
+    let size;
+    if (sizeOverride !== null) {
+      if (sizeOverride === b) size = 0;
+      else size = 1;
+    }
+    else {
+      size = this.cpu.opcode.w;
+    }
+    switch (size) {
       case 0:
         switch (rmReg) {
           case 0b000:

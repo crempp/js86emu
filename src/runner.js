@@ -68,8 +68,8 @@ cpu.reg16[regIP] = 0;
 cpu.reg16[regSP] = 0x100;
 
 // Run
-for (let i = 0; i <= 8; i++) {
+for (let i = 0; i <= 16; i++) {
   winston.log("debug", "-".repeat(80));
   cpu.cycle();
-  readlineSync.question('Continue [ENTER]:');
+  // readlineSync.question('Continue [ENTER]:');
 }

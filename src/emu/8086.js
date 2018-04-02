@@ -18,7 +18,7 @@ import {
 } from './Constants';
 import {
   binString8, binString16, hexString8, hexString16, formatOpcode,
-  formatMemory, formatFlags
+  formatMemory, formatFlags, formatRegisters
 } from './Debug'
 
 export default class CPU8086 extends CPU {
@@ -31,6 +31,8 @@ export default class CPU8086 extends CPU {
       throw new CPUConfigException("CPU Config Error - config is not a CPUConfig instance");
     }
     config.validate();
+
+    this.cycleCount = 0;
 
     // bios_rom_address: 0xF0100,
     // video_rom_address: 0xC0000,
@@ -520,16 +522,17 @@ export default class CPU8086 extends CPU {
   }
 
   cycle () {
-    winston.log("debug", "8086.cycle()             : Running instruction cycle [" + this.reg16[regIP] + "]");
+    winston.log("debug", "8086.cycle()             : Running instruction cycle [" + this.cycleCount + "]");
     // Reset the instruction cycle counter
     this.cycleIP = 0;
     this.decode();
 
     winston.log("debug", "  INSTRUCTION: " +  this.opcode.string);
     winston.log("debug", "  CS:IP:       " + hexString16(this.reg16[regCS]) + ":" + hexString16(this.reg16[regIP]));
-    winston.log("debug", "  MEMORY:      " + formatMemory(this.mem8, segIP(this), segIP(this) + 13, 11));
+    winston.log("debug", "  MEMORY:      " + "\n" + formatMemory(this.mem8, segIP(this), segIP(this) + 13, 11));
     winston.log("debug", "  OPCODE:      " + formatOpcode(this.opcode, 17));
     winston.log("debug", "  FLAGS:       " + formatFlags(this.reg16[regFlags], 17));
+    winston.log("debug", "  REGISTERS    " + formatRegisters(this, 17));
 
     // let result = this.opcode.inst();
     let result = this.opcode.inst.run();
@@ -537,6 +540,7 @@ export default class CPU8086 extends CPU {
     winston.log("debug", "  result: " + hexString16(result));
 
     this.reg16[regIP] += this.cycleIP;
+    this.cycleCount += 1;
   }
 
   saveState () {

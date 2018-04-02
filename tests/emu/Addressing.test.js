@@ -1869,7 +1869,8 @@ describe('Addressing Modes', () => {
     test('addressing mode overrides operand-size bit', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
       cpu.decode();
-      expect(addr.Gb(segment, null)).toBe(0x12);
+      let r = addr.Gb(segment, null);
+      expect(r).toBe(0x12);
     });
   });
 

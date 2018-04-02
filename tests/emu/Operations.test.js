@@ -269,7 +269,6 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-
     test('dst > src with overflow', () => {
       // 0x8000 > 0x0001 (0x7FFF)
       cpu.reg16[regAX] = 0x8000;
@@ -284,6 +283,23 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
+    });
+    test.skip('[regression] dst (word) = src (byte) both are negative', () => {
+      // SUB AX,iv
+      cpu.reg16[regBX] = 0xFFFF;
+      cpu.mem8[0x00FF] = 0x83;
+      cpu.mem8[0x0100] = 0xFB;
+      cpu.mem8[0x0101] = 0xFF;
+      cpu.decode();
+      let result = oper.sub(addr.Ev.bind(addr), addr.Ib.bind(addr));
+
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+      expect(cpu.reg16[regBX]).toBe(0x0000);
     });
   });
 
@@ -1393,26 +1409,81 @@ describe('Operation methods', () => {
 
     });
   });
-  describe.skip('pop', () => {
-    test('test 1', () => {
 
+  describe('pop', () => {
+    beforeEach(() => {
+      setMemory(cpu, 0xAA);
+    });
+
+    test('POP AX', () => {
+      cpu.reg16[regSP] = 0x001E;
+      cpu.mem8[0x000FF] = 0x58; // inst (byte)
+      cpu.mem8[0x401E] = 0x34;
+      cpu.mem8[0x401F] = 0x12;
+      cpu.decode();
+      oper.pop(addr.AX.bind(addr), null);
+
+      expect(cpu.reg16[regAX]).toBe(0x1234);
+      expect(cpu.reg16[regSP]).toBe(0x0020);
+      expect(cpu.cycleIP).toBe(1);
     });
   });
-  describe.skip('popf', () => {
-    test('test 1', () => {
 
+  describe('popf', () => {
+    beforeEach(() => {
+      setMemory(cpu, 0xAA);
+    });
+
+    test('POPF', () => {
+      cpu.reg16[regSP] = 0x001E;
+      cpu.mem8[0x000FF] = 0x9D; // inst (byte)
+      cpu.mem8[0x401E] = 0xDC;
+      cpu.mem8[0x401F] = 0xFE;
+      cpu.decode();
+      oper.popf(null, null);
+
+      expect(cpu.reg16[regFlags]).toBe(0xFEDC);
+      expect(cpu.reg16[regSP]).toBe(0x0020);
+      expect(cpu.cycleIP).toBe(1);
     });
   });
-  describe.skip('push', () => {
-    test('test 1', () => {
 
+  describe('push', () => {
+    beforeEach(() => {
+      setMemory(cpu, 0xAA);
+    });
+
+    test('PUSH AX', () => {
+      cpu.mem8[0x000FF] = 0x50; // inst (byte)
+      cpu.reg16[regAX] = 0x1234;
+      cpu.decode();
+      oper.push(addr.AX.bind(addr), null);
+
+      expect(cpu.mem8[0x401E]).toBe(0x34);
+      expect(cpu.mem8[0x401F]).toBe(0x12);
+      expect(cpu.reg16[regSP]).toBe(0x001E);
+      expect(cpu.cycleIP).toBe(1);
     });
   });
-  describe.skip('pushf', () => {
-    test('test 1', () => {
 
+  describe('pushf', () => {
+    beforeEach(() => {
+      setMemory(cpu, 0xAA);
+    });
+
+    test('PUSHF', () => {
+      cpu.mem8[0x000FF] = 0x9C; // inst (byte)
+      cpu.reg16[regFlags] = 0xFEDC;
+      cpu.decode();
+      oper.pushf(null, null);
+
+      expect(cpu.mem8[0x401E]).toBe(0xDC);
+      expect(cpu.mem8[0x401F]).toBe(0xFE);
+      expect(cpu.reg16[regSP]).toBe(0x001E);
+      expect(cpu.cycleIP).toBe(1);
     });
   });
+
   describe.skip('rcl', () => {
     test('test 1', () => {
 
@@ -1582,7 +1653,6 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
       expect(cpu.reg16[regAX]).toBe(0x0000)
     });
-
     test('dst > src with overflow', () => {
       // 0x8000 > 0x0001
       cpu.reg16[regAX] = 0x8000;
@@ -1599,7 +1669,6 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regAX]).toBe(0x7FFF);
     });
-
     test('subtract with cf set', () => {
       // 0x8000 > 0x0001
       cpu.reg16[regAX] = 0x8000;
@@ -1616,6 +1685,23 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regAX]).toBe(0x7FFE);
+    });
+    test.skip('[regression] dst (word) = src (byte) both are negative', () => {
+      // SUB AX,iv
+      cpu.reg16[regBX] = 0xFFFF;
+      cpu.mem8[0x00FF] = 0x83;
+      cpu.mem8[0x0100] = 0xFB;
+      cpu.mem8[0x0101] = 0xFF;
+      cpu.decode();
+      let result = oper.sub(addr.Ev.bind(addr), addr.Ib.bind(addr));
+
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+      expect(cpu.reg16[regBX]).toBe(0x0000);
     });
   });
 
@@ -1675,6 +1761,7 @@ describe('Operation methods', () => {
       // SUB AX,iv
       cpu.mem8[0x00FF] = 0x2D;
     });
+
     test('dst > src', () => {
       //  0x1235 > 0x1234
       cpu.reg16[regAX] = 0x1235;
@@ -1723,7 +1810,6 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
       expect(cpu.reg16[regAX]).toBe(0x0000);
     });
-
     test('dst > src with overflow', () => {
       // 0x8000 > 0x0001
       cpu.reg16[regAX] = 0x8000;
@@ -1739,6 +1825,23 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regAX]).toBe(0x7FFF);
+    });
+    test('[regression] dst (word) = src (byte) both are negative', () => {
+      // SUB AX,iv
+      cpu.reg16[regBX] = 0xFFFF;
+      cpu.mem8[0x00FF] = 0x83;
+      cpu.mem8[0x0100] = 0xFB;
+      cpu.mem8[0x0101] = 0xFF;
+      cpu.decode();
+      let result = oper.sub(addr.Ev.bind(addr), addr.Ib.bind(addr));
+
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+      expect(cpu.reg16[regBX]).toBe(0x0000);
     });
   });
 

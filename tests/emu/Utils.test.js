@@ -143,3 +143,11 @@ describe('seg2abs() Segment to absolute memory address conversion', () => {
     expect(seg2abs(cpu.reg16[regDS], 0xFFFF, cpu)).toBe(0x10FFEF);
   });
 });
+
+describe.skip('segIP()', () => {});
+
+describe.skip('twosComplement2Int8()', () => {});
+
+describe.skip('twosComplement2Int16()', () => {});
+
+describe.skip('signExtend()', () => {});
