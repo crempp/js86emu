@@ -409,7 +409,8 @@ export default class Addressing {
    * @return {number[]} An array containing the [segment, offset]
    */
   Ap (segment, value) {
-    if (value) throw new InvalidAddressModeException("Ap addressing mode can not set values")
+    if (value)
+      throw new InvalidAddressModeException("Ap addressing mode can not set values");
 
     // Get the 32bit far address (segment:offset) from the instruction argument
     let s = (this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)] << 8) |
@@ -438,11 +439,12 @@ export default class Addressing {
    */
   Eb (segment, value) {
     let result;
-    if (value !== null && value > 0xFF) throw new ValueOverflowException("Value too large for memory addressing mode");
-    //this.cpu.opcode.w = 0; // Override opcode w bit
+    if (value !== null && value > 0xFF)
+      throw new ValueOverflowException("Value too large for memory addressing mode");
+
     if (value || value === 0) result = this.writeRMReg8(segment, value);
     else result = this.readRMReg8(segment);
-    this.cpu.cycleIP += 1;
+
     return result;
   }
 
@@ -463,10 +465,12 @@ export default class Addressing {
    */
   Ev (segment, value) {
     let result;
-    if (value !== null && value > 0xFFFFFFFF) throw new ValueOverflowException("Value too large for memory addressing mode");
+    if (value !== null && value > 0xFFFFFFFF)
+      throw new ValueOverflowException("Value too large for memory addressing mode");
+
     if (value || value === 0) result = this.writeRMReg16(segment, value);
     else result = this.readRMReg16(segment);
-    this.cpu.cycleIP += 1;
+
     return result;
   }
 
@@ -487,11 +491,12 @@ export default class Addressing {
    */
   Ew (segment, value) {
     let result;
-    if (value !== null && value > 0xFFFF) throw new ValueOverflowException("Value too large for memory addressing mode");
-    // this.cpu.opcode.w = 1; // Override opcode w bit
+    if (value !== null && value > 0xFFFF)
+      throw new ValueOverflowException("Value too large for memory addressing mode");
+
     if (value || value === 0) result = this.writeRMReg16(segment, value);
     else result = this.readRMReg16(segment);
-    this.cpu.cycleIP += 1;
+
     return result;
   }
 
@@ -509,11 +514,12 @@ export default class Addressing {
    */
   Gb (segment, value) {
     let result;
-    if (value !== null && value > 0xFF) throw new ValueOverflowException("Value too large for memory addressing mode");
-    // this.cpu.opcode.w = 0; // Override opcode w bit
+    if (value !== null && value > 0xFF)
+      throw new ValueOverflowException("Value too large for memory addressing mode");
+
     if (value || value === 0) result = this.writeRegVal(value, false, b);
     else result = this.readRegVal(false, b);
-    this.cpu.cycleIP += 1;
+
     return result;
   }
 
@@ -531,10 +537,12 @@ export default class Addressing {
    */
   Gv (segment, value) {
     let result;
-    if (value !== null && value > 0xFFFFFFFF) throw new ValueOverflowException("Value too large for memory addressing mode");
+    if (value !== null && value > 0xFFFFFFFF)
+      throw new ValueOverflowException("Value too large for memory addressing mode");
+
     if (value || value === 0) result = this.writeRegVal(value);
     else result = this.readRegVal();
-    this.cpu.cycleIP += 1;
+
     return result;
   }
 
@@ -552,11 +560,15 @@ export default class Addressing {
    */
   Ib (segment, value) {
     let result;
-    if (value !== null && value > 0xFF) throw new ValueOverflowException("Value too large for memory addressing mode");
-    //this.cpu.opcode.w = 0; // Override opcode w bit
+    if (value !== null && value > 0xFF)
+      throw new ValueOverflowException("Value too large for memory addressing mode");
+
     let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
-    if (value || value === 0) throw new FeatureNotImplementedException("Writing using this addressing mode is not implemented");
+
+    if (value || value === 0)
+      throw new FeatureNotImplementedException("Writing using this addressing mode is not implemented");
     else result = this.readMem8(segment, offset);
+
     this.cpu.cycleIP += 1;
     return result;
   }
@@ -575,11 +587,18 @@ export default class Addressing {
    */
   Iv (segment, value) {
     let result;
-    if (value !== null && value > 0xFFFFFFFF) throw new ValueOverflowException("Value too large for memory addressing mode");
+    if (value !== null && value > 0xFFFFFFFF)
+      throw new ValueOverflowException("Value too large for memory addressing mode");
+
+    segment = this.cpu.reg16[regCS]; // Imm values are in the CS segment
     let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
-    if (value || value === 0) throw new FeatureNotImplementedException("Writing using this addressing mode is not implemented");
+
+    if (value || value === 0)
+      throw new FeatureNotImplementedException("Writing using this addressing mode is not implemented");
     else result = this.readMem16(segment, offset);
+
     this.cpu.cycleIP += 2;
+
     return result;
   }
 
@@ -597,12 +616,18 @@ export default class Addressing {
    */
   Iw (segment, value) {
     let result;
-    if (value !== null && value > 0xFFFF) throw new ValueOverflowException("Value too large for memory addressing mode");
-    //this.cpu.opcode.w = 1; // Override opcode w bit
+    if (value !== null && value > 0xFFFF)
+      throw new ValueOverflowException("Value too large for memory addressing mode");
+
+    segment = this.cpu.reg16[regCS]; // Imm values are in the CS segment
     let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
-    if (value || value === 0) throw new FeatureNotImplementedException("Writing using this addressing mode is not implemented");
+
+    if (value || value === 0)
+      throw new FeatureNotImplementedException("Writing using this addressing mode is not implemented");
     else result = this.readMem16(segment, offset);
+
     this.cpu.cycleIP += 2;
+
     return result;
   }
 
@@ -618,13 +643,16 @@ export default class Addressing {
    * @return {number} The value from the address is returned
    */
   Jb (segment, value) {
-    if (value) throw new InvalidAddressModeException("Jb addressing mode can not set values");
-    //this.cpu.opcode.w = 0; // Override opcode w bit
+    if (value)
+      throw new InvalidAddressModeException("Jb addressing mode can not set values");
+
     let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
+
     let result = this.readMem8(segment, offset);
+
     this.cpu.cycleIP += 1;
-    let t = twosComplement2Int8(result);
-    return this.cpu.reg16[regIP] + t;
+
+    return this.cpu.reg16[regIP] + twosComplement2Int8(result);
   }
 
   /**
@@ -639,10 +667,15 @@ export default class Addressing {
    * @return {number} The value from the address is returned
    */
   Jv (segment, value) {
-    if (value) throw new InvalidAddressModeException("Jv addressing mode can not set values")
+    if (value)
+      throw new InvalidAddressModeException("Jv addressing mode can not set values")
+
     let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
+
     let result = this.readMem16(segment, offset);
+
     this.cpu.cycleIP += 2;
+
     return this.cpu.reg16[regIP] + twosComplement2Int16(result);
   }
 
@@ -662,7 +695,8 @@ export default class Addressing {
    * @return {number[]} An array containing the [segment, offset]
    */
   Mp (segment, value) {
-    if (value) throw new InvalidAddressModeException("Ap addressing mode can not set values")
+    if (value)
+      throw new InvalidAddressModeException("Ap addressing mode can not set values")
 
     let addr;
     switch (this.cpu.opcode.mod) {
@@ -678,7 +712,6 @@ export default class Addressing {
     let o = this.readMem16(segment, addr);
     let s = this.readMem16(segment, addr + 2);
 
-    this.cpu.cycleIP += 4;
     return [s, o];
   }
 
@@ -789,6 +822,8 @@ export default class Addressing {
    * Note: This returns an offset, this address does not account for segment.
    * Use seg2abs() to get the segmented address.
    *
+   * TODO: segment is no longer needed
+   *
    * @param {number} segment Memory segment
    * @return {number} Calculated address
    */
@@ -805,9 +840,11 @@ export default class Addressing {
         break;
       case 0b010 : // [BP + SI]
         addr = this.cpu.reg16[regBP] + this.cpu.reg16[regSI];
+        this.cpu.addrSeg = regSS;
         break;
       case 0b011 : // [BP + DI]
         addr = this.cpu.reg16[regBP] + this.cpu.reg16[regDI];
+        this.cpu.addrSeg = regSS;
         break;
       case 0b100 : // [SI]
         addr = this.cpu.reg16[regSI];
@@ -818,8 +855,9 @@ export default class Addressing {
       case 0b110 : // Direct Address
         // Direct address is always 2 bytes
         //   - yoshicapstonememo.googlecode.com/svn/trunk/4_2_86.pdf
-        addr = (this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 3, this.cpu)] << 8) |
-                this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)];
+        addr = (this.cpu.mem8[seg2abs( this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 3, this.cpu)] << 8) |
+                this.cpu.mem8[seg2abs( this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 2, this.cpu)];
+        this.cpu.cycleIP += 2;
         break;
       case 0b111 : // [BX]
         addr = this.cpu.reg16[regBX];
@@ -843,11 +881,13 @@ export default class Addressing {
     switch (this.cpu.opcode.mod) {
       case 0b01: // Use R/M table 2 with 8-bit displacement
         disp = this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)];
+        this.cpu.cycleIP += 1;
         break;
       case 0b10: // Use R/M table 2 with 16-bit displacement
         disp = disp ||
           ((this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 3, this.cpu)] << 8) |
             this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)] );
+        this.cpu.cycleIP += 2;
     }
 
     switch (this.cpu.opcode.rm) {

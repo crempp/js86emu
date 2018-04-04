@@ -1851,7 +1851,7 @@ describe('Addressing Modes', () => {
     });
     test('read cycles', () => {
       addr.Gb(segment, null);
-      expect(cpu.cycleIP).toBe(1);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('write', () => {
       addr.Gb(segment, 0xFF);
@@ -1859,7 +1859,7 @@ describe('Addressing Modes', () => {
     });
     test('write cycles', () => {
       addr.Gb(segment, 0xFF);
-      expect(cpu.cycleIP).toBe(1);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('overflow throws', () => {
       expect(() => {
@@ -1884,7 +1884,7 @@ describe('Addressing Modes', () => {
     });
     test('read cycles', () => {
       addr.Gv(segment, null);
-      expect(cpu.cycleIP).toBe(1);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('write', () => {
       addr.Gv(segment, 0xFFFF);
@@ -1892,7 +1892,7 @@ describe('Addressing Modes', () => {
     });
     test('write cycles', () => {
       addr.Gv(segment, 0xFFFF);
-      expect(cpu.cycleIP).toBe(1);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('overflow throws', () => {
       expect(() => {
@@ -2087,7 +2087,7 @@ describe('Addressing Modes', () => {
     });
     test('read cycles', () => {
       addr.Mp(segment, null);
-      expect(cpu.cycleIP).toBe(4);
+      expect(cpu.cycleIP).toBe(2);
     });
     test('write throws', () => {
       expect(() => {

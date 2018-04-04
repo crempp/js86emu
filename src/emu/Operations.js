@@ -129,8 +129,6 @@ export default class Operations {
    * @return {boolean} True if the jump was made, false otherwise
    */
   call (dst, src) {
-    this.cpu.cycleIP += 1;
-
     let segment = this.cpu.reg16[regCS];
     let oper = dst(segment);
 
@@ -194,7 +192,6 @@ export default class Operations {
    * @return {number} Result of the operation
    */
   cmp (dst, src) {
-    this.cpu.cycleIP += 1;
     let segment = this.cpu.reg16[regCS];
     let d = dst(segment, null);
     let s = src(segment, null);
@@ -263,7 +260,6 @@ export default class Operations {
    * @return {number} Result of the operation
    */
   dec (dst, src) {
-    this.cpu.cycleIP += 1;
     let segment = this.cpu.reg16[regCS];
     let d = dst(segment, null);
     let s = 1;
@@ -346,8 +342,6 @@ export default class Operations {
    * @return {boolean} True if the jump was made, false otherwise
    */
   ja (dst, src) {
-    this.cpu.cycleIP += 1;
-
     let segment = this.cpu.reg16[regCS];
     let offset = dst(segment);
     if ( (this.cpu.reg16[regFlags] & FLAG_ZF_MASK) === 0 ||
@@ -386,8 +380,6 @@ export default class Operations {
    * @return {boolean} True if the jump was made, false otherwise
    */
   jb (dst, src) {
-    this.cpu.cycleIP += 1;
-
     let segment = this.cpu.reg16[regCS];
     let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_CF_MASK) > 0) {
@@ -424,8 +416,6 @@ export default class Operations {
    * @return {boolean} True if the jump was made, false otherwise
    */
   jbe (dst, src) {
-    this.cpu.cycleIP += 1;
-
     let segment = this.cpu.reg16[regCS];
     let offset = dst(segment);
     if ( (this.cpu.reg16[regFlags] & FLAG_ZF_MASK) > 0 ||
@@ -453,8 +443,6 @@ export default class Operations {
    * @return {boolean} True if the jump was made, false otherwise
    */
   jcxz (dst, src) {
-    this.cpu.cycleIP += 1;
-
     let segment = this.cpu.reg16[regCS];
     let offset = dst(segment);
     if ( this.cpu.reg16[regCX] === 0) {
@@ -491,8 +479,6 @@ export default class Operations {
    * @return {boolean} True if the jump was made, false otherwise
    */
   jg (dst, src) {
-    this.cpu.cycleIP += 1;
-
     let segment = this.cpu.reg16[regCS];
     let offset = dst(segment);
 
@@ -532,8 +518,6 @@ export default class Operations {
    * @return {boolean} True if the jump was made, false otherwise
    */
   jge (dst, src) {
-    this.cpu.cycleIP += 1;
-
     let segment = this.cpu.reg16[regCS];
     let offset = dst(segment);
 
@@ -573,8 +557,6 @@ export default class Operations {
    * @return {boolean} True if the jump was made, false otherwise
    */
   jl (dst, src) {
-    this.cpu.cycleIP += 1;
-
     let segment = this.cpu.reg16[regCS];
     let offset = dst(segment);
 
@@ -614,8 +596,6 @@ export default class Operations {
    * @return {boolean} True if the jump was made, false otherwise
    */
   jle (dst, src) {
-    this.cpu.cycleIP += 1;
-
     let segment = this.cpu.reg16[regCS];
     let offset = dst(segment);
 
@@ -664,8 +644,6 @@ export default class Operations {
    * @return {boolean} True
    */
   jmp (dst, src) {
-    this.cpu.cycleIP += 1;
-
     let segment = this.cpu.reg16[regCS];
     let oper = dst(segment);
 
@@ -718,8 +696,6 @@ export default class Operations {
    * @return {boolean} True if the jump was made, false otherwise
    */
   jnb (dst, src) {
-    this.cpu.cycleIP += 1;
-
     let segment = this.cpu.reg16[regCS];
     let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_CF_MASK) === 0) {
@@ -756,8 +732,6 @@ export default class Operations {
    * @return {boolean} True if the jump was made, false otherwise
    */
   jno (dst, src) {
-    this.cpu.cycleIP += 1;
-
     let segment = this.cpu.reg16[regCS];
     let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) === 0) {
@@ -794,8 +768,6 @@ export default class Operations {
    * @return {boolean} True if the jump was made, false otherwise
    */
   jns (dst, src) {
-    this.cpu.cycleIP += 1;
-
     let segment = this.cpu.reg16[regCS];
     let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_SF_MASK) === 0) {
@@ -832,8 +804,6 @@ export default class Operations {
    * @return {boolean} True if the jump was made, false otherwise
    */
   jnz (dst, src) {
-    this.cpu.cycleIP += 1;
-
     let segment = this.cpu.reg16[regCS];
     let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_ZF_MASK) === 0) {
@@ -870,8 +840,6 @@ export default class Operations {
    * @return {boolean} True if the jump was made, false otherwise
    */
   jo (dst, src) {
-    this.cpu.cycleIP += 1;
-
     let segment = this.cpu.reg16[regCS];
     let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) > 0) {
@@ -908,8 +876,6 @@ export default class Operations {
    * @return {boolean} True if the jump was made, false otherwise
    */
   jpe (dst, src) {
-    this.cpu.cycleIP += 1;
-
     let segment = this.cpu.reg16[regCS];
     let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_PF_MASK) > 0) {
@@ -946,8 +912,6 @@ export default class Operations {
    * @return {boolean} True if the jump was made, false otherwise
    */
   jpo (dst, src) {
-    this.cpu.cycleIP += 1;
-
     let segment = this.cpu.reg16[regCS];
     let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_PF_MASK) === 0) {
@@ -984,8 +948,6 @@ export default class Operations {
    * @return {boolean} True if the jump was made, false otherwise
    */
   js (dst, src) {
-    this.cpu.cycleIP += 1;
-
     let segment = this.cpu.reg16[regCS];
     let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_SF_MASK) > 0) {
@@ -1022,8 +984,6 @@ export default class Operations {
    * @return {boolean} True if the jump was made, false otherwise
    */
   jz (dst, src) {
-    this.cpu.cycleIP += 1;
-
     let segment = this.cpu.reg16[regCS];
     let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_ZF_MASK) > 0) {
@@ -1069,8 +1029,6 @@ export default class Operations {
    * @return {boolean} True if the jump was made, false otherwise
    */
   loopnz (dst, src) {
-    this.cpu.cycleIP += 1;
-
     this.cpu.reg16[regCX] -= 1;
 
     let segment = this.cpu.reg16[regCS];
@@ -1098,8 +1056,6 @@ export default class Operations {
    * @return {boolean} True if the jump was made, false otherwise
    */
   loopz (dst, src) {
-    this.cpu.cycleIP += 1;
-
     this.cpu.reg16[regCX] -= 1;
 
     let segment = this.cpu.reg16[regCS];
@@ -1124,8 +1080,6 @@ export default class Operations {
    * @return {boolean} True if the jump was made, false otherwise
    */
   loop (dst, src) {
-    this.cpu.cycleIP += 1;
-
     this.cpu.reg16[regCX] -= 1;
 
     let segment = this.cpu.reg16[regCS];
@@ -1148,9 +1102,9 @@ export default class Operations {
    * @return {number} Result of the operation
    */
   mov (dst, src) {
-    this.cpu.cycleIP += 1;
-    let segment = this.cpu.reg16[regCS];
-    return dst(segment, src(segment, null));
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
+    let srcVal = src(segment);
+    return dst(segment, srcVal);
   }
 
   movb (dst, src) {
@@ -1183,7 +1137,6 @@ export default class Operations {
    * @return {number} Result of the operation
    */
   neg (dst, src) {
-    this.cpu.cycleIP += 1;
     let segment = this.cpu.reg16[regCS];
     let d = dst(segment, null);
     let result = 0 - d;
@@ -1237,7 +1190,6 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   pop (dst, src) {
-    this.cpu.cycleIP += 1;
     let segment = this.cpu.reg16[regCS];
     dst(segment, this.pop16());
   }
@@ -1257,7 +1209,6 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   popf (dst, src) {
-    this.cpu.cycleIP += 1;
     this.cpu.reg16[regFlags] = this.pop16();
   }
 
@@ -1273,7 +1224,6 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   push (dst, src) {
-    this.cpu.cycleIP += 1;
     let segment = this.cpu.reg16[regCS];
     this.push16(dst(segment));
   }
@@ -1288,7 +1238,6 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   pushf (dst, src) {
-    this.cpu.cycleIP += 1;
     this.push16(this.cpu.reg16[regFlags]);
   }
 
@@ -1318,8 +1267,6 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   ret (dst, src) {
-    this.cpu.cycleIP += 1;
-
     switch (this.cpu.opcode.opcode_byte) {
       case 0xC2: // RET Iw
         let segment = this.cpu.reg16[regCS];
@@ -1346,8 +1293,6 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   retf (dst, src) {
-    this.cpu.cycleIP += 1;
-
     switch (this.cpu.opcode.opcode_byte) {
       case 0xCA: // RETF Iw
         let segment = this.cpu.reg16[regCS];
@@ -1391,7 +1336,6 @@ export default class Operations {
    * @return {number} Result of the operation
    */
   sbb (dst, src) {
-    this.cpu.cycleIP += 1;
     let segment = this.cpu.reg16[regCS];
     let d = dst(segment, null);
     let s = src(segment, null);
@@ -1461,7 +1405,6 @@ export default class Operations {
    * @return {number} Result of the operation
    */
   sub (dst, src) {
-    this.cpu.cycleIP += 1;
     let segment = this.cpu.reg16[regCS];
     let d = dst(segment, null);
     let s = src(segment, null);
@@ -1503,7 +1446,6 @@ export default class Operations {
   }
 
   notimp () {
-    this.cpu.cycleIP += 1;
     winston.log("info", "Operations - Instruction not implemented");
   };
 

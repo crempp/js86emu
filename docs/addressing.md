@@ -84,7 +84,10 @@ STOS, or SCAS).
 
 
 
-// Use R/M Table 2 with 8-bit displacement
+## Notes
+
+ If segment is not specified, as almost always, it is assumed to be ds, unless base register is esp or ebp; in this case, the address is assumed to be relative to ss
+ https://en.wikibooks.org/wiki/X86_Assembly/GAS_Syntax#cite_note-1
 
 
 

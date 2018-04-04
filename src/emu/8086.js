@@ -32,16 +32,29 @@ export default class CPU8086 extends CPU {
     }
     config.validate();
 
+    /**
+     * CPU cycle counter. This tracks the number of instruction cycles the CPU
+     * has executed.
+     */
     this.cycleCount = 0;
 
-    // bios_rom_address: 0xF0100,
-    // video_rom_address: 0xC0000,
+    /**
+     * Segment register to use for addressing. Typically it is assumed to be
+     * DS, unless the base register is SP or BP; in which case the address is
+     * assumed to be relative to SS
+     */
+    this.addrSeg = regDS;
 
-    // Segment override flags
-    this.CS_OVERRIDE = false;
-    this.DS_OVERRIDE = false;
-    this.ES_OVERRIDE = false;
-    this.SS_OVERRIDE = false;
+    /**
+     *
+     */
+    this.repType = null;
+
+    /**
+     * Instruction Pointer increment counter. This tracks the amount to
+     * increment the instruction pointer during the instruction execution.
+     */
+    this.cycleIP = 0;
 
     // Memory
     this.mem8 = new Uint8Array(config.memorySize);
@@ -70,7 +83,8 @@ export default class CPU8086 extends CPU {
     // Opcode
     this.opcode = 0x00;
 
-    this.cycleIP = 0;
+    // bios_rom_address: 0xF0100,
+    // video_rom_address: 0xC0000,
 
     // Supporting modules
     let addr = new Addressing(this);
@@ -78,16 +92,18 @@ export default class CPU8086 extends CPU {
 
     winston.log("debug", "8086.constructor()       : Creating instruction table");
 
-    // Wrapper class for instructions. I don't think I can move this to a
-    // module because I need to close over oper and addr for binding and I
-    // don't want to make the signature messy by passing them in.
-    //
-    // TODO:
-    //   - Add a cycle param
-    //   - Add a size param
+    /**
+     * Wrapper class for instructions. I don't think I can move this to a
+     * module because I need to close over oper and addr for binding and I
+     * don't want to make the signature messy by passing them in.
+     *
+     *  TODO:
+     *    - Add a cycle param
+     */
     class inst {
-      constructor(op, dst, src) {
+      constructor(op, baseSize, dst, src) {
         this.op = op ? op.bind(oper) : undefined;
+        this.baseSize = baseSize;
         this.dst = dst ? dst.bind(addr) : undefined;
         this.src = src ? src.bind(addr) : undefined;
       }
@@ -108,374 +124,378 @@ export default class CPU8086 extends CPU {
       }
     }
 
+    /**
+     * Instruction lookup table. This array serves as a lookup table for the
+     * CPU instructions.
+     */
     this.inst = [];
-    this.inst[0x00] = new inst(oper.add,     addr.Eb, addr.Gb);
-    this.inst[0x01] = new inst(oper.add,     addr.Ev, addr.Gv);
-    this.inst[0x02] = new inst(oper.add,     addr.Gb, addr.Eb);
-    this.inst[0x03] = new inst(oper.add,     addr.Gv, addr.Ev);
-    this.inst[0x04] = new inst(oper.add,     addr.AL, addr.Ib);
-    this.inst[0x05] = new inst(oper.add,     addr.AX, addr.Iv);
-    this.inst[0x06] = new inst(oper.push,    addr.ES         );
-    this.inst[0x07] = new inst(oper.pop,     addr.ES         );
-    this.inst[0x08] = new inst(oper.or,      addr.Eb, addr.Gb);
-    this.inst[0x09] = new inst(oper.or,      addr.Ev, addr.Gv);
-    this.inst[0x0A] = new inst(oper.or,      addr.Gb, addr.Eb);
-    this.inst[0x0B] = new inst(oper.or,      addr.Gv, addr.Ev);
-    this.inst[0x0C] = new inst(oper.or,      addr.AL, addr.Ib);
-    this.inst[0x0D] = new inst(oper.or,      addr.AX, addr.Iv);
-    this.inst[0x0E] = new inst(oper.push,    addr.CS         );
-    this.inst[0x0F] = new inst(oper.notimp                   );
-    this.inst[0x10] = new inst(oper.adc,     addr.Eb, addr.Gb);
-    this.inst[0x11] = new inst(oper.adc,     addr.Ev, addr.Gv);
-    this.inst[0x12] = new inst(oper.adc,     addr.Gb, addr.Eb);
-    this.inst[0x13] = new inst(oper.adc,     addr.Gv, addr.Ev);
-    this.inst[0x14] = new inst(oper.adc,     addr.AL, addr.Ib);
-    this.inst[0x15] = new inst(oper.adc,     addr.AX, addr.Iv);
-    this.inst[0x16] = new inst(oper.push,    addr.SS         );
-    this.inst[0x17] = new inst(oper.pop,     addr.SS         );
-    this.inst[0x18] = new inst(oper.sbb,     addr.Eb, addr.Gb);
-    this.inst[0x19] = new inst(oper.sbb,     addr.Ev, addr.Gv);
-    this.inst[0x1A] = new inst(oper.sbb,     addr.Gb, addr.Eb);
-    this.inst[0x1B] = new inst(oper.sbb,     addr.Gv, addr.Ev);
-    this.inst[0x1C] = new inst(oper.sbb,     addr.AL, addr.Ib);
-    this.inst[0x1D] = new inst(oper.sbb,     addr.AX, addr.Iv);
-    this.inst[0x1E] = new inst(oper.push,    addr.DS         );
-    this.inst[0x1F] = new inst(oper.pop,     addr.DS         );
-    this.inst[0x20] = new inst(oper.and,     addr.Eb, addr.Gb);
-    this.inst[0x21] = new inst(oper.and,     addr.Ev, addr.Gv);
-    this.inst[0x22] = new inst(oper.and,     addr.Gb, addr.Eb);
-    this.inst[0x23] = new inst(oper.and,     addr.Gv, addr.Ev);
-    this.inst[0x24] = new inst(oper.and,     addr.AL, addr.Ib);
-    this.inst[0x25] = new inst(oper.and,     addr.AX, addr.Iv);
-    this.inst[0x26] = new inst(oper.es                       );
-    this.inst[0x27] = new inst(oper.daa                      );
-    this.inst[0x28] = new inst(oper.sub,     addr.Eb, addr.Gb);
-    this.inst[0x29] = new inst(oper.sub,     addr.Ev, addr.Gv);
-    this.inst[0x2A] = new inst(oper.sub,     addr.Gb, addr.Eb);
-    this.inst[0x2B] = new inst(oper.sub,     addr.Gv, addr.Ev);
-    this.inst[0x2C] = new inst(oper.sub,     addr.AL, addr.Ib);
-    this.inst[0x2D] = new inst(oper.sub,     addr.AX, addr.Iv);
-    this.inst[0x2E] = new inst(oper.cs                       );
-    this.inst[0x2F] = new inst(oper.das                      );
-    this.inst[0x30] = new inst(oper.xor,     addr.Eb, addr.Gb);
-    this.inst[0x31] = new inst(oper.xor,     addr.Ev, addr.Gv);
-    this.inst[0x32] = new inst(oper.xor,     addr.Gb, addr.Eb);
-    this.inst[0x33] = new inst(oper.xor,     addr.Gv, addr.Ev);
-    this.inst[0x34] = new inst(oper.xor,     addr.AL, addr.Ib);
-    this.inst[0x35] = new inst(oper.xor,     addr.AX, addr.Iv);
-    this.inst[0x36] = new inst(oper.ss                       );
-    this.inst[0x37] = new inst(oper.aaa                      );
-    this.inst[0x38] = new inst(oper.cmp,     addr.Eb, addr.Gb);
-    this.inst[0x39] = new inst(oper.cmp,     addr.Ev, addr.Gv);
-    this.inst[0x3A] = new inst(oper.cmp,     addr.Gb, addr.Eb);
-    this.inst[0x3B] = new inst(oper.cmp,     addr.Gv, addr.Ev);
-    this.inst[0x3C] = new inst(oper.cmp,     addr.AL, addr.Ib);
-    this.inst[0x3D] = new inst(oper.cmp,     addr.AX, addr.Iv);
-    this.inst[0x3E] = new inst(oper.ds                       );
-    this.inst[0x3F] = new inst(oper.aas                      );
-    this.inst[0x40] = new inst(oper.inc,     addr.AX         );
-    this.inst[0x41] = new inst(oper.inc,     addr.CX         );
-    this.inst[0x42] = new inst(oper.inc,     addr.DX         );
-    this.inst[0x43] = new inst(oper.inc,     addr.BX         );
-    this.inst[0x44] = new inst(oper.inc,     addr.SP         );
-    this.inst[0x45] = new inst(oper.inc,     addr.BP         );
-    this.inst[0x46] = new inst(oper.inc,     addr.SI         );
-    this.inst[0x47] = new inst(oper.inc,     addr.DI         );
-    this.inst[0x48] = new inst(oper.dec,     addr.AX         );
-    this.inst[0x49] = new inst(oper.dec,     addr.CX         );
-    this.inst[0x4A] = new inst(oper.dec,     addr.DX         );
-    this.inst[0x4B] = new inst(oper.dec,     addr.BX         );
-    this.inst[0x4C] = new inst(oper.dec,     addr.SP         );
-    this.inst[0x4D] = new inst(oper.dec,     addr.BP         );
-    this.inst[0x4E] = new inst(oper.dec,     addr.SI         );
-    this.inst[0x4F] = new inst(oper.dec,     addr.DI         );
-    this.inst[0x50] = new inst(oper.push,    addr.AX         );
-    this.inst[0x51] = new inst(oper.push,    addr.CX         );
-    this.inst[0x52] = new inst(oper.push,    addr.DX         );
-    this.inst[0x53] = new inst(oper.push,    addr.BX         );
-    this.inst[0x54] = new inst(oper.push,    addr.SP         );
-    this.inst[0x55] = new inst(oper.push,    addr.BP         );
-    this.inst[0x56] = new inst(oper.push,    addr.SI         );
-    this.inst[0x57] = new inst(oper.push,    addr.DI         );
-    this.inst[0x58] = new inst(oper.pop,     addr.AX         );
-    this.inst[0x59] = new inst(oper.pop,     addr.CX         );
-    this.inst[0x5A] = new inst(oper.pop,     addr.DX         );
-    this.inst[0x5B] = new inst(oper.pop,     addr.BX         );
-    this.inst[0x5C] = new inst(oper.pop,     addr.SP         );
-    this.inst[0x5D] = new inst(oper.pop,     addr.BP         );
-    this.inst[0x5E] = new inst(oper.pop,     addr.SI         );
-    this.inst[0x5F] = new inst(oper.pop,     addr.DI         );
-    this.inst[0x60] = new inst(oper.notimp                   );
-    this.inst[0x61] = new inst(oper.notimp                   );
-    this.inst[0x62] = new inst(oper.notimp                   );
-    this.inst[0x63] = new inst(oper.notimp                   );
-    this.inst[0x64] = new inst(oper.notimp                   );
-    this.inst[0x65] = new inst(oper.notimp                   );
-    this.inst[0x66] = new inst(oper.notimp                   );
-    this.inst[0x67] = new inst(oper.notimp                   );
-    this.inst[0x68] = new inst(oper.notimp                   );
-    this.inst[0x69] = new inst(oper.notimp                   );
-    this.inst[0x6A] = new inst(oper.notimp                   );
-    this.inst[0x6B] = new inst(oper.notimp                   );
-    this.inst[0x6C] = new inst(oper.notimp                   );
-    this.inst[0x6D] = new inst(oper.notimp                   );
-    this.inst[0x6E] = new inst(oper.notimp                   );
-    this.inst[0x6F] = new inst(oper.notimp                   );
-    this.inst[0x70] = new inst(oper.jo,      addr.Jb         );
-    this.inst[0x71] = new inst(oper.jno,     addr.Jb         );
-    this.inst[0x72] = new inst(oper.jb,      addr.Jb         );
-    this.inst[0x73] = new inst(oper.jnb,     addr.Jb         );
-    this.inst[0x74] = new inst(oper.jz,      addr.Jb         );
-    this.inst[0x75] = new inst(oper.jnz,     addr.Jb         );
-    this.inst[0x76] = new inst(oper.jbe,     addr.Jb         );
-    this.inst[0x77] = new inst(oper.ja,      addr.Jb         );
-    this.inst[0x78] = new inst(oper.js,      addr.Jb         );
-    this.inst[0x79] = new inst(oper.jns,     addr.Jb         );
-    this.inst[0x7A] = new inst(oper.jpe,     addr.Jb         );
-    this.inst[0x7B] = new inst(oper.jpo,     addr.Jb         );
-    this.inst[0x7C] = new inst(oper.jl,      addr.Jb         );
-    this.inst[0x7D] = new inst(oper.jge,     addr.Jb         );
-    this.inst[0x7E] = new inst(oper.jle,     addr.Jb         );
-    this.inst[0x7F] = new inst(oper.jg,      addr.Jb         );
+    this.inst[0x00]    = new inst(oper.add,    2, addr.Eb, addr.Gb);
+    this.inst[0x01]    = new inst(oper.add,    2, addr.Ev, addr.Gv);
+    this.inst[0x02]    = new inst(oper.add,    2, addr.Gb, addr.Eb);
+    this.inst[0x03]    = new inst(oper.add,    2, addr.Gv, addr.Ev);
+    this.inst[0x04]    = new inst(oper.add,    1, addr.AL, addr.Ib);
+    this.inst[0x05]    = new inst(oper.add,    1, addr.AX, addr.Iv);
+    this.inst[0x06]    = new inst(oper.push,   1, addr.ES         );
+    this.inst[0x07]    = new inst(oper.pop,    1, addr.ES         );
+    this.inst[0x08]    = new inst(oper.or,     2, addr.Eb, addr.Gb);
+    this.inst[0x09]    = new inst(oper.or,     2, addr.Ev, addr.Gv);
+    this.inst[0x0A]    = new inst(oper.or,     2, addr.Gb, addr.Eb);
+    this.inst[0x0B]    = new inst(oper.or,     2, addr.Gv, addr.Ev);
+    this.inst[0x0C]    = new inst(oper.or,     1, addr.AL, addr.Ib);
+    this.inst[0x0D]    = new inst(oper.or,     1, addr.AX, addr.Iv);
+    this.inst[0x0E]    = new inst(oper.push,   1, addr.CS         );
+    this.inst[0x0F]    = new inst(oper.notimp, 0                  );
+    this.inst[0x10]    = new inst(oper.adc,    2, addr.Eb, addr.Gb);
+    this.inst[0x11]    = new inst(oper.adc,    2, addr.Ev, addr.Gv);
+    this.inst[0x12]    = new inst(oper.adc,    2, addr.Gb, addr.Eb);
+    this.inst[0x13]    = new inst(oper.adc,    2, addr.Gv, addr.Ev);
+    this.inst[0x14]    = new inst(oper.adc,    1, addr.AL, addr.Ib);
+    this.inst[0x15]    = new inst(oper.adc,    1, addr.AX, addr.Iv);
+    this.inst[0x16]    = new inst(oper.push,   1, addr.SS         );
+    this.inst[0x17]    = new inst(oper.pop,    1, addr.SS         );
+    this.inst[0x18]    = new inst(oper.sbb,    2, addr.Eb, addr.Gb);
+    this.inst[0x19]    = new inst(oper.sbb,    2, addr.Ev, addr.Gv);
+    this.inst[0x1A]    = new inst(oper.sbb,    2, addr.Gb, addr.Eb);
+    this.inst[0x1B]    = new inst(oper.sbb,    2, addr.Gv, addr.Ev);
+    this.inst[0x1C]    = new inst(oper.sbb,    1, addr.AL, addr.Ib);
+    this.inst[0x1D]    = new inst(oper.sbb,    1, addr.AX, addr.Iv);
+    this.inst[0x1E]    = new inst(oper.push,   1, addr.DS         );
+    this.inst[0x1F]    = new inst(oper.pop,    1, addr.DS         );
+    this.inst[0x20]    = new inst(oper.and,    2, addr.Eb, addr.Gb);
+    this.inst[0x21]    = new inst(oper.and,    2, addr.Ev, addr.Gv);
+    this.inst[0x22]    = new inst(oper.and,    2, addr.Gb, addr.Eb);
+    this.inst[0x23]    = new inst(oper.and,    2, addr.Gv, addr.Ev);
+    this.inst[0x24]    = new inst(oper.and,    2, addr.AL, addr.Ib);
+    this.inst[0x25]    = new inst(oper.and,    2, addr.AX, addr.Iv);
+    this.inst[0x26]    = new inst(oper.es,     1,                 );
+    this.inst[0x27]    = new inst(oper.daa,    1                  );
+    this.inst[0x28]    = new inst(oper.sub,    2, addr.Eb, addr.Gb);
+    this.inst[0x29]    = new inst(oper.sub,    2, addr.Ev, addr.Gv);
+    this.inst[0x2A]    = new inst(oper.sub,    2, addr.Gb, addr.Eb);
+    this.inst[0x2B]    = new inst(oper.sub,    2, addr.Gv, addr.Ev);
+    this.inst[0x2C]    = new inst(oper.sub,    1, addr.AL, addr.Ib);
+    this.inst[0x2D]    = new inst(oper.sub,    1, addr.AX, addr.Iv);
+    this.inst[0x2E]    = new inst(oper.cs,     1,                 );
+    this.inst[0x2F]    = new inst(oper.das,    1,                 );
+    this.inst[0x30]    = new inst(oper.xor,    2, addr.Eb, addr.Gb);
+    this.inst[0x31]    = new inst(oper.xor,    2, addr.Ev, addr.Gv);
+    this.inst[0x32]    = new inst(oper.xor,    2, addr.Gb, addr.Eb);
+    this.inst[0x33]    = new inst(oper.xor,    2, addr.Gv, addr.Ev);
+    this.inst[0x34]    = new inst(oper.xor,    1, addr.AL, addr.Ib);
+    this.inst[0x35]    = new inst(oper.xor,    1, addr.AX, addr.Iv);
+    this.inst[0x36]    = new inst(oper.ss,     1,                 );
+    this.inst[0x37]    = new inst(oper.aaa,    1                  );
+    this.inst[0x38]    = new inst(oper.cmp,    1, addr.Eb, addr.Gb);
+    this.inst[0x39]    = new inst(oper.cmp,    2, addr.Ev, addr.Gv);
+    this.inst[0x3A]    = new inst(oper.cmp,    2, addr.Gb, addr.Eb);
+    this.inst[0x3B]    = new inst(oper.cmp,    2, addr.Gv, addr.Ev);
+    this.inst[0x3C]    = new inst(oper.cmp,    1, addr.AL, addr.Ib);
+    this.inst[0x3D]    = new inst(oper.cmp,    1, addr.AX, addr.Iv);
+    this.inst[0x3E]    = new inst(oper.ds,     1,                 );
+    this.inst[0x3F]    = new inst(oper.aas,    1,                 );
+    this.inst[0x40]    = new inst(oper.inc,    1, addr.AX         );
+    this.inst[0x41]    = new inst(oper.inc,    1, addr.CX         );
+    this.inst[0x42]    = new inst(oper.inc,    1, addr.DX         );
+    this.inst[0x43]    = new inst(oper.inc,    1, addr.BX         );
+    this.inst[0x44]    = new inst(oper.inc,    1, addr.SP         );
+    this.inst[0x45]    = new inst(oper.inc,    1, addr.BP         );
+    this.inst[0x46]    = new inst(oper.inc,    1, addr.SI         );
+    this.inst[0x47]    = new inst(oper.inc,    1, addr.DI         );
+    this.inst[0x48]    = new inst(oper.dec,    1, addr.AX         );
+    this.inst[0x49]    = new inst(oper.dec,    1, addr.CX         );
+    this.inst[0x4A]    = new inst(oper.dec,    1, addr.DX         );
+    this.inst[0x4B]    = new inst(oper.dec,    1, addr.BX         );
+    this.inst[0x4C]    = new inst(oper.dec,    1, addr.SP         );
+    this.inst[0x4D]    = new inst(oper.dec,    1, addr.BP         );
+    this.inst[0x4E]    = new inst(oper.dec,    1, addr.SI         );
+    this.inst[0x4F]    = new inst(oper.dec,    1, addr.DI         );
+    this.inst[0x50]    = new inst(oper.push,   1, addr.AX         );
+    this.inst[0x51]    = new inst(oper.push,   1, addr.CX         );
+    this.inst[0x52]    = new inst(oper.push,   1, addr.DX         );
+    this.inst[0x53]    = new inst(oper.push,   1, addr.BX         );
+    this.inst[0x54]    = new inst(oper.push,   1, addr.SP         );
+    this.inst[0x55]    = new inst(oper.push,   1, addr.BP         );
+    this.inst[0x56]    = new inst(oper.push,   1, addr.SI         );
+    this.inst[0x57]    = new inst(oper.push,   1, addr.DI         );
+    this.inst[0x58]    = new inst(oper.pop,    1, addr.AX         );
+    this.inst[0x59]    = new inst(oper.pop,    1, addr.CX         );
+    this.inst[0x5A]    = new inst(oper.pop,    1, addr.DX         );
+    this.inst[0x5B]    = new inst(oper.pop,    1, addr.BX         );
+    this.inst[0x5C]    = new inst(oper.pop,    1, addr.SP         );
+    this.inst[0x5D]    = new inst(oper.pop,    1, addr.BP         );
+    this.inst[0x5E]    = new inst(oper.pop,    1, addr.SI         );
+    this.inst[0x5F]    = new inst(oper.pop,    1, addr.DI         );
+    this.inst[0x60]    = new inst(oper.notimp, 0                  );
+    this.inst[0x61]    = new inst(oper.notimp, 0                  );
+    this.inst[0x62]    = new inst(oper.notimp, 0                  );
+    this.inst[0x63]    = new inst(oper.notimp, 0                  );
+    this.inst[0x64]    = new inst(oper.notimp, 0                  );
+    this.inst[0x65]    = new inst(oper.notimp, 0                  );
+    this.inst[0x66]    = new inst(oper.notimp, 0                  );
+    this.inst[0x67]    = new inst(oper.notimp, 0                  );
+    this.inst[0x68]    = new inst(oper.notimp, 0                  );
+    this.inst[0x69]    = new inst(oper.notimp, 0                  );
+    this.inst[0x6A]    = new inst(oper.notimp, 0                  );
+    this.inst[0x6B]    = new inst(oper.notimp, 0                  );
+    this.inst[0x6C]    = new inst(oper.notimp, 0                  );
+    this.inst[0x6D]    = new inst(oper.notimp, 0                  );
+    this.inst[0x6E]    = new inst(oper.notimp, 0                  );
+    this.inst[0x6F]    = new inst(oper.notimp, 0                  );
+    this.inst[0x70]    = new inst(oper.jo,     1, addr.Jb         );
+    this.inst[0x71]    = new inst(oper.jno,    1, addr.Jb         );
+    this.inst[0x72]    = new inst(oper.jb,     1, addr.Jb         );
+    this.inst[0x73]    = new inst(oper.jnb,    1, addr.Jb         );
+    this.inst[0x74]    = new inst(oper.jz,     1, addr.Jb         );
+    this.inst[0x75]    = new inst(oper.jnz,    1, addr.Jb         );
+    this.inst[0x76]    = new inst(oper.jbe,    1, addr.Jb         );
+    this.inst[0x77]    = new inst(oper.ja,     1, addr.Jb         );
+    this.inst[0x78]    = new inst(oper.js,     1, addr.Jb         );
+    this.inst[0x79]    = new inst(oper.jns,    1, addr.Jb         );
+    this.inst[0x7A]    = new inst(oper.jpe,    1, addr.Jb         );
+    this.inst[0x7B]    = new inst(oper.jpo,    1, addr.Jb         );
+    this.inst[0x7C]    = new inst(oper.jl,     1, addr.Jb         );
+    this.inst[0x7D]    = new inst(oper.jge,    1, addr.Jb         );
+    this.inst[0x7E]    = new inst(oper.jle,    1, addr.Jb         );
+    this.inst[0x7F]    = new inst(oper.jg,     1, addr.Jb         );
 
     // Group 1 instructions
     this.inst[0x80] = [];
-    this.inst[0x80][0] = new inst(oper.add, addr.Eb, addr.Ib);
-    this.inst[0x80][1] = new inst(oper.or,  addr.Eb, addr.Ib);
-    this.inst[0x80][2] = new inst(oper.adc, addr.Eb, addr.Ib);
-    this.inst[0x80][3] = new inst(oper.sbb, addr.Eb, addr.Ib);
-    this.inst[0x80][4] = new inst(oper.and, addr.Eb, addr.Ib);
-    this.inst[0x80][5] = new inst(oper.sub, addr.Eb, addr.Ib);
-    this.inst[0x80][6] = new inst(oper.xor, addr.Eb, addr.Ib);
-    this.inst[0x80][7] = new inst(oper.cmp, addr.Eb, addr.Ib);
+    this.inst[0x80][0] = new inst(oper.add,    2, addr.Eb, addr.Ib);
+    this.inst[0x80][1] = new inst(oper.or,     2, addr.Eb, addr.Ib);
+    this.inst[0x80][2] = new inst(oper.adc,    2, addr.Eb, addr.Ib);
+    this.inst[0x80][3] = new inst(oper.sbb,    2, addr.Eb, addr.Ib);
+    this.inst[0x80][4] = new inst(oper.and,    2, addr.Eb, addr.Ib);
+    this.inst[0x80][5] = new inst(oper.sub,    2, addr.Eb, addr.Ib);
+    this.inst[0x80][6] = new inst(oper.xor,    2, addr.Eb, addr.Ib);
+    this.inst[0x80][7] = new inst(oper.cmp,    2, addr.Eb, addr.Ib);
     this.inst[0x81] = [];
-    this.inst[0x81][0] = new inst(oper.add, addr.Ev, addr.Iv);
-    this.inst[0x81][1] = new inst(oper.or,  addr.Ev, addr.Iv);
-    this.inst[0x81][2] = new inst(oper.adc, addr.Ev, addr.Iv);
-    this.inst[0x81][3] = new inst(oper.sbb, addr.Ev, addr.Iv);
-    this.inst[0x81][4] = new inst(oper.and, addr.Ev, addr.Iv);
-    this.inst[0x81][5] = new inst(oper.sub, addr.Ev, addr.Iv);
-    this.inst[0x81][6] = new inst(oper.xor, addr.Ev, addr.Iv);
-    this.inst[0x81][7] = new inst(oper.cmp, addr.Ev, addr.Iv);
+    this.inst[0x81][0] = new inst(oper.add,    2, addr.Ev, addr.Iv);
+    this.inst[0x81][1] = new inst(oper.or,     2, addr.Ev, addr.Iv);
+    this.inst[0x81][2] = new inst(oper.adc,    2, addr.Ev, addr.Iv);
+    this.inst[0x81][3] = new inst(oper.sbb,    2, addr.Ev, addr.Iv);
+    this.inst[0x81][4] = new inst(oper.and,    2, addr.Ev, addr.Iv);
+    this.inst[0x81][5] = new inst(oper.sub,    2, addr.Ev, addr.Iv);
+    this.inst[0x81][6] = new inst(oper.xor,    2, addr.Ev, addr.Iv);
+    this.inst[0x81][7] = new inst(oper.cmp,    2, addr.Ev, addr.Iv);
     this.inst[0x82] = [];
-    this.inst[0x82][0] = new inst(oper.add, addr.Eb, addr.Ib);
-    this.inst[0x82][1] = new inst(oper.or,  addr.Eb, addr.Ib);
-    this.inst[0x82][2] = new inst(oper.adc, addr.Eb, addr.Ib);
-    this.inst[0x82][3] = new inst(oper.sbb, addr.Eb, addr.Ib);
-    this.inst[0x82][4] = new inst(oper.and, addr.Eb, addr.Ib);
-    this.inst[0x82][5] = new inst(oper.sub, addr.Eb, addr.Ib);
-    this.inst[0x82][6] = new inst(oper.xor, addr.Eb, addr.Ib);
-    this.inst[0x82][7] = new inst(oper.cmp, addr.Eb, addr.Ib);
+    this.inst[0x82][0] = new inst(oper.add,    2, addr.Eb, addr.Ib);
+    this.inst[0x82][1] = new inst(oper.or,     2, addr.Eb, addr.Ib);
+    this.inst[0x82][2] = new inst(oper.adc,    2, addr.Eb, addr.Ib);
+    this.inst[0x82][3] = new inst(oper.sbb,    2, addr.Eb, addr.Ib);
+    this.inst[0x82][4] = new inst(oper.and,    2, addr.Eb, addr.Ib);
+    this.inst[0x82][5] = new inst(oper.sub,    2, addr.Eb, addr.Ib);
+    this.inst[0x82][6] = new inst(oper.xor,    2, addr.Eb, addr.Ib);
+    this.inst[0x82][7] = new inst(oper.cmp,    2, addr.Eb, addr.Ib);
     this.inst[0x83] = [];
-    this.inst[0x83][0] = new inst(oper.add, addr.Ev, addr.Ib);
-    this.inst[0x83][1] = new inst(oper.or,  addr.Ev, addr.Ib);
-    this.inst[0x83][2] = new inst(oper.adc, addr.Ev, addr.Ib);
-    this.inst[0x83][3] = new inst(oper.sbb, addr.Ev, addr.Ib);
-    this.inst[0x83][4] = new inst(oper.and, addr.Ev, addr.Ib);
-    this.inst[0x83][5] = new inst(oper.sub, addr.Ev, addr.Ib);
-    this.inst[0x83][6] = new inst(oper.xor, addr.Ev, addr.Ib);
-    this.inst[0x83][7] = new inst(oper.cmp, addr.Ev, addr.Ib);
+    this.inst[0x83][0] = new inst(oper.add,    2, addr.Ev, addr.Ib);
+    this.inst[0x83][1] = new inst(oper.or,     2, addr.Ev, addr.Ib);
+    this.inst[0x83][2] = new inst(oper.adc,    2, addr.Ev, addr.Ib);
+    this.inst[0x83][3] = new inst(oper.sbb,    2, addr.Ev, addr.Ib);
+    this.inst[0x83][4] = new inst(oper.and,    2, addr.Ev, addr.Ib);
+    this.inst[0x83][5] = new inst(oper.sub,    2, addr.Ev, addr.Ib);
+    this.inst[0x83][6] = new inst(oper.xor,    2, addr.Ev, addr.Ib);
+    this.inst[0x83][7] = new inst(oper.cmp,    2, addr.Ev, addr.Ib);
 
-    this.inst[0x84] = new inst(oper.test,    addr.Gb, addr.Eb);
-    this.inst[0x85] = new inst(oper.test,    addr.Gv, addr.Ev);
-    this.inst[0x86] = new inst(oper.xchg,    addr.Gb, addr.Eb);
-    this.inst[0x87] = new inst(oper.xchg,    addr.Gv, addr.Ev);
-    this.inst[0x88] = new inst(oper.mov,     addr.Eb, addr.Gb);
-    this.inst[0x89] = new inst(oper.mov,     addr.Ev, addr.Gv);
-    this.inst[0x8A] = new inst(oper.mov,     addr.Gb, addr.Eb);
-    this.inst[0x8B] = new inst(oper.mov,     addr.Gv, addr.Ev);
-    this.inst[0x8C] = new inst(oper.mov,     addr.Ew, addr.Sw);
-    this.inst[0x8D] = new inst(oper.lea,     addr.Gv, addr.M );
-    this.inst[0x8E] = new inst(oper.mov,     addr.Sw, addr.Ew);
-    this.inst[0x8F] = new inst(oper.pop,     addr.Ev         );
-    this.inst[0x90] = new inst(oper.nop                      );
-    this.inst[0x91] = new inst(oper.xchg,    addr.CX, addr.AX);
-    this.inst[0x92] = new inst(oper.xchg,    addr.DX, addr.AX);
-    this.inst[0x93] = new inst(oper.xchg,    addr.BX, addr.AX);
-    this.inst[0x94] = new inst(oper.xchg,    addr.SP, addr.AX);
-    this.inst[0x95] = new inst(oper.xchg,    addr.BP, addr.AX);
-    this.inst[0x96] = new inst(oper.xchg,    addr.SI, addr.AX);
-    this.inst[0x97] = new inst(oper.xchg,    addr.DI, addr.AX);
-    this.inst[0x98] = new inst(oper.cbw                      );
-    this.inst[0x99] = new inst(oper.cwd                      );
-    this.inst[0x9A] = new inst(oper.call,    addr.Ap         );
-    this.inst[0x9B] = new inst(oper.wait                     );
-    this.inst[0x9C] = new inst(oper.pushf                    );
-    this.inst[0x9D] = new inst(oper.popf                     );
-    this.inst[0x9E] = new inst(oper.sahf                     );
-    this.inst[0x9F] = new inst(oper.lahf                     );
-    this.inst[0xA0] = new inst(oper.mov,     addr.AL, addr.Ob);
-    this.inst[0xA1] = new inst(oper.mov,     addr.AX, addr.Ov);
-    this.inst[0xA2] = new inst(oper.mov,     addr.Ob, addr.AL);
-    this.inst[0xA3] = new inst(oper.mov,     addr.Ov, addr.AX);
-    this.inst[0xA4] = new inst(oper.movsb                    );
-    this.inst[0xA5] = new inst(oper.movsw                    );
-    this.inst[0xA6] = new inst(oper.cmpsb                    );
-    this.inst[0xA7] = new inst(oper.cmpsw                    );
-    this.inst[0xA8] = new inst(oper.test,    addr.AL, addr.Ib);
-    this.inst[0xA9] = new inst(oper.test,    addr.AX, addr.Iv);
-    this.inst[0xAA] = new inst(oper.stosb                    );
-    this.inst[0xAB] = new inst(oper.stosw                    );
-    this.inst[0xAC] = new inst(oper.lodsb                    );
-    this.inst[0xAD] = new inst(oper.lodsw                    );
-    this.inst[0xAE] = new inst(oper.scasb                    );
-    this.inst[0xAF] = new inst(oper.scasw                    );
-    this.inst[0xB0] = new inst(oper.mov,     addr.AL, addr.Ib);
-    this.inst[0xB1] = new inst(oper.mov,     addr.CL, addr.Ib);
-    this.inst[0xB2] = new inst(oper.mov,     addr.DL, addr.Ib);
-    this.inst[0xB3] = new inst(oper.mov,     addr.BL, addr.Ib);
-    this.inst[0xB4] = new inst(oper.mov,     addr.AH, addr.Ib);
-    this.inst[0xB5] = new inst(oper.mov,     addr.CH, addr.Ib);
-    this.inst[0xB6] = new inst(oper.mov,     addr.DH, addr.Ib);
-    this.inst[0xB7] = new inst(oper.mov,     addr.BH, addr.Ib);
-    this.inst[0xB8] = new inst(oper.mov,     addr.AX, addr.Iv);
-    this.inst[0xB9] = new inst(oper.mov,     addr.CX, addr.Iv);
-    this.inst[0xBA] = new inst(oper.mov,     addr.DX, addr.Iv);
-    this.inst[0xBB] = new inst(oper.mov,     addr.BX, addr.Iv);
-    this.inst[0xBC] = new inst(oper.mov,     addr.SP, addr.Iv);
-    this.inst[0xBD] = new inst(oper.mov,     addr.BP, addr.Iv);
-    this.inst[0xBE] = new inst(oper.mov,     addr.SI, addr.Iv);
-    this.inst[0xBF] = new inst(oper.mov,     addr.DI, addr.Iv);
-    this.inst[0xC0] = new inst(oper.notimp                   );
-    this.inst[0xC1] = new inst(oper.notimp                   );
-    this.inst[0xC2] = new inst(oper.ret,     addr.Iw         );
-    this.inst[0xC3] = new inst(oper.ret                      );
-    this.inst[0xC4] = new inst(oper.les,     addr.Gv, addr.Mp);
-    this.inst[0xC5] = new inst(oper.lds,     addr.Gv, addr.Mp);
-    this.inst[0xC6] = new inst(oper.mov,     addr.Eb, addr.Ib);
-    this.inst[0xC7] = new inst(oper.mov,     addr.Ev, addr.Iv);
-    this.inst[0xC8] = new inst(oper.notimp                   );
-    this.inst[0xC9] = new inst(oper.notimp                   );
-    this.inst[0xCA] = new inst(oper.retf,    addr.Iw         );
-    this.inst[0xCB] = new inst(oper.retf                     );
-    this.inst[0xCC] = new inst(oper.int,     addr._3         );
-    this.inst[0xCD] = new inst(oper.int,     addr.Ib         );
-    this.inst[0xCE] = new inst(oper.into                     );
-    this.inst[0xCF] = new inst(oper.iret                     );
+    this.inst[0x84]    = new inst(oper.test,   2, addr.Gb, addr.Eb);
+    this.inst[0x85]    = new inst(oper.test,   2, addr.Gv, addr.Ev);
+    this.inst[0x86]    = new inst(oper.xchg,   2, addr.Gb, addr.Eb);
+    this.inst[0x87]    = new inst(oper.xchg,   2, addr.Gv, addr.Ev);
+    this.inst[0x88]    = new inst(oper.mov,    2, addr.Eb, addr.Gb);
+    this.inst[0x89]    = new inst(oper.mov,    2, addr.Ev, addr.Gv);
+    this.inst[0x8A]    = new inst(oper.mov,    2, addr.Gb, addr.Eb);
+    this.inst[0x8B]    = new inst(oper.mov,    2, addr.Gv, addr.Ev);
+    this.inst[0x8C]    = new inst(oper.mov,    2, addr.Ew, addr.Sw);
+    this.inst[0x8D]    = new inst(oper.lea,    2, addr.Gv, addr.M );
+    this.inst[0x8E]    = new inst(oper.mov,    2, addr.Sw, addr.Ew);
+    this.inst[0x8F]    = new inst(oper.pop,    2, addr.Ev         );
+    this.inst[0x90]    = new inst(oper.nop,    1                  );
+    this.inst[0x91]    = new inst(oper.xchg,   1, addr.CX, addr.AX);
+    this.inst[0x92]    = new inst(oper.xchg,   1, addr.DX, addr.AX);
+    this.inst[0x93]    = new inst(oper.xchg,   1, addr.BX, addr.AX);
+    this.inst[0x94]    = new inst(oper.xchg,   1, addr.SP, addr.AX);
+    this.inst[0x95]    = new inst(oper.xchg,   1, addr.BP, addr.AX);
+    this.inst[0x96]    = new inst(oper.xchg,   1, addr.SI, addr.AX);
+    this.inst[0x97]    = new inst(oper.xchg,   1, addr.DI, addr.AX);
+    this.inst[0x98]    = new inst(oper.cbw,    1                  );
+    this.inst[0x99]    = new inst(oper.cwd,    1                  );
+    this.inst[0x9A]    = new inst(oper.call,   1, addr.Ap         );
+    this.inst[0x9B]    = new inst(oper.wait,   1                  );
+    this.inst[0x9C]    = new inst(oper.pushf,  1                  );
+    this.inst[0x9D]    = new inst(oper.popf,   1                  );
+    this.inst[0x9E]    = new inst(oper.sahf,   1                  );
+    this.inst[0x9F]    = new inst(oper.lahf,   1                  );
+    this.inst[0xA0]    = new inst(oper.mov,    1, addr.AL, addr.Ob);
+    this.inst[0xA1]    = new inst(oper.mov,    1, addr.AX, addr.Ov);
+    this.inst[0xA2]    = new inst(oper.mov,    1, addr.Ob, addr.AL);
+    this.inst[0xA3]    = new inst(oper.mov,    1, addr.Ov, addr.AX);
+    this.inst[0xA4]    = new inst(oper.movsb,  1                  );
+    this.inst[0xA5]    = new inst(oper.movsw,  1                  );
+    this.inst[0xA6]    = new inst(oper.cmpsb,  1                  );
+    this.inst[0xA7]    = new inst(oper.cmpsw,  1                  );
+    this.inst[0xA8]    = new inst(oper.test,   1, addr.AL, addr.Ib);
+    this.inst[0xA9]    = new inst(oper.test,   1, addr.AX, addr.Iv);
+    this.inst[0xAA]    = new inst(oper.stosb,  1                  );
+    this.inst[0xAB]    = new inst(oper.stosw,  1                  );
+    this.inst[0xAC]    = new inst(oper.lodsb,  1                  );
+    this.inst[0xAD]    = new inst(oper.lodsw,  1                  );
+    this.inst[0xAE]    = new inst(oper.scasb,  1                  );
+    this.inst[0xAF]    = new inst(oper.scasw,  1                  );
+    this.inst[0xB0]    = new inst(oper.mov,    1, addr.AL, addr.Ib);
+    this.inst[0xB1]    = new inst(oper.mov,    1, addr.CL, addr.Ib);
+    this.inst[0xB2]    = new inst(oper.mov,    1, addr.DL, addr.Ib);
+    this.inst[0xB3]    = new inst(oper.mov,    1, addr.BL, addr.Ib);
+    this.inst[0xB4]    = new inst(oper.mov,    1, addr.AH, addr.Ib);
+    this.inst[0xB5]    = new inst(oper.mov,    1, addr.CH, addr.Ib);
+    this.inst[0xB6]    = new inst(oper.mov,    1, addr.DH, addr.Ib);
+    this.inst[0xB7]    = new inst(oper.mov,    1, addr.BH, addr.Ib);
+    this.inst[0xB8]    = new inst(oper.mov,    1, addr.AX, addr.Iv);
+    this.inst[0xB9]    = new inst(oper.mov,    1, addr.CX, addr.Iv);
+    this.inst[0xBA]    = new inst(oper.mov,    1, addr.DX, addr.Iv);
+    this.inst[0xBB]    = new inst(oper.mov,    1, addr.BX, addr.Iv);
+    this.inst[0xBC]    = new inst(oper.mov,    1, addr.SP, addr.Iv);
+    this.inst[0xBD]    = new inst(oper.mov,    1, addr.BP, addr.Iv);
+    this.inst[0xBE]    = new inst(oper.mov,    1, addr.SI, addr.Iv);
+    this.inst[0xBF]    = new inst(oper.mov,    1, addr.DI, addr.Iv);
+    this.inst[0xC0]    = new inst(oper.notimp, 0                  );
+    this.inst[0xC1]    = new inst(oper.notimp, 0                  );
+    this.inst[0xC2]    = new inst(oper.ret,    1, addr.Iw         );
+    this.inst[0xC3]    = new inst(oper.ret,    1                  );
+    this.inst[0xC4]    = new inst(oper.les,    2, addr.Gv, addr.Mp);
+    this.inst[0xC5]    = new inst(oper.lds,    2, addr.Gv, addr.Mp);
+    this.inst[0xC6]    = new inst(oper.mov,    2, addr.Eb, addr.Ib);
+    this.inst[0xC7]    = new inst(oper.mov,    2, addr.Ev, addr.Iv);
+    this.inst[0xC8]    = new inst(oper.notimp, 1                  );
+    this.inst[0xC9]    = new inst(oper.notimp, 0                  );
+    this.inst[0xCA]    = new inst(oper.retf,   1, addr.Iw         );
+    this.inst[0xCB]    = new inst(oper.retf,   1                  );
+    this.inst[0xCC]    = new inst(oper.int,    1, addr._3         );
+    this.inst[0xCD]    = new inst(oper.int,    1, addr.Ib         );
+    this.inst[0xCE]    = new inst(oper.into,   1                  );
+    this.inst[0xCF]    = new inst(oper.iret,   1                  );
 
     // Group 2 instructions
     this.inst[0xD0] = [];
-    this.inst[0xD0][0] = new inst(oper.rol,    addr.Eb, addr._1);
-    this.inst[0xD0][1] = new inst(oper.ror,    addr.Eb, addr._1);
-    this.inst[0xD0][2] = new inst(oper.rcl,    addr.Eb, addr._1);
-    this.inst[0xD0][3] = new inst(oper.rcr,    addr.Eb, addr._1);
-    this.inst[0xD0][4] = new inst(oper.shl,    addr.Eb, addr._1);
-    this.inst[0xD0][5] = new inst(oper.shr,    addr.Eb, addr._1);
-    this.inst[0xD0][6] = new inst(oper.notimp,                 );
-    this.inst[0xD0][7] = new inst(oper.sar,    addr.Eb, addr._1);
+    this.inst[0xD0][0] = new inst(oper.rol,    2, addr.Eb, addr._1);
+    this.inst[0xD0][1] = new inst(oper.ror,    2, addr.Eb, addr._1);
+    this.inst[0xD0][2] = new inst(oper.rcl,    2, addr.Eb, addr._1);
+    this.inst[0xD0][3] = new inst(oper.rcr,    2, addr.Eb, addr._1);
+    this.inst[0xD0][4] = new inst(oper.shl,    2, addr.Eb, addr._1);
+    this.inst[0xD0][5] = new inst(oper.shr,    2, addr.Eb, addr._1);
+    this.inst[0xD0][6] = new inst(oper.notimp, 0                  );
+    this.inst[0xD0][7] = new inst(oper.sar,    2, addr.Eb, addr._1);
     this.inst[0xD1] = [];
-    this.inst[0xD1][0] = new inst(oper.rol,    addr.Ev, addr._1);
-    this.inst[0xD1][1] = new inst(oper.ror,    addr.Ev, addr._1);
-    this.inst[0xD1][2] = new inst(oper.rcl,    addr.Ev, addr._1);
-    this.inst[0xD1][3] = new inst(oper.rcr,    addr.Ev, addr._1);
-    this.inst[0xD1][4] = new inst(oper.shl,    addr.Ev, addr._1);
-    this.inst[0xD1][5] = new inst(oper.shr,    addr.Ev, addr._1);
-    this.inst[0xD1][6] = new inst(oper.notimp,                 );
-    this.inst[0xD1][7] = new inst(oper.sar,    addr.Ev, addr._1);
+    this.inst[0xD1][0] = new inst(oper.rol,    2, addr.Ev, addr._1);
+    this.inst[0xD1][1] = new inst(oper.ror,    2, addr.Ev, addr._1);
+    this.inst[0xD1][2] = new inst(oper.rcl,    2, addr.Ev, addr._1);
+    this.inst[0xD1][3] = new inst(oper.rcr,    2, addr.Ev, addr._1);
+    this.inst[0xD1][4] = new inst(oper.shl,    2, addr.Ev, addr._1);
+    this.inst[0xD1][5] = new inst(oper.shr,    2, addr.Ev, addr._1);
+    this.inst[0xD1][6] = new inst(oper.notimp, 0                  );
+    this.inst[0xD1][7] = new inst(oper.sar,    2, addr.Ev, addr._1);
     this.inst[0xD2] = [];
-    this.inst[0xD2][0] = new inst(oper.rol,    addr.Eb, addr.CL);
-    this.inst[0xD2][1] = new inst(oper.ror,    addr.Eb, addr.CL);
-    this.inst[0xD2][2] = new inst(oper.rcl,    addr.Eb, addr.CL);
-    this.inst[0xD2][3] = new inst(oper.rcr,    addr.Eb, addr.CL);
-    this.inst[0xD2][4] = new inst(oper.shl,    addr.Eb, addr.CL);
-    this.inst[0xD2][5] = new inst(oper.shr,    addr.Eb, addr.CL);
-    this.inst[0xD2][6] = new inst(oper.notimp,                 );
-    this.inst[0xD2][7] = new inst(oper.sar,    addr.Eb, addr.CL);
+    this.inst[0xD2][0] = new inst(oper.rol,    2, addr.Eb, addr.CL);
+    this.inst[0xD2][1] = new inst(oper.ror,    2, addr.Eb, addr.CL);
+    this.inst[0xD2][2] = new inst(oper.rcl,    2, addr.Eb, addr.CL);
+    this.inst[0xD2][3] = new inst(oper.rcr,    2, addr.Eb, addr.CL);
+    this.inst[0xD2][4] = new inst(oper.shl,    2, addr.Eb, addr.CL);
+    this.inst[0xD2][5] = new inst(oper.shr,    2, addr.Eb, addr.CL);
+    this.inst[0xD2][6] = new inst(oper.notimp, 0                  );
+    this.inst[0xD2][7] = new inst(oper.sar,    2, addr.Eb, addr.CL);
     this.inst[0xD3] = [];
-    this.inst[0xD3][0] = new inst(oper.rol,    addr.Ev, addr.CL);
-    this.inst[0xD3][1] = new inst(oper.ror,    addr.Ev, addr.CL);
-    this.inst[0xD3][2] = new inst(oper.rcl,    addr.Ev, addr.CL);
-    this.inst[0xD3][3] = new inst(oper.rcr,    addr.Ev, addr.CL);
-    this.inst[0xD3][4] = new inst(oper.shl,    addr.Ev, addr.CL);
-    this.inst[0xD3][5] = new inst(oper.shr,    addr.Ev, addr.CL);
-    this.inst[0xD3][6] = new inst(oper.notimp,                 );
-    this.inst[0xD3][7] = new inst(oper.sar,    addr.Ev, addr.CL);
+    this.inst[0xD3][0] = new inst(oper.rol,    2, addr.Ev, addr.CL);
+    this.inst[0xD3][1] = new inst(oper.ror,    2, addr.Ev, addr.CL);
+    this.inst[0xD3][2] = new inst(oper.rcl,    2, addr.Ev, addr.CL);
+    this.inst[0xD3][3] = new inst(oper.rcr,    2, addr.Ev, addr.CL);
+    this.inst[0xD3][4] = new inst(oper.shl,    2, addr.Ev, addr.CL);
+    this.inst[0xD3][5] = new inst(oper.shr,    2, addr.Ev, addr.CL);
+    this.inst[0xD3][6] = new inst(oper.notimp, 0                  );
+    this.inst[0xD3][7] = new inst(oper.sar,    2, addr.Ev, addr.CL);
 
-    this.inst[0xD4] = new inst(oper.aam,     addr.Ib         );
-    this.inst[0xD5] = new inst(oper.aad,     addr.Ib         );
-    this.inst[0xD6] = new inst(oper.notimp                   );
-    this.inst[0xD7] = new inst(oper.xlat                     );
-    this.inst[0xD8] = new inst(oper.notimp                   );
-    this.inst[0xD9] = new inst(oper.notimp                   );
-    this.inst[0xDA] = new inst(oper.notimp                   );
-    this.inst[0xDB] = new inst(oper.notimp                   );
-    this.inst[0xDC] = new inst(oper.notimp                   );
-    this.inst[0xDD] = new inst(oper.notimp                   );
-    this.inst[0xDE] = new inst(oper.notimp                   );
-    this.inst[0xDF] = new inst(oper.notimp                   );
-    this.inst[0xE0] = new inst(oper.loopnz,  addr.Jb         );
-    this.inst[0xE1] = new inst(oper.loopz,   addr.Jb         );
-    this.inst[0xE2] = new inst(oper.loop,    addr.Jb         );
-    this.inst[0xE3] = new inst(oper.jcxz,    addr.Jb         );
-    this.inst[0xE4] = new inst(oper.iin,     addr.AL, addr.Ib);
-    this.inst[0xE5] = new inst(oper.iin,     addr.AX, addr.Ib);
-    this.inst[0xE6] = new inst(oper.out,     addr.Ib, addr.AL);
-    this.inst[0xE7] = new inst(oper.out,     addr.Ib, addr.AX);
-    this.inst[0xE8] = new inst(oper.call,    addr.Jv         );
-    this.inst[0xE9] = new inst(oper.jmp,     addr.Jv         );
-    this.inst[0xEA] = new inst(oper.jmp,     addr.Ap         );
-    this.inst[0xEB] = new inst(oper.jmp,     addr.Jb         );
-    this.inst[0xEC] = new inst(oper.iin,     addr.AL, addr.DX);
-    this.inst[0xED] = new inst(oper.iin,     addr.AX, addr.DX);
-    this.inst[0xEE] = new inst(oper.out,     addr.DX, addr.AL);
-    this.inst[0xEF] = new inst(oper.out,     addr.DX, addr.AX);
-    this.inst[0xF0] = new inst(oper.lock                     );
-    this.inst[0xF1] = new inst(oper.notimp                   );
-    this.inst[0xF2] = new inst(oper.repnz                    );
-    this.inst[0xF3] = new inst(oper.repz                     );
-    this.inst[0xF4] = new inst(oper.hlt                      );
-    this.inst[0xF5] = new inst(oper.cmc                      );
+    this.inst[0xD4]    = new inst(oper.aam,    1, addr.Ib         );
+    this.inst[0xD5]    = new inst(oper.aad,    1, addr.Ib         );
+    this.inst[0xD6]    = new inst(oper.notimp, 0                  );
+    this.inst[0xD7]    = new inst(oper.xlat,   1                  );
+    this.inst[0xD8]    = new inst(oper.notimp, 0                  );
+    this.inst[0xD9]    = new inst(oper.notimp, 0                  );
+    this.inst[0xDA]    = new inst(oper.notimp, 0                  );
+    this.inst[0xDB]    = new inst(oper.notimp, 0                  );
+    this.inst[0xDC]    = new inst(oper.notimp, 0                  );
+    this.inst[0xDD]    = new inst(oper.notimp, 0                  );
+    this.inst[0xDE]    = new inst(oper.notimp, 0                  );
+    this.inst[0xDF]    = new inst(oper.notimp, 0                  );
+    this.inst[0xE0]    = new inst(oper.loopnz, 1, addr.Jb         );
+    this.inst[0xE1]    = new inst(oper.loopz,  1, addr.Jb         );
+    this.inst[0xE2]    = new inst(oper.loop,   1, addr.Jb         );
+    this.inst[0xE3]    = new inst(oper.jcxz,   1, addr.Jb         );
+    this.inst[0xE4]    = new inst(oper.iin,    1, addr.AL, addr.Ib);
+    this.inst[0xE5]    = new inst(oper.iin,    1, addr.AX, addr.Ib);
+    this.inst[0xE6]    = new inst(oper.out,    1, addr.Ib, addr.AL);
+    this.inst[0xE7]    = new inst(oper.out,    1, addr.Ib, addr.AX);
+    this.inst[0xE8]    = new inst(oper.call,   1, addr.Jv         );
+    this.inst[0xE9]    = new inst(oper.jmp,    1, addr.Jv         );
+    this.inst[0xEA]    = new inst(oper.jmp,    1, addr.Ap         );
+    this.inst[0xEB]    = new inst(oper.jmp,    1, addr.Jb         );
+    this.inst[0xEC]    = new inst(oper.iin,    1, addr.AL, addr.DX);
+    this.inst[0xED]    = new inst(oper.iin,    1, addr.AX, addr.DX);
+    this.inst[0xEE]    = new inst(oper.out,    1, addr.DX, addr.AL);
+    this.inst[0xEF]    = new inst(oper.out,    1, addr.DX, addr.AX);
+    this.inst[0xF0]    = new inst(oper.lock,   1                  );
+    this.inst[0xF1]    = new inst(oper.notimp, 0                  );
+    this.inst[0xF2]    = new inst(oper.repnz,  1                  );
+    this.inst[0xF3]    = new inst(oper.repz,   1                  );
+    this.inst[0xF4]    = new inst(oper.hlt,    1                  );
+    this.inst[0xF5]    = new inst(oper.cmc,    1                  );
 
     // Group 3a instructions
     this.inst[0xF6] = [];
-    this.inst[0xF6][0] = new inst(oper.test,   addr.Eb, addr.Ib);
-    this.inst[0xF6][1] = new inst(oper.notimp,                 );
-    this.inst[0xF6][2] = new inst(oper.not,    addr.Eb,        );
-    this.inst[0xF6][3] = new inst(oper.neg,    addr.Eb,        );
-    this.inst[0xF6][4] = new inst(oper.mul,    addr.Eb,        );
-    this.inst[0xF6][5] = new inst(oper.imul,   addr.Eb,        );
-    this.inst[0xF6][6] = new inst(oper.div,    addr.Eb,        );
-    this.inst[0xF6][7] = new inst(oper.idiv,   addr.Eb,        );
+    this.inst[0xF6][0] = new inst(oper.test,   2, addr.Eb, addr.Ib);
+    this.inst[0xF6][1] = new inst(oper.notimp, 0,                 );
+    this.inst[0xF6][2] = new inst(oper.not,    2, addr.Eb,        );
+    this.inst[0xF6][3] = new inst(oper.neg,    2, addr.Eb,        );
+    this.inst[0xF6][4] = new inst(oper.mul,    2, addr.Eb,        );
+    this.inst[0xF6][5] = new inst(oper.imul,   2, addr.Eb,        );
+    this.inst[0xF6][6] = new inst(oper.div,    2, addr.Eb,        );
+    this.inst[0xF6][7] = new inst(oper.idiv,   2, addr.Eb,        );
 
     // Group 3b instructions
     this.inst[0xF7] = [];
-    this.inst[0xF7][0] = new inst(oper.test,   addr.Ev, addr.Iv);
-    this.inst[0xF7][1] = new inst(oper.notimp, addr.Ev,        );
-    this.inst[0xF7][2] = new inst(oper.not,    addr.Ev,        );
-    this.inst[0xF7][3] = new inst(oper.neg,    addr.Ev,        );
-    this.inst[0xF7][4] = new inst(oper.mul,    addr.Ev,        );
-    this.inst[0xF7][5] = new inst(oper.imul,   addr.Ev,        );
-    this.inst[0xF7][6] = new inst(oper.div,    addr.Ev,        );
-    this.inst[0xF7][7] = new inst(oper.idiv,   addr.Ev,        );
+    this.inst[0xF7][0] = new inst(oper.test,   2, addr.Ev, addr.Iv);
+    this.inst[0xF7][1] = new inst(oper.notimp, 0,                 );
+    this.inst[0xF7][2] = new inst(oper.not,    2, addr.Ev,        );
+    this.inst[0xF7][3] = new inst(oper.neg,    2, addr.Ev,        );
+    this.inst[0xF7][4] = new inst(oper.mul,    2, addr.Ev,        );
+    this.inst[0xF7][5] = new inst(oper.imul,   0, addr.Ev,        );
+    this.inst[0xF7][6] = new inst(oper.div,    0, addr.Ev,        );
+    this.inst[0xF7][7] = new inst(oper.idiv,   0, addr.Ev,        );
 
-    this.inst[0xF8] = new inst(oper.clc                      );
-    this.inst[0xF9] = new inst(oper.stc                      );
-    this.inst[0xFA] = new inst(oper.cli                      );
-    this.inst[0xFB] = new inst(oper.sti                      );
-    this.inst[0xFC] = new inst(oper.cld                      );
-    this.inst[0xFD] = new inst(oper.std                      );
+    this.inst[0xF8]    = new inst(oper.clc,    1                  );
+    this.inst[0xF9]    = new inst(oper.stc,    1                  );
+    this.inst[0xFA]    = new inst(oper.cli,    1                  );
+    this.inst[0xFB]    = new inst(oper.sti,    1                  );
+    this.inst[0xFC]    = new inst(oper.cld,    1                  );
+    this.inst[0xFD]    = new inst(oper.std,    1                  );
 
     // Group 4 instructions
     this.inst[0xFE] = [];
-    this.inst[0xFE][0] = new inst(oper.inc,    addr.Eb,        );
-    this.inst[0xFE][1] = new inst(oper.dec,    addr.Eb,        );
-    this.inst[0xFE][2] = new inst(oper.notimp                  );
-    this.inst[0xFE][3] = new inst(oper.notimp                  );
-    this.inst[0xFE][4] = new inst(oper.notimp                  );
-    this.inst[0xFE][5] = new inst(oper.notimp                  );
-    this.inst[0xFE][6] = new inst(oper.notimp                  );
-    this.inst[0xFE][7] = new inst(oper.notimp                  );
+    this.inst[0xFE][0] = new inst(oper.inc,    2, addr.Eb,        );
+    this.inst[0xFE][1] = new inst(oper.dec,    2, addr.Eb,        );
+    this.inst[0xFE][2] = new inst(oper.notimp, 0                  );
+    this.inst[0xFE][3] = new inst(oper.notimp, 0                  );
+    this.inst[0xFE][4] = new inst(oper.notimp, 0                  );
+    this.inst[0xFE][5] = new inst(oper.notimp, 0                  );
+    this.inst[0xFE][6] = new inst(oper.notimp, 0                  );
+    this.inst[0xFE][7] = new inst(oper.notimp, 0                  );
 
     // Group 5 instructions
     this.inst[0xFF] = [];
-    this.inst[0xFF][0] = new inst(oper.inc,  addr.Ev,          );
-    this.inst[0xFF][1] = new inst(oper.dec,  addr.Ev,          );
-    this.inst[0xFF][2] = new inst(oper.call, addr.Ev,          );
-    this.inst[0xFF][3] = new inst(oper.call, addr.Mp           );
-    this.inst[0xFF][4] = new inst(oper.jmp,  addr.Ev,          );
-    this.inst[0xFF][5] = new inst(oper.jmp,  addr.Mp           );
-    this.inst[0xFF][6] = new inst(oper.push, addr.Ev,          );
-    this.inst[0xFF][7] = new inst(oper.notimp                  );
+    this.inst[0xFF][0] = new inst(oper.inc,    2, addr.Ev,        );
+    this.inst[0xFF][1] = new inst(oper.dec,    2, addr.Ev,        );
+    this.inst[0xFF][2] = new inst(oper.call,   2, addr.Ev,        );
+    this.inst[0xFF][3] = new inst(oper.call,   2, addr.Mp         );
+    this.inst[0xFF][4] = new inst(oper.jmp,    2, addr.Ev,        );
+    this.inst[0xFF][5] = new inst(oper.jmp,    2, addr.Mp         );
+    this.inst[0xFF][6] = new inst(oper.push,   2, addr.Ev,        );
+    this.inst[0xFF][7] = new inst(oper.notimp, 0                  );
   }
 
   decode () {
@@ -493,7 +513,6 @@ export default class CPU8086 extends CPU {
       rm              : (addressing_byte & 0x07),
       inst            : null,
       string          : "",
-      // addrType        : null,
       addrSize        : null,
     };
 
@@ -521,11 +540,67 @@ export default class CPU8086 extends CPU {
     else this.opcode.addrSize = u;
   }
 
+  // TODO: I don't like this. Move this back into operations if possible
+  // http://www.c-jump.com/CIS77/CPU/x86/X77_0240_prefix.htm
+  prefix () {
+    let inst = this.opcode.opcode_byte;
+    // Instruction prefix check
+    switch (this.opcode.opcode_byte) {
+      case 0x2E: // CS segment prefix
+        this.addrSeg = regCS;
+        this.reg16[regIP] += 1;
+        this.decode();
+        this.opcode.prefix = inst;
+        break;
+      case 0x3E: // DS segment prefix
+        this.addrSeg = regDS;
+        this.reg16[regIP] += 1;
+        this.decode();
+        this.opcode.prefix = inst;
+        break;
+      case 0x26: // ES segment prefix
+        this.addrSeg = regES;
+        this.reg16[regIP] += 1;
+        this.decode();
+        this.opcode.prefix = inst;
+        break;
+      case 0x36: // SS segment prefix
+        this.addrSeg = regSS;
+        this.reg16[regIP] += 1;
+        this.decode();
+        this.opcode.prefix = inst;
+        break;
+      case 0xF3: // REP/REPE/REPZ
+        this.repType = 1;
+        this.reg16[regIP] += 1;
+        this.decode();
+        this.opcode.prefix = inst;
+        break;
+      case 0xF2: // REPNE/REPNZ
+        this.repType = 2;
+        this.reg16[regIP] += 1;
+        this.decode();
+        this.opcode.prefix = inst;
+        break;
+      default:
+        this.addrSeg = regDS;
+        this.repType = 0;
+        break;
+    }
+  }
+
   cycle () {
     winston.log("debug", "8086.cycle()             : Running instruction cycle [" + this.cycleCount + "]");
-    // Reset the instruction cycle counter
+
+    // Reset per-cycle values
     this.cycleIP = 0;
+    this.addrSeg = regDS;
+
+    // Decode the instruction
     this.decode();
+
+    // If this is a prefix instruction, run it and move to the next instruction
+    this.prefix();
 
     winston.log("debug", "  INSTRUCTION: " +  this.opcode.string);
     winston.log("debug", "  CS:IP:       " + hexString16(this.reg16[regCS]) + ":" + hexString16(this.reg16[regIP]));
@@ -534,12 +609,17 @@ export default class CPU8086 extends CPU {
     winston.log("debug", "  FLAGS:       " + formatFlags(this.reg16[regFlags], 17));
     winston.log("debug", "  REGISTERS    " + formatRegisters(this, 17));
 
-    // let result = this.opcode.inst();
+    // Increase the cycleIp by the instruction base size
+    this.cycleIP += this.opcode.inst.baseSize;
+
+    // Run the instruction
     let result = this.opcode.inst.run();
 
     winston.log("debug", "  result: " + hexString16(result));
 
+    // Move the IP
     this.reg16[regIP] += this.cycleIP;
+
     this.cycleCount += 1;
   }
 

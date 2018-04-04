@@ -25,7 +25,7 @@ Quickstart
 ----
 * Install Nodejs
 * install Ruby
-* 
+*
 
 TODO
 ----
@@ -68,13 +68,13 @@ Notes
 $ npm run build
 ```
 
-or 
+or
 
 ```
 $ npm run build:watch
 ```
 
-## test 
+## test
 ```
 $ npm test
 ```
@@ -82,5 +82,11 @@ $ npm test
 ## Notes
 npm install git+https://github.com/sweet-js/sweet.js.git
 
-./node_modules/.bin/jest tests/8086.test.js 
+./node_modules/.bin/jest tests/8086.test.js
 node dist/runner.js
+
+
+
+## TODO
+* Refactor the cycle IP increment counter. Try setting a base inc attached to
+ the instruction in the lookup table, then add to it based on addressing.
