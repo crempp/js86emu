@@ -6,7 +6,7 @@ import {
   regCS, regDS, regES, regSS,
   regFlags,
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
-  FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK, b,
+  FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK, b, w, v
 } from './Constants';
 import { formatOpcode, hexString16, hexString32 } from "./Debug";
 import {
@@ -455,6 +455,33 @@ export default class Addressing {
    * of the following values: a base register, an index register, a scaling
    * factor, a displacement.
    *
+   * 32-bit or 48-bit pointer, depending on operand-size attribute.
+   *   - [3] p. A-1 to A-3
+   *
+   * @param {number|null} segment Memory segment
+   * @param {number|null} value NOT USED
+   * @return {number[]} An array containing the [segment, offset]
+   */
+  Ep (segment, value) {
+    if (value)
+      throw new InvalidAddressModeException("Ep addressing mode can not set values");
+
+    let result = this.readRMReg32(segment);
+
+    // 0x56 0x78 0x9A 0xBC
+    let s = result & 0x0000FFFF;
+    let o = (result & 0xFFFF0000) >> 16;
+
+    return [s, o];
+  }
+
+  /**
+   * A ModR/M byte follows the opcode and specifies the operand. The operand
+   * is either a general-purpose register or a memory address. If it is a
+   * memory address, the address is computed from a segment register and any
+   * of the following values: a base register, an index register, a scaling
+   * factor, a displacement.
+   *
    * The operand is a word or doubleword, depending on operand-size attribute.
    *   - [3] p. A-1 to A-3
    *
@@ -540,8 +567,8 @@ export default class Addressing {
     if (value !== null && value > 0xFFFFFFFF)
       throw new ValueOverflowException("Value too large for memory addressing mode");
 
-    if (value || value === 0) result = this.writeRegVal(value);
-    else result = this.readRegVal();
+    if (value || value === 0) result = this.writeRegVal(value, false, v);
+    else result = this.readRegVal(false, v);
 
     return result;
   }
@@ -679,8 +706,30 @@ export default class Addressing {
     return this.cpu.reg16[regIP] + twosComplement2Int16(result);
   }
 
+  /**
+   * The ModR/M byte may refer only to memory (for example, BOUND, LES, LDS,
+   * LSS, LFS, LGS, CMPXCHG8B).
+   *   - [3] p. A-1 to A-3
+   *
+   * @param {number|null} segment Memory segment
+   * @param {number|null} value NOT USED
+   * @return {number} The value from the address is returned
+   */
   M (segment, value) {
+    if (value)
+      throw new InvalidAddressModeException("M addressing mode can not set values");
 
+    let addr;
+    switch (this.cpu.opcode.mod) {
+      case 0b00: // Use R/M Table 1 for R/M operand
+        addr = this.calcRMAddr(segment);
+        break;
+      case 0b01: // Use R/M Table 2 with 8-bit displacement
+      case 0b10: // Use R/M Table 2 with 16-bit displacement
+        addr = this.calcRMDispAddr(segment);
+        break;
+    }
+    return addr
   }
 
   /**
@@ -696,7 +745,7 @@ export default class Addressing {
    */
   Mp (segment, value) {
     if (value)
-      throw new InvalidAddressModeException("Ap addressing mode can not set values")
+      throw new InvalidAddressModeException("Mp addressing mode can not set values");
 
     let addr;
     switch (this.cpu.opcode.mod) {
@@ -764,6 +813,27 @@ export default class Addressing {
       case 0b10: // Use R/M Table 2 with 16-bit displacement
         offset = this.calcRMDispAddr(segment);
         return this.readMem16(segment, offset);
+      case 0b11: // Two register instruction; use REG table
+        return this.readRegVal(true);
+    }
+  }
+
+  /**
+   * Read a double word from memory or a register as specified by the
+   * addressing mode determined by the mod, reg and r/m values.
+   *
+   * @param {number} segment Memory segment
+   */
+  readRMReg32 (segment) {
+    let offset;
+    switch (this.cpu.opcode.mod) {
+      case 0b00: // Use R/M Table 1 for R/M operand
+        offset = this.calcRMAddr(segment);
+        return this.readMem32(segment, offset);
+      case 0b01: // Use R/M Table 2 with 8-bit displacement
+      case 0b10: // Use R/M Table 2 with 16-bit displacement
+        offset = this.calcRMDispAddr(segment);
+        return this.readMem32(segment, offset);
       case 0b11: // Two register instruction; use REG table
         return this.readRegVal(true);
     }
@@ -880,13 +950,13 @@ export default class Addressing {
 
     switch (this.cpu.opcode.mod) {
       case 0b01: // Use R/M table 2 with 8-bit displacement
-        disp = this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)];
+        disp = this.cpu.mem8[seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 2, this.cpu)];
         this.cpu.cycleIP += 1;
         break;
       case 0b10: // Use R/M table 2 with 16-bit displacement
         disp = disp ||
-          ((this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 3, this.cpu)] << 8) |
-            this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)] );
+          ((this.cpu.mem8[seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 3, this.cpu)] << 8) |
+            this.cpu.mem8[seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 2, this.cpu)] );
         this.cpu.cycleIP += 2;
     }
 
@@ -1080,6 +1150,20 @@ export default class Addressing {
   readMem16(segment, offset) {
     return ((this.cpu.mem8[seg2abs(segment, offset + 1, this.cpu)] << 8) |
              this.cpu.mem8[seg2abs(segment, offset, this.cpu)]);
+  }
+
+  /**
+   * Read a double word from a segment:offset location in memory
+   *
+   * @param {number} segment
+   * @param {number} offset
+   * @return {number} Value from memory as a double word
+   */
+  readMem32(segment, offset) {
+    return ((this.cpu.mem8[seg2abs(segment, offset + 1, this.cpu)] << 24) |
+            (this.cpu.mem8[seg2abs(segment, offset    , this.cpu)] << 16) |
+            (this.cpu.mem8[seg2abs(segment, offset + 3, this.cpu)] << 8) |
+             this.cpu.mem8[seg2abs(segment, offset + 2, this.cpu)]);
   }
 
   /**

@@ -1781,6 +1781,10 @@ describe('Addressing Modes', () => {
     });
   });
 
+  describe.skip('Ep', () => {
+
+  });
+
   describe('Ev', () => {
     beforeEach(() => {
       cpu.mem8[0xB36E3] = 0x90;
@@ -2060,8 +2064,29 @@ describe('Addressing Modes', () => {
     });
   });
 
-  describe.skip('M', () => {
+  describe('M', () => {
+    beforeEach(() => {
+      cpu.reg16[regDI] = 0x9ABC;
+      cpu.mem8[0xABCD0] = 0xFF; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b10000101; // addr mode
+      cpu.mem8[0xABCD2] = 0x34; // segment byte high
+      cpu.mem8[0xABCD3] = 0x12; // segment byte low
 
+      cpu.decode();
+    });
+
+    test('read', () => {
+      expect(addr.M(segment, null)).toEqual(0x9ABC + 0x1234);
+    });
+    test('read cycles', () => {
+      addr.M(segment, null);
+      expect(cpu.cycleIP).toBe(2);
+    });
+    test('write throws', () => {
+      expect(() => {
+        addr.M(segment, 0xFF);
+      }).toThrowError(InvalidAddressModeException);
+    });
   });
 
   describe('Mp', () => {
@@ -2076,9 +2101,6 @@ describe('Addressing Modes', () => {
       cpu.mem8[0xACF06] = 0xBC; // v2 high
       cpu.mem8[0xACF07] = 0x9A; // v2 low
 
-      // (CS     * 0x10) + ( offs ) =
-      // (0xABCD * 0x10) + (0x5678) =
-      //    0xABCD0      +  0x1234  = 0xACF04
       cpu.decode();
     });
 

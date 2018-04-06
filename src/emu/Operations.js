@@ -995,18 +995,87 @@ export default class Operations {
     }
   }
 
+  /**
+   * LAHF (load register AH from flags) copies SF, ZF, AF, PF and CF (the
+   * 8080/8085 flags) into bits 7, 6, 4, 2 and 0, respectively, of register
+   * AH (see figure 2-32). The content of bits 5, 3 and 1 is undefined; the
+   * flags themselves are not affected. LAHF is provided primarily for
+   * converting 8080/8085 assembly language programs to run on an 8086 or 8088.
+   *   - [1] p.2-32
+   *
+   * AH ← EFLAGS(SF:ZF:0:AF:0:PF:1:CF);
+   *   - [4] 3-518
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   lahf (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.reg8[regAH] = this.cpu.reg16[regFlags] & 0b11010111;
   }
+
+  /**
+   * LDS (load pointer using DS) transfers a 32-bit pointer variable from the
+   * source operand, which must be a memory operand, to the destination operand
+   * and register DS. The offset word of the pointer is transferred to the
+   * destination operand, which may be any 16-bit general register. The segment
+   * word of the pointer is transferred to register DS. Specifying SI as the
+   * destination operand is a convenient way to prepare to process a source
+   * string that is not in the current data segment (string instructions assume
+   * that the source string is located in the current data segment and that SI
+   * contains the offset of the string).
+   *   - [1] p.2-32
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   lds (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
+    let srcVal = src(segment);
+    dst(segment, srcVal[1]);
+    this.cpu.reg16[regDS] = srcVal[0];
   }
+
+  /**
+   * LEA (load effective address) transfers the offset of the source operand
+   * (rather than its value) to the destination operand. The source operand
+   * must be a memory operand, and the destination operand must be a 16-bit
+   * general register. LEA does not affect any flags. The XLA T and string
+   * instructions assume that certain registers point to operands; LEA can
+   * be used to load these registers (e.g., 10'lding BX with the address of
+   * the translate table used by the XLA T instruction).
+   *   - [1] p.2-45
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   lea (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
+    let srcVal = src(segment);
+    return dst(segment, srcVal);
   }
+
+  /**
+   * LES (load pointer using ES) transfers a 32-bit pointer variable from the
+   * source operand, which must be a memory operand, to the destination operand
+   * and register ES. The offset word of the pointer is transferred to the
+   * destination operand, which may be any 16-bit general register. The segment
+   * word of the pointer is transferred to register ES. Specifying DI as the
+   * destination operand is a convenient way to prepare to process a
+   * destination string that is not in the current extra segment. (The
+   * destination string must be located in the extra segment, and DI must
+   * contain the offset of the string.)
+   *   - [1] p.2-32
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   les (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
+    let srcVal = src(segment);
+    dst(segment, srcVal[1]);
+    this.cpu.reg16[regES] = srcVal[0];
   }
+
   lock (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -1313,9 +1382,22 @@ export default class Operations {
   ror (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * SAHF (store register AH into flags) transfers bits 7,6,4,2 and 0 from
+   * register AH into SF, ZF, AF, PF and CF, respectively, replacing whatever
+   * values these flags previously had. OF, DF, IF and TF are not affected.
+   * This instruction is provided for 8080/8085 compatibility.
+   *   - [1] p.2-33
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   sahf (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+
+    this.cpu.reg16[regFlags] |= (this.cpu.reg8[regAH] & 0b11010111);
   }
+
   sar (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -1435,9 +1517,25 @@ export default class Operations {
   wait (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * XCHG (exchange) switches the contents of the source and destination (byte
+   * or word) operands. When used in conjunction with the LOCK prefix, XCHG
+   * can test and set a semaphore that controls access to a resource shared by
+   * multiple processors (see section 2.5).
+   *   - [1] p.2-36
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   * @return {number}
+   */
   xchg (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
+    let srcVal = src(segment);
+    src(segment, dst(segment));
+    dst(segment, srcVal);
   }
+
   xlat (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }

@@ -491,15 +491,16 @@ export default class CPU8086 extends CPU {
     this.inst[0xFF][0] = new inst(oper.inc,    2, addr.Ev,        );
     this.inst[0xFF][1] = new inst(oper.dec,    2, addr.Ev,        );
     this.inst[0xFF][2] = new inst(oper.call,   2, addr.Ev,        );
-    this.inst[0xFF][3] = new inst(oper.call,   2, addr.Mp         );
+    this.inst[0xFF][3] = new inst(oper.call,   2, addr.Ep         );
     this.inst[0xFF][4] = new inst(oper.jmp,    2, addr.Ev,        );
-    this.inst[0xFF][5] = new inst(oper.jmp,    2, addr.Mp         );
+    this.inst[0xFF][5] = new inst(oper.jmp,    2, addr.Ep         );
     this.inst[0xFF][6] = new inst(oper.push,   2, addr.Ev,        );
     this.inst[0xFF][7] = new inst(oper.notimp, 0                  );
   }
 
   decode () {
     let opcode_byte = this.mem8[segIP(this)];
+    // TODO: only get addressing_byte if baseSize >1 else null
     let addressing_byte = this.mem8[segIP(this) + 1];
     this.opcode = {
       opcode_byte     : opcode_byte,

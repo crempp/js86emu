@@ -171,7 +171,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regIP]).toBe(0x1234);
       expect(cpu.cycleIP).toBe(0);
     });
-    test('CALL Mp (far)', () => {
+    test('CALL Ep (far)', () => {
       cpu.mem8[0x000FF] = 0xFF; // inst (byte)
       cpu.mem8[0x00100] = 0b00011100; // addr mode
       cpu.reg16[regSI] = 0x1234;
@@ -180,7 +180,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x01236] = 0xBC; // v2 high
       cpu.mem8[0x01237] = 0x9A; // v2 low
       cpu.decode();
-      oper.call(addr.Mp.bind(addr), null);
+      oper.call(addr.Ep.bind(addr), null);
 
       // CS on stack
       expect(cpu.mem8[0x401E]).toBe(0x00);
@@ -1114,24 +1114,87 @@ describe('Operation methods', () => {
     });
   });
 
-  describe.skip('lahf', () => {
-    test('test 1', () => {
+  describe('lahf', () => {
+    beforeEach(() => {
+      cpu.mem8[0x00FF] = 0x9F; // inst
+      cpu.cycleIP = 1;
+      cpu.decode();
+    });
 
+    test('load flags', () => {
+      cpu.reg16[regFlags] = 0b0101010101111111;
+      oper.lahf(null, null);
+
+      expect(cpu.reg8[regAH]).toBe(0b01010111)
     });
   });
-  describe.skip('lds', () => {
-    test('test 1', () => {
 
+  describe('lds', () => {
+    beforeEach(() => {
+      cpu.mem8[0x00FF] = 0xC5; // inst
+    });
+
+    test(' LDS Gv Mp', () => {
+      cpu.mem8[0x0100] = 0b00000110; // addr mode
+      cpu.mem8[0x0101] = 0x34; // segment byte high
+      cpu.mem8[0x0102] = 0x12; // segment byte low
+
+      cpu.mem8[0x04234] = 0x78; // v1 high
+      cpu.mem8[0x04235] = 0x56; // v1 low
+      cpu.mem8[0x04236] = 0xBC; // v2 high
+      cpu.mem8[0x04237] = 0x9A; // v2 low
+
+      cpu.cycleIP = 2;
+      cpu.decode();
+      oper.lds(addr.Gv.bind(addr), addr.Mp.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x5678);
+      expect(cpu.reg16[regDS]).toBe(0x9ABC);
+      expect(cpu.cycleIP).toBe(4);
     });
   });
-  describe.skip('lea', () => {
-    test('test 1', () => {
 
+  describe('lea', () => {
+    beforeEach(() => {
+      cpu.mem8[0x00FF] = 0x8D; // inst
+    });
+
+    test(' LEA Gv M', () => {
+      cpu.reg16[regBX] = 0x1234;
+      cpu.mem8[0x0100] = 0b10010111; // addr
+      cpu.mem8[0x0101] = 0x11; // oper high
+      cpu.mem8[0x0102] = 0x22; // oper low
+      cpu.cycleIP = 2;
+      cpu.decode();
+      oper.lea(addr.Gv.bind(addr), addr.M.bind(addr));
+
+      expect(cpu.reg16[regDX]).toBe(0x1234 + 0x2211);
+      expect(cpu.cycleIP).toBe(4);
     });
   });
-  describe.skip('les', () => {
-    test('test 1', () => {
 
+  describe('les', () => {
+    beforeEach(() => {
+      cpu.mem8[0x00FF] = 0xC4; // inst
+    });
+
+    test(' LES Gv Mp', () => {
+      cpu.mem8[0x0100] = 0b00000110; // addr mode
+      cpu.mem8[0x0101] = 0x34; // segment byte high
+      cpu.mem8[0x0102] = 0x12; // segment byte low
+
+      cpu.mem8[0x04234] = 0x78; // v1 high
+      cpu.mem8[0x04235] = 0x56; // v1 low
+      cpu.mem8[0x04236] = 0xBC; // v2 high
+      cpu.mem8[0x04237] = 0x9A; // v2 low
+
+      cpu.cycleIP = 2;
+      cpu.decode();
+      oper.les(addr.Gv.bind(addr), addr.Mp.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x5678);
+      expect(cpu.reg16[regES]).toBe(0x9ABC);
+      expect(cpu.cycleIP).toBe(4);
     });
   });
   describe.skip('lock', () => {
@@ -1638,9 +1701,19 @@ describe('Operation methods', () => {
 
     });
   });
-  describe.skip('sahf', () => {
-    test('test 1', () => {
+  describe('sahf', () => {
+    beforeEach(() => {
+      cpu.mem8[0x00FF] = 0x9E; // inst
+      cpu.cycleIP = 1;
+      cpu.decode();
+    });
 
+    test('set flags', () => {
+      cpu.reg16[regFlags] = 0b0000000000000010;
+      cpu.reg16[regAH] = 0b01111101;
+      oper.sahf(null, null);
+
+      expect(cpu.reg16[regFlags]).toBe(0b01010111)
     });
   });
   describe.skip('sar', () => {
@@ -1908,11 +1981,24 @@ describe('Operation methods', () => {
 
     });
   });
-  describe.skip('xchg', () => {
-    test('test 1', () => {
 
+  describe('xchg', () => {
+    beforeEach(() => {
+      cpu.cycleIP = 1;
+    });
+    test('exchange CX AX', () => {
+      cpu.mem8[0x00FF] = 0x91; // addr
+      cpu.reg16[regCX] = 0x1234;
+      cpu.reg16[regAX] = 0x5678;
+      cpu.decode();
+      oper.xchg(addr.CX.bind(addr), addr.AX.bind(addr));
+
+      expect(cpu.reg16[regCX]).toBe(0x5678);
+      expect(cpu.reg16[regAX]).toBe(0x1234);
+      expect(cpu.cycleIP).toBe(1);
     });
   });
+
   describe.skip('xlat', () => {
     test('test 1', () => {
 
