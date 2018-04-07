@@ -83,16 +83,267 @@ describe('Operation methods', () => {
 
     });
   });
-  describe.skip('adc', () => {
-    test('test 1', () => {
 
+  describe('adc', () => {
+    test('+dst, +src no carry', () => {
+      cpu.reg16[regFlags] = 0b0000000000000010;
+      cpu.reg16[regAX] = 0x1235;
+      // ADD AX,iv
+      cpu.mem8[0x00FF] = 0x15;
+      cpu.mem8[0x0100] = 0x34;
+      cpu.mem8[0x0101] = 0x12;
+      cpu.cycleIP = 1;
+      cpu.decode();
+      oper.adc(addr.AX.bind(addr), addr.Iv.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x2469);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+    test('+dst, +src with carry', () => {
+      cpu.reg16[regFlags] = 0b0000000000000011;
+      cpu.reg16[regAX] = 0x1235;
+      // ADD AX,iv
+      cpu.mem8[0x00FF] = 0x15;
+      cpu.mem8[0x0100] = 0x34;
+      cpu.mem8[0x0101] = 0x12;
+      cpu.cycleIP = 1;
+      cpu.decode();
+      oper.adc(addr.AX.bind(addr), addr.Iv.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x246A);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+    test('-dst, +src with carry', () => {
+      cpu.reg16[regFlags] = 0b0000000000000011;
+      cpu.reg16[regAX] = 0xFFFF;
+      // ADD AX,iv
+      cpu.mem8[0x00FF] = 0x15;
+      cpu.mem8[0x0100] = 0x35;
+      cpu.mem8[0x0101] = 0x12;
+      cpu.cycleIP = 1;
+      cpu.decode();
+      oper.adc(addr.AX.bind(addr), addr.Iv.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x1235);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+    test('+dst, -src with carry', () => {
+      cpu.reg16[regFlags] = 0b0000000000000011;
+      cpu.reg16[regAX] = 0x1235;
+      // ADD AX,iv
+      cpu.mem8[0x00FF] = 0x15;
+      cpu.mem8[0x0100] = 0xFF;
+      cpu.mem8[0x0101] = 0xFF;
+      cpu.cycleIP = 1;
+      cpu.decode();
+      oper.adc(addr.AX.bind(addr), addr.Iv.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x1235);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+    test('-dst, -src with carry', () => {
+      cpu.reg16[regFlags] = 0b0000000000000011;
+      cpu.reg16[regAX] = 0xFFFF;
+      // ADD AX,iv
+      cpu.mem8[0x00FF] = 0x15;
+      cpu.mem8[0x0100] = 0xFF;
+      cpu.mem8[0x0101] = 0xFF;
+      cpu.cycleIP = 1;
+      cpu.decode();
+      oper.adc(addr.AX.bind(addr), addr.Iv.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0xFFFF);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+    test('Overflow with carry', () => {
+      cpu.reg16[regFlags] = 0b0000000000000011;
+      cpu.reg16[regAX] = 0x7FFF;
+      // ADD AX,iv
+      cpu.mem8[0x00FF] = 0x15;
+      cpu.mem8[0x0100] = 0x00;
+      cpu.mem8[0x0101] = 0x80;
+      cpu.cycleIP = 1;
+      cpu.decode();
+      oper.adc(addr.AX.bind(addr), addr.Iv.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x0000);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
+      // This OF calculation is confusing but accurate
+      // 0x8000    1000 0000 0000 0000 -32768
+      // 0x7FFF  + 0111 1111 1111 1111  32767
+      // -----------------------------
+      //           1111 1111 1111 1111     -1
+      // 		     + 0000 0000 0000 0001     +1
+      // -----------------------------
+      //         1 0000 0000 0000 0000      0
+      // Note that the result fits in the operand
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+    test('dst (word) = src (byte) both are negative no carry', () => {
+      cpu.reg16[regFlags] = 0b0000000000000010;
+      cpu.reg16[regBX] = 0xFFFF;
+      // ADC BX,iv
+      // 0xFFFF + 0xFF = -1 + -1 + 1 = 0x1FFFF -> 0xFFFF
+      cpu.mem8[0x00FF] = 0x83; // inst
+      cpu.mem8[0x0100] = 0b11010011; // addr
+      cpu.mem8[0x0101] = 0xFF; // oper low
+      cpu.cycleIP = 2;
+      cpu.decode();
+      oper.adc(addr.Ev.bind(addr), addr.Ib.bind(addr));
+
+      expect(cpu.reg16[regBX]).toBe(0xFFFE);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
   });
-  describe.skip('add', () => {
-    test('test 1', () => {
 
+  describe('add', () => {
+    beforeEach(() => {});
+
+    test('+dst, +src', () => {
+      cpu.reg16[regAX] = 0x1235;
+      // ADD AX,iv
+      cpu.mem8[0x00FF] = 0x05;
+      cpu.mem8[0x0100] = 0x34;
+      cpu.mem8[0x0101] = 0x12;
+      cpu.cycleIP = 1;
+      cpu.decode();
+      oper.add(addr.AX.bind(addr), addr.Iv.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x2469);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+    test('-dst, +src', () => {
+      cpu.reg16[regAX] = 0xFFFF;
+      // ADD AX,iv
+      cpu.mem8[0x00FF] = 0x05;
+      cpu.mem8[0x0100] = 0x35;
+      cpu.mem8[0x0101] = 0x12;
+      cpu.cycleIP = 1;
+      cpu.decode();
+      oper.add(addr.AX.bind(addr), addr.Iv.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x1234);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+    test('+dst, -src', () => {
+      cpu.reg16[regAX] = 0x1235;
+      // ADD AX,iv
+      cpu.mem8[0x00FF] = 0x05;
+      cpu.mem8[0x0100] = 0xFF;
+      cpu.mem8[0x0101] = 0xFF;
+      cpu.cycleIP = 1;
+      cpu.decode();
+      oper.add(addr.AX.bind(addr), addr.Iv.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x1234);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+    test('-dst, -src', () => {
+      cpu.reg16[regAX] = 0xFFFF;
+      // ADD AX,iv
+      cpu.mem8[0x00FF] = 0x05;
+      cpu.mem8[0x0100] = 0xFF;
+      cpu.mem8[0x0101] = 0xFF;
+      cpu.cycleIP = 1;
+      cpu.decode();
+      oper.add(addr.AX.bind(addr), addr.Iv.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0xFFFE);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+    test('Overflow', () => {
+      cpu.reg16[regAX] = 0x8000;
+      // ADD AX,iv
+      cpu.mem8[0x00FF] = 0x05;
+      cpu.mem8[0x0100] = 0x00;
+      cpu.mem8[0x0101] = 0x80;
+      cpu.cycleIP = 1;
+      cpu.decode();
+      oper.add(addr.AX.bind(addr), addr.Iv.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x0000);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
+    });
+    test('dst (word) = src (byte) both are negative', () => {
+      // ADD BX,iv
+      // 0xFFFF + 0xFF = -1 + -1
+      cpu.reg16[regBX] = 0xFFFF;
+      cpu.mem8[0x00FF] = 0x83; // inst
+      cpu.mem8[0x0100] = 0b11000011; // addr
+      cpu.mem8[0x0101] = 0xFF; // oper low
+      cpu.cycleIP = 2;
+      cpu.decode();
+      oper.add(addr.Ev.bind(addr), addr.Ib.bind(addr));
+
+      expect(cpu.reg16[regBX]).toBe(0xFFFE);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
   });
+
   describe.skip('and', () => {
     test('test 1', () => {
 
@@ -296,7 +547,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x0100] = 0xFB;
       cpu.mem8[0x0101] = 0xFF;
       cpu.decode();
-      let result = oper.sub(addr.Ev.bind(addr), addr.Ib.bind(addr));
+      oper.sub(addr.Ev.bind(addr), addr.Ib.bind(addr));
 
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
@@ -434,11 +685,67 @@ describe('Operation methods', () => {
 
     });
   });
-  describe.skip('inc', () => {
-    test('test 1', () => {
 
+  describe('inc', () => {
+    beforeEach(() => {
+      // INC AX
+      cpu.mem8[0x00FF] = 0x40;
+    });
+    test('basic increment', () => {
+      cpu.reg16[regAX] = 0x1234;
+      cpu.decode();
+      oper.inc(addr.AX.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x1235);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+    test('increment to top of value range', () => {
+      cpu.reg16[regAX] = 0xFFFE;
+      cpu.decode();
+      oper.inc(addr.AX.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0xFFFF);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+    test('increment from zero', () => {
+      cpu.reg16[regAX] = 0x0000;
+      cpu.decode();
+      oper.inc(addr.AX.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x0001);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+
+    test('increment overflow', () => {
+      cpu.reg16[regAX] = 0xFFFF;
+      cpu.decode();
+      oper.inc(addr.AX.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x0000);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
   });
+
   describe.skip('int', () => {
     test('test 1', () => {
 
@@ -1734,7 +2041,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x0100] = 0x34;
       cpu.mem8[0x0101] = 0x12;
       cpu.decode();
-      let result = oper.sbb(addr.AX.bind(addr), addr.Iv.bind(addr));
+      oper.sbb(addr.AX.bind(addr), addr.Iv.bind(addr));
 
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
@@ -1750,7 +2057,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x0100] = 0x35;
       cpu.mem8[0x0101] = 0x12;
       cpu.decode();
-      let result = oper.sbb(addr.AX.bind(addr), addr.Iv.bind(addr));
+      oper.sbb(addr.AX.bind(addr), addr.Iv.bind(addr));
 
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
@@ -1766,7 +2073,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x0100] = 0x34;
       cpu.mem8[0x0101] = 0x12;
       cpu.decode();
-      let result = oper.sbb(addr.AX.bind(addr), addr.Iv.bind(addr));
+      oper.sbb(addr.AX.bind(addr), addr.Iv.bind(addr));
 
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
@@ -1782,7 +2089,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x0100] = 0x01;
       cpu.mem8[0x0101] = 0x00;
       cpu.decode();
-      let result = oper.sbb(addr.AX.bind(addr), addr.Iv.bind(addr));
+      oper.sbb(addr.AX.bind(addr), addr.Iv.bind(addr));
 
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
@@ -1799,7 +2106,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x0101] = 0x00;
       cpu.reg16[regFlags] |= FLAG_CF_MASK;
       cpu.decode();
-      let result = oper.sbb(addr.AX.bind(addr), addr.Iv.bind(addr));
+      oper.sbb(addr.AX.bind(addr), addr.Iv.bind(addr));
 
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
@@ -1816,7 +2123,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x0100] = 0xFB;
       cpu.mem8[0x0101] = 0xFF;
       cpu.decode();
-      let result = oper.sub(addr.Ev.bind(addr), addr.Ib.bind(addr));
+      oper.sub(addr.Ev.bind(addr), addr.Ib.bind(addr));
 
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
@@ -1892,7 +2199,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x0100] = 0x34;
       cpu.mem8[0x0101] = 0x12;
       cpu.decode();
-      let result = oper.sub(addr.AX.bind(addr), addr.Iv.bind(addr));
+      oper.sub(addr.AX.bind(addr), addr.Iv.bind(addr));
 
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
@@ -1908,7 +2215,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x0100] = 0x35;
       cpu.mem8[0x0101] = 0x12;
       cpu.decode();
-      let result = oper.sub(addr.AX.bind(addr), addr.Iv.bind(addr));
+      oper.sub(addr.AX.bind(addr), addr.Iv.bind(addr));
 
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
@@ -1924,7 +2231,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x0100] = 0x34;
       cpu.mem8[0x0101] = 0x12;
       cpu.decode();
-      let result = oper.sub(addr.AX.bind(addr), addr.Iv.bind(addr));
+      oper.sub(addr.AX.bind(addr), addr.Iv.bind(addr));
 
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
@@ -1940,7 +2247,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x0100] = 0x01;
       cpu.mem8[0x0101] = 0x00;
       cpu.decode();
-      let result = oper.sub(addr.AX.bind(addr), addr.Iv.bind(addr));
+      oper.sub(addr.AX.bind(addr), addr.Iv.bind(addr));
 
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
@@ -2051,4 +2358,14 @@ describe('Utility methods', () => {
     expect(oper.pop16()).toBe(0x1234);
     expect(cpu.reg16[regSP]).toBe(0x0020);
   });
+
+  test.skip('pop16()', () => {});
+  test.skip('correctUnderflow()', () => {});
+  test.skip('correctOverflow()', () => {});
+  test.skip('setPF_FLAG()', () => {});
+  test.skip('setSF_FLAG()', () => {});
+  test.skip('setZF_FLAG()', () => {});
+  test.skip('flagAdd()', () => {});
+  test.skip('flagSub()', () => {});
+
 });

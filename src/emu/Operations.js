@@ -39,6 +39,16 @@ export default class Operations {
     this.cpu = cpu;
   }
 
+  /**
+   * AAA (ASCII Adjust for Addition) changes the contents of register AL to a
+   * valid unpacked decimal number; the high-order half-byte is zeroed. AAA
+   * updates AF and CF; the content of OF, PF, SF and ZF is undefined following
+   * execution of AAA.
+   *   - [1] p.2-35
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   aaa (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -63,18 +73,64 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
-   * @return {number} Result of the operation
    */
   aas (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
 
+  /**
+   * ADC (Add with Carry) sums the operands, which may be bytes or words, adds
+   * one if CF is set and replaces the destination operand with the result.
+   * Both operands may be signed or unsigned binary numbers (see AAA and DAA).
+   * ADC updates AF, CF, OF, PF, SF and ZF. Since ADC incorporates a carry from
+   * a previous operation, it can be used to write routines to add numbers
+   * longer than 16 bits.
+   *   - [1] p.2-35
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   adc (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let segment = this.cpu.reg16[regCS];
+    let d = dst(segment, null);
+    let s = src(segment, null);
+    if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
+      s = signExtend(s);
+    }
+    let result = d + s + (this.cpu.reg16[regFlags] & FLAG_CF_MASK);
+
+    this.flagAdd(d, s, result);
+
+    result = this.correctOverflow(result);
+
+    dst(segment, result);
+    return result;
   }
 
+  /**
+   * The sum of the two operands, which may be bytes or words, replaces the
+   * destination operand. Both operands may be signed or unsigned binary
+   * numbers (see AAA and DAA). ADD updates AF, CF, OF, PF, SF and ZF.
+   *   - [1] p.2-35
+   *
+   * @param dst
+   * @param src
+   */
   add (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let segment = this.cpu.reg16[regCS];
+    let d = dst(segment, null);
+    let s = src(segment, null);
+    if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
+      s = signExtend(s);
+    }
+    let result = d + s;
+
+    this.flagAdd(d, s, result);
+
+    result = this.correctOverflow(result);
+
+    dst(segment, result);
+    return result;
   };
 
   and (dst, src) {
@@ -199,16 +255,7 @@ export default class Operations {
       s = signExtend(s);
     }
     let result = d - s;
-
-    // Handle underflow correctly
-    if (result < 0) {
-      if (this.cpu.opcode.addrSize === b)
-        result = 0xFF + 1 + result;
-      else if (this.cpu.opcode.addrSize === w)
-        result = 0xFFFF + 1 + result;
-      else if (this.cpu.opcode.addrSize === v)
-        result = 0xFFFF + 1 + result;
-    }
+    result = this.correctUnderflow(result);
 
     this.flagSub(d, s, result);
 
@@ -226,6 +273,18 @@ export default class Operations {
   cwd (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * DAA (Decimal Adjust for Addition) corrects the result of previously adding
+   * two valid packed decimal operands (the destination operand must have been
+   * register AL). DAA changes the content of AL to a pair of valid packed
+   * decimal digits. It updates AF, CF, PF, SF and ZF; the content of OF is
+   * undefined following execution of DAA.
+   *  - [1] p.2-36
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   daa (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -240,7 +299,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
-   * @return {number} Result of the operation
    */
   das (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
@@ -264,16 +322,7 @@ export default class Operations {
     let d = dst(segment, null);
     let s = 1;
     let result = d - s;
-
-    // Handle underflow correctly
-    if (result < 0) {
-      if (this.cpu.opcode.addrSize === b)
-        result = 0xFF + 1 + result;
-      else if (this.cpu.opcode.addrSize === w)
-        result = 0xFFFF + 1 + result;
-      else if (this.cpu.opcode.addrSize === v)
-        result = 0xFFFF + 1 + result;
-    }
+    result = this.correctUnderflow(result);
 
     this.flagSub(d, s, result);
 
@@ -304,8 +353,27 @@ export default class Operations {
   iin (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * INC (Increment) adds one to the destination operand. The operand may be a
+   * byte or a word and is treated as an unsigned binary number (see AAA and
+   * DAA). INC updates AF, OF, PF, SF and ZF; it does not affect CF.
+   *   - [1] p.2-35
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src NOT USED
+   */
   inc (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let segment = this.cpu.reg16[regCS];
+    let d = dst(segment, null);
+    let s = 1;
+    let result = d + s;
+
+    this.flagAdd(d, s, result);
+
+    result = this.correctOverflow(result);
+
+    dst(segment, result);
   }
   int (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
@@ -1209,16 +1277,7 @@ export default class Operations {
     let segment = this.cpu.reg16[regCS];
     let d = dst(segment, null);
     let result = 0 - d;
-
-    // Handle underflow correctly
-    if (result < 0) {
-      if (this.cpu.opcode.addrSize === b)
-        result = 0xFF + 1 + result;
-      else if (this.cpu.opcode.addrSize === w)
-        result = 0xFFFF + 1 + result;
-      else if (this.cpu.opcode.addrSize === v)
-        result = 0xFFFF + 1 + result;
-    }
+    result = this.correctUnderflow(result);
 
     this.flagSub(0, d, result);
 
@@ -1425,16 +1484,7 @@ export default class Operations {
       s = signExtend(s);
     }
     let result = d - s - (this.cpu.reg16[regFlags] & FLAG_CF_MASK);
-
-    // Handle underflow correctly
-    if (result < 0) {
-      if (this.cpu.opcode.addrSize === b)
-        result = 0xFF + 1 + result;
-      else if (this.cpu.opcode.addrSize === w)
-        result = 0xFFFF + 1 + result;
-      else if (this.cpu.opcode.addrSize === v)
-        result = 0xFFFF + 1 + result;
-    }
+    result = this.correctUnderflow(result);
 
     this.flagSub(d, s, result);
 
@@ -1494,16 +1544,7 @@ export default class Operations {
       s = signExtend(s);
     }
     let result = d - s;
-
-    // Handle underflow correctly
-    if (result < 0) {
-      if (this.cpu.opcode.addrSize === b)
-        result = 0xFF + 1 + result;
-      else if (this.cpu.opcode.addrSize === w)
-        result = 0xFFFF + 1 + result;
-      else if (this.cpu.opcode.addrSize === v)
-        result = 0xFFFF + 1 + result;
-    }
+    result = this.correctUnderflow(result);
 
     this.flagSub(d, s, result);
 
@@ -1577,11 +1618,25 @@ export default class Operations {
     return value;
   }
 
+
+  correctUnderflow (result) {
+    if (result < 0) {
+      let size = this.cpu.opcode.addrSize;
+      return result + 1 + (size === b ? 0xFF : 0xFFFF);
+    }
+    return result;
+  }
+
+  correctOverflow (result) {
+    let size = this.cpu.opcode.addrSize;
+    return result & (size === b ? 0xFF : 0xFFFF);
+  }
+
   // https://en.wikipedia.org/wiki/FLAGS_register
 
   /**
    * PF (parity flag): If the low-order eight bits of an arithmetic or logical
-   * result contain an even number of I-bits, then the parity flag is set;
+   * result contain an even number of 1-bits, then the parity flag is set;
    * otherwise it is cleared. PF is provided for 8080/8085 compatibility; it
    * also can be used to check ASCII characters for correct parity.
    *   - [1] p.2-35
@@ -1591,13 +1646,6 @@ export default class Operations {
   setPF_FLAG (result) {
     if (PARITY[(result & 0x00FF)]) this.cpu.reg16[regFlags] |= FLAG_PF_MASK;
     else this.cpu.reg16[regFlags] &= ~FLAG_PF_MASK;
-
-    // let bitRep = (result & 0x00FF).toString(2);
-    // let bitCnt = 0;
-    // for (let b in bitRep) { if ("1" === bitRep[b]) bitCnt++; }
-    //
-    // if (0 === (bitCnt % 2)) this.cpu.reg16[regFlags] |= FLAG_PF_MASK;
-    // else this.cpu.reg16[regFlags] &= ~FLAG_PF_MASK;
   }
 
   /**
@@ -1642,23 +1690,76 @@ export default class Operations {
   }
 
   /**
+   * Set flags for addition operations such as ADD, INC, ADC, and so forth.
    *
-   * @param v1
-   * @param v2
-   * @param result
+   * @param {number} v1 Destination operand
+   * @param {number} v2 Source operand
+   * @param {number} result Addition result
+   */
+  flagAdd (v1, v2, result) {
+    let size = this.cpu.opcode.addrSize;
+    let clampedResult = result & (size === b ? 0xFF : 0xFFFF);
+
+    // CF (carry flag): If an addition results in a carry out of the high-order
+    // bit of the result, then CF is set; otherwise CF is cleared. Note that a
+    // signed carry is indicated by CF ≠ OF. CF can be used to detect an
+    // unsigned overflow. Two instructions, ADC (add with carry) and SBB
+    // (subtract with borrow), incorporate the carry flag  in their operations
+    // and can be used to perform multibyte (e.g., 32-bit, 64-bit) addition and
+    // subtraction.
+    //   - [1] p.2-35
+    if (result & (size === b ? 0xFF00 : 0xFFFF0000)) {
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+    } else {
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+    }
+
+    // OF (overflow flag): If the result of an operation is too large a
+    // positive number, or too small a negative number to fit in the
+    // destination operand (excluding the sign bit), then OF is set; otherwise
+    // OF is cleared. OF thus indicates signed arithmetic overflow; it can be
+    // tested with a conditional jump or the INTO (interrupt on overflow)
+    // instruction. OF may be ignored when performing unsigned arithmetic.
+    //   - [1] p.2-35
+    if ( (result ^ v1) & (result ^ v2) & (size === b ? 0x80 : 0x8000)) {
+      this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
+    } else {
+      this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
+    }
+
+    // AF (auxiliary carry flag): If an addition results in a carry out of the
+    // low-order halfbyte of the result, then AF is set; otherwise AF is
+    // cleared. The auxiliary carry flag is provided for the decimal adjust
+    // instructions and ordinarily is not used for any other purpose.
+    //   - [1] p.2-35
+    if ( (v1 ^ v2 ^ result) & 0x10) {
+      this.cpu.reg16[regFlags] |= FLAG_AF_MASK;
+    } else {
+      this.cpu.reg16[regFlags] &= ~FLAG_AF_MASK;
+    }
+
+    this.setPF_FLAG(clampedResult);
+    this.setSF_FLAG(clampedResult);
+    this.setZF_FLAG(clampedResult);
+  }
+
+  /**
+   * Set flags for subtraction operations such as SUB, DEC, SBB, and so forth.
+   *
+   * @param {number} v1 Destination operand
+   * @param {number} v2 Source operand
+   * @param {number} result Subtraction result
    */
   flagSub (v1, v2, result) {
     let size = this.cpu.opcode.addrSize;
-    // let result = v1 - v2;
 
-    // CF (carry flag): If an addition results in a carry out of the high-order
-    // bit of the result, then CF is set; otherwise CF is cleared. If a
-    // subtraction results in a borrow into the highorder bit of the result,
-    // then CF is set; otherwise CF is cleared. Note that a signed carry is
-    // indicated by CF ≠ OF. CF can be used to detect an unsigned overflow.
-    // Two instructions, ADC (add with carry) and SBB (subtract with borrow),
-    // incorporate the carry flag  in their operations and can be used to
-    // perform multibyte (e.g., 32-bit, 64-bit) addition and subtraction.
+    // CF (carry flag): If a subtraction results in a borrow into the highorder
+    // bit of the result, then CF is set; otherwise CF is cleared. Note that a
+    // signed carry is indicated by CF ≠ OF. CF can be used to detect an
+    // unsigned overflow. Two instructions, ADC (add with carry) and SBB
+    // (subtract with borrow), incorporate the carry flag  in their operations
+    // and can be used to perform multibyte (e.g., 32-bit, 64-bit) addition and
+    // subtraction.
     //   - [1] p.2-35
     if ((v1 - v2) & (size === b ? 0xFF00 : 0xFFFF0000)) {
       this.cpu.reg16[regFlags] |= FLAG_CF_MASK
@@ -1678,19 +1779,11 @@ export default class Operations {
     } else {
       this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
     }
-    // For addition
-    // if ( (result ^ v1) & (result ^ v2) & (size === b ? 0x80 : 0x8000)) {
-    //   this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
-    // } else {
-    //   this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
-    // }
 
-    // AF (auxiliary carry flag): If an addition results in a carry out of the
-    // low-order halfbyte of the result, then AF is set; otherwise AF is
-    // cleared. If a subtraction results in a borrow into the low-order
-    // half-byte of the result, then AF is set; otherwise AF is cleared. The
-    // auxiliary carry flag is provided for the decimal adjust instructions and
-    // ordinarily is not used for any other purpose.
+    // AF (auxiliary carry flag): If a subtraction results in a borrow into the
+    // low-order half-byte of the result, then AF is set; otherwise AF is
+    // cleared. The auxiliary carry flag is provided for the decimal adjust
+    // instructions and ordinarily is not used for any other purpose.
     //   - [1] p.2-35
     if ( (v1 ^ v2 ^ result) & 0x10) {
       this.cpu.reg16[regFlags] |= FLAG_AF_MASK;

@@ -25,57 +25,57 @@ flag
 Arithmetic 2-33
 ---------------
 addition
-	ADD
-	ADC
-	INC
-	AAA
-	DAA
+	√ ADD
+	√ ADC
+	√ INC
+	  AAA
+	  DAA
 subtraction
 	√ SUB
 	√ SBB
 	√ DEC
 	√ NEG
 	√ CMP
-	√ AAS
-	DAS
+	  AAS
+	  DAS
 multiplication
-	MUL
-	IMUL
-	AAM
+	  MUL
+	  IMUL
+	  AAM
 division
-	DIV
-	IDIV
-	AAD
-	CBW
-	CWD
+	  DIV
+	  IDIV
+	  AAD
+	  CBW
+	  CWD
 
 Bit Manipulation 2-38
 ---------------------
 logical
-	NOT
-	AND
-	OR
-	XOR
-	TEST
+	  NOT
+	  AND
+	  OR
+	  XOR
+	  TEST
 shifts
-	SHL/SAL
-	SHR
-	SAR
+	  SHL/SAL
+	  SHR
+	  SAR
 rotates
-	ROL
-	ROR
-	RCL
-	RCR
+	  ROL
+	  ROR
+	  RCL
+	  RCR
 
 String 2-40
 -----------
-	REP/REPE/REPZ/REPNE/REPNZ
-	MOVS
-	MOVSB/MOVSW
-	CMPS
-	SCAS
-	LODS
-	STOS
+	  REP/REPE/REPZ/REPNE/REPNZ
+	  MOVS
+	  MOVSB/MOVSW
+	  CMPS
+	  SCAS
+	  LODS
+	  STOS
 
 Program Transfer 2-43
 ---------------------
@@ -85,33 +85,33 @@ unconditional
 	√ JMP
 conditional
 	√ J*
-√ iteration control
+iteration control
 	√ LOOP
 	√ LOOPE/LOOPZ
 	√ LOOPNE/LOOPNZ
 	√ JCXZ
 interupt
-	INT
-	INTO
-	IRET
+	  INT
+	  INTO
+	  IRET
 
 Processor Control 2-47
 ----------------------
 flag
-	CLC
-	CMC
-	STC
-	CLD
-	STD
-	CLI
-	STI
+	  CLC
+	  CMC
+	  STC
+	  CLD
+	  STD
+	  CLI
+	  STI
 external sync
-	HLT
-	WAIT
-	ESC
-	LOCK
+	  HLT
+	  WAIT
+	  ESC
+	  LOCK
 no operation
-	NOP
+	  NOP
 
 
 
