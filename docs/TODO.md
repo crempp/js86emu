@@ -1,6 +1,9 @@
 ## TODO
 * Don't return values from instructions
-*
+* Review what flags each inst modifies
+* Fix Ep and Mp segments - still need done?
+* move to proper instructions for prefixes
+
 
 Data Transfer 2-31
 ------------------
@@ -52,15 +55,15 @@ division
 Bit Manipulation 2-38
 ---------------------
 logical
-	  NOT
-	  AND
-	  OR
-	  XOR
-	  TEST
+	√ NOT
+	√ AND
+	√ OR
+	√ XOR
+	√ TEST
 shifts
-	  SHL/SAL
-	  SHR
-	  SAR
+	√ SHL/SAL
+	√ SHR
+	√ SAR
 rotates
 	  ROL
 	  ROR

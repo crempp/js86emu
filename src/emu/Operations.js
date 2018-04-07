@@ -46,15 +46,49 @@ export default class Operations {
    * execution of AAA.
    *   - [1] p.2-35
    *
+   * Modifies flags: ?
+   *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
    */
   aaa (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * AAD (ASCII Adjust for Division) modifies the numerator in AL before
+   * dividing two valid unpacked decimal operands so that the quotient
+   * produced by the division will be a valid unpacked decimal number. AH must
+   * be zero for the subsequent DIV to produce the correct result. The quotient
+   * is returned in AL, and the remainder is returned in AH; both high-order
+   * half-bytes are zeroed. AAD updates PF, SF and ZF; the content of AF, CF
+   * and OF is undefined following execution of AAD.
+   *   - [1] p.2-37
+   *
+   * Modifies flags: ?
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   aad (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * AAM (ASCII Adjust for Multiply) corrects the result of a previous
+   * multiplication of two valid unpacked decimal operands. A valid 2-digit
+   * unpacked decimal number is derived from the content of AH and AL and is
+   * returned to AH and AL. The high-order half-bytes of the multiplied
+   * operands must have been OH for AAM to produce a correct result. AAM
+   * updates PF, SF and ZF; the content of AF, CF and OF is undefined following
+   * execution of AAM.
+   *   - [1] p.2-37
+   *
+   * Modifies flags: ?
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   aam (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -67,6 +101,8 @@ export default class Operations {
    * zeroed. AAS updates AF and CF; the content of OF, PF, SF and ZF is
    * undefined following execution of AAS.
    *   - [1] p.2-36
+   *
+   * Modifies flags: ?
    *
    * http://service.scs.carleton.ca/sivarama/asm_book_web/Instructor_copies/ch11_bcd.pdf
    * https://stackoverflow.com/a/24093050/1436323
@@ -87,11 +123,13 @@ export default class Operations {
    * longer than 16 bits.
    *   - [1] p.2-35
    *
+   * Modifies flags: ?
+   *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
    */
   adc (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let d = dst(segment, null);
     let s = src(segment, null);
     if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
@@ -113,11 +151,13 @@ export default class Operations {
    * numbers (see AAA and DAA). ADD updates AF, CF, OF, PF, SF and ZF.
    *   - [1] p.2-35
    *
-   * @param dst
-   * @param src
+   * Modifies flags: ?
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
    */
   add (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let d = dst(segment, null);
     let s = src(segment, null);
     if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
@@ -133,8 +173,25 @@ export default class Operations {
     return result;
   };
 
+  /**
+   * AND performs the logical "and" of the two operands (byte or word) and
+   * returns the result to the destination operand. A bit in the result is set
+   * if both corresponding bits of the original operands are set; otherwise the
+   * bit is cleared.
+   *   - [1] p.2-35
+   *
+   * Modifies flags: ?
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   and (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
+    let result = dst(segment) & src(segment);
+    this.setPF_FLAG(result);
+    this.setSF_FLAG(result);
+    this.setZF_FLAG(result);
+    dst(segment, result);
   }
 
   /**
@@ -177,15 +234,16 @@ export default class Operations {
    * referenced by the instruction. SP again is decremented by two, and IP is
    * pushed onto the stack and is replaced by the content of the first word of
    * the doubleword pointer referenced by the instruction.
-   *
    *   - [1] p.2-43 to 2.44
+   *
+   * Modifies flags: ?
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True if the jump was made, false otherwise
    */
   call (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let oper = dst(segment);
 
     switch (this.cpu.opcode.opcode_byte) {
@@ -214,9 +272,22 @@ export default class Operations {
     }
   }
 
+  /**
+   * CBW (Convert Byte to Word) extends the sign of the byte in register AL
+   * throughout register AH. CBW does not affect any flags. CBW can be used to
+   * produce a double-length (word) dividend from a byte prior to performing
+   * byte division.
+   *   - [1] p.2-38
+   *
+   * Modifies flags: ?
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   cbw (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
   clc (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -248,7 +319,7 @@ export default class Operations {
    * @return {number} Result of the operation
    */
   cmp (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let d = dst(segment, null);
     let s = src(segment, null);
     if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
@@ -261,6 +332,7 @@ export default class Operations {
 
     return result;
   }
+
   cmpsb (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -270,6 +342,19 @@ export default class Operations {
   cs (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * CWD (Convert Word to Doubleword) extends the sign of the word in register
+   * AX throughout register DX. CWD does not affect any flags. CWD can be used
+   * to produce a double-length (doubleword) dividend from a word prior to
+   * performing word division.
+   *  - [1] p.2-38
+   *
+   * Modifies flags: ?
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   cwd (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -281,6 +366,8 @@ export default class Operations {
    * decimal digits. It updates AF, CF, PF, SF and ZF; the content of OF is
    * undefined following execution of DAA.
    *  - [1] p.2-36
+   *
+   * Modifies flags: ?
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
@@ -297,6 +384,8 @@ export default class Operations {
    * ZF; the content of OF is undefined following execution of DAS.
    *  - [1] p.2-36
    *
+   * Modifies flags: ?
+   *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
    */
@@ -309,16 +398,14 @@ export default class Operations {
    * a word.
    *   - [1] p.2-36
    *
-   * Modifies flags: AF, OF, PF, SF, and ZF
-   *
-   * NOTE: DEC does not affect CF.
+   * Modifies flags: AF, OF, PF, SF, and ZF (DEC does not affect CF)
    *
    * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} src NOT USED
    * @return {number} Result of the operation
    */
   dec (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let d = dst(segment, null);
     let s = 1;
     let result = d - s;
@@ -329,9 +416,32 @@ export default class Operations {
     dst(segment, result);
     return result;
   }
+
+  /**
+   * DIV (divide) performs an unsigned division of the accumulator (and its
+   * extension) by the source operand. If the source operand is a byte, it is
+   * divided into the double-length dividend assumed to be in registers AL and
+   * AH. The single-length quotient is returned in AL, and the single-length
+   * remainder is returned in AH. If the source operand is a word, it is
+   * divided into the doublelength dividend in registers AX and DX. The
+   * single-length quotient is returned in AX, and the single-length remainder
+   * is returned in DX. If the quotient exceeds the capacity of its destination
+   * register (FFH for byte source, FFFFFH for word source), as when division
+   * by zero is attempted, a type 0 interrupt is generated, and the quotient
+   * and remainder are undefined. Nonintegral quotients are truncated to
+   * integers. The content of AF, CF, OF, PF, SF and ZF is undefined following
+   * execution of DIV.
+   *   - [1] p.2-37
+   *
+   * Modifies flags: ?
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   div (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
   ds (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -341,15 +451,76 @@ export default class Operations {
   hlt (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * IDIV (Integer Divide) performs a signed division of the accumulator (and
+   * its extension) by the source operand. If the source operand is a byte, it
+   * is divided into the double-length dividend assumed to be in registers AL
+   * and AH; the singlelength quotient is returned in AL, and the singlelength
+   * remainder is returned in AH. For byte integer division, the maximum
+   * positive quotient is +127 (7FH) and the minimum negative quotient is -127
+   * (SIH). If the source operand is a word, it is divided into the
+   * double-length dividend in registers AX and DX; the single-length quotient
+   * is returned in AX, and the single-length remainder is returned in DX. For
+   * word integer division, the maximum positive quotient is +32,767 (7FFFH)
+   * and the minimum negative quotient is -32,767 (SOOIH). If the quotient is
+   * positive and exceeds the maximum, or is negative and is less than the
+   * minimum, the quotient and remainder are undefined, and a type 0 interrupt
+   * is generated. In particular, this occurs if division by 0 is attempted.
+   * Nonintegral quotients are truncated (toward 0) to integers, and the
+   * remainder has the same sign as the dividend. The content of AF, CF, OF,
+   * PF, SF and ZF is undefined following IDIV.
+   *   - [1] p.2-37
+   *
+   * Modifies flags: ?
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   idiv (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * IMUL (Integer Multiply) performs a signed multiplication of the source
+   * operand and the accumulator. If the source is a byte, then it is
+   * multiplied by register AL, and the double-length result is returned in AH
+   * and AL. If the source is a word, then it is multiplied by register AX, and
+   * the double-length result is returned in registers DX and AX. If the upper
+   * half of the result (AH for byte source, DX for word source) is not the
+   * sign extension of the lower half of the result, CF and OF are set;
+   * otherwise they are cleared. When CF and OF are set, they indicate that AH
+   * or DX contains significant digits of the result. The content of AF, PF, SF
+   * and ZF is undefined following execution of IMUL.
+   *   - [1] p.2-37
+   *
+   * Modifies flags: ?
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   imul (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * IN transfers a byte or a word from an input port to the AL register or the
+   * AX register, respectively. The port number may be specified either with an
+   * immediate byte constant, allowing access to ports numbered 0 through 255,
+   * or with a number previously placed in the DX register, allowing variable
+   * access (by changing the value in DX) to ports numbered from 0 through
+   * 65,535.
+   *   - [1] p.2-32
+   *
+   * Modifies flags: ?
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   in (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
   iin (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -360,11 +531,13 @@ export default class Operations {
    * DAA). INC updates AF, OF, PF, SF and ZF; it does not affect CF.
    *   - [1] p.2-35
    *
+   * Modifies flags: ?
+   *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    */
   inc (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let d = dst(segment, null);
     let s = 1;
     let result = d + s;
@@ -375,6 +548,7 @@ export default class Operations {
 
     dst(segment, result);
   }
+
   int (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -400,17 +574,17 @@ export default class Operations {
    * displacement of the target to the instruction pointer, all conditional
    * jumps are self-relative and are appropriate for position-independent
    * routines.
-   *
-   * CONDITION TESTED: (CF OR ZF)=O
-   *
    *   - [1] p.2-44 to 2.46
+   *
+   * Modifies flags: NONE
+   * Condition Tested: (CF OR ZF)=O
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True if the jump was made, false otherwise
    */
   ja (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let offset = dst(segment);
     if ( (this.cpu.reg16[regFlags] & FLAG_ZF_MASK) === 0 ||
          (this.cpu.reg16[regFlags] & FLAG_CF_MASK) === 0)
@@ -438,17 +612,17 @@ export default class Operations {
    * displacement of the target to the instruction pointer, all conditional
    * jumps are self-relative and are appropriate for position-independent
    * routines.
-   *
-   * CONDITION TESTED: CF=1
-   *
    *   - [1] p.2-44 to 2.46
+   *
+   * CModifies flags: NONE
+   * Condition Tested: CF=1
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True if the jump was made, false otherwise
    */
   jb (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_CF_MASK) > 0) {
       this.cpu.reg16[regIP] = offset;
@@ -474,17 +648,17 @@ export default class Operations {
    * displacement of the target to the instruction pointer, all conditional
    * jumps are self-relative and are appropriate for position-independent
    * routines.
-   *
-   * CONDITION TESTED: (CF OR ZF)=1
-   *
    *   - [1] p.2-44 to 2.46
+   *
+   * Modifies flags: NONE
+   * Condition Tested: (CF OR ZF)=1
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True if the jump was made, false otherwise
    */
   jbe (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let offset = dst(segment);
     if ( (this.cpu.reg16[regFlags] & FLAG_ZF_MASK) > 0 ||
          (this.cpu.reg16[regFlags] & FLAG_CF_MASK) > 0)
@@ -501,17 +675,17 @@ export default class Operations {
    * JCXZ (Jump If CX Zero) transfers control to the target operand if CX is O.
    * This instruction is useful at the beginning of a loop to bypass the loop
    * if ex has a zero value, i.e., to execute the loop zero times.
-   *
-   * CONDITION TESTED: (CF OR ZF)=1
-   *
    *   - [1] p.2-44 to 2.46
+   *
+   * Modifies flags: NONE
+   * Condition Tested: (CF OR ZF)=1
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True if the jump was made, false otherwise
    */
   jcxz (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let offset = dst(segment);
     if ( this.cpu.reg16[regCX] === 0) {
       this.cpu.reg16[regIP] = offset;
@@ -537,17 +711,17 @@ export default class Operations {
    * displacement of the target to the instruction pointer, all conditional
    * jumps are self-relative and are appropriate for position-independent
    * routines.
-   *
-   * CONDITION TESTED: ((SF XOR OF) OR ZF)=O
-   *
    *   - [1] p.2-44 to 2.46
+   *
+   * Modifies flags: NONE
+   * Condition Tested: ((SF XOR OF) OR ZF)=O
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True if the jump was made, false otherwise
    */
   jg (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let offset = dst(segment);
 
     if (((this.cpu.reg16[regFlags] & FLAG_SF_MASK) >> 7) ^ ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) >> 11) === 0 ||
@@ -576,17 +750,17 @@ export default class Operations {
    * displacement of the target to the instruction pointer, all conditional
    * jumps are self-relative and are appropriate for position-independent
    * routines.
-   *
-   * CONDITION TESTED: (SF XOR OF)=O
-   *
    *   - [1] p.2-44 to 2.46
+   *
+   * Modifies flags: NONE
+   * Condition Tested: (SF XOR OF)=O
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True if the jump was made, false otherwise
    */
   jge (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let offset = dst(segment);
 
     if (((this.cpu.reg16[regFlags] & FLAG_SF_MASK) >> 7) ^
@@ -615,17 +789,17 @@ export default class Operations {
    * displacement of the target to the instruction pointer, all conditional
    * jumps are self-relative and are appropriate for position-independent
    * routines.
-   *
-   * CONDITION TESTED: (SF XOR OF)=1
-   *
    *   - [1] p.2-44 to 2.46
+   *
+   * Modifies flags: NONE
+   * Condition Tested: (SF XOR OF)=1
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True if the jump was made, false otherwise
    */
   jl (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let offset = dst(segment);
 
     if (((this.cpu.reg16[regFlags] & FLAG_SF_MASK) >> 7) ^
@@ -654,17 +828,17 @@ export default class Operations {
    * displacement of the target to the instruction pointer, all conditional
    * jumps are self-relative and are appropriate for position-independent
    * routines.
-   *
-   * CONDITION TESTED: ((SF XOR OF) OR ZF)=1
-   *
    *   - [1] p.2-44 to 2.46
+   *
+   * Modifies flags: NONE
+   * Condition Tested: ((SF XOR OF) OR ZF)=1
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True if the jump was made, false otherwise
    */
   jle (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let offset = dst(segment);
 
     if (((this.cpu.reg16[regFlags] & FLAG_SF_MASK) >> 7) ^ ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) >> 11) > 0 ||
@@ -707,12 +881,14 @@ export default class Operations {
    * and the second word replaces CS.
    *   - [1] p.2-45
    *
+   * Modifies flags: NONE
+   *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True
    */
   jmp (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let oper = dst(segment);
 
     switch (this.cpu.opcode.opcode_byte) {
@@ -754,17 +930,17 @@ export default class Operations {
    * displacement of the target to the instruction pointer, all conditional
    * jumps are self-relative and are appropriate for position-independent
    * routines.
-   *
-   * CONDITION TESTED: CF=O
-   *
    *   - [1] p.2-44 to 2.46
+   *
+   * Modifies flags: NONE
+   * Condition Tested: CF=O
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True if the jump was made, false otherwise
    */
   jnb (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_CF_MASK) === 0) {
       this.cpu.reg16[regIP] = offset;
@@ -790,17 +966,17 @@ export default class Operations {
    * displacement of the target to the instruction pointer, all conditional
    * jumps are self-relative and are appropriate for position-independent
    * routines.
-   *
-   * CONDITION TESTED: OF=O
-   *
    *   - [1] p.2-44 to 2.46
+   *
+   * Modifies flags: NONE
+   * Condition Tested: OF=O
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True if the jump was made, false otherwise
    */
   jno (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) === 0) {
       this.cpu.reg16[regIP] = offset;
@@ -826,17 +1002,17 @@ export default class Operations {
    * displacement of the target to the instruction pointer, all conditional
    * jumps are self-relative and are appropriate for position-independent
    * routines.
-   *
-   * CONDITION TESTED: SF=O
-   *
    *   - [1] p.2-44 to 2.46
+   *
+   * Modifies flags: NONE
+   * Condition Tested: SF=O
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True if the jump was made, false otherwise
    */
   jns (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_SF_MASK) === 0) {
       this.cpu.reg16[regIP] = offset;
@@ -862,17 +1038,17 @@ export default class Operations {
    * displacement of the target to the instruction pointer, all conditional
    * jumps are self-relative and are appropriate for position-independent
    * routines.
-   *
-   * CONDITION TESTED: ZF=O
-   *
    *   - [1] p.2-44 to 2.46
+   *
+   * Modifies flags: NONE
+   * Condition Tested: ZF=O
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True if the jump was made, false otherwise
    */
   jnz (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_ZF_MASK) === 0) {
       this.cpu.reg16[regIP] = offset;
@@ -898,17 +1074,17 @@ export default class Operations {
    * displacement of the target to the instruction pointer, all conditional
    * jumps are self-relative and are appropriate for position-independent
    * routines.
-   *
-   * CONDITION TESTED: OF=1
-   *
    *   - [1] p.2-44 to 2.46
+   *
+   * Modifies flags: NONE
+   * Condition Tested: OF=1
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True if the jump was made, false otherwise
    */
   jo (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) > 0) {
       this.cpu.reg16[regIP] = offset;
@@ -934,17 +1110,17 @@ export default class Operations {
    * displacement of the target to the instruction pointer, all conditional
    * jumps are self-relative and are appropriate for position-independent
    * routines.
-   *
-   * CONDITION TESTED: PF=1
-   *
    *   - [1] p.2-44 to 2.46
+   *
+   * Modifies flags: NONE
+   * Condition Tested: PF=1
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True if the jump was made, false otherwise
    */
   jpe (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_PF_MASK) > 0) {
       this.cpu.reg16[regIP] = offset;
@@ -970,17 +1146,17 @@ export default class Operations {
    * displacement of the target to the instruction pointer, all conditional
    * jumps are self-relative and are appropriate for position-independent
    * routines.
-   *
-   * CONDITION TESTED: PF=O
-   *
    *   - [1] p.2-44 to 2.46
+   *
+   * Modifies flags: NONE
+   * Condition Tested: PF=O
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True if the jump was made, false otherwise
    */
   jpo (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_PF_MASK) === 0) {
       this.cpu.reg16[regIP] = offset;
@@ -1006,17 +1182,17 @@ export default class Operations {
    * displacement of the target to the instruction pointer, all conditional
    * jumps are self-relative and are appropriate for position-independent
    * routines.
-   *
-   * CONDITION TESTED: SF=1
-   *
    *   - [1] p.2-44 to 2.46
+   *
+   * Modifies flags: NONE
+   * Condition Tested: SF=1
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
    * @return {boolean} True if the jump was made, false otherwise
    */
   js (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_SF_MASK) > 0) {
       this.cpu.reg16[regIP] = offset;
@@ -1042,17 +1218,17 @@ export default class Operations {
    * displacement of the target to the instruction pointer, all conditional
    * jumps are self-relative and are appropriate for position-independent
    * routines.
-   *
-   * CONDITION TESTED: ZF=O
-   *
    *   - [1] p.2-44 to 2.46
+   *
+   * Modifies flags: NONE
+   * Condition Tested: ZF=O
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
    * @return {boolean} True if the jump was made, false otherwise
    */
   jz (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let offset = dst(segment);
     if ((this.cpu.reg16[regFlags] & FLAG_ZF_MASK) > 0) {
       this.cpu.reg16[regIP] = offset;
@@ -1074,6 +1250,8 @@ export default class Operations {
    * AH ← EFLAGS(SF:ZF:0:AF:0:PF:1:CF);
    *   - [4] 3-518
    *
+   * Modifies flags: ?
+   *
    * @param {Function} dst NOT USED
    * @param {Function} src NOT USED
    */
@@ -1092,6 +1270,8 @@ export default class Operations {
    * that the source string is located in the current data segment and that SI
    * contains the offset of the string).
    *   - [1] p.2-32
+   *
+   * Modifies flags: ?
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
@@ -1113,6 +1293,8 @@ export default class Operations {
    * the translate table used by the XLA T instruction).
    *   - [1] p.2-45
    *
+   * Modifies flags: ?
+   *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
    */
@@ -1133,6 +1315,8 @@ export default class Operations {
    * destination string must be located in the extra segment, and DI must
    * contain the offset of the string.)
    *   - [1] p.2-32
+   *
+   * Modifies flags: ?
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
@@ -1161,6 +1345,8 @@ export default class Operations {
    * otherwise the next sequential instruction is executed.
    *   - [1] p.2-45
    *
+   * Modifies flags: ?
+   *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
    * @return {boolean} True if the jump was made, false otherwise
@@ -1168,7 +1354,7 @@ export default class Operations {
   loopnz (dst, src) {
     this.cpu.reg16[regCX] -= 1;
 
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let operand = dst(segment);
 
     if (this.cpu.reg16[regCX] !== 0 &&
@@ -1188,6 +1374,8 @@ export default class Operations {
    * following LOOPE/LOOPZ is executed.
    *   - [1] p.2-45
    *
+   * Modifies flags: ?
+   *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
    * @return {boolean} True if the jump was made, false otherwise
@@ -1195,7 +1383,7 @@ export default class Operations {
   loopz (dst, src) {
     this.cpu.reg16[regCX] -= 1;
 
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let operand = dst(segment);
 
     if (this.cpu.reg16[regCX] !== 0 &&
@@ -1212,6 +1400,8 @@ export default class Operations {
    * is not 0; otherwise the instruction following LOOP is executed.
    *   - [1] p.2-45
    *
+   * Modifies flags: ?
+   *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
    * @return {boolean} True if the jump was made, false otherwise
@@ -1219,7 +1409,7 @@ export default class Operations {
   loop (dst, src) {
     this.cpu.reg16[regCX] -= 1;
 
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let operand = dst(segment);
 
     if (this.cpu.reg16[regCX] !== 0) {
@@ -1233,6 +1423,8 @@ export default class Operations {
    * MOV transfers a byte or a word from the source operand to the destination
    * operand.
    *  - [1] p.2-31
+   *
+   * Modifies flags: ?
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
@@ -1253,8 +1445,27 @@ export default class Operations {
   movsw (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * MUL (Multiply) performs an unsigned multiplication of the source operand
+   * and the accumulator. If the source is a byte, then it is multiplied by
+   * register AL, and the double-length result is returned in AH and AL. If the
+   * source operand is a word, then it is multiplied by register AX, and the
+   * double-length result is returned in registers DX and AX. The operands are
+   * treated as unsigned binary numbers (see AAM). If the upper half of the
+   * result (AH for byte source, DX for word source) is nonzero, CF and OF are
+   * set; otherwise they are cleared. When CF and OF are set, they indicate
+   * that AH or DX contains significant digits of the result. The content of
+   * AF, PF, SF and ZF is undefined following execution of MUL.
+   *   - [1] p.2-36
+   *
+   * Modifies flags: ?
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   mul (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+
   }
 
   /**
@@ -1274,7 +1485,7 @@ export default class Operations {
    * @return {number} Result of the operation
    */
   neg (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let d = dst(segment, null);
     let result = 0 - d;
     result = this.correctUnderflow(result);
@@ -1297,12 +1508,60 @@ export default class Operations {
   nop (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * NOT inverts the bits (forms the one's complement) of the byte or word
+   * operand.
+   *   - [1] p.2-38
+   *
+   * Modifies flags: ?
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   not (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
+    let size = this.cpu.opcode.addrSize;
+    let value = dst(segment) ^ (size === b ? 0xFF : 0xFFFF);
+
+    dst(segment, value);
   }
+
+  /**
+   * OR performs the logical "inclusive or" of the two operands (byte or word)
+   * and returns the result to the destination operand. A bit in the result is
+   * set if either or both corresponding bits in the original operands are set;
+   * otherwise the result bit is cleared.
+   *   - [1] p.2-38
+   *
+   * Modifies flags: PF, SF, ZF
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   or (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
+    let result = dst(segment) | src(segment);
+    this.setPF_FLAG(result);
+    this.setSF_FLAG(result);
+    this.setZF_FLAG(result);
+    dst(segment, result);
   }
+
+  /**
+   * OUT transfers a byte or a word from the AL register or the AX register,
+   * respectively, to an output port. The port number may be specified either
+   * with an immediate byte constant; allowing access to ports numbered 0
+   * through 255, or with a number previously placed in register DX, allowing
+   * variable access (by changing the value in DX) to ports numbered from 0
+   * through 65,535.
+   *   - [1] p.2-31
+   *
+   * Modifies flags: ?
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   out (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -1314,11 +1573,13 @@ export default class Operations {
    * to registers or memory.
    *   - [1] p.2-31
    *
+   * Modifies flags: ?
+   *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
    */
   pop (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     dst(segment, this.pop16());
   }
 
@@ -1332,6 +1593,8 @@ export default class Operations {
    * updating this flag directly). The change is accomplished by pushing the
    * flags, altering bit 8 of the memory-image and then popping the flags.
    *   - [1] p.2-31
+   *
+   * Modifies flags: ?
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
@@ -1348,11 +1611,13 @@ export default class Operations {
    * stack.
    *   - [1] p.2-31
    *
+   * Modifies flags: ?
+   *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
    */
   push (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     this.push16(dst(segment));
   }
 
@@ -1361,6 +1626,8 @@ export default class Operations {
    * flags to the word at the top of stack pointed to by SP (see figure 2-32).
    * The flags themselves are not affected.
    *    - [1] p.2-33
+   *
+   * Modifies flags: ?
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
@@ -1391,13 +1658,15 @@ export default class Operations {
    * pushed onto the stack before the execution of the CALL instruction.
    *   - [1] p.2-45
    *
+   * Modifies flags: ?
+   *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
    */
   ret (dst, src) {
     switch (this.cpu.opcode.opcode_byte) {
       case 0xC2: // RET Iw
-        let segment = this.cpu.reg16[regCS];
+        let segment = this.cpu.reg16[this.cpu.addrSeg];
         this.cpu.reg16[regIP] = this.pop16() + dst(segment);
         break;
       case 0xC3: // RET
@@ -1417,13 +1686,15 @@ export default class Operations {
    * of the CALL instruction.
    *   - [1] p.2-45
    *
+   * Modifies flags: ?
+   *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
    */
   retf (dst, src) {
     switch (this.cpu.opcode.opcode_byte) {
       case 0xCA: // RETF Iw
-        let segment = this.cpu.reg16[regCS];
+        let segment = this.cpu.reg16[this.cpu.addrSeg];
 
         this.cpu.reg16[regIP] = this.pop16() + dst(segment);
         this.cpu.reg16[regCS] = this.pop16();
@@ -1449,6 +1720,8 @@ export default class Operations {
    * This instruction is provided for 8080/8085 compatibility.
    *   - [1] p.2-33
    *
+   * Modifies flags: ?
+   *
    * @param {Function} dst NOT USED
    * @param {Function} src NOT USED
    */
@@ -1457,8 +1730,52 @@ export default class Operations {
     this.cpu.reg16[regFlags] |= (this.cpu.reg8[regAH] & 0b11010111);
   }
 
+  /**
+   * SAR (Shift Arithmetic Right) shifts the bits in the destination operand
+   * (byte or word) to the right by the number of bits specified in the count
+   * operand. Bits equal to the original high-order (sign) bit are shifted in
+   * on the left, preserving the sign of the original value. Note that SAR does
+   * not produce the same result as the dividend of an "equivalent" IDIV
+   * instruction if the destination operand is negative and I-bits are shifted
+   * out. For example, shifting -5 right by one bit yields -3, while integer
+   * division of -5 by 2 yields -2. The difference in the instructions is that
+   * IDIV truncates all numbers toward zero, while SAR truncates positive
+   * numbers toward zero and negative numbers toward negative infinity.
+   *   - [1] p.2-39
+   *
+   * Modifies flags: CF, OF, PF, ZF, SF
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   sar (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let size = this.cpu.opcode.addrSize;
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
+    let d = dst(segment);
+    let s = src(segment);
+    let cf = 0, msb;
+
+    for (let shift = 1; shift <= s; shift++) {
+      msb = d & (size === b ? 0x80 : 0x8000);
+      cf = d & 1;
+      d = (d >> 1) | msb;
+    }
+
+    // Operand always keeps sign so clear OF
+    this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
+
+    // Set CF if a '1' shifted out
+    if (cf === 1) {
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+    } else {
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+    }
+
+    this.setPF_FLAG(d);
+    this.setZF_FLAG(d);
+    this.setSF_FLAG(d);
+
+    dst(segment, d);
   }
 
   /**
@@ -1477,7 +1794,7 @@ export default class Operations {
    * @return {number} Result of the operation
    */
   sbb (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let d = dst(segment, null);
     let s = src(segment, null);
     if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
@@ -1498,12 +1815,104 @@ export default class Operations {
   scasw (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * SHL and SAL (Shift Logical Left and Shift Arithmetic Left) perform the
+   * same operation and are physically the same instruction. The destination
+   * byte or word is shifted left by the number of bits specified in the count
+   * operand. Zeros are shifted in on the right. If the sign bit retains its
+   * original value, then OF is cleared.
+   *   - [1] p.2-39
+   *
+   * Modifies flags: CF, OF, PF, ZF, SF
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   shl (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let size = this.cpu.opcode.addrSize;
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
+    let d = dst(segment);
+    let s = src(segment);
+    let cf = 0;
+
+    for (let shift = 1; shift <= s; shift++) {
+      if (d & (size === b ? 0x80 : 0x8000)) cf = 1;
+      else cf = 0;
+      d = (d << 1) & 0xFF;
+    }
+
+    // Set CF if a '1' shifted out
+    if (cf === 1) {
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+    } else {
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+    }
+
+    // Clamp the shifted value
+    d &= (size === b ? 0xFF : 0xFFFF);
+
+    // Set OF if the first operand changes sign
+    if ( (s === 1) && (cf === (d >> 7) ) ) {
+      this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
+    }
+    else {
+      this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
+    }
+
+    this.setPF_FLAG(d);
+    this.setZF_FLAG(d);
+    this.setSF_FLAG(d);
+
+    dst(segment, d);
   }
+
+  /**
+   * SHR (Shift Logical Right) shifts the bits in the destination operand (byte
+   * or word) to the right by the number of bits specified in the count
+   * operand. Zeros are shifted in on the left. If the sign bit retains its
+   * original value, then OF is cleared.
+   *   - [1] p.2-39
+   *
+   * Modifies flags: CF, OF, PF, ZF, SF
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   shr (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let size = this.cpu.opcode.addrSize;
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
+    let d = dst(segment);
+    let s = src(segment);
+    let cf = 0;
+
+    // Set OF if the first operand changes sign
+    if ( (s === 1) && (d & (size === b ? 0x80 : 0x8000)) ) {
+      this.cpu.reg16[regFlags] |= FLAG_OF_MASK
+    }
+    else {
+      this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK
+    }
+
+    for (let shift = 1; shift <= s; shift++) {
+      cf = d & 1;
+      d = d >> 1;
+    }
+
+    // Set CF if a '1' shifted out
+    if (cf === 1) {
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+    } else {
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+    }
+
+    this.setPF_FLAG(d);
+    this.setZF_FLAG(d);
+    this.setSF_FLAG(d);
+
+    dst(segment, d);
   }
+
   ss (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -1537,7 +1946,7 @@ export default class Operations {
    * @return {number} Result of the operation
    */
   sub (dst, src) {
-    let segment = this.cpu.reg16[regCS];
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
     let d = dst(segment, null);
     let s = src(segment, null);
     if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
@@ -1552,9 +1961,27 @@ export default class Operations {
     return result;
   }
 
+  /**
+   * TEST performs the logical "and" of the two operands (byte or word),
+   * updates the flags, but does not return the result, i.e., neither operand
+   * is changed. If a TEST instruction is followed by a JNZ (jump if not zero)
+   * instruction, the jump will be taken if there are any corresponding I-bits
+   * in both operands.
+   *   - [1] p.2-39
+   *
+   * Modifies flags: PF, SF, ZF
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   test (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
+    let result = dst(segment) & src(segment);
+    this.setPF_FLAG(result);
+    this.setSF_FLAG(result);
+    this.setZF_FLAG(result);
   }
+
   wait (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -1565,6 +1992,8 @@ export default class Operations {
    * can test and set a semaphore that controls access to a resource shared by
    * multiple processors (see section 2.5).
    *   - [1] p.2-36
+   *
+   * Modifies flags: ?
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
@@ -1577,11 +2006,47 @@ export default class Operations {
     dst(segment, srcVal);
   }
 
+  /**
+   * XLAT (translate) replaces a byte in the AL register with a byte from a
+   * 256-byte, user-coded translation table. Register BX is assumed to point to
+   * the beginning of the table. The byte in AL is used as an index into the
+   * table and is replaced by the byte at the offset in the table corresponding
+   * to AL's binary value. The first byte in the table has an offset of O. For
+   * example, if AL contains 5H, and the sixth element of the translation table
+   * contains 33H, then AL will contain 33H following the instruction. XLAT is
+   * useful for translating characters from one code to another, the classic
+   * example being ASCII to EBCDIC or the reverse.
+   *   - [1] p.2-32
+   *
+   * Modifies flags: ?
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   xlat (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * XOR (Exclusive Or) performs the logical "exclusive or" of the two operands
+   * and returns the result to the destination operand. A bit in the result is
+   * set if the corresponding bits of the original operands contain opposite
+   * values (one is set, the other is cleared); otherwise the result bit is
+   * cleared.
+   *   - [1] p.2-38
+   *
+   * Modifies flags: PF, SF, ZF
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   xor (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
+    let result = dst(segment) ^ src(segment);
+    this.setPF_FLAG(result);
+    this.setSF_FLAG(result);
+    this.setZF_FLAG(result);
+    dst(segment, result);
   }
 
   notimp () {
@@ -1644,7 +2109,7 @@ export default class Operations {
    * @param {number} result Result of the operation to set the flag for
    */
   setPF_FLAG (result) {
-    if (PARITY[(result & 0x00FF)]) this.cpu.reg16[regFlags] |= FLAG_PF_MASK;
+    if (PARITY[(result & 0x00FF)] === 1) this.cpu.reg16[regFlags] |= FLAG_PF_MASK;
     else this.cpu.reg16[regFlags] &= ~FLAG_PF_MASK;
   }
 
@@ -1690,6 +2155,93 @@ export default class Operations {
   }
 
   /**
+   * CF (carry flag): If an addition results in a carry out of the high-order
+   * bit of the result, then CF is set; otherwise CF is cleared. If a
+   * subtraction results in a borrow into the highorder bit of the result, then
+   * CF is set; otherwise CF is cleared. Note that a signed carry is indicated
+   * by CF *" OF. CF can be used to detect an unsigned overflow. Two
+   * instructions, ADC (add with carry) and SBB (subtract with borrow),
+   * incorporate the carry flag in their operations and can be used to perform
+   * multibyte (e.g., 32-bit, 64-bit) addition and subtraction.
+   *   - [1] p.2-35
+   *
+   * @param {number} result Result of the operation to set the flag for
+   */
+  setCF_FLAG (result) {
+    let size = this.cpu.opcode.addrSize;
+    if (result & (size === b ? 0xFF00 : 0xFFFF0000)) {
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+    } else {
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+    }
+  }
+
+  /**
+   * AF (auxiliary carry flag): If an addition results in a carry out of the
+   * low-order halfbyte of the result, then AF is set; otherwise AF is cleared.
+   * If a subtraction results in a borrow into the low-order half-byte of the
+   * result, then AF is set; otherwise AF is cleared. The auxiliary carry flag
+   * is provided for the decimal adjust instructions and ordinarily is not used
+   * for any other purpose.
+   *   - [1] p.2-35
+   *
+   * @param {number} v1 Destination operand
+   * @param {number} v2 Source operand
+   * @param {number} result Addition result
+   */
+  setAF_Flag (v1, v2, result) {
+    if ( (v1 ^ v2 ^ result) & 0x10) {
+      this.cpu.reg16[regFlags] |= FLAG_AF_MASK;
+    } else {
+      this.cpu.reg16[regFlags] &= ~FLAG_AF_MASK;
+    }
+  }
+
+  /**
+   * OF (overflow flag): If the result of an operation is too large a
+   * positive number, or too small a negative number to fit in the
+   * destination operand (excluding the sign bit), then OF is set; otherwise
+   * OF is cleared. OF thus indicates signed arithmetic overflow; it can be
+   * tested with a conditional jump or the INTO (interrupt on overflow)
+   * instruction. OF may be ignored when performing unsigned arithmetic.
+   *   - [1] p.2-35
+   *
+   * @param {number} v1 Destination operand
+   * @param {number} v2 Source operand
+   * @param {number} result Addition result
+   */
+  setOF_FLAG_sub (v1, v2, result) {
+    let size = this.cpu.opcode.addrSize;
+    if ( (result ^ v1) & (v1 ^ v2) & (size === b ? 0x80 : 0x8000)) {
+      this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
+    } else {
+      this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
+    }
+  }
+
+  /**
+   * OF (overflow flag): If the result of an operation is too large a
+   * positive number, or too small a negative number to fit in the
+   * destination operand (excluding the sign bit), then OF is set; otherwise
+   * OF is cleared. OF thus indicates signed arithmetic overflow; it can be
+   * tested with a conditional jump or the INTO (interrupt on overflow)
+   * instruction. OF may be ignored when performing unsigned arithmetic.
+   *   - [1] p.2-35
+   *
+   * @param {number} v1 Destination operand
+   * @param {number} v2 Source operand
+   * @param {number} result Addition result
+   */
+  setOF_FLAG_add (v1, v2, result) {
+    let size = this.cpu.opcode.addrSize;
+    if ( (result ^ v1) & (result ^ v2) & (size === b ? 0x80 : 0x8000)) {
+      this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
+    } else {
+      this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
+    }
+  }
+
+  /**
    * Set flags for addition operations such as ADD, INC, ADC, and so forth.
    *
    * @param {number} v1 Destination operand
@@ -1699,48 +2251,12 @@ export default class Operations {
   flagAdd (v1, v2, result) {
     let size = this.cpu.opcode.addrSize;
     let clampedResult = result & (size === b ? 0xFF : 0xFFFF);
-
-    // CF (carry flag): If an addition results in a carry out of the high-order
-    // bit of the result, then CF is set; otherwise CF is cleared. Note that a
-    // signed carry is indicated by CF ≠ OF. CF can be used to detect an
-    // unsigned overflow. Two instructions, ADC (add with carry) and SBB
-    // (subtract with borrow), incorporate the carry flag  in their operations
-    // and can be used to perform multibyte (e.g., 32-bit, 64-bit) addition and
-    // subtraction.
-    //   - [1] p.2-35
-    if (result & (size === b ? 0xFF00 : 0xFFFF0000)) {
-      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
-    } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
-    }
-
-    // OF (overflow flag): If the result of an operation is too large a
-    // positive number, or too small a negative number to fit in the
-    // destination operand (excluding the sign bit), then OF is set; otherwise
-    // OF is cleared. OF thus indicates signed arithmetic overflow; it can be
-    // tested with a conditional jump or the INTO (interrupt on overflow)
-    // instruction. OF may be ignored when performing unsigned arithmetic.
-    //   - [1] p.2-35
-    if ( (result ^ v1) & (result ^ v2) & (size === b ? 0x80 : 0x8000)) {
-      this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
-    } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
-    }
-
-    // AF (auxiliary carry flag): If an addition results in a carry out of the
-    // low-order halfbyte of the result, then AF is set; otherwise AF is
-    // cleared. The auxiliary carry flag is provided for the decimal adjust
-    // instructions and ordinarily is not used for any other purpose.
-    //   - [1] p.2-35
-    if ( (v1 ^ v2 ^ result) & 0x10) {
-      this.cpu.reg16[regFlags] |= FLAG_AF_MASK;
-    } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_AF_MASK;
-    }
-
+    this.setCF_FLAG(result);
     this.setPF_FLAG(clampedResult);
-    this.setSF_FLAG(clampedResult);
+    this.setAF_Flag(v1, v2, result);
     this.setZF_FLAG(clampedResult);
+    this.setSF_FLAG(clampedResult);
+    this.setOF_FLAG_add(v1, v2, result);
   }
 
   /**
@@ -1751,50 +2267,11 @@ export default class Operations {
    * @param {number} result Subtraction result
    */
   flagSub (v1, v2, result) {
-    let size = this.cpu.opcode.addrSize;
-
-    // CF (carry flag): If a subtraction results in a borrow into the highorder
-    // bit of the result, then CF is set; otherwise CF is cleared. Note that a
-    // signed carry is indicated by CF ≠ OF. CF can be used to detect an
-    // unsigned overflow. Two instructions, ADC (add with carry) and SBB
-    // (subtract with borrow), incorporate the carry flag  in their operations
-    // and can be used to perform multibyte (e.g., 32-bit, 64-bit) addition and
-    // subtraction.
-    //   - [1] p.2-35
-    if ((v1 - v2) & (size === b ? 0xFF00 : 0xFFFF0000)) {
-      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
-    } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
-    }
-
-    // OF (overflow flag): If the result of an operation is too large a
-    // positive number, or too small a negative number to fit in the
-    // destination operand (excluding the sign bit), then OF is set; otherwise
-    // OF is cleared. OF thus indicates signed arithmetic overflow; it can be
-    // tested with a conditional jump or the INTO (interrupt on overflow)
-    // instruction. OF may be ignored when performing unsigned arithmetic.
-    //   - [1] p.2-35
-    if ( (result ^ v1) & (v1 ^ v2) & (size === b ? 0x80 : 0x8000)) {
-      this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
-    } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
-    }
-
-    // AF (auxiliary carry flag): If a subtraction results in a borrow into the
-    // low-order half-byte of the result, then AF is set; otherwise AF is
-    // cleared. The auxiliary carry flag is provided for the decimal adjust
-    // instructions and ordinarily is not used for any other purpose.
-    //   - [1] p.2-35
-    if ( (v1 ^ v2 ^ result) & 0x10) {
-      this.cpu.reg16[regFlags] |= FLAG_AF_MASK;
-    } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_AF_MASK;
-    }
-
+    this.setCF_FLAG(v1 - v2);
     this.setPF_FLAG(result);
-    this.setSF_FLAG(result);
+    this.setAF_Flag(v1, v2, result);
     this.setZF_FLAG(result);
+    this.setSF_FLAG(result);
+    this.setOF_FLAG_sub(v1, v2, result);
   }
 }
-
-

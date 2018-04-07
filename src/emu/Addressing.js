@@ -53,7 +53,7 @@ export default class Addressing {
    */
   AX (segment, value) {
     let result;
-    if (value || value === 0) result =  this.cpu.reg16[regAX] = value;
+    if (value || value === 0) result =  this.cpu.reg16[regAX] = value & 0xFFFF;
     else result = this.cpu.reg16[regAX];
 
     this.cpu.cycleIP += 0;
@@ -71,7 +71,7 @@ export default class Addressing {
   AH (segment, value) {
     let result;
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
-    if (value || value === 0) result =  this.cpu.reg8[regAH] = value;
+    if (value || value === 0) result =  this.cpu.reg8[regAH] = value & 0xFF;
     else result = this.cpu.reg8[regAH];
 
     this.cpu.cycleIP += 0;
@@ -89,7 +89,7 @@ export default class Addressing {
   AL (segment, value) {
     let result;
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
-    if (value || value === 0) result =  this.cpu.reg8[regAL] = value;
+    if (value || value === 0) result =  this.cpu.reg8[regAL] = value & 0xFF;
     else result = this.cpu.reg8[regAL];
 
     this.cpu.cycleIP += 0;
@@ -106,7 +106,7 @@ export default class Addressing {
    */
   BX (segment, value) {
     let result;
-    if (value || value === 0) result =  this.cpu.reg16[regBX] = value;
+    if (value || value === 0) result =  this.cpu.reg16[regBX] = value & 0xFFFF;
     else result = this.cpu.reg16[regBX];
 
     this.cpu.cycleIP += 0;
@@ -124,7 +124,7 @@ export default class Addressing {
   BH (segment, value) {
     let result;
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
-    if (value || value === 0) result =  this.cpu.reg8[regBH] = value;
+    if (value || value === 0) result =  this.cpu.reg8[regBH] = value & 0xFF;
     else result = this.cpu.reg8[regBH];
 
     this.cpu.cycleIP += 0;
@@ -142,7 +142,7 @@ export default class Addressing {
   BL (segment, value) {
     let result;
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
-    if (value || value === 0) result =  this.cpu.reg8[regBL] = value;
+    if (value || value === 0) result =  this.cpu.reg8[regBL] = value & 0xFF;
     else result = this.cpu.reg8[regBL];
 
     this.cpu.cycleIP += 0;
@@ -159,7 +159,7 @@ export default class Addressing {
    */
   CX (segment, value) {
     let result;
-    if (value || value === 0) result =  this.cpu.reg16[regCX] = value;
+    if (value || value === 0) result =  this.cpu.reg16[regCX] = value & 0xFFFF;
     else result = this.cpu.reg16[regCX];
 
     this.cpu.cycleIP += 0;
@@ -177,7 +177,7 @@ export default class Addressing {
   CH (segment, value) {
     let result;
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
-    if (value || value === 0) result =  this.cpu.reg8[regCH] = value;
+    if (value || value === 0) result =  this.cpu.reg8[regCH] = value & 0xFF;
     else result = this.cpu.reg8[regCH];
 
     this.cpu.cycleIP += 0;
@@ -195,7 +195,7 @@ export default class Addressing {
   CL (segment, value) {
     let result;
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
-    if (value || value === 0) result =  this.cpu.reg8[regCL] = value;
+    if (value || value === 0) result =  this.cpu.reg8[regCL] = value & 0xFF;
     else result = this.cpu.reg8[regCL];
 
     this.cpu.cycleIP += 0;
@@ -212,7 +212,7 @@ export default class Addressing {
    */
   DX (segment, value) {
     let result;
-    if (value || value === 0) result =  this.cpu.reg16[regDX] = value;
+    if (value || value === 0) result =  this.cpu.reg16[regDX] = value & 0xFFFF;
     else result = this.cpu.reg16[regDX];
 
     this.cpu.cycleIP += 0;
@@ -230,7 +230,7 @@ export default class Addressing {
   DH (segment, value) {
     let result;
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
-    if (value || value === 0) result =  this.cpu.reg8[regDH] = value;
+    if (value || value === 0) result =  this.cpu.reg8[regDH] = value & 0xFF;
     else result = this.cpu.reg8[regDH];
 
     this.cpu.cycleIP += 0;
@@ -248,7 +248,7 @@ export default class Addressing {
   DL (segment, value) {
     let result;
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
-    if (value || value === 0) result =  this.cpu.reg8[regDL] = value;
+    if (value || value === 0) result =  this.cpu.reg8[regDL] = value & 0xFF;
     else result = this.cpu.reg8[regDL];
 
     this.cpu.cycleIP += 0;
@@ -265,7 +265,7 @@ export default class Addressing {
    */
   SI (segment, value) {
     let result;
-    if (value || value === 0) result =  this.cpu.reg16[regSI] = value;
+    if (value || value === 0) result =  this.cpu.reg16[regSI] = value & 0xFFFF;
     else result = this.cpu.reg16[regSI];
 
     this.cpu.cycleIP += 0;
@@ -282,7 +282,7 @@ export default class Addressing {
    */
   DI (segment, value) {
     let result;
-    if (value || value === 0) result =  this.cpu.reg16[regDI] = value;
+    if (value || value === 0) result =  this.cpu.reg16[regDI] = value & 0xFFFF;
     else result = this.cpu.reg16[regDI];
 
     this.cpu.cycleIP += 0;
@@ -299,7 +299,7 @@ export default class Addressing {
    */
   BP (segment, value) {
     let result;
-    if (value || value === 0) result =  this.cpu.reg16[regBP] = value;
+    if (value || value === 0) result =  this.cpu.reg16[regBP] = value & 0xFFFF;
     else result = this.cpu.reg16[regBP];
 
     this.cpu.cycleIP += 0;
@@ -316,7 +316,7 @@ export default class Addressing {
    */
   SP (segment, value) {
     let result;
-    if (value || value === 0) result =  this.cpu.reg16[regSP] = value;
+    if (value || value === 0) result =  this.cpu.reg16[regSP] = value & 0xFFFF;
     else result = this.cpu.reg16[regSP];
 
     this.cpu.cycleIP += 0;
@@ -333,7 +333,7 @@ export default class Addressing {
    */
   CS (segment, value) {
     let result;
-    if (value || value === 0) result =  this.cpu.reg16[regCS] = value;
+    if (value || value === 0) result =  this.cpu.reg16[regCS] = value & 0xFFFF;
     else result = this.cpu.reg16[regCS];
 
     this.cpu.cycleIP += 0;
@@ -350,7 +350,7 @@ export default class Addressing {
    */
   DS (segment, value) {
     let result;
-    if (value || value === 0) result =  this.cpu.reg16[regDS] = value;
+    if (value || value === 0) result =  this.cpu.reg16[regDS] = value & 0xFFFF;
     else result = this.cpu.reg16[regDS];
 
     this.cpu.cycleIP += 0;
@@ -367,7 +367,7 @@ export default class Addressing {
    */
   ES (segment, value) {
     let result;
-    if (value || value === 0) result =  this.cpu.reg16[regES] = value;
+    if (value || value === 0) result =  this.cpu.reg16[regES] = value & 0xFFFF;
     else result = this.cpu.reg16[regES];
 
     this.cpu.cycleIP += 0;
@@ -385,7 +385,7 @@ export default class Addressing {
    */
   SS (segment, value) {
     let result;
-    if (value || value === 0) result =  this.cpu.reg16[regSS] = value;
+    if (value || value === 0) result =  this.cpu.reg16[regSS] = value & 0xFFFF;
     else result = this.cpu.reg16[regSS];
 
     this.cpu.cycleIP += 0;
@@ -411,6 +411,8 @@ export default class Addressing {
   Ap (segment, value) {
     if (value)
       throw new InvalidAddressModeException("Ap addressing mode can not set values");
+
+    segment = this.cpu.reg16[regCS]; // Direct address values are in the CS segment
 
     // Get the 32bit far address (segment:offset) from the instruction argument
     let s = (this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)] << 8) |
@@ -439,12 +441,8 @@ export default class Addressing {
    */
   Eb (segment, value) {
     let result;
-    if (value !== null && value > 0xFF)
-      throw new ValueOverflowException("Value too large for memory addressing mode");
-
-    if (value || value === 0) result = this.writeRMReg8(segment, value);
+    if (value || value === 0) result = this.writeRMReg8(segment, value & 0xFF);
     else result = this.readRMReg8(segment);
-
     return result;
   }
 
@@ -465,13 +463,10 @@ export default class Addressing {
   Ep (segment, value) {
     if (value)
       throw new InvalidAddressModeException("Ep addressing mode can not set values");
-
+    // segment = this.cpu.reg16[regCS]; // Ep values are in the CS segment
     let result = this.readRMReg32(segment);
-
-    // 0x56 0x78 0x9A 0xBC
     let s = result & 0x0000FFFF;
     let o = (result & 0xFFFF0000) >> 16;
-
     return [s, o];
   }
 
@@ -492,12 +487,8 @@ export default class Addressing {
    */
   Ev (segment, value) {
     let result;
-    if (value !== null && value > 0xFFFFFFFF)
-      throw new ValueOverflowException("Value too large for memory addressing mode");
-
-    if (value || value === 0) result = this.writeRMReg16(segment, value);
+    if (value || value === 0) result = this.writeRMReg16(segment, value & 0xFFFF);
     else result = this.readRMReg16(segment);
-
     return result;
   }
 
@@ -518,12 +509,8 @@ export default class Addressing {
    */
   Ew (segment, value) {
     let result;
-    if (value !== null && value > 0xFFFF)
-      throw new ValueOverflowException("Value too large for memory addressing mode");
-
-    if (value || value === 0) result = this.writeRMReg16(segment, value);
+    if (value || value === 0) result = this.writeRMReg16(segment, value & 0xFFFF);
     else result = this.readRMReg16(segment);
-
     return result;
   }
 
@@ -541,12 +528,8 @@ export default class Addressing {
    */
   Gb (segment, value) {
     let result;
-    if (value !== null && value > 0xFF)
-      throw new ValueOverflowException("Value too large for memory addressing mode");
-
-    if (value || value === 0) result = this.writeRegVal(value, false, b);
+    if (value || value === 0) result = this.writeRegVal(value & 0xFF, false, b);
     else result = this.readRegVal(false, b);
-
     return result;
   }
 
@@ -564,12 +547,8 @@ export default class Addressing {
    */
   Gv (segment, value) {
     let result;
-    if (value !== null && value > 0xFFFFFFFF)
-      throw new ValueOverflowException("Value too large for memory addressing mode");
-
-    if (value || value === 0) result = this.writeRegVal(value, false, v);
+    if (value || value === 0) result = this.writeRegVal(value & 0xFFFF, false, v);
     else result = this.readRegVal(false, v);
-
     return result;
   }
 
@@ -581,19 +560,17 @@ export default class Addressing {
    *   - [3] p. A-1 to A-3
    *
    * @param {number|null} segment Memory segment
-   * @param {number|null} value Value to write (word|doubleword)
+   * @param {number|null} value NOT USED
    * @return {number} For a read operation the value from the address is
    *  returned. For a write operation the same value provided is returned.
    */
   Ib (segment, value) {
     let result;
-    if (value !== null && value > 0xFF)
-      throw new ValueOverflowException("Value too large for memory addressing mode");
 
+    segment = this.cpu.reg16[regCS]; // Imm values are in the CS segment
     let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
 
-    if (value || value === 0)
-      throw new FeatureNotImplementedException("Writing using this addressing mode is not implemented");
+    if (value || value === 0) throw new InvalidAddressModeException("Ib addressing mode can not set values");
     else result = this.readMem8(segment, offset);
 
     this.cpu.cycleIP += 1;
@@ -608,20 +585,17 @@ export default class Addressing {
    *   - [3] p. A-1 to A-3
    *
    * @param {number|null} segment Memory segment
-   * @param {number|null} value Value to write (word|doubleword)
+   * @param {number|null} value NOT USED
    * @return {number} For a read operation the value from the address is
    *  returned. For a write operation the same value provided is returned.
    */
   Iv (segment, value) {
     let result;
-    if (value !== null && value > 0xFFFFFFFF)
-      throw new ValueOverflowException("Value too large for memory addressing mode");
 
     segment = this.cpu.reg16[regCS]; // Imm values are in the CS segment
     let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
 
-    if (value || value === 0)
-      throw new FeatureNotImplementedException("Writing using this addressing mode is not implemented");
+    if (value || value === 0) throw new InvalidAddressModeException("Iv addressing mode can not set values");
     else result = this.readMem16(segment, offset);
 
     this.cpu.cycleIP += 2;
@@ -637,20 +611,17 @@ export default class Addressing {
    *   - [3] p. A-1 to A-3
    *
    * @param {number|null} segment Memory segment
-   * @param {number|null} value Value to write (word|doubleword)
+   * @param {number|null} value NOT USED
    * @return {number} For a read operation the value from the address is
    *  returned. For a write operation the same value provided is returned.
    */
   Iw (segment, value) {
     let result;
-    if (value !== null && value > 0xFFFF)
-      throw new ValueOverflowException("Value too large for memory addressing mode");
 
     segment = this.cpu.reg16[regCS]; // Imm values are in the CS segment
     let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
 
-    if (value || value === 0)
-      throw new FeatureNotImplementedException("Writing using this addressing mode is not implemented");
+    if (value || value === 0) InvalidAddressModeException("Iw addressing mode can not set values");
     else result = this.readMem16(segment, offset);
 
     this.cpu.cycleIP += 2;
@@ -665,17 +636,16 @@ export default class Addressing {
    * The operand is a word, regardless of operand-size attribute.
    *   - [3] p. A-1 to A-3
    *
-   * @param {number|null} segment Memory segment
+   * @param {number|null} segment NOT USED
    * @param {number|null} value NOT USED
    * @return {number} The value from the address is returned
    */
   Jb (segment, value) {
-    if (value)
-      throw new InvalidAddressModeException("Jb addressing mode can not set values");
+    if (value) throw new InvalidAddressModeException("Jb addressing mode can not set values");
 
     let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
 
-    let result = this.readMem8(segment, offset);
+    let result = this.readMem8(this.cpu.reg16[regCS], offset);
 
     this.cpu.cycleIP += 1;
 
@@ -699,7 +669,7 @@ export default class Addressing {
 
     let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
 
-    let result = this.readMem16(segment, offset);
+    let result = this.readMem16(this.cpu.reg16[regCS], offset);
 
     this.cpu.cycleIP += 2;
 
@@ -746,6 +716,8 @@ export default class Addressing {
   Mp (segment, value) {
     if (value)
       throw new InvalidAddressModeException("Mp addressing mode can not set values");
+
+    // segment = this.cpu.reg16[regCS]; // MP values are in the CS segment
 
     let addr;
     switch (this.cpu.opcode.mod) {

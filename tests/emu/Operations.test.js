@@ -344,9 +344,22 @@ describe('Operation methods', () => {
     });
   });
 
-  describe.skip('and', () => {
-    test('test 1', () => {
+  describe('and', () => {
+    test('AND AX Iv', () => {
+      cpu.reg16[regAX] = 0x1234;
+      cpu.mem8[0x000FF] = 0x25; // inst (byte)
+      cpu.mem8[0x00100] = 0x21; // oper low
+      cpu.mem8[0x00101] = 0x34; // oper high
+      cpu.cycleIP = 1;
 
+      cpu.decode();
+      oper.and(addr.AX.bind(addr), addr.Iv.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x1020);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
+      expect(cpu.cycleIP).toBe(3);
     });
   });
 
@@ -426,10 +439,10 @@ describe('Operation methods', () => {
       cpu.mem8[0x000FF] = 0xFF; // inst (byte)
       cpu.mem8[0x00100] = 0b00011100; // addr mode
       cpu.reg16[regSI] = 0x1234;
-      cpu.mem8[0x01234] = 0x78; // v1 high
-      cpu.mem8[0x01235] = 0x56; // v1 low
-      cpu.mem8[0x01236] = 0xBC; // v2 high
-      cpu.mem8[0x01237] = 0x9A; // v2 low
+      cpu.mem8[0x04234] = 0x78; // v1 high
+      cpu.mem8[0x04235] = 0x56; // v1 low
+      cpu.mem8[0x04236] = 0xBC; // v2 high
+      cpu.mem8[0x04237] = 0x9A; // v2 low
       cpu.decode();
       oper.call(addr.Ep.bind(addr), null);
 
@@ -1184,10 +1197,10 @@ describe('Operation methods', () => {
       cpu.mem8[0x000FF] = 0xFF; // inst (byte)
       cpu.mem8[0x00100] = 0b00101100; // addr mode
       cpu.reg16[regSI] = 0x1234;
-      cpu.mem8[0x01234] = 0x78; // v1 high
-      cpu.mem8[0x01235] = 0x56; // v1 low
-      cpu.mem8[0x01236] = 0xBC; // v2 high
-      cpu.mem8[0x01237] = 0x9A; // v2 low
+      cpu.mem8[0x04234] = 0x78; // v1 high
+      cpu.mem8[0x04235] = 0x56; // v1 low
+      cpu.mem8[0x04236] = 0xBC; // v2 high
+      cpu.mem8[0x04237] = 0x9A; // v2 low
       cpu.decode();
       oper.jmp(addr.Mp.bind(addr), null);
 
@@ -1723,86 +1736,85 @@ describe('Operation methods', () => {
   describe('neg', () => {
     beforeEach(() => {
       // NEG Ev
-      cpu.mem8[0x00FF] = 0xF7;
-      cpu.mem8[0x0100] = 0x1D;
-
+      cpu.mem8[0x00FF] = 0xF7; // Inst
+      cpu.mem8[0x0100] = 0b00011101; // Addr byte
       cpu.reg16[regDI] = 0x0222;
     });
     test('negate a positive number', () => {
-      cpu.mem8[0x0222] = 0x34;
-      cpu.mem8[0x0223] = 0x12;
+      cpu.mem8[0x3222] = 0x34;
+      cpu.mem8[0x3223] = 0x12;
       cpu.decode();
       oper.neg(addr.Ev.bind(addr));
 
+      expect(cpu.mem8[0x3222]).toBe(0xCC);
+      expect(cpu.mem8[0x3223]).toBe(0xED);
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
-      expect(cpu.mem8[0x0222]).toBe(0xCC);
-      expect(cpu.mem8[0x0223]).toBe(0xED);
     });
     test('negate a negative number', () => {
-      cpu.mem8[0x0222] = 0xCC;
-      cpu.mem8[0x0223] = 0xED;
+      cpu.mem8[0x3222] = 0xCC;
+      cpu.mem8[0x3223] = 0xED;
       cpu.decode();
       oper.neg(addr.Ev.bind(addr));
 
+      expect(cpu.mem8[0x3222]).toBe(0x34);
+      expect(cpu.mem8[0x3223]).toBe(0x12);
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
-      expect(cpu.mem8[0x0222]).toBe(0x34);
-      expect(cpu.mem8[0x0223]).toBe(0x12);
     });
     test('If the operand is zero, its sign is not changed', () => {
-      cpu.mem8[0x0222] = 0x00;
-      cpu.mem8[0x0223] = 0x00;
+      cpu.mem8[0x3222] = 0x00;
+      cpu.mem8[0x3223] = 0x00;
       cpu.decode();
       oper.neg(addr.Ev.bind(addr));
 
+      expect(cpu.mem8[0x3222]).toBe(0x00);
+      expect(cpu.mem8[0x3223]).toBe(0x00);
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
-      expect(cpu.mem8[0x0222]).toBe(0x00);
-      expect(cpu.mem8[0x0223]).toBe(0x00);
     });
     test('negate a byte -128 causes no change to operand and sets OF', () => {
       cpu.mem8[0x00FF] = 0xF6; // Change instruction to NEG Eb
-      cpu.mem8[0x0222] = 0x80;
+
+      cpu.mem8[0x3222] = 0x80;
       // cpu.mem8[0x0223] = 0x00;
       cpu.decode();
       oper.neg(addr.Eb.bind(addr));
 
+      expect(cpu.mem8[0x3222]).toBe(0x80);
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
-      expect(cpu.mem8[0x0222]).toBe(0x80);
-      // expect(cpu.mem8[0x0223]).toBe(0x00);
     });
     test('negate a word -32,768 causes no change to operand and sets OF', () => {
-      cpu.mem8[0x0222] = 0x00;
-      cpu.mem8[0x0223] = 0x80;
+      cpu.mem8[0x3222] = 0x00;
+      cpu.mem8[0x3223] = 0x80;
       cpu.decode();
       oper.neg(addr.Ev.bind(addr));
 
+      expect(cpu.mem8[0x3222]).toBe(0x00);
+      expect(cpu.mem8[0x3223]).toBe(0x80);
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
-      expect(cpu.mem8[0x0222]).toBe(0x00);
-      expect(cpu.mem8[0x0223]).toBe(0x80);
     });
   });
 
@@ -1811,14 +1823,35 @@ describe('Operation methods', () => {
 
     });
   });
-  describe.skip('not', () => {
-    test('test 1', () => {
+  describe('not', () => {
+    test('NOT Ev', () => {
+      cpu.reg16[regAX] = 0x1234;
+      cpu.mem8[0x000FF] = 0xF7; // inst (byte)
+      cpu.mem8[0x00100] = 0b11010000; // addr
 
+      cpu.decode();
+      oper.not(addr.Ev.bind(addr), null);
+
+      expect(cpu.reg16[regAX]).toBe(0xEDCB);
+      expect(cpu.cycleIP).toBe(0);
     });
   });
-  describe.skip('or', () => {
-    test('test 1', () => {
+  describe('or', () => {
+    test('OR AX Iv', () => {
+      cpu.reg16[regAX] = 0x1234;
+      cpu.mem8[0x000FF] = 0x0D; // inst (byte)
+      cpu.mem8[0x00100] = 0x21; // oper low
+      cpu.mem8[0x00101] = 0x34; // oper high
+      cpu.cycleIP = 1;
 
+      cpu.decode();
+      oper.or(addr.AX.bind(addr), addr.Iv.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x3635);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
+      expect(cpu.cycleIP).toBe(3);
     });
   });
   describe.skip('out', () => {
@@ -2023,9 +2056,24 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags]).toBe(0b01010111)
     });
   });
-  describe.skip('sar', () => {
-    test('test 1', () => {
 
+  describe('sar', () => {
+    test('SAR Eb 1', () => {
+      cpu.reg8[regAL] = 0xE3;
+      cpu.mem8[0x000FF] = 0xD0; // inst (byte)
+      cpu.mem8[0x00100] = 0b11111000; // addr
+      cpu.cycleIP = 2;
+
+      cpu.decode();
+      oper.sar(addr.Eb.bind(addr), addr._1.bind(addr));
+
+      expect(cpu.reg8[regAL]).toBe(0xF1);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
+      expect(cpu.cycleIP).toBe(2);
     });
   });
 
@@ -2145,14 +2193,44 @@ describe('Operation methods', () => {
 
     });
   });
-  describe.skip('shl', () => {
-    test('test 1', () => {
 
+  describe('shl', () => {
+    test('SHL Eb 1', () => {
+      cpu.reg8[regAL] = 0xE2;
+      cpu.mem8[0x000FF] = 0xD0; // inst (byte)
+      cpu.mem8[0x00100] = 0b11100000; // addr
+      cpu.cycleIP = 2;
+
+      cpu.decode();
+      oper.shl(addr.Eb.bind(addr), addr._1.bind(addr));
+
+      expect(cpu.reg8[regAL]).toBe(0xC4);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
+      expect(cpu.cycleIP).toBe(2);
     });
   });
-  describe.skip('shr', () => {
-    test('test 1', () => {
 
+  describe('shr', () => {
+    test('SHR Eb 1', () => {
+      cpu.reg8[regAL] = 0xE3;
+      cpu.mem8[0x000FF] = 0xD0; // inst (byte)
+      cpu.mem8[0x00100] = 0b11101000; // addr
+      cpu.cycleIP = 2;
+
+      cpu.decode();
+      oper.shr(addr.Eb.bind(addr), addr._1.bind(addr));
+
+      expect(cpu.reg8[regAL]).toBe(0x71);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
+      expect(cpu.cycleIP).toBe(2);
     });
   });
   describe.skip('ss', () => {
@@ -2278,11 +2356,25 @@ describe('Operation methods', () => {
     });
   });
 
-  describe.skip('test', () => {
-    test('test 1', () => {
+  describe('test', () => {
+    test('TEST AX Iv', () => {
+      cpu.reg16[regAX] = 0x1234;
+      cpu.mem8[0x000FF] = 0xA9; // inst (byte)
+      cpu.mem8[0x00100] = 0x21; // oper low
+      cpu.mem8[0x00101] = 0x34; // oper high
+      cpu.cycleIP = 1;
 
+      cpu.decode();
+      oper.test(addr.AX.bind(addr), addr.Iv.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x1234);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
+      expect(cpu.cycleIP).toBe(3);
     });
   });
+
   describe.skip('wait', () => {
     test('test 1', () => {
 
@@ -2311,9 +2403,22 @@ describe('Operation methods', () => {
 
     });
   });
-  describe.skip('xor', () => {
-    test('test 1', () => {
+  describe('xor', () => {
+    test('XOR AX Iv', () => {
+      cpu.reg16[regAX] = 0x1234;
+      cpu.mem8[0x000FF] = 0x35; // inst (byte)
+      cpu.mem8[0x00100] = 0x21; // oper low
+      cpu.mem8[0x00101] = 0x34; // oper high
+      cpu.cycleIP = 1;
 
+      cpu.decode();
+      oper.xor(addr.AX.bind(addr), addr.Iv.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x2615);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
+      expect(cpu.cycleIP).toBe(3);
     });
   });
 

@@ -1769,11 +1769,6 @@ describe('Addressing Modes', () => {
       addr.Eb(segment, 0xFF);
       expect(cpu.cycleIP).toBe(1);
     });
-    test('overflow throws', () => {
-      expect(() => {
-        addr.Eb(segment, 0xFFFF);
-      }).toThrowError(ValueOverflowException);
-    });
     test('addressing mode overrides operand-size bit', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
       cpu.decode();
@@ -1806,11 +1801,6 @@ describe('Addressing Modes', () => {
       addr.Ev(segment, 0xFFFF);
       expect(cpu.cycleIP).toBe(1);
     });
-    test('overflow throws', () => {
-      expect(() => {
-        addr.Ev(segment, 0xFFFFFFFFF);
-      }).toThrowError(ValueOverflowException);
-    });
   });
 
   describe('Ew', () => {
@@ -1837,11 +1827,6 @@ describe('Addressing Modes', () => {
       addr.Ew(segment, 0xFFFF);
       expect(cpu.cycleIP).toBe(1);
     });
-    test('overflow throws', () => {
-      expect(() => {
-        addr.Ew(segment, 0xFFFFFF);
-      }).toThrowError(ValueOverflowException);
-    });
     test('addressing mode overrides operand-size bit', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.decode();
@@ -1864,11 +1849,6 @@ describe('Addressing Modes', () => {
     test('write cycles', () => {
       addr.Gb(segment, 0xFF);
       expect(cpu.cycleIP).toBe(0);
-    });
-    test('overflow throws', () => {
-      expect(() => {
-        addr.Gb(segment, 0xFFFF);
-      }).toThrowError(ValueOverflowException);
     });
     test('addressing mode overrides operand-size bit', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
@@ -1898,11 +1878,6 @@ describe('Addressing Modes', () => {
       addr.Gv(segment, 0xFFFF);
       expect(cpu.cycleIP).toBe(0);
     });
-    test('overflow throws', () => {
-      expect(() => {
-        addr.Gv(segment, 0xFFFFFFFFF);
-      }).toThrowError(ValueOverflowException);
-    });
   });
 
   describe('Ib', () => {
@@ -1920,18 +1895,6 @@ describe('Addressing Modes', () => {
     test('read cycles', () => {
       addr.Ib(segment, null);
       expect(cpu.cycleIP).toBe(2);
-    });
-    // TODO: Finish these
-    test.skip('write', () => {
-
-    });
-    test.skip('write cycles', () => {
-
-    });
-    test('overflow throws', () => {
-      expect(() => {
-        addr.Ib(segment, 0xFFF);
-      }).toThrowError(ValueOverflowException);
     });
     test('addressing mode overrides operand-size bit', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
@@ -1958,18 +1921,6 @@ describe('Addressing Modes', () => {
       addr.Iv(segment, null);
       expect(cpu.cycleIP).toBe(3);
     });
-    // TODO: Finish these
-    test.skip('write', () => {
-
-    });
-    test.skip('write cycles', () => {
-
-    });
-    test('overflow throws', () => {
-      expect(() => {
-        addr.Iv(segment, 0xFFFFFFFFF);
-      }).toThrowError(ValueOverflowException);
-    });
   });
 
   describe('Iw', () => {
@@ -1987,18 +1938,6 @@ describe('Addressing Modes', () => {
     test('read cycles', () => {
       addr.Iw(segment, null);
       expect(cpu.cycleIP).toBe(3);
-    });
-    // TODO: Finish these
-    test.skip('write', () => {
-
-    });
-    test.skip('write cycles', () => {
-
-    });
-    test('overflow throws', () => {
-      expect(() => {
-        addr.Iw(segment, 0xFFFFF);
-      }).toThrowError(ValueOverflowException);
     });
     test('addressing mode overrides operand-size bit', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
