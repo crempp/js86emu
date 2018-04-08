@@ -1934,14 +1934,69 @@ describe('Operation methods', () => {
     });
   });
 
-  describe.skip('rcl', () => {
-    test('test 1', () => {
+  describe('rcl', () => {
+    test('RCL Eb 1 no carry', () => {
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.reg8[regAL] = 0b11100011; // 0xE3
+      cpu.mem8[0x000FF] = 0xD0; // inst (byte)
+      cpu.mem8[0x00100] = 0b11010000; // addr
+      cpu.cycleIP = 2;
 
+      cpu.decode();
+      oper.rcl(addr.Eb.bind(addr), addr._1.bind(addr));
+
+      expect(cpu.reg8[regAL]).toBe(0b11000110); // 0xC6
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+      expect(cpu.cycleIP).toBe(2);
+    });
+    test('RCL Eb 1 with carry', () => {
+      cpu.reg16[regFlags] = 0b0000000000000001;
+      cpu.reg8[regAL] = 0b11100011; // 0xE3
+      cpu.mem8[0x000FF] = 0xD0; // inst (byte)
+      cpu.mem8[0x00100] = 0b11010000; // addr
+      cpu.cycleIP = 2;
+
+      cpu.decode();
+      oper.rcl(addr.Eb.bind(addr), addr._1.bind(addr));
+
+      expect(cpu.reg8[regAL]).toBe(0b11000111); // 0xC6
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+      expect(cpu.cycleIP).toBe(2);
     });
   });
-  describe.skip('rcr', () => {
-    test('test 1', () => {
 
+  describe('rcr', () => {
+    test('RCR Eb 1 no carry', () => {
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.reg8[regAL] = 0b11100011; // 0xE3
+      cpu.mem8[0x000FF] = 0xD0; // inst (byte)
+      cpu.mem8[0x00100] = 0b11011000; // addr
+      cpu.cycleIP = 2;
+
+      cpu.decode();
+      oper.rcr(addr.Eb.bind(addr), addr._1.bind(addr));
+
+      expect(cpu.reg8[regAL]).toBe(0b01110001); // 0xC6
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
+      expect(cpu.cycleIP).toBe(2);
+    });
+    test('RCR Eb 1 with carry', () => {
+      cpu.reg16[regFlags] = 0b0000000000000001;
+      cpu.reg8[regAL] = 0b11100011; // 0xE3
+      cpu.mem8[0x000FF] = 0xD0; // inst (byte)
+      cpu.mem8[0x00100] = 0b11011000; // addr
+      cpu.cycleIP = 2;
+
+      cpu.decode();
+      oper.rcr(addr.Eb.bind(addr), addr._1.bind(addr));
+
+      expect(cpu.reg8[regAL]).toBe(0b11110001); // 0xC6
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+      expect(cpu.cycleIP).toBe(2);
     });
   });
   describe.skip('repnz', () => {
@@ -2031,14 +2086,37 @@ describe('Operation methods', () => {
     });
   });
 
-  describe.skip('rol', () => {
-    test('test 1', () => {
+  describe('rol', () => {
+    test('ROL Eb 1', () => {
+      cpu.reg8[regAL] = 0b11100011; // 0xE3
+      cpu.mem8[0x000FF] = 0xD0; // inst (byte)
+      cpu.mem8[0x00100] = 0b11000000; // addr
+      cpu.cycleIP = 2;
 
+      cpu.decode();
+      oper.rol(addr.Eb.bind(addr), addr._1.bind(addr));
+
+      expect(cpu.reg8[regAL]).toBe(0b11000111); // 0xC7
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+      expect(cpu.cycleIP).toBe(2);
     });
   });
-  describe.skip('ror', () => {
-    test('test 1', () => {
 
+  describe('ror', () => {
+    test('ROR Eb 1', () => {
+      cpu.reg8[regAL] = 0b11100011; // 0xE3
+      cpu.mem8[0x000FF] = 0xD0; // inst (byte)
+      cpu.mem8[0x00100] = 0b11001000; // addr
+      cpu.cycleIP = 2;
+
+      cpu.decode();
+      oper.ror(addr.Eb.bind(addr), addr._1.bind(addr));
+
+      expect(cpu.reg8[regAL]).toBe(0b11110001); // 0xF1
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+      expect(cpu.cycleIP).toBe(2);
     });
   });
   describe('sahf', () => {

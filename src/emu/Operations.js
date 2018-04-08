@@ -1636,12 +1636,115 @@ export default class Operations {
     this.push16(this.cpu.reg16[regFlags]);
   }
 
+  /**
+   * RCL (Rotate through Carry Left) rotates the bits in the byte or word
+   * destination operand to the left by the number of bits specified in the
+   * count operand. The carry flag (CF) is treated as "part of" the destination
+   * operand; that is, its value is rotated into the low-order bit of the
+   * destination, and itself is replaced by the high-order bit of the
+   * destination.
+   *    - [1] p.2-40
+   *
+   * The OF flag is defined only for the 1-bit rotates; it is undefined in all
+   * other cases (except RCL and RCR instructions only: a zero-bit rotate does
+   * nothing, that is affects no flags). For left rotates, the OF flag is set
+   * to the exclusive OR of the CF bit (after the rotate) and the
+   * most-significant bit of the result. For right rotates, the OF flag is set
+   * to the exclusive OR of the two most-significant bits of the result.
+   *   - [4] p.4-519
+   *
+   * Modifies flags: CF, OF
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   rcl (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let size = this.cpu.opcode.addrSize;
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
+    let d = dst(segment);
+    let s = src(segment);
+    let oldcf, of, cf = this.cpu.reg16[regFlags] & 0x01;
+
+    for (let shift = 1; shift <= s; shift++) {
+      oldcf = cf;
+      if (d & 0x80) cf = 1;
+      else cf = 0;
+
+      d = d << 1;
+      d = d | oldcf;
+    }
+
+    if (s === 1) {
+      of = cf ^ ( (d >> (size === b ? 7 : 15)) & 1);
+    }
+
+    if (cf === 1) {
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+    } else {
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+    }
+
+    if ( of === 1 ) {
+      this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
+    }
+    else {
+      this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
+    }
+
+    dst(segment, d);
   }
+
+  /**
+   * RCR (Rotate through Carry Right) operates exactly like RCL except that the
+   * bits are rotated right instead of left.
+   *    - [1] p.2-40
+   *
+   * The OF flag is defined only for the 1-bit rotates; it is undefined in all
+   * other cases (except RCL and RCR instructions only: a zero-bit rotate does
+   * nothing, that is affects no flags). For left rotates, the OF flag is set
+   * to the exclusive OR of the CF bit (after the rotate) and the
+   * most-significant bit of the result. For right rotates, the OF flag is set
+   * to the exclusive OR of the two most-significant bits of the result.
+   *   - [4] p.4-519
+   *
+   * Modifies flags: CF, OF
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   rcr (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let size = this.cpu.opcode.addrSize;
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
+    let d = dst(segment);
+    let s = src(segment);
+    let oldcf, of, cf = this.cpu.reg16[regFlags] & 0x01;
+
+    for (let shift = 1; shift <= s; shift++) {
+      oldcf = cf;
+      cf = d & 1;
+      d = (d >> 1) | (oldcf << (size === b ? 7 : 15));
+    }
+
+    if (s === 1) {
+      of = (d >> (size === b ? 7 : 15)) ^ ( (d >> (size === b ? 6 : 14)) & 1);
+    }
+
+    if (cf === 1) {
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+    } else {
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+    }
+
+    if ( of === 1 ) {
+      this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
+    }
+    else {
+      this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
+    }
+
+    dst(segment, d);
   }
+
   repnz (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -1706,11 +1809,108 @@ export default class Operations {
     }
   }
 
+  /**
+   * ROL (Rotate Left) rotates the destination byte or word left by the number
+   * of bits specified in the count operand.
+   *   - [1] p.2-39
+   *
+   * The OF flag is defined only for the 1-bit rotates; it is undefined in all
+   * other cases (except RCL and RCR instructions only: a zero-bit rotate does
+   * nothing, that is affects no flags). For left rotates, the OF flag is set
+   * to the exclusive OR of the CF bit (after the rotate) and the
+   * most-significant bit of the result. For right rotates, the OF flag is set
+   * to the exclusive OR of the two most-significant bits of the result.
+   *   - [4] p.4-519
+   *
+   * Modifies flags: CF, OF
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   rol (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let size = this.cpu.opcode.addrSize;
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
+    let d = dst(segment);
+    let s = src(segment);
+    let cf, of;
+
+
+    for (let shift = 1; shift <= s; shift++) {
+      if (d & (size === b ? 0x80 : 0x8000)) cf = 1;
+      else cf = 0;
+
+      d = d << 1;
+      d = d | cf;
+    }
+
+    if (s === 1) {
+      of = cf ^ ( (d >> (size === b ? 7 : 15)) & 1);
+    } else of = 0;
+
+    if (cf === 1) {
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+    } else {
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+    }
+
+    if ( of === 1 ) {
+      this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
+    }
+    else {
+      this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
+    }
+
+    dst(segment, d);
   }
+
+  /**
+   * ROR (Rotate Right) operates similar to ROL except that the bits in the
+   * destination byte or word are rotated right instead of left.
+   *   - [1] p.2-40
+   *
+   * The OF flag is defined only for the 1-bit rotates; it is undefined in all
+   * other cases (except RCL and RCR instructions only: a zero-bit rotate does
+   * nothing, that is affects no flags). For left rotates, the OF flag is set
+   * to the exclusive OR of the CF bit (after the rotate) and the
+   * most-significant bit of the result. For right rotates, the OF flag is set
+   * to the exclusive OR of the two most-significant bits of the result.
+   *   - [4] p.4-519
+   *
+   * Modifies flags: CF, OF
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   ror (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let size = this.cpu.opcode.addrSize;
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
+    let d = dst(segment);
+    let s = src(segment);
+    let cf, of;
+
+    for (let shift = 1; shift <= s; shift++) {
+      cf = d & 1;
+      d = (d >> 1) | (cf << (size === b ? 7 : 15));
+    }
+
+    if (s === 1) {
+      of = (d >> (size === b ? 7 : 15)) ^ ( (d >> (size === b ? 6 : 14)) & 1);
+    }
+
+    if (cf === 1) {
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+    } else {
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+    }
+
+    if ( of === 1 ) {
+      this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
+    }
+    else {
+      this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
+    }
+
+    dst(segment, d);
   }
 
   /**
@@ -1726,7 +1926,6 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   sahf (dst, src) {
-
     this.cpu.reg16[regFlags] |= (this.cpu.reg8[regAH] & 0b11010111);
   }
 

@@ -65,10 +65,10 @@ shifts
 	√ SHR
 	√ SAR
 rotates
-	  ROL
-	  ROR
-	  RCL
-	  RCR
+	√ ROL
+	√ ROR
+	√ RCL
+	√ RCR
 
 String 2-40
 -----------
