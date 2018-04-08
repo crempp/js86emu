@@ -464,24 +464,61 @@ describe('Operation methods', () => {
 
     });
   });
-  describe.skip('clc', () => {
-    test('test 1', () => {
 
+  describe('clc', () => {
+    test('CLC with CF set', () => {
+      cpu.reg16[regFlags] = 0b1111111111111111;
+      cpu.mem8[0x000FF] = 0xF8; // inst (byte)
+      cpu.decode();
+
+      oper.clc(null, null);
+
+      expect(cpu.reg16[regFlags]).toBe(0b1111111111111110);
     });
   });
-  describe.skip('cld', () => {
-    test('test 1', () => {
 
+  describe('cld', () => {
+    test('CLD with DF set', () => {
+      cpu.reg16[regFlags] = 0b1111111111111111;
+      cpu.mem8[0x000FF] = 0xFC; // inst (byte)
+      cpu.decode();
+
+      oper.cld(null, null);
+
+      expect(cpu.reg16[regFlags]).toBe(0b1111101111111111);
     });
   });
-  describe.skip('cli', () => {
-    test('test 1', () => {
 
+  describe('cli', () => {
+    test('CLI with IF set', () => {
+      cpu.reg16[regFlags] = 0b1111111111111111;
+      cpu.mem8[0x000FF] = 0xFA; // inst (byte)
+      cpu.decode();
+
+      oper.cli(null, null);
+
+      expect(cpu.reg16[regFlags]).toBe(0b1111110111111111);
     });
   });
-  describe.skip('cmc', () => {
-    test('test 1', () => {
 
+  describe('cmc', () => {
+    test('CMC with CF set', () => {
+      cpu.reg16[regFlags] = 0b1111111111111111;
+      cpu.mem8[0x000FF] = 0xF5; // inst (byte)
+      cpu.decode();
+
+      oper.cmc(null, null);
+
+      expect(cpu.reg16[regFlags]).toBe(0b1111111111111110);
+    });
+    test('CMC with CF clear', () => {
+      cpu.reg16[regFlags] = 0b1111111111111110;
+      cpu.mem8[0x000FF] = 0xF5; // inst (byte)
+      cpu.decode();
+
+      oper.cmc(null, null);
+
+      expect(cpu.reg16[regFlags]).toBe(0b1111111111111111);
     });
   });
 
@@ -2316,21 +2353,43 @@ describe('Operation methods', () => {
 
     });
   });
-  describe.skip('stc', () => {
-    test('test 1', () => {
 
+  describe('stc', () => {
+    test('STC with CF clear', () => {
+      cpu.reg16[regFlags] = 0b1111111111111110;
+      cpu.mem8[0x000FF] = 0xF9; // inst (byte)
+      cpu.decode();
+
+      oper.stc(null, null);
+
+      expect(cpu.reg16[regFlags]).toBe(0b1111111111111111);
     });
   });
-  describe.skip('std', () => {
-    test('test 1', () => {
 
+  describe('std', () => {
+    test('STD with DF clear', () => {
+      cpu.reg16[regFlags] = 0b1111101111111111;
+      cpu.mem8[0x000FF] = 0xFD; // inst (byte)
+      cpu.decode();
+
+      oper.std(null, null);
+
+      expect(cpu.reg16[regFlags]).toBe(0b1111111111111111);
     });
   });
-  describe.skip('sti', () => {
-    test('test 1', () => {
 
+  describe('sti', () => {
+    test('STIC with IF clear', () => {
+      cpu.reg16[regFlags] = 0b1111110111111111;
+      cpu.mem8[0x000FF] = 0xF9; // inst (byte)
+      cpu.decode();
+
+      oper.sti(null, null);
+
+      expect(cpu.reg16[regFlags]).toBe(0b1111111111111111);
     });
   });
+
   describe.skip('stosb', () => {
     test('test 1', () => {
 

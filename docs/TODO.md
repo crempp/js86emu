@@ -3,7 +3,7 @@
 * Review what flags each inst modifies
 * Fix Ep and Mp segments - still need done?
 * move to proper instructions for prefixes
-
+*
 
 Data Transfer 2-31
 ------------------
@@ -101,12 +101,12 @@ interupt
 Processor Control 2-47
 ----------------------
 flag
-	  CLC
-	  CMC
+	√ CLC
+	√ CMC
 	  STC
-	  CLD
+	√ CLD
 	  STD
-	  CLI
+	√ CLI
 	  STI
 external sync
 	  HLT

@@ -1,6 +1,5 @@
 import winston from 'winston';
-
-import {seg2abs, signExtend, twosComplement2Int8} from "./Utils";
+import {seg2abs, signExtend} from "./Utils";
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
   regAX, regBX, regCX, regDX,
@@ -10,29 +9,9 @@ import {
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
   b, w, v, u,
+  PARITY,
 } from './Constants';
-import { binString16, formatFlags, hexString16 } from "./Debug";
 import { FeatureNotImplementedException } from "./Exceptions";
-
-const PARITY = [
-/*         0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
-/* 0x00 */ 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-/* 0x10 */ 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-/* 0x20 */ 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-/* 0x30 */ 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-/* 0x40 */ 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-/* 0x50 */ 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-/* 0x60 */ 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-/* 0x70 */ 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-/* 0x80 */ 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-/* 0x90 */ 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-/* 0xA0 */ 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-/* 0xB0 */ 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-/* 0xC0 */ 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-/* 0xD0 */ 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-/* 0xE0 */ 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-/* 0xF0 */ 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1
-];
 
 export default class Operations {
   constructor(cpu) {
@@ -288,17 +267,71 @@ export default class Operations {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
 
+  /**
+   * CLC (Clear Carry flag) zeroes the carry flag (CF) and affects no other
+   * flags. It (and CMC and STC) is useful in conjunction with the RCL and RCR
+   * instructions.
+   *   - [1] p.2-47
+   *
+   * Modifies flags: CF
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   clc (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
   }
+
+  /**
+   * CLD (Clear Direction flag) zeroes DF causing the string instructions to
+   * auto-increment the SI and/or DI index registers. CLD does not affect any
+   * other flags.
+   *   - [1] p.2-47
+   *
+   * Modifies flags: DF
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   cld (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.reg16[regFlags] &= ~FLAG_DF_MASK;
   }
+
+  /**
+   * CLI (Clear Interrupt-enable flag) zeroes IF. When the interrupt-enable
+   * flag is cleared, the 8086 and 8088 do not recognize an external interrupt
+   * request that appears on the INTR line; in other words maskable interrupts
+   * are disabled. A non-maskable interrupt appearing on the NMI line, however,
+   * is honored, as is a software interrupt. CLI does not affect any other
+   * flags.
+   *   - [1] p.2-48
+   *
+   * Modifies flags: IF
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   cli (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.reg16[regFlags] &= ~FLAG_IF_MASK;
   }
+
+  /**
+   * CMC (Complement Carry flag) "toggles" CF to its opposite state and affects
+   * no other flags.
+   *   - [1] p.2-47
+   *
+   * Modifies flags: IF
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   cmc (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    if ((this.cpu.reg16[regFlags] & FLAG_CF_MASK) === 0) {
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+    }
+    else {
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
+    }
   }
 
   /**
@@ -2115,15 +2148,52 @@ export default class Operations {
   ss (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * STC (Set Carry flag) sets CF to 1 and affects no other flags.
+   *   - [1] p.2-47
+   *
+   * Modifies flags: CF
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   stc (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.reg16[regFlags] |= FLAG_CF_MASK
   }
+
+  /**
+   * STD (Set Direction flag) sets DF to 1 causing the string instructions to
+   * auto-decrement the SI and/or DI index registers. STD does not affect any
+   * other flags.
+   *   - [1] p.2-47
+   *
+   * Modifies flags: DF
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   std (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.reg16[regFlags] |= FLAG_DF_MASK
   }
+
+  /**
+   * STI (Set Interrupt-enable flag) sets IF to 1, enabling processor
+   * recognition of maskable interrupt requests appearing on the INTR line.
+   * Note however, that a pending interrupt will not actually be recognized
+   * until the instruction following STI has executed. STI does not affect any
+   * other flags.
+   *   - [1] p.2-48
+   *
+   * Modifies flags: IF
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   sti (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.reg16[regFlags] |= FLAG_IF_MASK
   }
+
   stosb (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
