@@ -88,6 +88,21 @@ export function formatMemory(mem8, from, to, indentSize=0) {
   return str;
 }
 
+export function formatStack(mem8, top, bottom, indentSize=0) {
+  let indent = " ".repeat(indentSize);
+  let str = indent;
+
+  for (let i = top; i <= bottom; i++) {
+    str += "[" + hexString16(i) + "]";
+  }
+  str += "\n" + indent;
+  for (let i = top; i <= bottom; i++) {
+    str += "  " + hexString8(mem8[i]) + "  ";
+  }
+
+  return str;
+}
+
 export function formatRegisters(cpu, indentSize=0) {
   let str = "";
   let indent = " ".repeat(indentSize);

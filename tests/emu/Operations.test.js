@@ -375,18 +375,19 @@ describe('Operation methods', () => {
       cpu.mem8[0x00102] = 0xBC; // v2 high
       cpu.mem8[0x00103] = 0x9A; // v2 low
       cpu.decode();
+      cpu.cycleIP = 1;
       oper.call(addr.Ap.bind(addr), null);
 
       // CS on stack
       expect(cpu.mem8[0x401E]).toBe(0x00);
       expect(cpu.mem8[0x401F]).toBe(0x00);
       // IP on stack
-      expect(cpu.mem8[0x401C]).toBe(0xFF);
-      expect(cpu.mem8[0x401D]).toBe(0x00);
+      expect(cpu.mem8[0x401C]).toBe(0x04);
+      expect(cpu.mem8[0x401D]).toBe(0x01);
       // CS and IP updated to called location
       expect(cpu.reg16[regCS]).toBe(0x5678);
       expect(cpu.reg16[regIP]).toBe(0x9ABC);
-      expect(cpu.cycleIP).toBe(4);
+      expect(cpu.cycleIP).toBe(5);
     });
     test('CALL Jv (near) positive offset', () => {
       cpu.cycleIP = 1;
@@ -394,11 +395,12 @@ describe('Operation methods', () => {
       cpu.mem8[0x00100] = 0x34; // segment byte high
       cpu.mem8[0x00101] = 0x12; // segment byte low
       cpu.decode();
+      cpu.cycleIP = 1;
       oper.call(addr.Jv.bind(addr), null);
 
       // IP on stack
-      expect(cpu.mem8[0x401E]).toBe(0xFF);
-      expect(cpu.mem8[0x401F]).toBe(0x00);
+      expect(cpu.mem8[0x401E]).toBe(0x02);
+      expect(cpu.mem8[0x401F]).toBe(0x01);
       // CS and IP updated to called location
       expect(cpu.reg16[regCS]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x1234);
@@ -410,11 +412,12 @@ describe('Operation methods', () => {
       cpu.mem8[0x00100] = 0xF6; // segment byte high
       cpu.mem8[0x00101] = 0xFF; // segment byte low
       cpu.decode();
+      cpu.cycleIP = 1;
       oper.call(addr.Jv.bind(addr), null);
 
       // IP on stack
-      expect(cpu.mem8[0x401E]).toBe(0xFF);
-      expect(cpu.mem8[0x401F]).toBe(0x00);
+      expect(cpu.mem8[0x401E]).toBe(0x02);
+      expect(cpu.mem8[0x401F]).toBe(0x01);
       // CS and IP updated to called location
       expect(cpu.reg16[regCS]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0xFF - 0x0A);
@@ -1855,11 +1858,23 @@ describe('Operation methods', () => {
     });
   });
 
-  describe.skip('nop', () => {
-    test('test 1', () => {
+  describe('nop', () => {
+    test('NOP changes nothing', () => {
+      cpu.mem8[0x000FF] = 0x90; // inst (byte)
+      cpu.cycleIP = 1;
+      cpu.decode();
+      oper.nop(null, null);
 
+      expect(cpu.reg16[regIP]).toBe(0x00FF);
+      expect(cpu.reg16[regCS]).toBe(0x0000);
+      expect(cpu.reg16[regDS]).toBe(0x0300);
+      expect(cpu.reg16[regSS]).toBe(0x0400);
+      expect(cpu.reg16[regSP]).toBe(0x0020);
+      expect(cpu.reg16[regFlags]).toBe(0x0000);
+      expect(cpu.cycleIP).toBe(1);
     });
   });
+
   describe('not', () => {
     test('NOT Ev', () => {
       cpu.reg16[regAX] = 0x1234;
@@ -2066,7 +2081,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regIP]).toBe(0x1234 + 0x0101);
       expect(cpu.reg16[regCS]).toBe(0x0000);
-      expect(cpu.cycleIP).toBe(3);
+      expect(cpu.cycleIP).toBe(0);
     });
     test('RET', () => {
       cpu.mem8[0x000FF] = 0xC3; // inst (byte)

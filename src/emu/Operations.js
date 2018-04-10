@@ -228,22 +228,22 @@ export default class Operations {
     switch (this.cpu.opcode.opcode_byte) {
       case 0x9A: // CALL Ap (far)
         this.push16(this.cpu.reg16[regCS]);
-        this.push16(this.cpu.reg16[regIP]);
+        this.push16(this.cpu.reg16[regIP] + this.cpu.cycleIP);
         this.cpu.reg16[regCS] = oper[0];
         this.cpu.reg16[regIP] = oper[1];
         break;
       case 0xE8: // CALL Jv (near)
-        this.push16(this.cpu.reg16[regIP]);
+        this.push16(this.cpu.reg16[regIP] + this.cpu.cycleIP);
         this.cpu.reg16[regIP] = oper;
         break;
       case 0xFF:
         if (this.cpu.opcode.reg === 2) { // 0xFF (2) CALL Ev (near)
-          this.push16(this.cpu.reg16[regIP]);
+          this.push16(this.cpu.reg16[regIP] + this.cpu.cycleIP);
           this.cpu.reg16[regIP] = oper;
         }
         else if (this.cpu.opcode.reg === 3) { // 0xFF (3) CALL Mp (far)
           this.push16(this.cpu.reg16[regCS]);
-          this.push16(this.cpu.reg16[regIP]);
+          this.push16(this.cpu.reg16[regIP] + this.cpu.cycleIP);
           this.cpu.reg16[regCS] = oper[0];
           this.cpu.reg16[regIP] = oper[1];
         }
@@ -275,8 +275,8 @@ export default class Operations {
    *
    * Modifies flags: CF
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   clc (dst, src) {
     this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
@@ -290,8 +290,8 @@ export default class Operations {
    *
    * Modifies flags: DF
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   cld (dst, src) {
     this.cpu.reg16[regFlags] &= ~FLAG_DF_MASK;
@@ -308,8 +308,8 @@ export default class Operations {
    *
    * Modifies flags: IF
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   cli (dst, src) {
     this.cpu.reg16[regFlags] &= ~FLAG_IF_MASK;
@@ -322,8 +322,8 @@ export default class Operations {
    *
    * Modifies flags: IF
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   cmc (dst, src) {
     if ((this.cpu.reg16[regFlags] & FLAG_CF_MASK) === 0) {
@@ -1538,8 +1538,18 @@ export default class Operations {
     return result;
   }
 
+  /**
+   * NOP (No Operation) causes the CPU to do nothing. Nap does not affect any
+   * flags.
+   *   - [1] p.2-48
+   *
+   * Modifies flags: NONE
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   nop (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    // Do nothing
   }
 
   /**
@@ -1809,6 +1819,11 @@ export default class Operations {
         this.cpu.reg16[regIP] = this.pop16();
         break;
     }
+
+    // HACK! Or... is it?
+    // The way the cycle code is structured we will end up with the IP being
+    // incremented by the instruction base size if we don't reset it.
+    this.cpu.cycleIP = 0;
   }
 
   /**
@@ -2155,8 +2170,8 @@ export default class Operations {
    *
    * Modifies flags: CF
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   stc (dst, src) {
     this.cpu.reg16[regFlags] |= FLAG_CF_MASK
@@ -2170,8 +2185,8 @@ export default class Operations {
    *
    * Modifies flags: DF
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   std (dst, src) {
     this.cpu.reg16[regFlags] |= FLAG_DF_MASK
@@ -2187,8 +2202,8 @@ export default class Operations {
    *
    * Modifies flags: IF
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   sti (dst, src) {
     this.cpu.reg16[regFlags] |= FLAG_IF_MASK
@@ -2325,6 +2340,9 @@ export default class Operations {
   /**
    * Push a value onto the stack. SP is decremented by two and the value is
    * stored at regSS:regSP
+   *
+   * SP is decremented first
+   *   - [4] 4-508
    *
    * @param {number} value Word value to push onto the stack
    */

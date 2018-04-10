@@ -103,18 +103,18 @@ Processor Control 2-47
 flag
 	√ CLC
 	√ CMC
-	  STC
+	√ STC
 	√ CLD
-	  STD
+	√ STD
 	√ CLI
-	  STI
+	√ STI
 external sync
 	  HLT
 	  WAIT
 	  ESC
 	  LOCK
 no operation
-	  NOP
+	√ NOP
 
 
 

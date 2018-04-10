@@ -14,7 +14,59 @@ import {
 import { binString8, binString16, hexString8, hexString16, formatOpcode} from './emu/Debug'
 
 winston.level = 'debug';
+// let logger = new (winston.Logger)({
+//   levels: {
+//     error: 0,
+//     warn: 1,
+//     info: 2,
+//     verbose: 3,
+//     debug: 4,
+//     silly: 5
+//   },
+//   colors: {
+//     error: 'red',
+//     warn: 'yellow',
+//     info: 'grey',
+//     verbose: 'cyan',
+//     debug: 'blue',
+//     silly: 'green'
+//     // trace: 'magenta',
+//   }
+// });
+//
+// logger.add(winston.transports.Console, {
+//   level: 'debug',
+//   prettyPrint: true,
+//   colorize: true,
+//   silent: false,
+//   timestamp: false
+// });
+//
+// const alignedWithColorsAndTime = winston.format.combine(
+//   winston.format.colorize(),
+//   winston.format.timestamp(),
+//   winston.format.align(),
+//   winston.format.printf((info) => {
+//     const {
+//       timestamp, level, message, ...args
+//     } = info;
+//
+//     const ts = timestamp.slice(0, 19).replace('T', ' ');
+//     return `${ts} [${level}]: ${message} ${Object.keys(args).length ? JSON.stringify(args, null, 2) : ''}`;
+//   }),
+// );
 
+// logger.add(winston.transports.File, {
+//   prettyPrint: false,
+//   level: 'info',
+//   silent: false,
+//   colorize: true,
+//   timestamp: true,
+//   filename: './nKindler.log',
+//   maxsize: 40000,
+//   maxFiles: 10,
+//   json: false
+// });
 let codegolf = [
   0x81, 0xFC, 0x00, 0x01, 0x74, 0x01, 0xF4, 0xBC, 0x00, 0x10, 0xB0, 0x2E, 0xBB,
   0x00, 0x00, 0x4B, 0x83, 0xFB, 0xFF, 0x75, 0xF1, 0xE8, 0x51, 0x01, 0x43, 0x75,
@@ -56,7 +108,7 @@ let codegolf = [
 
 // Setup
 let config = new CPUConfig({
-  memorySize: 1024,
+  memorySize: 2**16,
 });
 let cpu = new CPU8086(config);
 
@@ -66,9 +118,10 @@ for (let i = 0; i < codegolf.length; i++) {
 }
 cpu.reg16[regIP] = 0;
 cpu.reg16[regSP] = 0x100;
+cpu.reg16[regCS] = 0x0000;
 
 // Run
-for (let i = 0; i <= 26; i++) {
+for (let i = 0; i <= 20; i++) {
   winston.log("debug", "-".repeat(80));
   cpu.cycle();
   // readlineSync.question('Continue [ENTER]:');

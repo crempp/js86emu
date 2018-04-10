@@ -17,8 +17,8 @@ import {
   b, w, v, u,
 } from './Constants';
 import {
-  binString8, binString16, hexString8, hexString16, formatOpcode,
-  formatMemory, formatFlags, formatRegisters
+  hexString16, formatOpcode, formatMemory, formatFlags, formatRegisters,
+  formatStack
 } from './Debug'
 
 export default class CPU8086 extends CPU {
@@ -605,18 +605,18 @@ export default class CPU8086 extends CPU {
 
     winston.log("debug", "  INSTRUCTION: " +  this.opcode.string);
     winston.log("debug", "  CS:IP:       " + hexString16(this.reg16[regCS]) + ":" + hexString16(this.reg16[regIP]));
-    winston.log("debug", "  MEMORY:      " + "\n" + formatMemory(this.mem8, segIP(this), segIP(this) + 13, 11));
-    winston.log("debug", "  OPCODE:      " + formatOpcode(this.opcode, 17));
-    winston.log("debug", "  FLAGS:       " + formatFlags(this.reg16[regFlags], 17));
-    winston.log("debug", "  REGISTERS    " + formatRegisters(this, 17));
+    winston.log("debug", "  OPCODE:      " + "\n" + formatOpcode(this.opcode, 11));
+    winston.log("debug", "  MEMORY INST: " + "\n" + formatMemory(this.mem8, segIP(this), segIP(this) + 6, 11));
+    // winston.log("debug", "  MEMORY STACK:" + "\n" + formatStack(this.mem8, seg2abs(this.reg16[regSS], this.reg16[regSP], this), 11));
+    winston.log("debug", "  MEMORY STACK:" + "\n" + formatStack(this.mem8, this.reg16[regSP], 0x1000, 11));
+    winston.log("debug", "  REGISTERS    " + "\n" + formatRegisters(this, 11));
+    winston.log("debug", "  FLAGS:       " + "\n" + formatFlags(this.reg16[regFlags], 11));
 
     // Increase the cycleIp by the instruction base size
     this.cycleIP += this.opcode.inst.baseSize;
 
     // Run the instruction
-    let result = this.opcode.inst.run();
-
-    winston.log("debug", "  result: " + hexString16(result));
+    this.opcode.inst.run();
 
     // Move the IP
     this.reg16[regIP] += this.cycleIP;
