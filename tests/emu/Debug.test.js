@@ -1,5 +1,5 @@
-import CPU8086 from '../../src/emu/8086';
-import CPUConfig from '../../src/emu/CPUConfig';
+import CPU8086 from '../../src/emu/cpu/8086';
+import CPUConfig from '../../src/emu/cpu/CPUConfig';
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
   regAX, regBX, regCX, regDX,

@@ -3,7 +3,9 @@
 * Review what flags each inst modifies
 * Fix Ep and Mp segments - still need done?
 * move to proper instructions for prefixes
-*
+* look into prepack.io optimizer
+* Video drivers (console, canvas, ...)
+* Refactor CPU state as a class
 
 Data Transfer 2-31
 ------------------

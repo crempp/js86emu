@@ -7,14 +7,15 @@
   "repository": "https://github.com/crempp/js86emu",
   "main": "compiled.js",
   "dependencies": {
-    "readline-sync": "^1.4.9",
+    "bson": "^2.0.5",
     "winston": "^2.4.0"
   },
   "devDependencies": {
     "babel-cli": "^6.22.2",
     "babel-plugin-transform-builtin-extend": "^1.1.2",
     "babel-preset-env": "^1.1.8",
-    "jest": "^19.0.2"
+    "jest": "^19.0.2",
+    "jest-each": "^0.3.1"
   },
   "scripts": {
     "build": "babel src -d dist --source-maps --presets env",

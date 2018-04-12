@@ -1,8 +1,7 @@
-import winston from 'winston';
-
-import CPU8086 from '../../src/emu/8086';
-import Addressing from '../../src/emu/addressing';
-import CPUConfig from '../../src/emu/CPUConfig';
+import each from 'jest-each';
+import CPU8086 from '../../src/emu/cpu/8086';
+import CPUConfig from '../../src/emu/cpu/CPUConfig';
+import {regCS, regIP, regSP} from "../../src/emu/Constants";
 
 describe('Code Golf', () => {
   let codegolf_bin = [
@@ -45,15 +44,24 @@ describe('Code Golf', () => {
     0x00];
 
   let config = new CPUConfig({
-    memorySize: 1024,
+    memorySize: 2**16,
   });
   let cpu = new CPU8086(config);
+  cpu.reg16[regIP] = 0;
+  cpu.reg16[regSP] = 0x100;
+  cpu.reg16[regCS] = 0x0000;
 
   for (let i = 0; i < codegolf_bin.length; i++) {
     cpu.mem8[i] = codegolf_bin[i];
   }
 
-  test('cycle 1', () => {
+  let cycles = [];
+  for (let i = 0; i < 50; i++) {
+    cycles.push([i]);
+  }
 
+  each(cycles).test('cycle %s', () => {
+    cpu.cycle();
+    expect(cpu.getState()).toMatchSnapshot()
   });
 });

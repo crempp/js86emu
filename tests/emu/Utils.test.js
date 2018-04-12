@@ -1,8 +1,8 @@
 import winston from 'winston';
 
-import CPU8086 from '../../src/emu/8086';
-import Addressing from '../../src/emu/addressing';
-import CPUConfig from '../../src/emu/CPUConfig';
+import CPU8086 from '../../src/emu/cpu/8086';
+import Addressing from '../../src/emu/cpu/Addressing';
+import CPUConfig from '../../src/emu/cpu/CPUConfig';
 import { seg2abs } from "../../src/emu/Utils";
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
