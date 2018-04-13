@@ -7,6 +7,7 @@
 * Video drivers (console, canvas, ...)
 * Refactor CPU state as a class
 * add register values to CPUConfig (and more?)
+* Add a cycle param to inst class?
 
 Data Transfer 2-31
 ------------------

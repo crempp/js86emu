@@ -49,7 +49,8 @@ export const FLAG_OF_MASK = 0x0800; // 11
 export const b = 0; // Byte
 export const w = 1; // Word
 export const v = 2; // Varies
-export const u = 3; // Unknown
+export const d = 3; // Double Word
+export const u = 4; // Unknown
 
 export const PARITY = [
   /*         0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
