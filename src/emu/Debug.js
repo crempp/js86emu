@@ -55,15 +55,20 @@ export function formatOpcode(opcode, indentSize=0) {
   let str = "";
   let indent = " ".repeat(indentSize);
 
+  let addressBin = opcode.addressing_byte ? binString8(opcode.addressing_byte) : "        ";
+  let modBin = opcode.mod ? binString8(opcode.mod).slice(-2) : "  ";
+  let rmBin = opcode.rm ? binString8(opcode.rm).slice(-3) : "   ";
+  let regBin = opcode.reg ? binString8(opcode.reg).slice(-3) : "   ";
+
   str += indent + "opcode:  " + binString8(opcode.opcode_byte) + "[" + hexString8(opcode.opcode_byte) + "]    ";
-  str += "address: " + binString8(opcode.addressing_byte) + "[" + hexString8(opcode.addressing_byte) + "]\n";
+  str += "address: " + addressBin + "[" + hexString8(opcode.addressing_byte) + "]\n";
   str += indent + "prefix:  " + binString8(opcode.prefix) + "[" + hexString8(opcode.prefix) + "]    ";
   str += "opcode:  " + binString8(opcode.opcode) + "[" + hexString8(opcode.opcode) + "]\n";
   str += indent + "d:       " + "       " + binString8(opcode.d).slice(-1) + "[" + hexString8(opcode.d) + "]    ";
   str += "w:       " + "       " + binString8(opcode.w).slice(-1) + "[" + hexString8(opcode.w) + "]\n";
-  str += indent + "mod:     " + "      " + binString8(opcode.mod).slice(-2) + "[" + hexString8(opcode.mod) + "]    ";
-  str += "reg:     " + "     " + binString8(opcode.reg).slice(-3) + "[" + hexString8(opcode.reg) + "]\n";
-  str += indent + "rm:      " + "     " + binString8(opcode.rm).slice(-3) + "[" + hexString8(opcode.rm) + "]    ";
+  str += indent + "mod:     " + "      " + modBin + "[" + hexString8(opcode.mod) + "]    ";
+  str += "reg:     " + "     " + regBin + "[" + hexString8(opcode.reg) + "]\n";
+  str += indent + "rm:      " + "     " + rmBin + "[" + hexString8(opcode.rm) + "]    ";
   let size;
   if (opcode.addrSize === b) size = 'b';
   else if (opcode.addrSize === w) size = 'w';

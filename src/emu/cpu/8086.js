@@ -5,15 +5,12 @@ import Addressing from './Addressing.js'
 import CPU from './CPU';
 import { CPUConfigException } from '../Exceptions';
 import CPUConfig from './CPUConfig';
-import { seg2abs, segIP } from "../Utils";
+import { segIP } from "../Utils";
 import {
-  regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
   regAX, regBX, regCX, regDX,
   regSI, regDI, regBP, regSP, regIP,
   regCS, regDS, regES, regSS,
   regFlags,
-  FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
-  FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
   b, w, v, u,
 } from '../Constants';
 import {
@@ -503,33 +500,39 @@ export default class CPU8086 extends CPU {
    */
   decode () {
     let opcode_byte = this.mem8[segIP(this)];
-    // TODO: only get addressing_byte if baseSize >1 else null
-    let addressing_byte = this.mem8[segIP(this) + 1];
     this.opcode = {
       opcode_byte     : opcode_byte,
-      addressing_byte : addressing_byte,
+      addressing_byte : null,
       prefix          : 0x00,  // Not supporting prefix opcodes yet
       opcode          : (opcode_byte & 0xFC) >>> 2,
       d               : (opcode_byte & 0x02) >>> 1,
       w               : (opcode_byte & 0x01),
-      mod             : (addressing_byte & 0xC0) >>> 6,
-      reg             : (addressing_byte & 0x38) >>> 3,
-      rm              : (addressing_byte & 0x07),
+      mod             : null,
+      reg             : null,
+      rm              : null,
       inst            : null,
       string          : "",
       addrSize        : null,
+      isGroup         : (this.inst[opcode_byte] instanceof Array),
     };
 
     // Retrieve the operation from the opcode table
     this.opcode.inst = this.inst[this.opcode.opcode_byte];
-    if (this.opcode.inst instanceof Array) {
-      // If the instruction is an array it's a group instruction and we need
-      // to extract further based on the register component of the addressing
-      // byte
+
+    if (this.opcode.isGroup || this.opcode.inst.baseSize > 1) {
+      this.opcode.addressing_byte = this.mem8[segIP(this) + 1];
+      this.opcode.mod = (this.opcode.addressing_byte & 0xC0) >>> 6;
+      this.opcode.reg = (this.opcode.addressing_byte & 0x38) >>> 3;
+      this.opcode.rm = (this.opcode.addressing_byte & 0x07);
+    }
+
+    // If the instruction is an array it's a group instruction and we need
+    // to extract further based on the register component of the addressing
+    // byte
+    if (this.opcode.isGroup) {
       this.opcode.inst = this.opcode.inst[this.opcode.reg];
     }
 
-    // Store the string representation of the operation
     this.opcode.string = this.opcode.inst.toString();
 
     // Get the size and type of the opcode based on the addressing
@@ -613,7 +616,6 @@ export default class CPU8086 extends CPU {
     winston.log("debug", "  CS:IP:       " + hexString16(this.reg16[regCS]) + ":" + hexString16(this.reg16[regIP]));
     winston.log("debug", "  OPCODE:      " + "\n" + formatOpcode(this.opcode, 11));
     winston.log("debug", "  MEMORY INST: " + "\n" + formatMemory(this.mem8, segIP(this), segIP(this) + 6, 11));
-    // winston.log("debug", "  MEMORY STACK:" + "\n" + formatStack(this.mem8, seg2abs(this.reg16[regSS], this.reg16[regSP], this), 11));
     winston.log("debug", "  MEMORY STACK:" + "\n" + formatStack(this.mem8, this.reg16[regSP], 0x1000, 11));
     winston.log("debug", "  REGISTERS    " + "\n" + formatRegisters(this, 11));
     winston.log("debug", "  FLAGS:       " + "\n" + formatFlags(this.reg16[regFlags], 11));
@@ -628,50 +630,5 @@ export default class CPU8086 extends CPU {
     this.reg16[regIP] += this.cycleIP;
 
     this.cycleCount += 1;
-  }
-
-  /**
-   * Assemble the current CPU state in an object and return it.
-   *
-   * @return {Object} State encoded in an object
-   */
-  getState () {
-    let tmpOpcode = this.opcode;
-    delete tmpOpcode.inst;
-
-    return {
-      "cycleCount": this.cycleCount,
-      "addrSeg":    this.addrSeg,
-      "repType":    this.repType,
-      "cycleIP":    this.cycleIP,
-      "mem16":       this.mem16,//.buffer,
-      "reg16":       this.reg16,//.buffer,
-      "opcode":     tmpOpcode,
-    };
-  }
-
-  /**
-   * Restore the CPU state from the given object
-   *
-   * @param state
-   */
-  setState (state) {
-    // load all stateful attributes from bjson
-    // this could/should go in a parent class
-    this.cycleCount = state["cycleCount"];
-    this.addrSeg    = state["addrSeg"];
-    this.repType    = state["repType"];
-    this.cycleIP    = state["cycleIP"];
-    this.mem16      = new Uint16Array(state["mem16"]);
-    this.reg16      = new Uint16Array(state["reg16"]);
-    this.opcode     = state["opcode"];
-
-    // TODO: Refactor this so it's not copy/pasted
-    // The instruction function is not saved/restored correctly from bjson so
-    // we need to reset it.
-    this.opcode.inst = this.inst[this.opcode.opcode_byte];
-    if (this.opcode.inst instanceof Array) {
-      this.opcode.inst = this.opcode.inst[this.opcode.reg];
-    }
   }
 }

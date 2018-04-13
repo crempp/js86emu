@@ -2006,7 +2006,7 @@ describe('Addressing Modes', () => {
   describe('M', () => {
     beforeEach(() => {
       cpu.reg16[regDI] = 0x9ABC;
-      cpu.mem8[0xABCD0] = 0xFF; // inst (byte)
+      cpu.mem8[0xABCD0] = 0x8D; // inst (byte)
       cpu.mem8[0xABCD1] = 0b10000101; // addr mode
       cpu.mem8[0xABCD2] = 0x34; // segment byte high
       cpu.mem8[0xABCD3] = 0x12; // segment byte low
@@ -2030,7 +2030,7 @@ describe('Addressing Modes', () => {
 
   describe('Mp', () => {
     beforeEach(() => {
-      cpu.mem8[0xABCD0] = 0xFF; // inst (byte)
+      cpu.mem8[0xABCD0] = 0xC4; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000110; // addr mode
       cpu.mem8[0xABCD2] = 0x34; // segment byte high
       cpu.mem8[0xABCD3] = 0x12; // segment byte low

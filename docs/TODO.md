@@ -6,6 +6,7 @@
 * look into prepack.io optimizer
 * Video drivers (console, canvas, ...)
 * Refactor CPU state as a class
+* add register values to CPUConfig (and more?)
 
 Data Transfer 2-31
 ------------------

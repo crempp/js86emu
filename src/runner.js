@@ -63,7 +63,7 @@ cpu.reg16[regCS] = 0x0000;
 
 winston.level = 'debug';
 
-for (let i = 0; i <= 4; i++) {
+for (let i = 0; i <= 40; i++) {
   winston.log("debug", "-".repeat(80));
 
   cpu.cycle();

@@ -245,6 +245,18 @@ describe('Debug formatters', () => {
         "mod:           10[0x02]    reg:          101[0x05]\n" +
         "rm:           010[0x02]    size:           w");
     });
+
+    test('formatOpcode() should handle null addressing byte', () => {
+      cpu.mem8[0xABCD0] = 0x0E;       // inst (byte)
+      cpu.mem8[0xABCD1] = 0x00;       // addr mode
+      cpu.decode();
+      expect(formatOpcode(cpu.opcode)).toBe(
+        "opcode:  00001110[0x0E]    address:         [NULL]\n" +
+        "prefix:  00000000[0x00]    opcode:  00000011[0x03]\n" +
+        "d:              1[0x01]    w:              0[0x00]\n" +
+        "mod:             [NULL]    reg:             [NULL]\n" +
+        "rm:              [NULL]    size:           w");
+    })
   });
 
   describe('formatMemory()', () => {
