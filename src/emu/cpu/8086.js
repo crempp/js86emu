@@ -1,5 +1,3 @@
-// import winston from 'winston';
-
 import Operations from './Operations.js'
 import Addressing from './Addressing.js'
 import CPU from './CPU';
@@ -23,7 +21,7 @@ const DEBUG = false;
 export default class CPU8086 extends CPU {
   constructor(config) {
     super();
-    // winston.log("debug", "8086.constructor()       :");
+    // console.log(8086.constructor()       :");
 
     // Validate config
     if (!(config instanceof CPUConfig)) {
@@ -93,7 +91,7 @@ export default class CPU8086 extends CPU {
     let addr = new Addressing(this);
     let oper = new Operations(this);
 
-    // winston.log("debug", "8086.constructor()       : Creating instruction table");
+    // console.log("8086.constructor()       : Creating instruction table");
 
     /**
      * Wrapper class for instructions. I don't think I can move this to a
@@ -508,21 +506,20 @@ export default class CPU8086 extends CPU {
     // Retrieve the operation from the opcode table
     let instruction = this.inst[opcode_byte];
 
-    this.opcode = {
-      opcode_byte     : opcode_byte,
-      addressing_byte : null,
-      prefix          : 0x00,  // Not supporting prefix opcodes yet
-      opcode          : (opcode_byte & 0xFC) >>> 2,
-      d               : (opcode_byte & 0x02) >>> 1,
-      w               : (opcode_byte & 0x01),
-      mod             : null,
-      reg             : null,
-      rm              : null,
-      inst            : instruction,
-      string          : "",
-      addrSize        : null,
-      isGroup         : (instruction instanceof Array),
-    };
+    // this.opcode = {
+    this.opcode["opcode_byte"]     = opcode_byte;
+    this.opcode["addressing_byte"] = null;
+    this.opcode["prefix"]          = 0x00;  // Not supporting prefix opcodes yet
+    this.opcode["opcode"]          = (opcode_byte & 0xFC) >>> 2;
+    this.opcode["d"]               = (opcode_byte & 0x02) >>> 1;
+    this.opcode["w"]               = (opcode_byte & 0x01);
+    this.opcode["mod"]             = null;
+    this.opcode["reg"]             = null;
+    this.opcode["rm"]              = null;
+    this.opcode["inst"]            = instruction;
+    this.opcode["string"]          = "";
+    this.opcode["addrSize"]        = null;
+    this.opcode["isGroup"]         = (instruction instanceof Array);
 
     // If this instruction has an addressing mode byte decode it
     if (this.opcode.isGroup || this.opcode.inst.baseSize > 1) {
@@ -606,13 +603,13 @@ export default class CPU8086 extends CPU {
     // If this is a prefix instruction, run it and move to the next instruction
     this.prefix();
 
-    // winston.log("debug", "  INSTRUCTION: " +  this.opcode.string);
-    // winston.log("debug", "  CS:IP:       " + hexString16(this.reg16[regCS]) + ":" + hexString16(this.reg16[regIP]));
-    // winston.log("debug", "  OPCODE:      " + "\n" + formatOpcode(this.opcode, 11));
-    // winston.log("debug", "  MEMORY INST: " + "\n" + formatMemory(this.mem8, segIP(this), segIP(this) + 6, 11));
-    // winston.log("debug", "  MEMORY STACK:" + "\n" + formatStack(this.mem8, this.reg16[regSP], 0x1000, 11));
-    // winston.log("debug", "  REGISTERS    " + "\n" + formatRegisters(this, 11));
-    // winston.log("debug", "  FLAGS:       " + "\n" + formatFlags(this.reg16[regFlags], 11));
+    // console.log("  INSTRUCTION: " +  this.opcode.string);
+    // console.log("  CS:IP:       " + hexString16(this.reg16[regCS]) + ":" + hexString16(this.reg16[regIP]));
+    // console.log("  OPCODE:      " + "\n" + formatOpcode(this.opcode, 11));
+    // console.log("  MEMORY INST: " + "\n" + formatMemory(this.mem8, segIP(this), segIP(this) + 6, 11));
+    // console.log("  MEMORY STACK:" + "\n" + formatStack(this.mem8, this.reg16[regSP], 0x1000, 11));
+    // console.log("  REGISTERS    " + "\n" + formatRegisters(this, 11));
+    // console.log("  FLAGS:       " + "\n" + formatFlags(this.reg16[regFlags], 11));
 
     // Increase the cycleIp by the instruction base size
     this.cycleIP += this.opcode.inst.baseSize;

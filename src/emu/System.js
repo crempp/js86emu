@@ -1,4 +1,3 @@
-// import winston from 'winston'
 import CPUConfig from "./cpu/CPUConfig";
 import CPU8086 from "./cpu/8086";
 import {
@@ -54,8 +53,8 @@ export default class System {
     this.prevTiming = process.hrtime();
 
     while (cyclesToRun === null || cyclesToRun-- > 0) {
-      // winston.log("debug", "-".repeat(80 - 7));
-      // winston.log("debug", "8086.cycle()             : Running instruction cycle [" + this.cycleCount + "]");
+      // console.log("-".repeat(80 - 7));
+      // console.log("8086.cycle()             : Running instruction cycle [" + this.cycleCount + "]");
 
       // if (this.cpu.state === STATE_PAUSED) {
       //   break;

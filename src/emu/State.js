@@ -1,4 +1,3 @@
-import winston from 'winston'
 import BSON from 'bson';
 
 export default class State {
@@ -11,9 +10,7 @@ export default class State {
     let data = bson.serialize(state);
 
     fs.writeFile(file, data, (err) => {
-      // throws an error, you could also catch it here
       if (err) throw err;
-      winston.log("info", 'state saved!');
     });
   }
 

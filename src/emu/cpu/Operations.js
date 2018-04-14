@@ -1,4 +1,3 @@
-// import winston from 'winston';
 import {seg2abs, signExtend} from "../utils/Utils";
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
@@ -2349,7 +2348,7 @@ export default class Operations {
   }
 
   notimp () {
-    // winston.log("info", "Operations - Instruction not implemented");
+    // console.log(Operations - Instruction not implemented");
     console.log("Operations - Instruction not implemented")
   };
 
