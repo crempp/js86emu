@@ -52,6 +52,15 @@ export const v = 2; // Varies
 export const d = 3; // Double Word
 export const u = 4; // Unknown
 
+export const STATE_RUNNING = 0;
+export const STATE_HALT    = 1;
+
+export const NS_PER_SEC = 1e9;
+// ...
+// PAUSED, STOPPED???
+
+export const FONT_PATH = "files/fonts/";
+
 export const PARITY = [
   /*         0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
   /* 0x00 */ 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,

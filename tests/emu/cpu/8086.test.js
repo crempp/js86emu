@@ -1,7 +1,7 @@
 import winston from 'winston'
 
 import CPU8086 from '../../../src/emu/cpu/8086';
-import {CPUConfigException} from '../../../src/emu/Exceptions';
+import {CPUConfigException} from '../../../src/emu/utils/Exceptions';
 import CPUConfig from "../../../src/emu/cpu/CPUConfig";
 
 winston.level = 'warn';

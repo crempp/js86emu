@@ -12,12 +12,12 @@ import {
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
 } from '../../../src/emu/Constants';
-import {InvalidAddressModeException, ValueOverflowException} from "../../../src/emu/Exceptions";
+import {InvalidAddressModeException, ValueOverflowException} from "../../../src/emu/utils/Exceptions";
 import {
   formatOpcode, hexString8, hexString16, hexString32, formatFlags,
   formatMemory, formatRegisters
-} from "../../../src/emu/Debug";
-import {segIP} from "../../../src/emu/Utils";
+} from "../../../src/emu/utils/Debug";
+import {segIP} from "../../../src/emu/utils/Utils";
 
 winston.level = 'warn';
 

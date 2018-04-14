@@ -84,3 +84,16 @@ npm install git+https://github.com/sweet-js/sweet.js.git
 
 ./node_modules/.bin/jest tests/8086.test.js
 node dist/runner.js
+
+
+## Graphics drivers
+```
+$ brew install pkg-config gd
+$ npm install node-gd
+```
+
+## Profiling
+```
+node --prof ./dist/runner.js
+node --prof-process isolate-0x102801e00-v8.log
+```

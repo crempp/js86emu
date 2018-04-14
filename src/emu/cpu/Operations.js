@@ -1,5 +1,5 @@
-import winston from 'winston';
-import {seg2abs, signExtend} from "../Utils";
+// import winston from 'winston';
+import {seg2abs, signExtend} from "../utils/Utils";
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
   regAX, regBX, regCX, regDX,
@@ -9,9 +9,9 @@ import {
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
   b, w, v, u,
-  PARITY,
+  PARITY, STATE_HALT,
 } from '../Constants';
-import { FeatureNotImplementedException } from "../Exceptions";
+import { FeatureNotImplementedException } from "../utils/Exceptions";
 
 export default class Operations {
   constructor(cpu) {
@@ -481,8 +481,23 @@ export default class Operations {
   es (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * HLT (Halt) causes the 8086/8088 to enter the halt state. The processor
+   * leaves the halt state upon activation of the RESET line, upon receipt of a
+   * non-maskable interrupt request on NMI, or, if interrupts are enabled, upon
+   * receipt of a maskable interrupt request on INTR. HLT does not affect any
+   * flags. It may be used as an alternative to an endless software loop in
+   * situations where a program must wait for an interrupt.
+   *   - [1] p.2-37
+   *
+   * Modifies flags: None
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   hlt (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.state = STATE_HALT;
   }
 
   /**
@@ -2334,7 +2349,8 @@ export default class Operations {
   }
 
   notimp () {
-    winston.log("info", "Operations - Instruction not implemented");
+    // winston.log("info", "Operations - Instruction not implemented");
+    console.log("Operations - Instruction not implemented")
   };
 
   /**

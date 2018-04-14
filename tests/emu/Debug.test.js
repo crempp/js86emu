@@ -13,8 +13,8 @@ import {
   binString8, binString16, binString32,
   hexString8, hexString16, hexString32,
   formatOpcode, formatFlags, formatMemory, formatRegisters
-} from "../../src/emu/Debug";
-import { ValueOverflowException, ValueUnderflowException } from "../../src/emu/Exceptions";
+} from "../../src/emu/utils/Debug";
+import { ValueOverflowException, ValueUnderflowException } from "../../src/emu/utils/Exceptions";
 
 describe('Debug helpers', () => {
   describe('binString8()', () => {

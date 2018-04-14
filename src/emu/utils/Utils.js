@@ -1,3 +1,4 @@
+import PNG from 'png-js';
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
   regAX, regBX, regCX, regDX,
@@ -6,7 +7,7 @@ import {
   regFlags,
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
-} from './Constants';
+} from '../Constants';
 import { hexString16, hexString32 } from "./Debug";
 
 /**
@@ -83,4 +84,18 @@ export function signExtend(value) {
   else {
     return value;
   }
+}
+
+/**
+ * Load a PNG file in a wat that supports async and both node and browser.
+ *
+ * @param {string} path Path to the file.
+ * @return {Promise<any>} Promise to be fulfilled when the file is loaded.
+ */
+export function loadPNGAwait (path) {
+  return new Promise(resolve => {
+    PNG.decode(path, function(pixels) {
+      resolve(pixels);
+    });
+  });
 }

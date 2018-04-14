@@ -6,7 +6,7 @@ import {
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
   b, w, v, u,
-} from './Constants';
+} from '../Constants';
 import { ValueOverflowException, ValueUnderflowException } from "./Exceptions";
 
 export function binString8 (value) {

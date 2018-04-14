@@ -14,9 +14,10 @@ export default class CPU {
       "addrSeg":    this.addrSeg,
       "repType":    this.repType,
       "cycleIP":    this.cycleIP,
-      "mem16":       this.mem16,//.buffer,
-      "reg16":       this.reg16,//.buffer,
+      "mem16":      this.mem16,
+      "reg16":      this.reg16,
       "opcode":     tmpOpcode,
+      "state":      this.state,
     };
   }
 
@@ -33,6 +34,7 @@ export default class CPU {
     this.mem16      = new Uint16Array(state["mem16"]);
     this.reg16      = new Uint16Array(state["reg16"]);
     this.opcode     = state["opcode"];
+    this.state      = state["state"];
 
     // TODO: Refactor this so it's not copy/pasted
     // The instruction function is not saved/restored correctly from bjson so

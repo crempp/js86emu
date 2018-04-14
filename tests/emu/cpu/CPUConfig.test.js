@@ -1,7 +1,7 @@
 import winston from 'winston';
 
 import CPUConfig from "../../../src/emu/cpu/CPUConfig";
-import {CPUConfigException} from '../../../src/emu/Exceptions';
+import {CPUConfigException} from '../../../src/emu/utils/Exceptions';
 
 winston.level = 'warn';
 

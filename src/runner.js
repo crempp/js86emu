@@ -1,13 +1,6 @@
-import winston from 'winston'
-import CPUConfig from './emu/cpu/CPUConfig'
-import CPU8086 from './emu/cpu/8086.js'
-import {
-  regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
-  regAX, regBX, regCX, regDX,
-  regSI, regDI, regBP, regSP, regIP,
-  regCS, regDS, regES, regSS,
-} from './emu/Constants';
-
+// import winston from 'winston'
+import System from "./emu/System";
+import "babel-polyfill";
 let codegolf = [
   0x81, 0xFC, 0x00, 0x01, 0x74, 0x01, 0xF4, 0xBC, 0x00, 0x10, 0xB0, 0x2E, 0xBB,
   0x00, 0x00, 0x4B, 0x83, 0xFB, 0xFF, 0x75, 0xF1, 0xE8, 0x51, 0x01, 0x43, 0x75,
@@ -47,94 +40,10 @@ let codegolf = [
   0x6C, 0x6C, 0x6F, 0x2C, 0x20, 0x77, 0x6F, 0x72, 0x6C, 0x64, 0x21, 0x00, 0x00,
   0x00];
 
-// Setup
-let config = new CPUConfig({
-  memorySize: 2**16,
+// winston.level = 'debug';
+
+let system = new System();
+system.boot().then( () => {
+  system.run(20000);
+  process.exit();
 });
-let cpu = new CPU8086(config);
-
-// Load program
-for (let i = 0; i < codegolf.length; i++) {
-  cpu.mem8[i] = codegolf[i];
-}
-cpu.reg16[regIP] = 0;
-cpu.reg16[regSP] = 0x100;
-cpu.reg16[regCS] = 0x0000;
-
-winston.level = 'debug';
-
-for (let i = 0; i <= 40; i++) {
-  winston.log("debug", "-".repeat(80));
-
-  cpu.cycle();
-}
-
-// Misc code
-//
-// function writeState(state, file) {
-//   let bson = new BSON();
-//   let data = bson.serialize(state);
-//
-//   fs.writeFile(file, data, (err) => {
-//     // throws an error, you could also catch it here
-//     if (err) throw err;
-//     winston.log("info", 'state saved!');
-//   });
-// }
-//
-// function loadState(file) {
-//   let bson = new BSON();
-//   let data = fs.readFileSync(file);
-//   return bson.deserialize(data);
-// }
-//
-// let compareStates = (givenState, expectedState) => {
-//   let diff = "";
-//   let same = true;
-//
-//   // let reg16 = new Uint16Array(givenState.reg8.buffer);
-//
-//   let registersWord = {regAX, regBX, regCX, regDX, regSI, regDI, regBP, regSP, regIP, regCS, regDS, regES, regSS};
-//
-//   if (givenState.cycleCount !== expectedState.cycleCount) {
-//     same = false;
-//     diff += "CYCLE COUNT: " + givenState.cycleCount + " (given) != " + expectedState.cycleCount + " (expected)\n";
-//   }
-//   if (givenState.addrSeg !== expectedState.addrSeg) {
-//     same = false;
-//     diff += "ADDR SEG: " + givenState.addrSeg + " (given) != " + expectedState.addrSeg + " (expected)\n";
-//   }
-//   if (givenState.repType !== expectedState.repType) {
-//     same = false;
-//     diff += "REP TYPE: " + givenState.repType + " (given) != " + expectedState.repType + " (expected)\n";
-//   }
-//   if (givenState.cycleIP !== expectedState.cycleIP) {
-//     same = false;
-//     diff += "CYCLE IP: " + givenState.cycleIP + " (given) != " + expectedState.cycleIP + " (expected)\n";
-//   }
-//
-//   for (let k in givenState.opcode) {
-//     if (givenState.opcode[k] !== expectedState.opcode[k]) {
-//       same = false;
-//       diff += "OPCODE: [" + k + "] " + givenState.opcode[k] + " (given) != " + expectedState.opcode[k] + " (expected)\n";
-//     }
-//   }
-//
-//   // Compare memory addresses
-//   for (let i = 0; i < givenState.mem16.length; i++) {
-//     if (givenState.mem16[i] !== expectedState.mem16[i]) {
-//       same = false;
-//       diff += "MEM: [" + hexString16(i) + "] " + hexString16(givenState.mem16[i]) + " (given) != " + hexString16(expectedState.mem16[i]) + " (expected)\n";
-//     }
-//   }
-//
-//   // Compare registers
-//   for (let reg in registersWord) {
-//     if (givenState.mem16[registersWord[reg]] !== expectedState.mem16[registersWord[reg]]) {
-//       same = false;
-//       diff += "REG: [" + reg + "] " + hexString16(givenState.mem16[registersWord[reg]]) + " (given) != " + hexString16(expectedState.mem16[registersWord[reg]]) + " (expected)\n";
-//     }
-//   }
-//
-//   return [same, diff];
-// };

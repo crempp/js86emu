@@ -1,27 +1,29 @@
-import winston from 'winston';
+// import winston from 'winston';
 
 import Operations from './Operations.js'
 import Addressing from './Addressing.js'
 import CPU from './CPU';
-import { CPUConfigException } from '../Exceptions';
+import { CPUConfigException } from '../utils/Exceptions';
 import CPUConfig from './CPUConfig';
-import { segIP } from "../Utils";
+import { segIP } from "../utils/Utils";
 import {
   regAX, regBX, regCX, regDX,
   regSI, regDI, regBP, regSP, regIP,
   regCS, regDS, regES, regSS,
   regFlags,
-  b, w, v, d, u,
+  b, w, v, d, u, STATE_HALT,
 } from '../Constants';
 import {
   hexString16, formatOpcode, formatMemory, formatFlags, formatRegisters,
   formatStack
-} from '../Debug'
+} from '../utils/Debug'
+
+const DEBUG = false;
 
 export default class CPU8086 extends CPU {
   constructor(config) {
     super();
-    winston.log("debug", "8086.constructor()       :");
+    // winston.log("debug", "8086.constructor()       :");
 
     // Validate config
     if (!(config instanceof CPUConfig)) {
@@ -30,10 +32,9 @@ export default class CPU8086 extends CPU {
     config.validate();
 
     /**
-     * CPU cycle counter. This tracks the number of instruction cycles the CPU
-     * has executed.
+     * CPU frequency in hertz (cyles per second).
      */
-    this.cycleCount = 0;
+    this.frequency = 10 * 1024**2; // 10 Mhz
 
     /**
      * Segment register to use for addressing. Typically it is assumed to be
@@ -52,6 +53,11 @@ export default class CPU8086 extends CPU {
      * increment the instruction pointer during the instruction execution.
      */
     this.cycleIP = 0;
+
+    /**
+     * The CPU state.
+     */
+    this.state = STATE_HALT;
 
     // Memory
     this.mem8 = new Uint8Array(config.memorySize);
@@ -87,15 +93,12 @@ export default class CPU8086 extends CPU {
     let addr = new Addressing(this);
     let oper = new Operations(this);
 
-    winston.log("debug", "8086.constructor()       : Creating instruction table");
+    // winston.log("debug", "8086.constructor()       : Creating instruction table");
 
     /**
      * Wrapper class for instructions. I don't think I can move this to a
      * module because I need to close over oper and addr for binding and I
      * don't want to make the signature messy by passing them in.
-     *
-     *  TODO:
-     *    -
      */
     class inst {
       constructor(op, baseSize, addrSize, dst, src) {
@@ -537,7 +540,7 @@ export default class CPU8086 extends CPU {
     }
 
     this.opcode.addrSize = this.opcode.inst.addrSize;
-    this.opcode.string = this.opcode.inst.toString();
+    if (DEBUG) this.opcode.string = this.opcode.inst.toString();
   }
 
   // TODO: I don't like this. Move this back into operations if possible
@@ -593,8 +596,6 @@ export default class CPU8086 extends CPU {
    * Run a single CPU cycle
    */
   cycle () {
-    winston.log("debug", "8086.cycle()             : Running instruction cycle [" + this.cycleCount + "]");
-
     // Reset per-cycle values
     this.cycleIP = 0;
     this.addrSeg = regDS;
@@ -605,13 +606,13 @@ export default class CPU8086 extends CPU {
     // If this is a prefix instruction, run it and move to the next instruction
     this.prefix();
 
-    winston.log("debug", "  INSTRUCTION: " +  this.opcode.string);
-    winston.log("debug", "  CS:IP:       " + hexString16(this.reg16[regCS]) + ":" + hexString16(this.reg16[regIP]));
-    winston.log("debug", "  OPCODE:      " + "\n" + formatOpcode(this.opcode, 11));
-    winston.log("debug", "  MEMORY INST: " + "\n" + formatMemory(this.mem8, segIP(this), segIP(this) + 6, 11));
-    winston.log("debug", "  MEMORY STACK:" + "\n" + formatStack(this.mem8, this.reg16[regSP], 0x1000, 11));
-    winston.log("debug", "  REGISTERS    " + "\n" + formatRegisters(this, 11));
-    winston.log("debug", "  FLAGS:       " + "\n" + formatFlags(this.reg16[regFlags], 11));
+    // winston.log("debug", "  INSTRUCTION: " +  this.opcode.string);
+    // winston.log("debug", "  CS:IP:       " + hexString16(this.reg16[regCS]) + ":" + hexString16(this.reg16[regIP]));
+    // winston.log("debug", "  OPCODE:      " + "\n" + formatOpcode(this.opcode, 11));
+    // winston.log("debug", "  MEMORY INST: " + "\n" + formatMemory(this.mem8, segIP(this), segIP(this) + 6, 11));
+    // winston.log("debug", "  MEMORY STACK:" + "\n" + formatStack(this.mem8, this.reg16[regSP], 0x1000, 11));
+    // winston.log("debug", "  REGISTERS    " + "\n" + formatRegisters(this, 11));
+    // winston.log("debug", "  FLAGS:       " + "\n" + formatFlags(this.reg16[regFlags], 11));
 
     // Increase the cycleIp by the instruction base size
     this.cycleIP += this.opcode.inst.baseSize;
@@ -621,7 +622,5 @@ export default class CPU8086 extends CPU {
 
     // Move the IP
     this.reg16[regIP] += this.cycleIP;
-
-    this.cycleCount += 1;
   }
 }

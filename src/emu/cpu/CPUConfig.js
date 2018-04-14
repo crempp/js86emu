@@ -4,7 +4,7 @@
  * The CPU configuration class which serves as a container for CPU parameters.
  *
  */
-import { CPUConfigException } from '../Exceptions';
+import { CPUConfigException } from '../utils/Exceptions';
 
 const DEFAULTS = {
   memorySize: 65536,
