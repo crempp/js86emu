@@ -1,5 +1,3 @@
-import winston from 'winston';
-
 import CPU8086 from '../../../src/emu/cpu/8086';
 import Addressing from '../../../src/emu/cpu/Addressing';
 import CPUConfig from '../../../src/emu/cpu/CPUConfig';
@@ -18,8 +16,6 @@ import {
   formatMemory, formatRegisters
 } from "../../../src/emu/utils/Debug";
 import {segIP} from "../../../src/emu/utils/Utils";
-
-winston.level = 'warn';
 
 // TODO: writeMem8 and readMem8 - should be the same
 // TODO: writeMem16 and readMem16 - should be the same

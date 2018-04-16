@@ -1,10 +1,6 @@
-import winston from 'winston'
-
 import CPU8086 from '../../../src/emu/cpu/8086';
 import {CPUConfigException} from '../../../src/emu/utils/Exceptions';
 import CPUConfig from "../../../src/emu/cpu/CPUConfig";
-
-winston.level = 'warn';
 
 test('can create a cpu instance', () => {
   expect(new CPU8086(new CPUConfig())).toBeInstanceOf(CPU8086);

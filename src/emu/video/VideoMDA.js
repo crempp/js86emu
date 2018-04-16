@@ -11,10 +11,7 @@ export default class VideoMDA {
     this.memStart        = 0x8000;
     this.memSize         = 4 * 1024; // 4k
     this.font            = [];
-    this.renderer        = null;
-
-    this.fontWidth       = 9;
-    this.fontHeight      = 14;
+    
     this.screenWidth     = 720;
     this.screenHeight    = 350;
     this.textModeColumns = 80;
@@ -23,22 +20,25 @@ export default class VideoMDA {
 
     this.fontFiles = [
       {
-        "file"     : "mda_cp_437",
-        "width"    : 288,
-        "height"   : 112,
-        "FG_LIGHT" : 0xAA,
-        "BG_DARK"  : 0x00,
+        "file"       : "mda_cp_437",
+        "width"      : null,
+        "height"     : null,
+        "fontWidth"  : 9,
+        "fontHeight" : 14,
+        "FG_LIGHT"   : 0xAA,
+        "BG_DARK"    : 0x00,
       }
     ];
     this.selectedFont = this.fontFiles[0];
   }
 
-  async init (renderer) {
-    this.renderer = renderer;
+  async init () {
 
     // Load font
     let path = `${FONT_PATH}${this.selectedFont["file"]}.png`;
     let fontImage = await loadPNGAwait(path);
+    this.selectedFont["width"] = fontImage.width;
+    this.selectedFont["height"] = fontImage.height;
     this.buildFontTable(fontImage);
   }
 
@@ -46,8 +46,8 @@ export default class VideoMDA {
     let fontCounter = 0;
     let imageWidth  = this.selectedFont["width"];
     let imageHeight = this.selectedFont["height"];
-    let fontsAcross = (imageWidth / this.fontWidth);
-    let fontsDown   = (imageHeight / this.fontHeight);
+    let fontsAcross = (imageWidth / this.selectedFont["fontWidth"]);
+    let fontsDown   = (imageHeight / this.selectedFont["fontHeight"]);
     this.font = Array(fontsAcross * fontsDown);
 
     for ( let y = 0; y < fontsDown; y++) {
@@ -55,17 +55,17 @@ export default class VideoMDA {
         let glyph = [];
 
         // Now loop through the pixels of the font
-        for ( let fy = 0; fy < this.fontHeight; fy++) {
+        for ( let fy = 0; fy < this.selectedFont["fontHeight"]; fy++) {
           // Build an array for this row of the font
-          let glyphRow = new Uint8Array(this.fontWidth);
+          let glyphRow = new Uint8Array(this.selectedFont["fontWidth"]);
 
-          for ( let fx = 0; fx < this.fontWidth; fx++) {
+          for ( let fx = 0; fx < this.selectedFont["fontWidth"]; fx++) {
             // Calculate the memory offset
-            let glyphOffset = ( ((y * this.fontHeight) + fy) * imageWidth + ((x * this.fontWidth) + fx) ) * 4;
+            let glyphOffset = ( ((y * this.selectedFont["fontHeight"]) + fy) * imageWidth + ((x * this.selectedFont["fontWidth"]) + fx) ) * 4;
 
             // The font files should be black & white so we just need
             // to check of one channel has a non-zero value
-            if (fontImage[glyphOffset] !== 0) {
+            if (fontImage.data[glyphOffset] !== 0) {
               glyphRow[fx] = 0;
             }
             else {
@@ -82,8 +82,12 @@ export default class VideoMDA {
   }
 
   scan () {
-    let imageWidth  = this.selectedFont["width"];
-    let imageHeight = this.selectedFont["height"];
+    // let fontWidth  = this.selectedFont["width"];
+    // let fontHeight = this.selectedFont["height"];
+    let fontWidth = this.selectedFont["fontWidth"];
+    let fontHeight = this.selectedFont["fontHeight"];
+
+    let screenData  = new Uint8Array(this.screenWidth * this.screenHeight * 4);
 
     let attribute_offset;
     if (this.use_attribute_bit) attribute_offset = 2;
@@ -94,27 +98,28 @@ export default class VideoMDA {
         let memoryOffset = this.memStart + ( (r * this.textModeColumns) + c ) * attribute_offset;
 
         let glyph = this.font[this.mem8[memoryOffset]];
-        let attr  = this.mem8[memoryOffset + 1];
+        // let attr  = this.mem8[memoryOffset + 1];
 
         //console.log("off = ", memoryOffset, " val=(", gfxMem[memoryOffset], ",", gfxMem[memoryOffset + 1], ")");
 
         // Now loop through the pixels of the font
-        for ( let fy = 0; fy < this.fontHeight; fy++) {
+        for ( let fy = 0; fy < fontHeight; fy++) {
           let glyphRow = glyph[fy];
 
-          for ( let fx = 0; fx < this.fontWidth; fx++) {
+          for ( let fx = 0; fx < fontWidth; fx++) {
             // Calculate the memory offset
-            let screenOffset = ( ((r * this.fontHeight) + fy) * imageWidth + ((c * this.fontWidth) + fx) ) * 4;
+            let screenOffset = ( ((r * fontHeight) + fy) * this.screenWidth + ((c * fontWidth) + fx) ) * 4;
 
             let value = (0xFF === glyphRow[fx]) ? this.selectedFont["FG_LIGHT"] : this.selectedFont["BG_DARK"];
-            imageData.data[screenOffset]     = value; // Red
-            imageData.data[screenOffset + 1] = value; // Blue
-            imageData.data[screenOffset + 2] = value; // Green
-            imageData.data[screenOffset + 3] = 255;   // Alpha
+
+            screenData[screenOffset]     = value; // Red
+            screenData[screenOffset + 1] = value; // Blue
+            screenData[screenOffset + 2] = value; // Green
+            screenData[screenOffset + 3] = 255;   // Alpha
           }
         }
       }
     }
-    this.renderer.render(screen);
+    this.renderer.render(screenData, this.screenWidth, this.screenHeight);
   }
 }

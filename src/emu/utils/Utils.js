@@ -1,4 +1,6 @@
-import PNG from 'png-js';
+import { PNG } from 'pngjs';
+import fs from 'fs';
+
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
   regAX, regBX, regCX, regDX,
@@ -88,14 +90,17 @@ export function signExtend(value) {
 
 /**
  * Load a PNG file in a wat that supports async and both node and browser.
+ * NOTE: This is no longer asynchronous. Could easily make so again.
  *
  * @param {string} path Path to the file.
  * @return {Promise<any>} Promise to be fulfilled when the file is loaded.
  */
 export function loadPNGAwait (path) {
   return new Promise(resolve => {
-    PNG.decode(path, function(pixels) {
-      resolve(pixels);
+    let data = fs.readFileSync(path);
+    let png = PNG.sync.read(data, {
+      filterType: -1
     });
+    resolve(png);
   });
 }

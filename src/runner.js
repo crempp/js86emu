@@ -39,8 +39,15 @@ let codegolf = [
   0x6C, 0x6C, 0x6F, 0x2C, 0x20, 0x77, 0x6F, 0x72, 0x6C, 0x64, 0x21, 0x00, 0x00,
   0x00];
 
+global.DEBUG = true;
+
 let system = new System();
+
+system.loadMem(codegolf, 0x00);
+
 system.boot().then( () => {
-  system.run(20000);
+  system.run(200000);
   process.exit();
+}).catch( (error) => {
+  console.error(error);
 });

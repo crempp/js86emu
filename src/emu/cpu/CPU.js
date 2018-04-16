@@ -10,7 +10,6 @@ export default class CPU {
     delete tmpOpcode.inst;
 
     return {
-      "cycleCount": this.cycleCount,
       "addrSeg":    this.addrSeg,
       "repType":    this.repType,
       "cycleIP":    this.cycleIP,
@@ -27,7 +26,6 @@ export default class CPU {
    * @param state
    */
   setState (state) {
-    this.cycleCount = state["cycleCount"];
     this.addrSeg    = state["addrSeg"];
     this.repType    = state["repType"];
     this.cycleIP    = state["cycleIP"];
