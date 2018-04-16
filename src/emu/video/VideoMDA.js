@@ -11,7 +11,7 @@ export default class VideoMDA {
     this.memStart        = 0x8000;
     this.memSize         = 4 * 1024; // 4k
     this.font            = [];
-    
+
     this.screenWidth     = 720;
     this.screenHeight    = 350;
     this.textModeColumns = 80;

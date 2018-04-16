@@ -46,7 +46,7 @@ let system = new System();
 system.loadMem(codegolf, 0x00);
 
 system.boot().then( () => {
-  system.run(200000);
+  system.run(200);
   process.exit();
 }).catch( (error) => {
   console.error(error);

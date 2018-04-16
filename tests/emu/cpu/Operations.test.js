@@ -92,7 +92,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x00FF] = 0x15;
       cpu.mem8[0x0100] = 0x34;
       cpu.mem8[0x0101] = 0x12;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.decode();
       oper.adc(addr.AX.bind(addr), addr.Iv.bind(addr));
 
@@ -111,7 +111,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x00FF] = 0x15;
       cpu.mem8[0x0100] = 0x34;
       cpu.mem8[0x0101] = 0x12;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.decode();
       oper.adc(addr.AX.bind(addr), addr.Iv.bind(addr));
 
@@ -130,7 +130,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x00FF] = 0x15;
       cpu.mem8[0x0100] = 0x35;
       cpu.mem8[0x0101] = 0x12;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.decode();
       oper.adc(addr.AX.bind(addr), addr.Iv.bind(addr));
 
@@ -149,7 +149,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x00FF] = 0x15;
       cpu.mem8[0x0100] = 0xFF;
       cpu.mem8[0x0101] = 0xFF;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.decode();
       oper.adc(addr.AX.bind(addr), addr.Iv.bind(addr));
 
@@ -168,7 +168,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x00FF] = 0x15;
       cpu.mem8[0x0100] = 0xFF;
       cpu.mem8[0x0101] = 0xFF;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.decode();
       oper.adc(addr.AX.bind(addr), addr.Iv.bind(addr));
 
@@ -187,7 +187,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x00FF] = 0x15;
       cpu.mem8[0x0100] = 0x00;
       cpu.mem8[0x0101] = 0x80;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.decode();
       oper.adc(addr.AX.bind(addr), addr.Iv.bind(addr));
 
@@ -216,7 +216,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x00FF] = 0x83; // inst
       cpu.mem8[0x0100] = 0b11010011; // addr
       cpu.mem8[0x0101] = 0xFF; // oper low
-      cpu.cycleIP = 2;
+      cpu.instIPInc = 2;
       cpu.decode();
       oper.adc(addr.Ev.bind(addr), addr.Ib.bind(addr));
 
@@ -239,7 +239,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x00FF] = 0x05;
       cpu.mem8[0x0100] = 0x34;
       cpu.mem8[0x0101] = 0x12;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.decode();
       oper.add(addr.AX.bind(addr), addr.Iv.bind(addr));
 
@@ -257,7 +257,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x00FF] = 0x05;
       cpu.mem8[0x0100] = 0x35;
       cpu.mem8[0x0101] = 0x12;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.decode();
       oper.add(addr.AX.bind(addr), addr.Iv.bind(addr));
 
@@ -275,7 +275,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x00FF] = 0x05;
       cpu.mem8[0x0100] = 0xFF;
       cpu.mem8[0x0101] = 0xFF;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.decode();
       oper.add(addr.AX.bind(addr), addr.Iv.bind(addr));
 
@@ -293,7 +293,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x00FF] = 0x05;
       cpu.mem8[0x0100] = 0xFF;
       cpu.mem8[0x0101] = 0xFF;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.decode();
       oper.add(addr.AX.bind(addr), addr.Iv.bind(addr));
 
@@ -311,7 +311,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x00FF] = 0x05;
       cpu.mem8[0x0100] = 0x00;
       cpu.mem8[0x0101] = 0x80;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.decode();
       oper.add(addr.AX.bind(addr), addr.Iv.bind(addr));
 
@@ -330,7 +330,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x00FF] = 0x83; // inst
       cpu.mem8[0x0100] = 0b11000011; // addr
       cpu.mem8[0x0101] = 0xFF; // oper low
-      cpu.cycleIP = 2;
+      cpu.instIPInc = 2;
       cpu.decode();
       oper.add(addr.Ev.bind(addr), addr.Ib.bind(addr));
 
@@ -350,7 +350,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x000FF] = 0x25; // inst (byte)
       cpu.mem8[0x00100] = 0x21; // oper low
       cpu.mem8[0x00101] = 0x34; // oper high
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
 
       cpu.decode();
       oper.and(addr.AX.bind(addr), addr.Iv.bind(addr));
@@ -359,7 +359,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
-      expect(cpu.cycleIP).toBe(3);
+      expect(cpu.instIPInc).toBe(3);
     });
   });
 
@@ -375,7 +375,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x00102] = 0xBC; // v2 high
       cpu.mem8[0x00103] = 0x9A; // v2 low
       cpu.decode();
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       oper.call(addr.Ap.bind(addr), null);
 
       // CS on stack
@@ -387,15 +387,15 @@ describe('Operation methods', () => {
       // CS and IP updated to called location
       expect(cpu.reg16[regCS]).toBe(0x5678);
       expect(cpu.reg16[regIP]).toBe(0x9ABC);
-      expect(cpu.cycleIP).toBe(5);
+      expect(cpu.instIPInc).toBe(5);
     });
     test('CALL Jv (near) positive offset', () => {
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.mem8[0x000FF] = 0xE8; // inst (byte)
       cpu.mem8[0x00100] = 0x34; // segment byte high
       cpu.mem8[0x00101] = 0x12; // segment byte low
       cpu.decode();
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       oper.call(addr.Jv.bind(addr), null);
 
       // IP on stack
@@ -404,15 +404,15 @@ describe('Operation methods', () => {
       // CS and IP updated to called location
       expect(cpu.reg16[regCS]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x1234);
-      expect(cpu.cycleIP).toBe(3);
+      expect(cpu.instIPInc).toBe(3);
     });
     test('CALL Jv (near) negative offset', () => {
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.mem8[0x000FF] = 0xE8; // inst (byte)
       cpu.mem8[0x00100] = 0xF6; // segment byte high
       cpu.mem8[0x00101] = 0xFF; // segment byte low
       cpu.decode();
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       oper.call(addr.Jv.bind(addr), null);
 
       // IP on stack
@@ -421,7 +421,7 @@ describe('Operation methods', () => {
       // CS and IP updated to called location
       expect(cpu.reg16[regCS]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0xFF - 0x0A);
-      expect(cpu.cycleIP).toBe(3);
+      expect(cpu.instIPInc).toBe(3);
     });
     test('CALL Ev (near)', () => {
       cpu.mem8[0x000FF] = 0xFF; // inst (byte)
@@ -436,7 +436,7 @@ describe('Operation methods', () => {
       // CS and IP updated to called location
       expect(cpu.reg16[regCS]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0x1234);
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.instIPInc).toBe(0);
     });
     test('CALL Ep (far)', () => {
       cpu.mem8[0x000FF] = 0xFF; // inst (byte)
@@ -458,7 +458,7 @@ describe('Operation methods', () => {
       // CS and IP updated to called location
       expect(cpu.reg16[regIP]).toBe(0x5678);
       expect(cpu.reg16[regCS]).toBe(0x9ABC);
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.instIPInc).toBe(0);
     });
   });
 
@@ -529,7 +529,7 @@ describe('Operation methods', () => {
     beforeEach(() => {
       // CMP AX,iv
       cpu.mem8[0x00FF] = 0x3D;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
     test('dst > src', () => {
       //  0x1235 > 0x1234
@@ -592,23 +592,6 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
-    });
-    test.skip('[regression] dst (word) = src (byte) both are negative', () => {
-      // SUB AX,iv
-      cpu.reg16[regBX] = 0xFFFF;
-      cpu.mem8[0x00FF] = 0x83;
-      cpu.mem8[0x0100] = 0xFB;
-      cpu.mem8[0x0101] = 0xFF;
-      cpu.decode();
-      oper.sub(addr.Ev.bind(addr), addr.Ib.bind(addr));
-
-      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
-      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
-      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
-      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBeGreaterThan(0);
-      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
-      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
-      expect(cpu.reg16[regBX]).toBe(0x0000);
     });
   });
 
@@ -820,7 +803,7 @@ describe('Operation methods', () => {
       // JA Jb
       cpu.mem8[0x00FF] = 0x77;
       cpu.mem8[0x0100] = 0x12;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
 
     test('jump executes if ZF = 0, CF = 0', () => {
@@ -828,7 +811,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.ja(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump executes if ZF = 0, CF = 1', () => {
@@ -836,7 +819,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.ja(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump executes if ZF = 1, CF = 0', () => {
@@ -844,7 +827,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.ja(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump does not execute if ZF = 1, CF = 1', () => {
@@ -852,7 +835,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.ja(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -861,7 +844,7 @@ describe('Operation methods', () => {
       // JB Jb
       cpu.mem8[0x00FF] = 0x72;
       cpu.mem8[0x0100] = 0x12;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
 
     test('jump executes if CF=1', () => {
@@ -869,7 +852,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jb(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump does not execute if CF=0', () => {
@@ -877,7 +860,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jb(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -886,7 +869,7 @@ describe('Operation methods', () => {
       // JA Jb
       cpu.mem8[0x00FF] = 0x76;
       cpu.mem8[0x0100] = 0x12;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
 
     test('jump does not execute if ZF = 0, CF = 0', () => {
@@ -894,7 +877,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jbe(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump executes if ZF = 0, CF = 1', () => {
@@ -902,7 +885,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jbe(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump executes if ZF = 1, CF = 0', () => {
@@ -910,7 +893,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jbe(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump executes if ZF = 1, CF = 1', () => {
@@ -918,7 +901,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jbe(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -927,7 +910,7 @@ describe('Operation methods', () => {
       // JCXZ Jb
       cpu.mem8[0x00FF] = 0xE3;
       cpu.mem8[0x0100] = 0x12;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
 
     test('jump executes if CX=1', () => {
@@ -935,7 +918,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jcxz(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump does not execute if CX<>0', () => {
@@ -943,7 +926,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jcxz(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -952,7 +935,7 @@ describe('Operation methods', () => {
       // JG Jb
       cpu.mem8[0x00FF] = 0x76;
       cpu.mem8[0x0100] = 0x12;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
 
     test('jump executes if OF=0, SF=0, ZF=0', () => {
@@ -960,7 +943,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jg(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump executes if OF=0, SF=0, ZF=1', () => {
@@ -968,7 +951,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jg(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump executes if OF=0, SF=1, ZF=0', () => {
@@ -976,7 +959,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jg(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump does not execute if OF=0, SF=1, ZF=1', () => {
@@ -984,7 +967,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jg(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump executes if OF=1, SF=0, ZF=0', () => {
@@ -992,7 +975,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jg(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump executes if OF=1, SF=1, ZF=0', () => {
@@ -1000,7 +983,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jg(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump executes if OF=1, SF=1, ZF=1', () => {
@@ -1008,7 +991,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jg(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -1017,7 +1000,7 @@ describe('Operation methods', () => {
       // JGE Jb
       cpu.mem8[0x00FF] = 0x7D;
       cpu.mem8[0x0100] = 0x12;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
 
     test('jump executes if SF=0, OF=0', () => {
@@ -1025,7 +1008,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jge(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump does not execute if SF=0, OF=1', () => {
@@ -1033,7 +1016,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jge(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump does not execute if SF=1, OF=0', () => {
@@ -1041,7 +1024,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jge(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump executes if SF=1, OF=1', () => {
@@ -1049,7 +1032,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jge(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -1058,7 +1041,7 @@ describe('Operation methods', () => {
       // JL Jb
       cpu.mem8[0x00FF] = 0x7C;
       cpu.mem8[0x0100] = 0x12;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
 
     test('jump does not execute if SF=0, OF=0', () => {
@@ -1066,7 +1049,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jl(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump executes if SF=0, OF=1', () => {
@@ -1074,7 +1057,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jl(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump executes if SF=1, OF=0', () => {
@@ -1082,7 +1065,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jl(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump does not execute if SF=1, OF=1', () => {
@@ -1090,7 +1073,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jl(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -1099,7 +1082,7 @@ describe('Operation methods', () => {
       // JLE Jb
       cpu.mem8[0x00FF] = 0x7E;
       cpu.mem8[0x0100] = 0x12;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
 
     test('jump does not execute if OF=0, SF=0, ZF=0', () => {
@@ -1107,7 +1090,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jle(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump executes if OF=0, SF=0, ZF=1', () => {
@@ -1115,7 +1098,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jle(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump executes if OF=0, SF=1, ZF=0', () => {
@@ -1123,7 +1106,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jle(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump executes if OF=0, SF=1, ZF=1', () => {
@@ -1131,7 +1114,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jle(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump executes if OF=1, SF=0, ZF=0', () => {
@@ -1139,7 +1122,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jle(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump does not execute if OF=1, SF=1, ZF=0', () => {
@@ -1147,7 +1130,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jle(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump executes if OF=1, SF=1, ZF=1', () => {
@@ -1155,13 +1138,13 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jle(addr.Jb.bind(addr), null);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
   describe('jmp', () => {
     test('JMP Jv (near) positive offset', () => {
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.mem8[0x000FF] = 0xE9; // inst (byte)
       cpu.mem8[0x00100] = 0x34; // segment byte high
       cpu.mem8[0x00101] = 0x12; // segment byte low
@@ -1170,10 +1153,10 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x1234);
-      expect(cpu.cycleIP).toBe(3);
+      expect(cpu.instIPInc).toBe(3);
     });
     test('JMP Jv (near) negative offset', () => {
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.mem8[0x000FF] = 0xE9; // inst (byte)
       cpu.mem8[0x00100] = 0xF6; // segment byte high
       cpu.mem8[0x00101] = 0xFF; // segment byte low
@@ -1182,10 +1165,10 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0xFF - 0x0A);
-      expect(cpu.cycleIP).toBe(3);
+      expect(cpu.instIPInc).toBe(3);
     });
     test('JMP Ap (far)', () => {
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.mem8[0x000FF] = 0xEA; // inst (byte)
       cpu.mem8[0x00100] = 0x78; // v1 high
       cpu.mem8[0x00101] = 0x56; // v1 low
@@ -1196,10 +1179,10 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCS]).toBe(0x5678);
       expect(cpu.reg16[regIP]).toBe(0x9ABC);
-      expect(cpu.cycleIP).toBe(5);
+      expect(cpu.instIPInc).toBe(5);
     });
     test('JMP Jb (short) positive offset', () => {
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.mem8[0x000FF] = 0xEB; // inst (byte)
       cpu.mem8[0x00100] = 0x56; // v1 low
       cpu.decode();
@@ -1207,10 +1190,10 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x56);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
     test('JMP Jb (short) negative offset', () => {
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.mem8[0x000FF] = 0xEB; // inst (byte)
       cpu.mem8[0x00100] = 0xF6; // v1 low
       cpu.decode();
@@ -1218,10 +1201,10 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0xFF - 0x0A);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
     test('JMP Ev (near)', () => {
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.mem8[0x000FF] = 0xFF; // inst (byte)
       cpu.mem8[0x00100] = 0b11100000; // addr mode
       cpu.reg16[regAX] = 0x1234;
@@ -1230,10 +1213,10 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0x1234);
-      expect(cpu.cycleIP).toBe(1);
+      expect(cpu.instIPInc).toBe(1);
     });
     test('JMP Mp (far)', () => {
-      cpu.cycleIP = 2;
+      cpu.instIPInc = 2;
       cpu.mem8[0x000FF] = 0xFF; // inst (byte)
       cpu.mem8[0x00100] = 0b00101100; // addr mode
       cpu.reg16[regSI] = 0x1234;
@@ -1246,7 +1229,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regIP]).toBe(0x5678);
       expect(cpu.reg16[regCS]).toBe(0x9ABC);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -1255,7 +1238,7 @@ describe('Operation methods', () => {
       // JNB Jb
       cpu.mem8[0x00FF] = 0x73;
       cpu.mem8[0x0100] = 0x12;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
 
     test('jump executes CF=0', () => {
@@ -1263,7 +1246,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jnb(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump does not execute if CF=1', () => {
@@ -1271,7 +1254,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jnb(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -1280,7 +1263,7 @@ describe('Operation methods', () => {
       // JNO Jb
       cpu.mem8[0x00FF] = 0x71;
       cpu.mem8[0x0100] = 0x12;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
 
     test('jump executes OF=0', () => {
@@ -1288,7 +1271,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jno(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump does not execute if OF=1', () => {
@@ -1296,7 +1279,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jno(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -1305,7 +1288,7 @@ describe('Operation methods', () => {
       // JNS Jb
       cpu.mem8[0x00FF] = 0x79;
       cpu.mem8[0x0100] = 0x12;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
 
     test('jump executes SF=0', () => {
@@ -1313,7 +1296,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jns(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump does not execute if SF=1', () => {
@@ -1321,7 +1304,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jns(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -1330,7 +1313,7 @@ describe('Operation methods', () => {
       // JNZ Jb
       cpu.mem8[0x00FF] = 0x75;
       cpu.mem8[0x0100] = 0x12;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
 
     test('jump executes ZF=0', () => {
@@ -1338,7 +1321,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jnz(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump does not execute if ZF=1', () => {
@@ -1346,7 +1329,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jnz(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -1355,7 +1338,7 @@ describe('Operation methods', () => {
       // JO Jb
       cpu.mem8[0x00FF] = 0x70;
       cpu.mem8[0x0100] = 0x12;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
 
     test('jump executes OF=1', () => {
@@ -1363,7 +1346,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jo(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump does not execute if OF=0', () => {
@@ -1371,7 +1354,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jo(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -1380,7 +1363,7 @@ describe('Operation methods', () => {
       // JPE Jb
       cpu.mem8[0x00FF] = 0x7A;
       cpu.mem8[0x0100] = 0x12;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
 
     test('jump executes PF=1', () => {
@@ -1388,7 +1371,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jpe(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump does not execute if PF=0', () => {
@@ -1396,7 +1379,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jpe(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -1405,7 +1388,7 @@ describe('Operation methods', () => {
       // JPO Jb
       cpu.mem8[0x00FF] = 0x7B;
       cpu.mem8[0x0100] = 0x12;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
 
     test('jump executes PF=0', () => {
@@ -1413,7 +1396,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jpo(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump does not execute if PF=1', () => {
@@ -1421,7 +1404,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jpo(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -1430,7 +1413,7 @@ describe('Operation methods', () => {
       // JS Jb
       cpu.mem8[0x00FF] = 0x78;
       cpu.mem8[0x0100] = 0x12;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
 
     test('jump executes SF=1', () => {
@@ -1438,7 +1421,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.js(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
 
     test('jump does not execute if SF=0', () => {
@@ -1446,7 +1429,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.js(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -1455,7 +1438,7 @@ describe('Operation methods', () => {
       // JZ Jb
       cpu.mem8[0x00FF] = 0x74;
       cpu.mem8[0x0100] = 0x12;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
 
     test('jump executes if ZF=0', () => {
@@ -1470,14 +1453,14 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jz(addr.Jb.bind(addr));
       expect(cpu.reg16[regIP]).toBe(0xFF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
   describe('lahf', () => {
     beforeEach(() => {
       cpu.mem8[0x00FF] = 0x9F; // inst
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.decode();
     });
 
@@ -1504,13 +1487,14 @@ describe('Operation methods', () => {
       cpu.mem8[0x04236] = 0xBC; // v2 high
       cpu.mem8[0x04237] = 0x9A; // v2 low
 
-      cpu.cycleIP = 2;
+      cpu.instIPInc = 2;
       cpu.decode();
       oper.lds(addr.Gv.bind(addr), addr.Mp.bind(addr));
 
       expect(cpu.reg16[regAX]).toBe(0x5678);
       expect(cpu.reg16[regDS]).toBe(0x9ABC);
-      expect(cpu.cycleIP).toBe(4);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(2);
     });
   });
 
@@ -1524,12 +1508,13 @@ describe('Operation methods', () => {
       cpu.mem8[0x0100] = 0b10010111; // addr
       cpu.mem8[0x0101] = 0x11; // oper high
       cpu.mem8[0x0102] = 0x22; // oper low
-      cpu.cycleIP = 2;
+      cpu.instIPInc = 2;
       cpu.decode();
       oper.lea(addr.Gv.bind(addr), addr.M.bind(addr));
 
       expect(cpu.reg16[regDX]).toBe(0x1234 + 0x2211);
-      expect(cpu.cycleIP).toBe(4);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(2);
     });
   });
 
@@ -1548,13 +1533,14 @@ describe('Operation methods', () => {
       cpu.mem8[0x04236] = 0xBC; // v2 high
       cpu.mem8[0x04237] = 0x9A; // v2 low
 
-      cpu.cycleIP = 2;
+      cpu.instIPInc = 2;
       cpu.decode();
       oper.les(addr.Gv.bind(addr), addr.Mp.bind(addr));
 
       expect(cpu.reg16[regAX]).toBe(0x5678);
       expect(cpu.reg16[regES]).toBe(0x9ABC);
-      expect(cpu.cycleIP).toBe(4);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(2);
     });
   });
   describe.skip('lock', () => {
@@ -1577,7 +1563,7 @@ describe('Operation methods', () => {
     beforeEach(() => {
       // LOOPNZ Jb
       cpu.mem8[0x00FF] = 0xE0;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
 
     test('LOOPNZ repeats positive offset', () => {
@@ -1589,7 +1575,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCX]).toBe(0x0008);
       expect(cpu.reg16[regIP]).toBe(0x00FF + 0x0012);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
     test('LOOPNZ repeats negative offset', () => {
       cpu.reg16[regCX] = 0x0009;
@@ -1600,7 +1586,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCX]).toBe(0x0008);
       expect(cpu.reg16[regIP]).toBe(0x00FF - 0x0A);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
     test('LOOPNZ stops repeating if CX reaches 0', () => {
       cpu.reg16[regCX] = 0x0001;
@@ -1611,7 +1597,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCX]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0x00FF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
     test('LOOPNZ stops repeating if ZF is set', () => {
       cpu.reg16[regCX] = 0x0001;
@@ -1622,7 +1608,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCX]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0x00FF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -1630,7 +1616,7 @@ describe('Operation methods', () => {
     beforeEach(() => {
       // LOOPZ Jb
       cpu.mem8[0x00FF] = 0xE1;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
 
     test('LOOPZ repeats positive offset', () => {
@@ -1642,7 +1628,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCX]).toBe(0x0008);
       expect(cpu.reg16[regIP]).toBe(0x00FF + 0x0012);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
     test('LOOPZ repeats negative offset', () => {
       cpu.reg16[regCX] = 0x0009;
@@ -1653,7 +1639,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCX]).toBe(0x0008);
       expect(cpu.reg16[regIP]).toBe(0x00FF - 0x0A);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
     test('LOOPZ stops repeating if CX reaches 0', () => {
       cpu.reg16[regCX] = 0x0001;
@@ -1664,7 +1650,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCX]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0x00FF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
     test('LOOPZ stops repeating if ZF is not set', () => {
       cpu.reg16[regCX] = 0x0001;
@@ -1675,7 +1661,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCX]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0x00FF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -1683,7 +1669,7 @@ describe('Operation methods', () => {
     beforeEach(() => {
       // LOOP Jb
       cpu.mem8[0x00FF] = 0xE2;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
 
     test('LOOP repeats positive offset', () => {
@@ -1694,7 +1680,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCX]).toBe(0x0008);
       expect(cpu.reg16[regIP]).toBe(0x00FF + 0x0012);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
     test('LOOP repeats negative offset', () => {
       cpu.reg16[regCX] = 0x0009;
@@ -1704,7 +1690,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCX]).toBe(0x0008);
       expect(cpu.reg16[regIP]).toBe(0x00FF - 0x0A);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
     test('LOOP stops repeating', () => {
       cpu.reg16[regCX] = 0x0001;
@@ -1714,7 +1700,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCX]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0x00FF);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -1722,7 +1708,7 @@ describe('Operation methods', () => {
     beforeEach(() => {
       // MOV AX,iv
       cpu.mem8[0x00FF] = 0xB8;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
     test('move word', () => {
       cpu.mem8[0x0100] = 0x34;
@@ -1735,7 +1721,7 @@ describe('Operation methods', () => {
 
     test('[regression] MOV Gv, Ev', () => {
       // mov di, WORD PTR ds:0x1D3
-      cpu.cycleIP = 2;
+      cpu.instIPInc = 2;
       cpu.mem8[0x00FF] = 0x8B; // Instruction
       cpu.mem8[0x0100] = 0x3E; // Addressing
       cpu.mem8[0x0101] = 0xD3; // Operand low
@@ -1748,7 +1734,8 @@ describe('Operation methods', () => {
       oper.mov(addr.Gv.bind(addr), addr.Ev.bind(addr));
 
       expect(cpu.reg16[regDI]).toBe(0xBBCC);
-      expect(cpu.cycleIP).toBe(4);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(2);
     });
   });
 
@@ -1861,7 +1848,7 @@ describe('Operation methods', () => {
   describe('nop', () => {
     test('NOP changes nothing', () => {
       cpu.mem8[0x000FF] = 0x90; // inst (byte)
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.decode();
       oper.nop(null, null);
 
@@ -1871,7 +1858,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regSS]).toBe(0x0400);
       expect(cpu.reg16[regSP]).toBe(0x0020);
       expect(cpu.reg16[regFlags]).toBe(0x0000);
-      expect(cpu.cycleIP).toBe(1);
+      expect(cpu.instIPInc).toBe(1);
     });
   });
 
@@ -1885,7 +1872,7 @@ describe('Operation methods', () => {
       oper.not(addr.Ev.bind(addr), null);
 
       expect(cpu.reg16[regAX]).toBe(0xEDCB);
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.instIPInc).toBe(0);
     });
   });
   describe('or', () => {
@@ -1894,7 +1881,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x000FF] = 0x0D; // inst (byte)
       cpu.mem8[0x00100] = 0x21; // oper low
       cpu.mem8[0x00101] = 0x34; // oper high
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
 
       cpu.decode();
       oper.or(addr.AX.bind(addr), addr.Iv.bind(addr));
@@ -1903,7 +1890,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
-      expect(cpu.cycleIP).toBe(3);
+      expect(cpu.instIPInc).toBe(3);
     });
   });
   describe.skip('out', () => {
@@ -1927,7 +1914,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regAX]).toBe(0x1234);
       expect(cpu.reg16[regSP]).toBe(0x0020);
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.instIPInc).toBe(0);
     });
   });
 
@@ -1946,7 +1933,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regFlags]).toBe(0xFEDC);
       expect(cpu.reg16[regSP]).toBe(0x0020);
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.instIPInc).toBe(0);
     });
   });
 
@@ -1964,7 +1951,7 @@ describe('Operation methods', () => {
       expect(cpu.mem8[0x401E]).toBe(0x34);
       expect(cpu.mem8[0x401F]).toBe(0x12);
       expect(cpu.reg16[regSP]).toBe(0x001E);
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.instIPInc).toBe(0);
     });
   });
 
@@ -1982,7 +1969,7 @@ describe('Operation methods', () => {
       expect(cpu.mem8[0x401E]).toBe(0xDC);
       expect(cpu.mem8[0x401F]).toBe(0xFE);
       expect(cpu.reg16[regSP]).toBe(0x001E);
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.instIPInc).toBe(0);
     });
   });
 
@@ -1992,7 +1979,7 @@ describe('Operation methods', () => {
       cpu.reg8[regAL] = 0b11100011; // 0xE3
       cpu.mem8[0x000FF] = 0xD0; // inst (byte)
       cpu.mem8[0x00100] = 0b11010000; // addr
-      cpu.cycleIP = 2;
+      cpu.instIPInc = 2;
 
       cpu.decode();
       oper.rcl(addr.Eb.bind(addr), addr._1.bind(addr));
@@ -2000,14 +1987,14 @@ describe('Operation methods', () => {
       expect(cpu.reg8[regAL]).toBe(0b11000110); // 0xC6
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
     test('RCL Eb 1 with carry', () => {
       cpu.reg16[regFlags] = 0b0000000000000001;
       cpu.reg8[regAL] = 0b11100011; // 0xE3
       cpu.mem8[0x000FF] = 0xD0; // inst (byte)
       cpu.mem8[0x00100] = 0b11010000; // addr
-      cpu.cycleIP = 2;
+      cpu.instIPInc = 2;
 
       cpu.decode();
       oper.rcl(addr.Eb.bind(addr), addr._1.bind(addr));
@@ -2015,7 +2002,7 @@ describe('Operation methods', () => {
       expect(cpu.reg8[regAL]).toBe(0b11000111); // 0xC6
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -2025,7 +2012,7 @@ describe('Operation methods', () => {
       cpu.reg8[regAL] = 0b11100011; // 0xE3
       cpu.mem8[0x000FF] = 0xD0; // inst (byte)
       cpu.mem8[0x00100] = 0b11011000; // addr
-      cpu.cycleIP = 2;
+      cpu.instIPInc = 2;
 
       cpu.decode();
       oper.rcr(addr.Eb.bind(addr), addr._1.bind(addr));
@@ -2033,14 +2020,14 @@ describe('Operation methods', () => {
       expect(cpu.reg8[regAL]).toBe(0b01110001); // 0xC6
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
     test('RCR Eb 1 with carry', () => {
       cpu.reg16[regFlags] = 0b0000000000000001;
       cpu.reg8[regAL] = 0b11100011; // 0xE3
       cpu.mem8[0x000FF] = 0xD0; // inst (byte)
       cpu.mem8[0x00100] = 0b11011000; // addr
-      cpu.cycleIP = 2;
+      cpu.instIPInc = 2;
 
       cpu.decode();
       oper.rcr(addr.Eb.bind(addr), addr._1.bind(addr));
@@ -2048,7 +2035,7 @@ describe('Operation methods', () => {
       expect(cpu.reg8[regAL]).toBe(0b11110001); // 0xC6
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
   describe.skip('repnz', () => {
@@ -2068,7 +2055,7 @@ describe('Operation methods', () => {
     });
 
     test('RET Iw', () => {
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.mem8[0x000FF] = 0xC2; // inst (byte)
       cpu.mem8[0x00100] = 0x01; // v1 high
       cpu.mem8[0x00101] = 0x01; // v1 low
@@ -2081,7 +2068,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regIP]).toBe(0x1234 + 0x0101);
       expect(cpu.reg16[regCS]).toBe(0x0000);
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.instIPInc).toBe(0);
     });
     test('RET', () => {
       cpu.mem8[0x000FF] = 0xC3; // inst (byte)
@@ -2093,7 +2080,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regIP]).toBe(0x1234);
       expect(cpu.reg16[regCS]).toBe(0x0000);
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.instIPInc).toBe(0);
     });
   });
 
@@ -2103,7 +2090,7 @@ describe('Operation methods', () => {
     });
 
     test('RETF Iw', () => {
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.mem8[0x000FF] = 0xCA; // inst (byte)
       cpu.mem8[0x00100] = 0x01; // v1 high
       cpu.mem8[0x00101] = 0x01; // v1 low
@@ -2118,7 +2105,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regIP]).toBe(0x1234 + 0x0101);
       expect(cpu.reg16[regCS]).toBe(0x0202);
-      expect(cpu.cycleIP).toBe(3);
+      expect(cpu.instIPInc).toBe(3);
     });
 
     test('RETF', () => {
@@ -2134,7 +2121,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regIP]).toBe(0x1234);
       expect(cpu.reg16[regCS]).toBe(0x0202);
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.instIPInc).toBe(0);
     });
   });
 
@@ -2143,7 +2130,7 @@ describe('Operation methods', () => {
       cpu.reg8[regAL] = 0b11100011; // 0xE3
       cpu.mem8[0x000FF] = 0xD0; // inst (byte)
       cpu.mem8[0x00100] = 0b11000000; // addr
-      cpu.cycleIP = 2;
+      cpu.instIPInc = 2;
 
       cpu.decode();
       oper.rol(addr.Eb.bind(addr), addr._1.bind(addr));
@@ -2151,7 +2138,7 @@ describe('Operation methods', () => {
       expect(cpu.reg8[regAL]).toBe(0b11000111); // 0xC7
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -2160,7 +2147,7 @@ describe('Operation methods', () => {
       cpu.reg8[regAL] = 0b11100011; // 0xE3
       cpu.mem8[0x000FF] = 0xD0; // inst (byte)
       cpu.mem8[0x00100] = 0b11001000; // addr
-      cpu.cycleIP = 2;
+      cpu.instIPInc = 2;
 
       cpu.decode();
       oper.ror(addr.Eb.bind(addr), addr._1.bind(addr));
@@ -2168,13 +2155,13 @@ describe('Operation methods', () => {
       expect(cpu.reg8[regAL]).toBe(0b11110001); // 0xF1
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
   describe('sahf', () => {
     beforeEach(() => {
       cpu.mem8[0x00FF] = 0x9E; // inst
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
       cpu.decode();
     });
 
@@ -2192,7 +2179,7 @@ describe('Operation methods', () => {
       cpu.reg8[regAL] = 0xE3;
       cpu.mem8[0x000FF] = 0xD0; // inst (byte)
       cpu.mem8[0x00100] = 0b11111000; // addr
-      cpu.cycleIP = 2;
+      cpu.instIPInc = 2;
 
       cpu.decode();
       oper.sar(addr.Eb.bind(addr), addr._1.bind(addr));
@@ -2203,7 +2190,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -2211,7 +2198,7 @@ describe('Operation methods', () => {
     beforeEach(() => {
       // SBB AX,iv
       cpu.mem8[0x00FF] = 0x1D;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
     test('dst > src', () => {
       //  0x1235 > 0x1234
@@ -2294,23 +2281,6 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regAX]).toBe(0x7FFE);
     });
-    test.skip('[regression] dst (word) = src (byte) both are negative', () => {
-      // SUB AX,iv
-      cpu.reg16[regBX] = 0xFFFF;
-      cpu.mem8[0x00FF] = 0x83;
-      cpu.mem8[0x0100] = 0xFB;
-      cpu.mem8[0x0101] = 0xFF;
-      cpu.decode();
-      oper.sub(addr.Ev.bind(addr), addr.Ib.bind(addr));
-
-      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
-      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
-      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
-      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBeGreaterThan(0);
-      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
-      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
-      expect(cpu.reg16[regBX]).toBe(0x0000);
-    });
   });
 
   describe.skip('scasb', () => {
@@ -2329,7 +2299,7 @@ describe('Operation methods', () => {
       cpu.reg8[regAL] = 0xE2;
       cpu.mem8[0x000FF] = 0xD0; // inst (byte)
       cpu.mem8[0x00100] = 0b11100000; // addr
-      cpu.cycleIP = 2;
+      cpu.instIPInc = 2;
 
       cpu.decode();
       oper.shl(addr.Eb.bind(addr), addr._1.bind(addr));
@@ -2340,7 +2310,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
 
@@ -2349,7 +2319,7 @@ describe('Operation methods', () => {
       cpu.reg8[regAL] = 0xE3;
       cpu.mem8[0x000FF] = 0xD0; // inst (byte)
       cpu.mem8[0x00100] = 0b11101000; // addr
-      cpu.cycleIP = 2;
+      cpu.instIPInc = 2;
 
       cpu.decode();
       oper.shr(addr.Eb.bind(addr), addr._1.bind(addr));
@@ -2360,7 +2330,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
-      expect(cpu.cycleIP).toBe(2);
+      expect(cpu.instIPInc).toBe(2);
     });
   });
   describe.skip('ss', () => {
@@ -2420,7 +2390,7 @@ describe('Operation methods', () => {
     beforeEach(() => {
       // SUB AX,iv
       cpu.mem8[0x00FF] = 0x2D;
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
 
     test('dst > src', () => {
@@ -2490,7 +2460,7 @@ describe('Operation methods', () => {
     test('[regression] dst (word) = src (byte) both are negative', () => {
       // SUB BX,iv
       // 0xFFFF - 0xFF = -1 - -1
-      cpu.cycleIP = 2;
+      cpu.instIPInc = 2;
       cpu.reg16[regBX] = 0xFFFF;
       cpu.mem8[0x00FF] = 0x83; // inst
       cpu.mem8[0x0100] = 0xFB; // addr
@@ -2498,13 +2468,41 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.sub(addr.Ev.bind(addr), addr.Ib.bind(addr));
 
+      expect(cpu.reg16[regBX]).toBe(0x0000);
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
-      expect(cpu.reg16[regBX]).toBe(0x0000);
+    });
+    test('[regression] immediate value for dst doesn\'t double count IP increments', () => {
+      // Data (dst)
+      cpu.mem8[0x31D3] = 0x78;
+      cpu.mem8[0x31D4] = 0x56;
+      // Reg (src)
+      cpu.reg16[regDI] = 0x1234;
+
+      // SUB Ev,Gv
+      cpu.instIPInc = 2;
+      cpu.mem8[0x00FF] = 0x29; // inst
+      cpu.mem8[0x0100] = 0b00111110; // addr
+      cpu.mem8[0x0101] = 0xD3; // oper low
+      cpu.mem8[0x0102] = 0x01; // oper high
+
+      cpu.decode();
+      oper.sub(addr.Ev.bind(addr), addr.Gv.bind(addr));
+
+      expect(cpu.mem8[0x31D3]).toBe(0x44);
+      expect(cpu.mem8[0x31D4]).toBe(0x44);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(2);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
   });
 
@@ -2514,7 +2512,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x000FF] = 0xA9; // inst (byte)
       cpu.mem8[0x00100] = 0x21; // oper low
       cpu.mem8[0x00101] = 0x34; // oper high
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
 
       cpu.decode();
       oper.test(addr.AX.bind(addr), addr.Iv.bind(addr));
@@ -2523,7 +2521,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
-      expect(cpu.cycleIP).toBe(3);
+      expect(cpu.instIPInc).toBe(3);
     });
   });
 
@@ -2535,7 +2533,7 @@ describe('Operation methods', () => {
 
   describe('xchg', () => {
     beforeEach(() => {
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
     });
     test('exchange CX AX', () => {
       cpu.mem8[0x00FF] = 0x91; // addr
@@ -2546,7 +2544,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCX]).toBe(0x5678);
       expect(cpu.reg16[regAX]).toBe(0x1234);
-      expect(cpu.cycleIP).toBe(1);
+      expect(cpu.instIPInc).toBe(1);
     });
   });
 
@@ -2561,7 +2559,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x000FF] = 0x35; // inst (byte)
       cpu.mem8[0x00100] = 0x21; // oper low
       cpu.mem8[0x00101] = 0x34; // oper high
-      cpu.cycleIP = 1;
+      cpu.instIPInc = 1;
 
       cpu.decode();
       oper.xor(addr.AX.bind(addr), addr.Iv.bind(addr));
@@ -2570,7 +2568,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
-      expect(cpu.cycleIP).toBe(3);
+      expect(cpu.instIPInc).toBe(3);
     });
   });
 
@@ -2579,7 +2577,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x00FF] = 0xC8;
       cpu.decode();
       oper.notimp();
-      expect(cpu.cycleIP).toBe(0);
+      expect(cpu.instIPInc).toBe(0);
     });
   });
 });
@@ -2625,4 +2623,22 @@ describe('Utility methods', () => {
   test.skip('flagAdd()', () => {});
   test.skip('flagSub()', () => {});
 
+});
+
+describe('Regressions', () => {
+  let cpu, addr, oper;
+
+  beforeEach(() => {
+    cpu = new CPU8086(new CPUConfig({
+      memorySize: 2 ** 20
+    }));
+    oper = new Operations(cpu);
+    addr = new Addressing(cpu);
+    cpu.reg16[regIP] = 0x00FF;
+    cpu.reg16[regCS] = 0x0000;
+    cpu.reg16[regDS] = 0x0300;
+    cpu.reg16[regSS] = 0x0400;
+    cpu.reg16[regSP] = 0x0020;
+    cpu.reg16[regFlags] = 0x0000;
+  });
 });

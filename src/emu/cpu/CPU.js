@@ -12,7 +12,8 @@ export default class CPU {
     return {
       "addrSeg":    this.addrSeg,
       "repType":    this.repType,
-      "cycleIP":    this.cycleIP,
+      "instIPInc":  this.instIPInc,
+      "addrIPInc":  this.addrIPInc,
       "mem16":      this.mem16,
       "reg16":      this.reg16,
       "opcode":     tmpOpcode,
@@ -28,7 +29,8 @@ export default class CPU {
   setState (state) {
     this.addrSeg    = state["addrSeg"];
     this.repType    = state["repType"];
-    this.cycleIP    = state["cycleIP"];
+    this.instIPInc  = state["instIPInc"];
+    this.addrIPInc  = state["addrIPInc"];
     this.mem16      = new Uint16Array(state["mem16"]);
     this.reg16      = new Uint16Array(state["reg16"]);
     this.opcode     = state["opcode"];

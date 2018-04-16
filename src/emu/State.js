@@ -40,9 +40,9 @@ export default class State {
       same = false;
       diff += "REP TYPE: " + givenState.repType + " (given) != " + expectedState.repType + " (expected)\n";
     }
-    if (givenState.cycleIP !== expectedState.cycleIP) {
+    if (givenState.instIPInc !== expectedState.instIPInc) {
       same = false;
-      diff += "CYCLE IP: " + givenState.cycleIP + " (given) != " + expectedState.cycleIP + " (expected)\n";
+      diff += "INST INC IP: " + givenState.instIPInc + " (given) != " + expectedState.instIPInc + " (expected)\n";
     }
 
     for (let k in givenState.opcode) {

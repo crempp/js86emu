@@ -56,7 +56,7 @@ export default class Addressing {
     if (value || value === 0) result =  this.cpu.reg16[regAX] = value & 0xFFFF;
     else result = this.cpu.reg16[regAX];
 
-    this.cpu.cycleIP += 0;
+    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -74,7 +74,7 @@ export default class Addressing {
     if (value || value === 0) result =  this.cpu.reg8[regAH] = value & 0xFF;
     else result = this.cpu.reg8[regAH];
 
-    this.cpu.cycleIP += 0;
+    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -92,7 +92,7 @@ export default class Addressing {
     if (value || value === 0) result =  this.cpu.reg8[regAL] = value & 0xFF;
     else result = this.cpu.reg8[regAL];
 
-    this.cpu.cycleIP += 0;
+    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -109,7 +109,7 @@ export default class Addressing {
     if (value || value === 0) result =  this.cpu.reg16[regBX] = value & 0xFFFF;
     else result = this.cpu.reg16[regBX];
 
-    this.cpu.cycleIP += 0;
+    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -127,7 +127,7 @@ export default class Addressing {
     if (value || value === 0) result =  this.cpu.reg8[regBH] = value & 0xFF;
     else result = this.cpu.reg8[regBH];
 
-    this.cpu.cycleIP += 0;
+    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -145,7 +145,7 @@ export default class Addressing {
     if (value || value === 0) result =  this.cpu.reg8[regBL] = value & 0xFF;
     else result = this.cpu.reg8[regBL];
 
-    this.cpu.cycleIP += 0;
+    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -162,7 +162,7 @@ export default class Addressing {
     if (value || value === 0) result =  this.cpu.reg16[regCX] = value & 0xFFFF;
     else result = this.cpu.reg16[regCX];
 
-    this.cpu.cycleIP += 0;
+    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -180,7 +180,7 @@ export default class Addressing {
     if (value || value === 0) result =  this.cpu.reg8[regCH] = value & 0xFF;
     else result = this.cpu.reg8[regCH];
 
-    this.cpu.cycleIP += 0;
+    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -198,7 +198,7 @@ export default class Addressing {
     if (value || value === 0) result =  this.cpu.reg8[regCL] = value & 0xFF;
     else result = this.cpu.reg8[regCL];
 
-    this.cpu.cycleIP += 0;
+    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -215,7 +215,7 @@ export default class Addressing {
     if (value || value === 0) result =  this.cpu.reg16[regDX] = value & 0xFFFF;
     else result = this.cpu.reg16[regDX];
 
-    this.cpu.cycleIP += 0;
+    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -233,7 +233,7 @@ export default class Addressing {
     if (value || value === 0) result =  this.cpu.reg8[regDH] = value & 0xFF;
     else result = this.cpu.reg8[regDH];
 
-    this.cpu.cycleIP += 0;
+    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -251,7 +251,7 @@ export default class Addressing {
     if (value || value === 0) result =  this.cpu.reg8[regDL] = value & 0xFF;
     else result = this.cpu.reg8[regDL];
 
-    this.cpu.cycleIP += 0;
+    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -268,7 +268,7 @@ export default class Addressing {
     if (value || value === 0) result =  this.cpu.reg16[regSI] = value & 0xFFFF;
     else result = this.cpu.reg16[regSI];
 
-    this.cpu.cycleIP += 0;
+    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -285,7 +285,7 @@ export default class Addressing {
     if (value || value === 0) result =  this.cpu.reg16[regDI] = value & 0xFFFF;
     else result = this.cpu.reg16[regDI];
 
-    this.cpu.cycleIP += 0;
+    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -302,7 +302,7 @@ export default class Addressing {
     if (value || value === 0) result =  this.cpu.reg16[regBP] = value & 0xFFFF;
     else result = this.cpu.reg16[regBP];
 
-    this.cpu.cycleIP += 0;
+    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -319,7 +319,7 @@ export default class Addressing {
     if (value || value === 0) result =  this.cpu.reg16[regSP] = value & 0xFFFF;
     else result = this.cpu.reg16[regSP];
 
-    this.cpu.cycleIP += 0;
+    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -336,7 +336,7 @@ export default class Addressing {
     if (value || value === 0) result =  this.cpu.reg16[regCS] = value & 0xFFFF;
     else result = this.cpu.reg16[regCS];
 
-    this.cpu.cycleIP += 0;
+    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -353,7 +353,7 @@ export default class Addressing {
     if (value || value === 0) result =  this.cpu.reg16[regDS] = value & 0xFFFF;
     else result = this.cpu.reg16[regDS];
 
-    this.cpu.cycleIP += 0;
+    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -370,7 +370,7 @@ export default class Addressing {
     if (value || value === 0) result =  this.cpu.reg16[regES] = value & 0xFFFF;
     else result = this.cpu.reg16[regES];
 
-    this.cpu.cycleIP += 0;
+    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -388,7 +388,7 @@ export default class Addressing {
     if (value || value === 0) result =  this.cpu.reg16[regSS] = value & 0xFFFF;
     else result = this.cpu.reg16[regSS];
 
-    this.cpu.cycleIP += 0;
+    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -420,7 +420,7 @@ export default class Addressing {
     let o = (this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 4, this.cpu)] << 8) |
              this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 3, this.cpu)];
 
-    this.cpu.cycleIP += 4;
+    this.cpu.instIPInc += 4;
     return [s, o];
   }
 
@@ -568,12 +568,12 @@ export default class Addressing {
     let result;
 
     segment = this.cpu.reg16[regCS]; // Imm values are in the CS segment
-    let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
+    let offset = this.cpu.reg16[regIP] + this.cpu.instIPInc;
 
     if (value || value === 0) throw new InvalidAddressModeException("Ib addressing mode can not set values");
     else result = this.readMem8(segment, offset);
 
-    this.cpu.cycleIP += 1;
+    this.cpu.instIPInc += 1;
     return result;
   }
 
@@ -593,12 +593,12 @@ export default class Addressing {
     let result;
 
     segment = this.cpu.reg16[regCS]; // Imm values are in the CS segment
-    let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
+    let offset = this.cpu.reg16[regIP] + this.cpu.instIPInc;
 
     if (value || value === 0) throw new InvalidAddressModeException("Iv addressing mode can not set values");
     else result = this.readMem16(segment, offset);
 
-    this.cpu.cycleIP += 2;
+    this.cpu.instIPInc += 2;
 
     return result;
   }
@@ -619,12 +619,12 @@ export default class Addressing {
     let result;
 
     segment = this.cpu.reg16[regCS]; // Imm values are in the CS segment
-    let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
+    let offset = this.cpu.reg16[regIP] + this.cpu.instIPInc;
 
     if (value || value === 0) InvalidAddressModeException("Iw addressing mode can not set values");
     else result = this.readMem16(segment, offset);
 
-    this.cpu.cycleIP += 2;
+    this.cpu.instIPInc += 2;
 
     return result;
   }
@@ -643,11 +643,11 @@ export default class Addressing {
   Jb (segment, value) {
     if (value) throw new InvalidAddressModeException("Jb addressing mode can not set values");
 
-    let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
+    let offset = this.cpu.reg16[regIP] + this.cpu.instIPInc;
 
     let result = this.readMem8(this.cpu.reg16[regCS], offset);
 
-    this.cpu.cycleIP += 1;
+    this.cpu.instIPInc += 1;
 
     return this.cpu.reg16[regIP] + twosComplement2Int8(result);
   }
@@ -667,11 +667,11 @@ export default class Addressing {
     if (value)
       throw new InvalidAddressModeException("Jv addressing mode can not set values")
 
-    let offset = this.cpu.reg16[regIP] + this.cpu.cycleIP;
+    let offset = this.cpu.reg16[regIP] + this.cpu.instIPInc;
 
     let result = this.readMem16(this.cpu.reg16[regCS], offset);
 
-    this.cpu.cycleIP += 2;
+    this.cpu.instIPInc += 2;
 
     return this.cpu.reg16[regIP] + twosComplement2Int16(result);
   }
@@ -899,7 +899,7 @@ export default class Addressing {
         //   - yoshicapstonememo.googlecode.com/svn/trunk/4_2_86.pdf
         addr = (this.cpu.mem8[seg2abs( this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 3, this.cpu)] << 8) |
                 this.cpu.mem8[seg2abs( this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 2, this.cpu)];
-        this.cpu.cycleIP += 2;
+        if (this.cpu.addrIPInc === 0) this.cpu.addrIPInc += 2;
         break;
       case 0b111 : // [BX]
         addr = this.cpu.reg16[regBX];
@@ -923,13 +923,13 @@ export default class Addressing {
     switch (this.cpu.opcode.mod) {
       case 0b01: // Use R/M table 2 with 8-bit displacement
         disp = this.cpu.mem8[seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 2, this.cpu)];
-        this.cpu.cycleIP += 1;
+        this.cpu.instIPInc += 1;
         break;
       case 0b10: // Use R/M table 2 with 16-bit displacement
         disp = disp ||
           ((this.cpu.mem8[seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 3, this.cpu)] << 8) |
             this.cpu.mem8[seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 2, this.cpu)] );
-        this.cpu.cycleIP += 2;
+        if (this.cpu.addrIPInc === 0) this.cpu.addrIPInc += 2;
     }
 
     switch (this.cpu.opcode.rm) {

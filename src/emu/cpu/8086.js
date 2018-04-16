@@ -50,7 +50,9 @@ export default class CPU8086 extends CPU {
      * Instruction Pointer increment counter. This tracks the amount to
      * increment the instruction pointer during the instruction execution.
      */
-    this.cycleIP = 0;
+    this.instIPInc = 0;
+
+    this.addrIPInc = 0;
 
     /**
      * The CPU state.
@@ -595,7 +597,8 @@ export default class CPU8086 extends CPU {
    */
   cycle () {
     // Reset per-cycle values
-    this.cycleIP = 0;
+    this.instIPInc = 0;
+    this.addrIPInc = 0;
     this.addrSeg = regDS;
 
     // Decode the instruction
@@ -604,22 +607,22 @@ export default class CPU8086 extends CPU {
     // If this is a prefix instruction, run it and move to the next instruction
     this.prefix();
 
-    // console.log("  INSTRUCTION: " +  this.opcode.string);
-    // console.log("  CS:IP:       " + hexString16(this.reg16[regCS]) + ":" + hexString16(this.reg16[regIP]));
-    // console.log("  OPCODE:      " + "\n" + formatOpcode(this.opcode, 11));
-    // console.log("  MEMORY INST: " + "\n" + formatMemory(this.mem8, segIP(this), segIP(this) + 6, 11));
-    // // console.log("  MEMORY STACK:" + "\n" + formatStack(this.mem8, this.reg16[regSP], 0x1000, 11));
-    // console.log("  REGISTERS    " + "\n" + formatRegisters(this, 11));
-    // console.log("  FLAGS:       " + "\n" + formatFlags(this.reg16[regFlags], 11));
+    console.log("  INSTRUCTION: " +  this.opcode.string);
+    console.log("  CS:IP:       " + hexString16(this.reg16[regCS]) + ":" + hexString16(this.reg16[regIP]));
+    console.log("  OPCODE:      " + "\n" + formatOpcode(this.opcode, 11));
+    console.log("  MEMORY INST: " + "\n" + formatMemory(this.mem8, segIP(this), segIP(this) + 6, 11));
+    // console.log("  MEMORY STACK:" + "\n" + formatStack(this.mem8, this.reg16[regSP], 0x1000, 11));
+    console.log("  REGISTERS    " + "\n" + formatRegisters(this, 11));
+    console.log("  FLAGS:       " + "\n" + formatFlags(this.reg16[regFlags], 11));
 
 
-    // Increase the cycleIp by the instruction base size
-    this.cycleIP += this.opcode.inst.baseSize;
+    // Increase the instIPInc by the instruction base size
+    this.instIPInc += this.opcode.inst.baseSize;
 
     // Run the instruction
     this.opcode.inst.run();
 
     // Move the IP
-    this.reg16[regIP] += this.cycleIP;
+    this.reg16[regIP] += this.instIPInc + this.addrIPInc;
   }
 }
