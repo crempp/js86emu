@@ -227,22 +227,22 @@ export default class Operations {
     switch (this.cpu.opcode.opcode_byte) {
       case 0x9A: // CALL Ap (far)
         this.push16(this.cpu.reg16[regCS]);
-        this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc);
+        this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
         this.cpu.reg16[regCS] = oper[0];
         this.cpu.reg16[regIP] = oper[1];
         break;
       case 0xE8: // CALL Jv (near)
-        this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc);
+        this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
         this.cpu.reg16[regIP] = oper;
         break;
       case 0xFF:
         if (this.cpu.opcode.reg === 2) { // 0xFF (2) CALL Ev (near)
-          this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc);
+          this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
           this.cpu.reg16[regIP] = oper;
         }
         else if (this.cpu.opcode.reg === 3) { // 0xFF (3) CALL Mp (far)
           this.push16(this.cpu.reg16[regCS]);
-          this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc);
+          this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
           this.cpu.reg16[regCS] = oper[0];
           this.cpu.reg16[regIP] = oper[1];
         }
@@ -1479,8 +1479,29 @@ export default class Operations {
    */
   mov (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let srcVal = src(segment);
-    return dst(segment, srcVal);
+    // dst.getAddr()
+    // src.getAddr()
+    //
+    // src.getValue()
+    // dst.setValue()
+    //
+    // src.blah();
+
+    // let s = src(segment);
+    // return dst(segment, s);
+
+    let s = src(segment);
+
+    let addrIPInc = this.cpu.addrIPInc;
+    let instIPInc = this.cpu.instIPInc;
+    this.cpu.addrIPInc = 0;
+    this.cpu.instIPInc = addrIPInc;
+
+    let r = dst(segment, s);
+
+    this.cpu.addrIPInc += addrIPInc;
+    this.cpu.instIPInc = instIPInc;
+    return r;
   }
 
   movb (dst, src) {

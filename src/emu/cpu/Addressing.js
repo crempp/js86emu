@@ -55,8 +55,6 @@ export default class Addressing {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regAX] = value & 0xFFFF;
     else result = this.cpu.reg16[regAX];
-
-    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -73,8 +71,6 @@ export default class Addressing {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
     if (value || value === 0) result =  this.cpu.reg8[regAH] = value & 0xFF;
     else result = this.cpu.reg8[regAH];
-
-    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -91,8 +87,6 @@ export default class Addressing {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
     if (value || value === 0) result =  this.cpu.reg8[regAL] = value & 0xFF;
     else result = this.cpu.reg8[regAL];
-
-    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -108,8 +102,6 @@ export default class Addressing {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regBX] = value & 0xFFFF;
     else result = this.cpu.reg16[regBX];
-
-    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -126,8 +118,6 @@ export default class Addressing {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
     if (value || value === 0) result =  this.cpu.reg8[regBH] = value & 0xFF;
     else result = this.cpu.reg8[regBH];
-
-    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -144,8 +134,6 @@ export default class Addressing {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
     if (value || value === 0) result =  this.cpu.reg8[regBL] = value & 0xFF;
     else result = this.cpu.reg8[regBL];
-
-    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -161,8 +149,6 @@ export default class Addressing {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regCX] = value & 0xFFFF;
     else result = this.cpu.reg16[regCX];
-
-    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -179,8 +165,6 @@ export default class Addressing {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
     if (value || value === 0) result =  this.cpu.reg8[regCH] = value & 0xFF;
     else result = this.cpu.reg8[regCH];
-
-    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -197,8 +181,6 @@ export default class Addressing {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
     if (value || value === 0) result =  this.cpu.reg8[regCL] = value & 0xFF;
     else result = this.cpu.reg8[regCL];
-
-    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -214,8 +196,6 @@ export default class Addressing {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regDX] = value & 0xFFFF;
     else result = this.cpu.reg16[regDX];
-
-    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -232,8 +212,6 @@ export default class Addressing {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
     if (value || value === 0) result =  this.cpu.reg8[regDH] = value & 0xFF;
     else result = this.cpu.reg8[regDH];
-
-    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -250,8 +228,6 @@ export default class Addressing {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
     if (value || value === 0) result =  this.cpu.reg8[regDL] = value & 0xFF;
     else result = this.cpu.reg8[regDL];
-
-    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -267,8 +243,6 @@ export default class Addressing {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regSI] = value & 0xFFFF;
     else result = this.cpu.reg16[regSI];
-
-    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -284,8 +258,6 @@ export default class Addressing {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regDI] = value & 0xFFFF;
     else result = this.cpu.reg16[regDI];
-
-    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -301,8 +273,6 @@ export default class Addressing {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regBP] = value & 0xFFFF;
     else result = this.cpu.reg16[regBP];
-
-    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -318,8 +288,6 @@ export default class Addressing {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regSP] = value & 0xFFFF;
     else result = this.cpu.reg16[regSP];
-
-    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -335,8 +303,6 @@ export default class Addressing {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regCS] = value & 0xFFFF;
     else result = this.cpu.reg16[regCS];
-
-    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -352,8 +318,6 @@ export default class Addressing {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regDS] = value & 0xFFFF;
     else result = this.cpu.reg16[regDS];
-
-    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -369,8 +333,6 @@ export default class Addressing {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regES] = value & 0xFFFF;
     else result = this.cpu.reg16[regES];
-
-    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -387,8 +349,6 @@ export default class Addressing {
     let result;
     if (value || value === 0) result =  this.cpu.reg16[regSS] = value & 0xFFFF;
     else result = this.cpu.reg16[regSS];
-
-    this.cpu.instIPInc += 0;
     return result;
   }
 
@@ -420,7 +380,7 @@ export default class Addressing {
     let o = (this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 4, this.cpu)] << 8) |
              this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 3, this.cpu)];
 
-    this.cpu.instIPInc += 4;
+    this.cpu.addrIPInc += 4;
     return [s, o];
   }
 
@@ -490,6 +450,10 @@ export default class Addressing {
     if (value || value === 0) result = this.writeRMReg16(segment, value & 0xFFFF);
     else result = this.readRMReg16(segment);
     return result;
+  }
+
+  EvAddr () {
+
   }
 
   /**
@@ -573,7 +537,7 @@ export default class Addressing {
     if (value || value === 0) throw new InvalidAddressModeException("Ib addressing mode can not set values");
     else result = this.readMem8(segment, offset);
 
-    this.cpu.instIPInc += 1;
+    this.cpu.addrIPInc += 1;
     return result;
   }
 
@@ -590,6 +554,8 @@ export default class Addressing {
    *  returned. For a write operation the same value provided is returned.
    */
   Iv (segment, value) {
+    // this.blah = function() { console.log("HERE!"); };
+
     let result;
 
     segment = this.cpu.reg16[regCS]; // Imm values are in the CS segment
@@ -598,7 +564,7 @@ export default class Addressing {
     if (value || value === 0) throw new InvalidAddressModeException("Iv addressing mode can not set values");
     else result = this.readMem16(segment, offset);
 
-    this.cpu.instIPInc += 2;
+    this.cpu.addrIPInc += 2;
 
     return result;
   }
@@ -624,7 +590,7 @@ export default class Addressing {
     if (value || value === 0) InvalidAddressModeException("Iw addressing mode can not set values");
     else result = this.readMem16(segment, offset);
 
-    this.cpu.instIPInc += 2;
+    this.cpu.addrIPInc += 2;
 
     return result;
   }
@@ -647,7 +613,7 @@ export default class Addressing {
 
     let result = this.readMem8(this.cpu.reg16[regCS], offset);
 
-    this.cpu.instIPInc += 1;
+    this.cpu.addrIPInc += 1;
 
     return this.cpu.reg16[regIP] + twosComplement2Int8(result);
   }
@@ -671,7 +637,7 @@ export default class Addressing {
 
     let result = this.readMem16(this.cpu.reg16[regCS], offset);
 
-    this.cpu.instIPInc += 2;
+    this.cpu.addrIPInc += 2;
 
     return this.cpu.reg16[regIP] + twosComplement2Int16(result);
   }
@@ -923,7 +889,7 @@ export default class Addressing {
     switch (this.cpu.opcode.mod) {
       case 0b01: // Use R/M table 2 with 8-bit displacement
         disp = this.cpu.mem8[seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 2, this.cpu)];
-        this.cpu.instIPInc += 1;
+        this.cpu.addrIPInc += 1;
         break;
       case 0b10: // Use R/M table 2 with 16-bit displacement
         disp = disp ||

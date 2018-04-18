@@ -615,7 +615,6 @@ export default class CPU8086 extends CPU {
     console.log("  REGISTERS    " + "\n" + formatRegisters(this, 11));
     console.log("  FLAGS:       " + "\n" + formatFlags(this.reg16[regFlags], 11));
 
-
     // Increase the instIPInc by the instruction base size
     this.instIPInc += this.opcode.inst.baseSize;
 

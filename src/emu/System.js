@@ -78,14 +78,12 @@ export default class System {
         this.videoCard.scan();
       }
 
-      if (this.cycleCount === 10000) {
+      if (this.cycleCount >= 1510) {
         let a = 1;
       }
 
       this.cycleCount++;
     }
-
-
 
     console.log(`Done running - ${this.cycleCount} cycles`);
     let diff       = process.hrtime(this.prevTiming);

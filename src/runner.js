@@ -46,8 +46,12 @@ let system = new System();
 system.loadMem(codegolf, 0x00);
 
 system.boot().then( () => {
-  system.run(200);
-  process.exit();
+  system.run(2000);
+
+  // force a video scan at the end of the run
+  system.videoCard.scan();
+
+  // process.exit();
 }).catch( (error) => {
   console.error(error);
 });

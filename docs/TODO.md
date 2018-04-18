@@ -10,6 +10,7 @@
 * Add a cycle param to inst class?
 * Refactor timingCheck
 * Async RendererPNG with createWriteStream
+* Fix formatStack()
 
 Data Transfer 2-31
 ------------------
