@@ -1,16 +1,28 @@
 ## TODO
+
+1
 * Don't return values from instructions
-* Review what flags each inst modifies
 * Fix Ep and Mp segments - still need done?
+
+2
 * move to proper instructions for prefixes
-* look into prepack.io optimizer
-* Video drivers (console, canvas, ...)
+* Fix formatStack()
+
+3
 * Refactor CPU state as a class
 * add register values to CPUConfig (and more?)
-* Add a cycle param to inst class?
+
+4
 * Refactor timingCheck
 * Async RendererPNG with createWriteStream
-* Fix formatStack()
+
+5
+* Doc generation
+* Review what flags each inst modifies
+
+Tests
+* writeMem8 and readMem8 - should be the same
+* TODO: writeMem16 and readMem16 - should be the same
 
 Data Transfer 2-31
 ------------------

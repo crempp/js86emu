@@ -9,9 +9,9 @@ import {
   regCS, regDS, regES, regSS,
   regFlags,
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
-  FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
+  FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK, STATE_HALT,
 } from '../../../src/emu/Constants';
-import { ValueOverflowException } from "../../../src/emu/utils/Exceptions";
+import {FeatureNotImplementedException, InvalidAddressModeException, ValueOverflowException} from "../../../src/emu/utils/Exceptions";
 import {
   formatOpcode, hexString8, hexString16, hexString32, formatFlags,
   formatMemory, formatRegisters
@@ -63,24 +63,34 @@ describe('Operation methods', () => {
     cpu.reg16[regFlags] = 0x0000;
   });
 
-  describe.skip('aaa', () => {
-    test('test 1', () => {
-
+  describe('aaa', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.aaa();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
-  describe.skip('aad', () => {
-    test('test 1', () => {
 
+  describe('aad', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.aad();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
-  describe.skip('aam', () => {
-    test('test 1', () => {
-
+  describe('aam', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.aam();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
+
   describe.skip('aas', () => {
-    test('test 1', () => {
-
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.aas();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
 
@@ -466,9 +476,11 @@ describe('Operation methods', () => {
     });
   });
 
-  describe.skip('cbw', () => {
-    test('test 1', () => {
-
+  describe('cbw', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.cbw();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
 
@@ -599,29 +611,43 @@ describe('Operation methods', () => {
     });
   });
 
-  describe.skip('cmpsb', () => {
-    test('test 1', () => {
-
+  describe('cmpsb', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.cmpsb();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
-  describe.skip('cmpsw', () => {
-    test('test 1', () => {
 
+  describe('cmpsw', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.cmpsw();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
-  describe.skip('cwd', () => {
-    test('test 1', () => {
 
+  describe('cwd', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.cwd();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
-  describe.skip('daa', () => {
-    test('test 1', () => {
 
+  describe('daa', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.daa();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
-  describe.skip('das', () => {
-    test('test 1', () => {
 
+  describe('das', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.das();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
 
@@ -685,44 +711,66 @@ describe('Operation methods', () => {
     });
   });
 
-  describe.skip('div', () => {
-    test('test 1', () => {
-
+  describe('div', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.div();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
-  describe.skip('ds', () => {
-    test('test 1', () => {
 
+  describe('ds', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.ds();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
-  describe.skip('es', () => {
-    test('test 1', () => {
 
+  describe('es', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.es();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
-  describe.skip('hlt', () => {
-    test('test 1', () => {
 
+  describe('hlt', () => {
+    test('sets halt state', () => {
+      oper.hlt();
+      expect(cpu.state).toBe(STATE_HALT);
     });
   });
-  describe.skip('idiv', () => {
-    test('test 1', () => {
 
+  describe('idiv', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.idiv();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
-  describe.skip('imul', () => {
-    test('test 1', () => {
 
+  describe('imul', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.imul();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
-  describe.skip('in', () => {
-    test('test 1', () => {
 
+  describe('in', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.in();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
-  describe.skip('iin', () => {
-    test('test 1', () => {
 
+  describe('iin', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.iin();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
 
@@ -786,19 +834,27 @@ describe('Operation methods', () => {
     });
   });
 
-  describe.skip('int', () => {
-    test('test 1', () => {
-
+  describe('int', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.int();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
-  describe.skip('into', () => {
-    test('test 1', () => {
 
+  describe('into', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.into();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
-  describe.skip('iret', () => {
-    test('test 1', () => {
 
+  describe('iret', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.iret();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
 
@@ -1607,19 +1663,28 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(2);
     });
   });
-  describe.skip('lock', () => {
-    test('test 1', () => {
 
+  describe('lock', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.lock();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
-  describe.skip('lodsb', () => {
-    test('test 1', () => {
 
+  describe('lodsb', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.lodsb();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
-  describe.skip('lodsw', () => {
-    test('test 1', () => {
 
+  describe('lodsw', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.lodsw();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
 
@@ -1780,20 +1845,18 @@ describe('Operation methods', () => {
   });
 
   describe('mov', () => {
-    beforeEach(() => {
-      // MOV AX,iv
-      cpu.mem8[0x00FF] = 0xB8;
+    beforeEach(() => {});
+
+    test('MOV AX, iv', () => {
       cpu.instIPInc = 1;
-    });
-    test('move word', () => {
-      cpu.mem8[0x0100] = 0x34;
-      cpu.mem8[0x0101] = 0x12;
+      cpu.mem8[0x00FF] = 0xB8; // Inst
+      cpu.mem8[0x0100] = 0x34; // Operand low
+      cpu.mem8[0x0101] = 0x12; // Operand hight
       cpu.decode();
       oper.mov(addr.AX.bind(addr), addr.Iv.bind(addr));
 
       expect(cpu.reg16[regAX]).toBe(0x1234);
     });
-
     test('[regression] mov di, WORD PTR ds:0x1D3', () => {
       cpu.instIPInc = 2;
       cpu.mem8[0x00FF] = 0x8B; // Instruction
@@ -1811,7 +1874,6 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(2);
       expect(cpu.addrIPInc).toBe(2);
     });
-
     test('[regression] mov WORD [cursor], 80 * 5', () => {
       cpu.instIPInc = 2;
       cpu.mem8[0x00FF] = 0xC7; // Instruction
@@ -1831,24 +1893,35 @@ describe('Operation methods', () => {
     });
   });
 
-  describe.skip('movb', () => {
-    test('test 1', () => {
-
+  describe('movb', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.movb();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
-  describe.skip('movsb', () => {
-    test('test 1', () => {
 
+  describe('movsb', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.movsb();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
-  describe.skip('movsw', () => {
-    test('test 1', () => {
 
+  describe('movsw', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.movsw();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
-  describe.skip('mul', () => {
-    test('test 1', () => {
 
+  describe('mul', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.mul();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
 
@@ -1986,9 +2059,12 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(2);
     });
   });
-  describe.skip('out', () => {
-    test('test 1', () => {
 
+  describe('out', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.out();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
 
@@ -2131,14 +2207,20 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(2);
     });
   });
-  describe.skip('repnz', () => {
-    test('test 1', () => {
 
+  describe('repnz', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.repnz();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
-  describe.skip('repz', () => {
-    test('test 1', () => {
 
+  describe('repz', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.repz();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
 
@@ -2377,14 +2459,19 @@ describe('Operation methods', () => {
     });
   });
 
-  describe.skip('scasb', () => {
-    test('test 1', () => {
-
+  describe('scasb', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.scasb();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
-  describe.skip('scasw', () => {
-    test('test 1', () => {
 
+  describe('scasw', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.scasw();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
 
@@ -2427,9 +2514,12 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(2);
     });
   });
-  describe.skip('ss', () => {
-    test('test 1', () => {
 
+  describe('ss', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.ss();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
 
@@ -2469,14 +2559,19 @@ describe('Operation methods', () => {
     });
   });
 
-  describe.skip('stosb', () => {
-    test('test 1', () => {
-
+  describe('stosb', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.stosb();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
-  describe.skip('stosw', () => {
-    test('test 1', () => {
 
+  describe('stosw', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.stosw();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
 
@@ -2620,9 +2715,11 @@ describe('Operation methods', () => {
     });
   });
 
-  describe.skip('wait', () => {
-    test('test 1', () => {
-
+  describe('wait', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.wait();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
 
@@ -2643,9 +2740,11 @@ describe('Operation methods', () => {
     });
   });
 
-  describe.skip('xlat', () => {
-    test('test 1', () => {
-
+  describe('xlat', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.xlat();
+      }).toThrowError(FeatureNotImplementedException);
     });
   });
   describe('xor', () => {

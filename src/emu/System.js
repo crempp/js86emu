@@ -57,8 +57,8 @@ export default class System {
     let totalScans = 0;
 
     while (cyclesToRun === null || cyclesToRun-- > 0) {
-      console.log("-".repeat(80 - 7));
-      console.log("8086.cycle()             : Running instruction cycle [" + this.cycleCount + "]");
+      // console.log("-".repeat(80 - 7));
+      // console.log("8086.cycle()             : Running instruction cycle [" + this.cycleCount + "]");
 
       // if (this.cpu.state === STATE_PAUSED) {
       //   break;

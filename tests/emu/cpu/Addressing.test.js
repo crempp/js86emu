@@ -6,19 +6,12 @@ import {
   regAX, regBX, regCX, regDX,
   regSI, regDI, regBP, regSP, regIP,
   regCS, regDS, regES, regSS,
-  regFlags,
-  FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
-  FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
 } from '../../../src/emu/Constants';
 import {InvalidAddressModeException, ValueOverflowException} from "../../../src/emu/utils/Exceptions";
-import {
-  formatOpcode, hexString8, hexString16, hexString32, formatFlags,
-  formatMemory, formatRegisters
-} from "../../../src/emu/utils/Debug";
-import {segIP} from "../../../src/emu/utils/Utils";
-
-// TODO: writeMem8 and readMem8 - should be the same
-// TODO: writeMem16 and readMem16 - should be the same
+// import {
+//   formatOpcode, hexString8, hexString16, hexString32, formatFlags,
+//   formatMemory, formatRegisters
+// } from "../../../src/emu/utils/Debug";
 
 test('Addressing object constructs', () => {
   let cpu = new CPU8086(new CPUConfig({
@@ -792,6 +785,8 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000000; // addr mode
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  BX   +   SI  ) =
       // (0x2345 + 0x5678) = 0x79BD
@@ -801,6 +796,8 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000001; // addr mode
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  BX   +   DI  ) =
       // (0x2345 + 0x6789) = 0x8ACE
@@ -810,6 +807,8 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000010; // addr mode
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  BP   +   SI  ) =
       // (0x789A + 0x5678) = 0xCF12
@@ -819,6 +818,8 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000011; // addr mode
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  BP   +   DI  ) =
       // (0x789A + 0x6789) = 0xE023
@@ -828,6 +829,8 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000100; // addr mode
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  SI  ) =
       // (0x5678) = 0x5678
@@ -837,6 +840,8 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000101; // addr mode
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  DI  ) =
       // (0x6789) = 0x6789
@@ -848,15 +853,20 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // ( d1:d0) =
       // (0x1256) = 0x1256
-      expect(addr.calcRMAddr(segment)).toBe(0x1256);
+      let r = addr.calcRMAddr(segment);
+      expect(r).toBe(0x1256);
     });
     test('[BX]', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000111; // addr mode
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  BX  ) =
       // (0x2345) = 0x2345
@@ -864,18 +874,20 @@ describe('Memory addressing mode methods', () => {
     });
   });
 
-  describe('calcRMDispAddr', () => {
+  describe('calcRMAddrDisp', () => {
     test('[BX + SI] + disp (byte)', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b01000000; // addr mode
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  BX   +   SI  ) + disp =
       // (0x2345 + 0x5678) + 0x56 =
       //       0x79BD      + 0x56 = 0x7A13
-      expect(addr.calcRMDispAddr(segment)).toBe(0x7A13);
+      expect(addr.calcRMAddrDisp(segment)).toBe(0x7A13);
     });
     test('[BX + DI] + disp (byte)', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
@@ -883,11 +895,13 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  BX   +   DI  ) + disp =
       // (0x2345 + 0x6789) + 0x56 =
       //       0x8ACE      + 0x56 = 0x8B24
-      expect(addr.calcRMDispAddr(segment)).toBe(0x8B24);
+      expect(addr.calcRMAddrDisp(segment)).toBe(0x8B24);
     });
     test('[BP + SI] + disp (byte)', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
@@ -895,11 +909,13 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  BP   +   SI  ) + disp =
       // (0x789A + 0x5678) + 0x56 =
       //       0xCF12      + 0x56 = 0xCF68
-      expect(addr.calcRMDispAddr(segment)).toBe(0xCF68);
+      expect(addr.calcRMAddrDisp(segment)).toBe(0xCF68);
     });
     test('[BP + DI] + disp (byte)', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
@@ -907,11 +923,13 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  BP   +   DI  ) + disp =
       // (0x789A + 0x6789) + 0x56 =
       //      0xE023       + 0x56 = 0xE079
-      expect(addr.calcRMDispAddr(segment)).toBe(0xE079);
+      expect(addr.calcRMAddrDisp(segment)).toBe(0xE079);
     });
     test('[SI] + disp (byte)', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
@@ -919,10 +937,12 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  SI  ) + disp =
       // (0x5678) + 0x56 = 0x56CE
-      expect(addr.calcRMDispAddr(segment)).toBe(0x56CE);
+      expect(addr.calcRMAddrDisp(segment)).toBe(0x56CE);
     });
     test('[DI] + disp (byte)', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
@@ -930,10 +950,12 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  DI  ) + disp =
       // (0x6789) + 0x56 = 0x67DF
-      expect(addr.calcRMDispAddr(segment)).toBe(0x67DF);
+      expect(addr.calcRMAddrDisp(segment)).toBe(0x67DF);
     });
     test('[BP] + disp (byte)', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
@@ -941,10 +963,12 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  BP  ) + disp =
       // (0x789A) + 0x56 = 0x78F0
-      expect(addr.calcRMDispAddr(segment)).toBe(0x78F0);
+      expect(addr.calcRMAddrDisp(segment)).toBe(0x78F0);
     });
     test('[BX] + disp (byte)', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
@@ -952,10 +976,12 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  BX  ) + disp =
       // (0x2345) + 0x56 = 0x239B
-      expect(addr.calcRMDispAddr(segment)).toBe(0x239B);
+      expect(addr.calcRMAddrDisp(segment)).toBe(0x239B);
     });
 
     test('[BX + SI] + disp (word)', () => {
@@ -964,11 +990,13 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  BX   +   SI  ) + disp   =
       // (0x2345 + 0x5678) + 0x1256 =
       //       0x79BD      + 0x1256 = 0x8C13
-      expect(addr.calcRMDispAddr(segment)).toBe(0x8C13);
+      expect(addr.calcRMAddrDisp(segment)).toBe(0x8C13);
     });
     test('[BX + DI] + disp (word)', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
@@ -976,11 +1004,13 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  BX   +   DI  ) + disp   =
       // (0x2345 + 0x6789) + 0x1256 =
       //       0x8ACE      + 0x1256 = 0x9D24
-      expect(addr.calcRMDispAddr(segment)).toBe(0x9D24);
+      expect(addr.calcRMAddrDisp(segment)).toBe(0x9D24);
     });
     test('[BP + SI] + disp (word)', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
@@ -988,11 +1018,13 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  BP   +   SI  ) + disp   =
       // (0x789A + 0x5678) + 0x1256 =
       //       0xCF12      + 0x1256 = 0xE168
-      expect(addr.calcRMDispAddr(segment)).toBe(0xE168);
+      expect(addr.calcRMAddrDisp(segment)).toBe(0xE168);
     });
     test('[BP + DI] + disp (word)', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
@@ -1000,11 +1032,13 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  BP   +   DI  ) + disp   =
       // (0x789A + 0x6789) + 0x1256 =
       //      0xE023       + 0x1256 = 0xF279
-      expect(addr.calcRMDispAddr(segment)).toBe(0xF279);
+      expect(addr.calcRMAddrDisp(segment)).toBe(0xF279);
     });
     test('[SI] + disp (word)', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
@@ -1012,10 +1046,12 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  SI  ) + disp   =
       // (0x5678) + 0x1256 = 0x68CE
-      expect(addr.calcRMDispAddr(segment)).toBe(0x68CE);
+      expect(addr.calcRMAddrDisp(segment)).toBe(0x68CE);
     });
     test('[DI] + disp (word)', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
@@ -1023,10 +1059,12 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  DI  ) + disp   =
       // (0x6789) + 0x1256 = 0x79DF
-      expect(addr.calcRMDispAddr(segment)).toBe(0x79DF);
+      expect(addr.calcRMAddrDisp(segment)).toBe(0x79DF);
     });
     test('[BP] + disp (word)', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
@@ -1034,10 +1072,12 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  BP  ) + disp   =
       // (0x789A) + 0x1256 = 0x8AF0
-      expect(addr.calcRMDispAddr(segment)).toBe(0x8AF0);
+      expect(addr.calcRMAddrDisp(segment)).toBe(0x8AF0);
     });
     test('[BX] + disp (word)', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
@@ -1045,10 +1085,12 @@ describe('Memory addressing mode methods', () => {
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
       cpu.decode();
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
 
       // (  BX  ) + disp   =
       // (0x2345) + 0x1256 = 0x359B
-      expect(addr.calcRMDispAddr(segment)).toBe(0x359B);
+      expect(addr.calcRMAddrDisp(segment)).toBe(0x359B);
     });
   });
 });
@@ -1097,7 +1139,11 @@ describe('rm/reg access methods', () => {
       cpu.mem8[0xB368D] = 0x42;
 
       cpu.decode();
-      expect(addr.readRMReg8(segment)).toBe(0x42);
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
+      let offset = addr.calcRMAddr(segment);
+
+      expect(addr.readRMReg8(segment, offset)).toBe(0x42);
     });
     test('use R/M Table 2 with 8-bit displacement', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
@@ -1111,7 +1157,11 @@ describe('rm/reg access methods', () => {
       cpu.mem8[0xB36E3] = 0x42;
 
       cpu.decode();
-      expect(addr.readRMReg8(segment)).toBe(0x42);
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
+      let offset = addr.calcRMAddr(segment);
+
+      expect(addr.readRMReg8(segment, offset)).toBe(0x42);
     });
     test('use R/M Table 2 with 16-bit displacement (word disp)', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
@@ -1125,13 +1175,21 @@ describe('rm/reg access methods', () => {
       cpu.mem8[0xB48E3] = 0x42;
 
       cpu.decode();
-      expect(addr.readRMReg8(segment)).toBe(0x42);
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
+      let offset = addr.calcRMAddr(segment);
+
+      expect(addr.readRMReg8(segment, offset)).toBe(0x42);
     });
     test('two register instruction; use R/M bits with REG table', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b11111110; // addr mode
       cpu.decode();
-      expect(addr.readRMReg8(segment)).toBe(0x67);
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
+      let offset = addr.calcRMAddr(segment);
+
+      expect(addr.readRMReg8(segment, offset)).toBe(0x67);
     });
   });
 
@@ -1147,7 +1205,11 @@ describe('rm/reg access methods', () => {
       cpu.mem8[0xB368E] = 0x21;
 
       cpu.decode();
-      expect(addr.readRMReg16(segment)).toBe(0x2142);
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
+      let offset = addr.calcRMAddr(segment);
+
+      expect(addr.readRMReg16(segment, offset)).toBe(0x2142);
     });
     test('use R/M Table 2 with 8-bit displacement', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
@@ -1162,7 +1224,11 @@ describe('rm/reg access methods', () => {
       cpu.mem8[0xB36E4] = 0x21;
 
       cpu.decode();
-      expect(addr.readRMReg16(segment)).toBe(0x2142);
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
+      let offset = addr.calcRMAddr(segment);
+
+      expect(addr.readRMReg16(segment, offset)).toBe(0x2142);
     });
     test('use R/M Table 2 with 16-bit displacement (word disp)', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
@@ -1177,13 +1243,21 @@ describe('rm/reg access methods', () => {
       cpu.mem8[0xB48E4] = 0x21;
 
       cpu.decode();
-      expect(addr.readRMReg16(segment)).toBe(0x2142);
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
+      let offset = addr.calcRMAddr(segment);
+
+      expect(addr.readRMReg16(segment, offset)).toBe(0x2142);
     });
     test('two register instruction; use R/M bits with REG table', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
       cpu.mem8[0xABCD1] = 0b11111110; // addr mode
       cpu.decode();
-      expect(addr.readRMReg16(segment)).toBe(0x5678);
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
+      let offset = addr.calcRMAddr(segment);
+
+      expect(addr.readRMReg16(segment, offset)).toBe(0x5678);
     });
   });
 
@@ -1192,7 +1266,11 @@ describe('rm/reg access methods', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000000; // addr mode
       cpu.decode();
-      addr.writeRMReg8(segment, 0x42);
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
+      let offset = addr.calcRMAddr(segment);
+
+      addr.writeRMReg8(segment, offset, 0x42);
 
       // (CS     * 0x10) + (  BX   +   SI  ) =
       // (0xABCD * 0x10) + (0x2345 + 0x5678) =
@@ -1205,7 +1283,11 @@ describe('rm/reg access methods', () => {
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
       cpu.decode();
-      addr.writeRMReg8(segment, 0x42);
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
+      let offset = addr.calcRMAddr(segment);
+
+      addr.writeRMReg8(segment, offset, 0x42);
 
       // (CS     * 0x10) + (  BX   +   SI  ) + disp  =
       // (0xABCD * 0x10) + (0x2345 + 0x5678) + 0x56 =
@@ -1218,7 +1300,11 @@ describe('rm/reg access methods', () => {
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
       cpu.decode();
-      addr.writeRMReg8(segment, 0x42);
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
+      let offset = addr.calcRMAddr(segment);
+
+      addr.writeRMReg8(segment, offset, 0x42);
 
       // (CS     * 0x10) + (  BX   +   SI  ) + disp  =
       // (0xABCD * 0x10) + (0x2345 + 0x5678) + 0x1256 =
@@ -1229,7 +1315,11 @@ describe('rm/reg access methods', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b11111110; // addr mode
       cpu.decode();
-      addr.writeRMReg8(segment, 0x67);
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
+      let offset = addr.calcRMAddr(segment);
+
+      addr.writeRMReg8(segment, offset, 0x67);
       expect(cpu.reg8[regDH]).toBe(0x67);
     });
   });
@@ -1239,7 +1329,11 @@ describe('rm/reg access methods', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000000; // addr mode
       cpu.decode();
-      addr.writeRMReg16(segment, 0x2142);
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
+      let offset = addr.calcRMAddr(segment);
+
+      addr.writeRMReg16(segment, offset, 0x2142);
 
       // (CS     * 0x10) + (  BX   +   SI  ) =
       // (0xABCD * 0x10) + (0x2345 + 0x5678) =
@@ -1253,7 +1347,11 @@ describe('rm/reg access methods', () => {
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
       cpu.decode();
-      addr.writeRMReg16(segment, 0x2142);
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
+      let offset = addr.calcRMAddr(segment);
+
+      addr.writeRMReg16(segment, offset, 0x2142);
 
       // (CS     * 0x10) + (  BX   +   SI  ) + disp  =
       // (0xABCD * 0x10) + (0x2345 + 0x5678) + 0x56 =
@@ -1267,7 +1365,11 @@ describe('rm/reg access methods', () => {
       cpu.mem8[0xABCD2] = 0b01010110; // d1 (0x56)
       cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
       cpu.decode();
-      addr.writeRMReg16(segment, 0x2142);
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
+      let offset = addr.calcRMAddr(segment);
+
+      addr.writeRMReg16(segment, offset, 0x2142);
 
       // (CS     * 0x10) + (  BX   +   SI  ) + disp  =
       // (0xABCD * 0x10) + (0x2345 + 0x5678) + 0x1256 =
@@ -1279,7 +1381,11 @@ describe('rm/reg access methods', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
       cpu.mem8[0xABCD1] = 0b11111110; // addr mode
       cpu.decode();
-      addr.writeRMReg16(segment, 0x5678);
+      cpu.instIPInc = 2;
+      cpu.addrIPInc = 0;
+      let offset = addr.calcRMAddr(segment);
+
+      addr.writeRMReg16(segment, offset, 0x5678);
       expect(cpu.reg16[regSI]).toBe(0x5678);
     });
   });
@@ -1316,404 +1422,519 @@ describe('Addressing Modes', () => {
     cpu.mem8[0xABCD3] = 0b00010010; // d2 (0x12)
 
     segment = cpu.reg16[regCS];
-    cpu.instIPInc = 0;
+    cpu.instIPInc = 2;
+    cpu.addrIPInc = 0;
     cpu.decode();
   });
 
   describe('_1', () => {
-    test('read', () => {
-      expect(addr._1(null, null)).toBe(0x01);
-      expect(cpu.instIPInc).toBe(0);
+    test('address', () => {
+      expect(addr._1(segment)).toBe(null);
     });
-    // TODO: Do we need a write test?
+    test('read', () => {
+      expect(addr._1(segment, null)).toBe(0x01);
+      expect(cpu.instIPInc).toBe(2);
+    });
+    test('write throws', () => {
+      expect(() => {
+        addr._1(segment, 0xFF, 0xFF);
+      }).toThrowError(InvalidAddressModeException);
+    });
   });
 
   describe('_3', () => {
-    test('read', () => {
-      expect(addr._3(null, null)).toBe(0x03);
-      expect(cpu.instIPInc).toBe(0);
+    test('address', () => {
+      expect(addr._3(segment)).toBe(null);
     });
-    // TODO: Do we need a write test?
+    test('read', () => {
+      expect(addr._3(segment, null)).toBe(0x03);
+      expect(cpu.instIPInc).toBe(2);
+    });
+    test('write throws', () => {
+      expect(() => {
+        addr._3(segment, 0xFF, 0xFF);
+      }).toThrowError(InvalidAddressModeException);
+    });
   });
 
   describe('AX', () => {
-    test('read', () => {
-      expect(addr.AX(null, null)).toBe(0x1234);
+    test('address', () => {
+      expect(addr.AX(segment)).toBe(null);
     });
-    test('read cycles', () => {
-      addr.AX(null, null);
-      expect(cpu.instIPInc).toBe(0);
+    test('addr cycles', () => {
+      addr.AX(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
+    test('read', () => {
+      expect(addr.AX(segment, null)).toBe(0x1234);
     });
     test('write', () => {
-      let result = addr.AX(null, 0xFFFF);
+      let result = addr.AX(segment, null, 0xFFFF);
       expect(cpu.reg16[regAX]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
-    test('write cycles', () => {
-      addr.AX(null, 0xFFFF);
-      expect(cpu.instIPInc).toBe(0);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.AX(segment, 0xFF, 0xFFFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
   describe('AH', () => {
-    test('read', () => {
-      addr.AH(null, null);
-      expect(addr.AH()).toBe(0x34);
+    test('address', () => {
+      expect(addr.AH(segment)).toBe(null);
     });
-    test('read cycles', () => {
-      addr.AH(null, null);
-      expect(cpu.instIPInc).toBe(0);
+    test('addr cycles', () => {
+      addr.AH(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
+    test('read', () => {
+      expect(addr.AH(segment, null)).toBe(0x34);
     });
     test('write', () => {
-      let result = addr.AH(null, 0xFF);
+      let result = addr.AH(segment, null, 0xFF);
       expect(cpu.reg8[regAH]).toBe(0xFF);
       expect(result).toBe(0xFF);
     });
-    test('write cycles', () => {
-      addr.AH(null, 0xFF);
-      expect(cpu.instIPInc).toBe(0);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.AH(segment, 0xFF, 0xFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
   describe('AL', () => {
-    test('read', () => {
-      expect(addr.AL(null, null)).toBe(0x12);
+    test('address', () => {
+      expect(addr.AL(segment)).toBe(null);
     });
-    test('read cycles', () => {
-      addr.AL(null, null);
-      expect(cpu.instIPInc).toBe(0);
+    test('addr cycles', () => {
+      addr.AL(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
+    test('read', () => {
+      expect(addr.AL(segment, null)).toBe(0x12);
     });
     test('write', () => {
-      let result = addr.AL(null, 0xFF);
+      let result = addr.AL(segment, null, 0xFF);
       expect(cpu.reg8[regAL]).toBe(0xFF);
       expect(result).toBe(0xFF);
     });
-    test('write cycles', () => {
-      addr.AL(null, 0xFF);
-      expect(cpu.instIPInc).toBe(0);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.AL(segment, 0xFF, 0xFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
   describe('BX', () => {
-    test('read', () => {
-      expect(addr.BX(null, null)).toBe(0x2345);
+    test('address', () => {
+      expect(addr.BX(segment)).toBe(null);
     });
-    test('read cycles', () => {
-      addr.BX(null, null);
-      expect(cpu.instIPInc).toBe(0);
+    test('addr cycles', () => {
+      addr.BX(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
+    test('read', () => {
+      expect(addr.BX(segment, null)).toBe(0x2345);
     });
     test('write', () => {
-      let result = addr.BX(null, 0xFFFF);
+      let result = addr.BX(segment, null, 0xFFFF);
       expect(cpu.reg16[regBX]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
-    test('write cycles', () => {
-      addr.BX(null, 0xFFFF);
-      expect(cpu.instIPInc).toBe(0);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.BX(segment, 0xFF, 0xFFFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
   describe('BH', () => {
-    test('read', () => {
-      expect(addr.BH(null, null)).toBe(0x45);
+    test('address', () => {
+      expect(addr.BH(segment)).toBe(null);
     });
-    test('read cycles', () => {
-      addr.BH(null, null);
-      expect(cpu.instIPInc).toBe(0);
+    test('addr cycles', () => {
+      addr.BH(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
+    test('read', () => {
+      expect(addr.BH(segment, null)).toBe(0x45);
     });
     test('write', () => {
-      let result = addr.BH(null, 0xFF);
+      let result = addr.BH(segment, null, 0xFF);
       expect(cpu.reg8[regBH]).toBe(0xFF);
       expect(result).toBe(0xFF);
     });
-    test('write cycles', () => {
-      addr.BH(null, 0xFF);
-      expect(cpu.instIPInc).toBe(0);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.BH(segment, 0xFF, 0xFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
   describe('BL', () => {
-    test('read', () => {
-      expect(addr.BL(null, null)).toBe(0x23);
+    test('address', () => {
+      expect(addr.BL(segment)).toBe(null);
     });
-    test('read cycles', () => {
-      addr.BL(null, null);
-      expect(cpu.instIPInc).toBe(0);
+    test('addr cycles', () => {
+      addr.AL(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
+    test('read', () => {
+      expect(addr.BL(segment, null)).toBe(0x23);
     });
     test('write', () => {
-      let result = addr.BL(null, 0xFF);
+      let result = addr.BL(segment, null, 0xFF);
       expect(cpu.reg8[regBL]).toBe(0xFF);
       expect(result).toBe(0xFF);
     });
-    test('write cycles', () => {
-      addr.BL(null, 0xFF);
-      expect(cpu.instIPInc).toBe(0);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.BL(segment, 0xFF, 0xFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
   describe('CX', () => {
-    test('read', () => {
-      expect(addr.CX(null, null)).toBe(0x3456);
+    test('address', () => {
+      expect(addr.CX(segment)).toBe(null);
     });
-    test('read cycles', () => {
-      addr.CX(null, null);
-      expect(cpu.instIPInc).toBe(0);
+    test('addr cycles', () => {
+      addr.CX(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
+    test('read', () => {
+      expect(addr.CX(segment, null)).toBe(0x3456);
     });
     test('write', () => {
-      let result = addr.CX(null, 0xFFFF);
+      let result = addr.CX(segment, null, 0xFFFF);
       expect(cpu.reg16[regCX]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
-    test('write cycles', () => {
-      addr.CX(null, 0xFFFF);
-      expect(cpu.instIPInc).toBe(0);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.CX(segment, 0xFF, 0xFFFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
   describe('CH', () => {
-    test('read', () => {
-      expect(addr.CH(null, null)).toBe(0x56);
+    test('address', () => {
+      expect(addr.CH(segment)).toBe(null);
     });
-    test('read cycles', () => {
-      addr.CH(null, null);
-      expect(cpu.instIPInc).toBe(0);
+    test('addr cycles', () => {
+      addr.CH(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
+    test('read', () => {
+      expect(addr.CH(segment, null)).toBe(0x56);
     });
     test('write', () => {
-      let result = addr.CH(null, 0xFF);
+      let result = addr.CH(segment, null, 0xFF);
       expect(cpu.reg8[regCH]).toBe(0xFF);
       expect(result).toBe(0xFF);
     });
-    test('write cycles', () => {
-      addr.CH(null, 0xFF);
-      expect(cpu.instIPInc).toBe(0);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.CH(segment, 0xFF, 0xFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
   describe('CL', () => {
-    test('read', () => {
-      expect(addr.CL(null, null)).toBe(0x34);
+    test('address', () => {
+      expect(addr.CL(segment)).toBe(null);
     });
-    test('read cycles', () => {
-      addr.CL(null, null);
-      expect(cpu.instIPInc).toBe(0);
+    test('addr cycles', () => {
+      addr.CL(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
+    test('read', () => {
+      expect(addr.CL(segment, null)).toBe(0x34);
     });
     test('write', () => {
-      let result = addr.CL(null, 0xFF);
+      let result = addr.CL(segment, null, 0xFF);
       expect(cpu.reg8[regCL]).toBe(0xFF);
       expect(result).toBe(0xFF);
     });
-    test('write cycles', () => {
-      addr.CL(null, 0xFF);
-      expect(cpu.instIPInc).toBe(0);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.CL(segment, 0xFF, 0xFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
   describe('DX', () => {
-    test('read', () => {
-      expect(addr.DX(null, null)).toBe(0x4567);
+    test('address', () => {
+      expect(addr.DX(segment)).toBe(null);
+    });
+    test('addr cycles', () => {
+      addr.DX(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
     });
     test('read cycles', () => {
-      addr.DX(null, null);
-      expect(cpu.instIPInc).toBe(0);
+      addr.DX(segment, null);
+      expect(cpu.instIPInc).toBe(2);
     });
     test('write', () => {
-      let result = addr.DX(null, 0xFFFF);
+      let result = addr.DX(segment, null, 0xFFFF);
       expect(cpu.reg16[regDX]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
-    test('write cycles', () => {
-      addr.DX(null, 0xFFFF);
-      expect(cpu.instIPInc).toBe(0);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.DX(segment, 0xFF, 0xFFFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
   describe('DH', () => {
-    test('read', () => {
-      expect(addr.DH(null, null)).toBe(0x67);
+    test('address', () => {
+      expect(addr.DH(segment)).toBe(null);
     });
-    test('read cycles', () => {
-      addr.DH(null, null);
-      expect(cpu.instIPInc).toBe(0);
+    test('addr cycles', () => {
+      addr.DL(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
+    test('read', () => {
+      expect(addr.DH(segment, null)).toBe(0x67);
     });
     test('write', () => {
-      let result = addr.DH(null, 0xFF);
+      let result = addr.DH(segment, null, 0xFF);
       expect(cpu.reg8[regDH]).toBe(0xFF);
       expect(result).toBe(0xFF);
     });
-    test('write cycles', () => {
-      addr.DH(null, 0xFF);
-      expect(cpu.instIPInc).toBe(0);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.DH(segment, 0xFF, 0xFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
   describe('DL', () => {
-    test('read', () => {
-      expect(addr.DL(null, null)).toBe(0x45);
+    test('address', () => {
+      expect(addr.DL(segment)).toBe(null);
     });
-    test('read cycles', () => {
-      addr.DL(null, null);
-      expect(cpu.instIPInc).toBe(0);
+    test('addr cycles', () => {
+      addr.DL(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
+    test('read', () => {
+      expect(addr.DL(segment, null)).toBe(0x45);
     });
     test('write', () => {
-      let result = addr.DL(null, 0xFF);
+      let result = addr.DL(segment, null, 0xFF);
       expect(cpu.reg8[regDL]).toBe(0xFF);
       expect(result).toBe(0xFF);
     });
-    test('write cycles', () => {
-      addr.DL(null, 0xFF);
-      expect(cpu.instIPInc).toBe(0);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.DL(segment, 0xFF, 0xFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
   describe('SI', () => {
-    test('read', () => {
-      expect(addr.SI(null, null)).toBe(0x5678);
+    test('address', () => {
+      expect(addr.SI(segment)).toBe(null);
     });
-    test('read cycles', () => {
-      addr.SI(null, null);
-      expect(cpu.instIPInc).toBe(0);
+    test('addr cycles', () => {
+      addr.SI(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
+    test('read', () => {
+      expect(addr.SI(segment, null)).toBe(0x5678);
     });
     test('write', () => {
-      let result = addr.SI(null, 0xFFFF);
+      let result = addr.SI(segment, null, 0xFFFF);
       expect(cpu.reg16[regSI]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
-    test('write cycles', () => {
-      addr.SI(null, 0xFFFF);
-      expect(cpu.instIPInc).toBe(0);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.SI(segment, 0xFF, 0xFFFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
   describe('DI', () => {
-    test('read', () => {
-      expect(addr.DI(null, null)).toBe(0x6789);
+    test('address', () => {
+      expect(addr.DI(segment)).toBe(null);
     });
-    test('read cycles', () => {
-      addr.DI(null, null);
-      expect(cpu.instIPInc).toBe(0);
+    test('addr cycles', () => {
+      addr.DI(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
+    test('read', () => {
+      expect(addr.DI(segment, null)).toBe(0x6789);
     });
     test('write', () => {
-      let result = addr.DI(null, 0xFFFF);
+      let result = addr.DI(segment, null, 0xFFFF);
       expect(cpu.reg16[regDI]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
-    test('write cycles', () => {
-      addr.DI(null, 0xFFFF);
-      expect(cpu.instIPInc).toBe(0);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.DI(segment, 0xFF, 0xFFFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
   describe('BP', () => {
-    test('read', () => {
-      expect(addr.BP(null, null)).toBe(0x789A);
+    test('address', () => {
+      expect(addr.BP(segment)).toBe(null);
     });
-    test('read cycles', () => {
-      addr.BP(null, null);
-      expect(cpu.instIPInc).toBe(0);
+    test('addr cycles', () => {
+      addr.BP(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
+    test('read', () => {
+      expect(addr.BP(segment, null)).toBe(0x789A);
     });
     test('write', () => {
-      let result = addr.BP(null, 0xFFFF);
+      let result = addr.BP(segment, null, 0xFFFF);
       expect(cpu.reg16[regBP]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
-    test('write cycles', () => {
-      addr.BP(null, 0xFFFF);
-      expect(cpu.instIPInc).toBe(0);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.BP(segment, 0xFF, 0xFFFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
   describe('SP', () => {
-    test('read', () => {
-      expect(addr.SP(null, null)).toBe(0x89AB);
+    test('address', () => {
+      expect(addr.SP(segment)).toBe(null);
     });
-    test('read cycles', () => {
-      addr.SP(null, null);
-      expect(cpu.instIPInc).toBe(0);
+    test('addr cycles', () => {
+      addr.SP(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
+    test('read', () => {
+      expect(addr.SP(segment, null)).toBe(0x89AB);
     });
     test('write', () => {
-      let result = addr.SP(null, 0xFFFF);
+      let result = addr.SP(segment, null, 0xFFFF);
       expect(cpu.reg16[regSP]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
-    test('write cycles', () => {
-      addr.SP(null, 0xFFFF);
-      expect(cpu.instIPInc).toBe(0);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.SP(segment, 0xFF, 0xFFFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
   describe('CS', () => {
-    test('read', () => {
-      expect(addr.CS(null, null)).toBe(0xABCD);
+    test('address', () => {
+      expect(addr.CS(segment)).toBe(null);
     });
-    test('read cycles', () => {
-      addr.CS(null, null);
-      expect(cpu.instIPInc).toBe(0);
+    test('addr cycles', () => {
+      addr.CS(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
+    test('read', () => {
+      expect(addr.CS(segment, null)).toBe(0xABCD);
     });
     test('write', () => {
-      let result = addr.CS(null, 0xFFFF);
+      let result = addr.CS(segment, null, 0xFFFF);
       expect(cpu.reg16[regCS]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
-    test('write cycles', () => {
-      addr.CS(null, 0xFFFF);
-      expect(cpu.instIPInc).toBe(0);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.CS(segment, 0xFF, 0xFFFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
   describe('DS', () => {
-    test('read', () => {
-      expect(addr.DS(null, null)).toBe(0xBCD0);
+    test('address', () => {
+      expect(addr.DS(segment)).toBe(null);
     });
-    test('read cycles', () => {
-      addr.DS(null, null);
-      expect(cpu.instIPInc).toBe(0);
+    test('addr cycles', () => {
+      addr.DS(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
+    test('read', () => {
+      expect(addr.DS(segment, null)).toBe(0xBCD0);
     });
     test('write', () => {
-      let result = addr.DS(null, 0xFFFF);
+      let result = addr.DS(segment, null, 0xFFFF);
       expect(cpu.reg16[regDS]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
-    test('write cycles', () => {
-      addr.DS(null, 0xFFFF);
-      expect(cpu.instIPInc).toBe(0);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.DS(segment, 0xFF, 0xFFFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
   describe('ES', () => {
-    test('read', () => {
-      expect(addr.ES(null, null)).toBe(0xCD01);
+    test('address', () => {
+      expect(addr.ES(segment)).toBe(null);
     });
-    test('read cycles', () => {
-      addr.ES(null, null);
-      expect(cpu.instIPInc).toBe(0);
+    test('addr cycles', () => {
+      addr.ES(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
+    test('read', () => {
+      expect(addr.ES(segment, null)).toBe(0xCD01);
     });
     test('write', () => {
-      let result = addr.ES(null, 0xFFFF);
+      let result = addr.ES(segment, null, 0xFFFF);
       expect(cpu.reg16[regES]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
-    test('write cycles', () => {
-      addr.ES(null, 0xFFFF);
-      expect(cpu.instIPInc).toBe(0);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.ES(segment, 0xFF, 0xFFFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
   describe('SS', () => {
-    test('read', () => {
-      expect(addr.SS(null, null)).toBe(0xD012);
+    test('address', () => {
+      expect(addr.SS(segment)).toBe(null);
     });
-    test('read cycles', () => {
-      addr.SS(null, null);
-      expect(cpu.instIPInc).toBe(0);
+    test('addr cycles', () => {
+      addr.SS(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
+    test('read', () => {
+      expect(addr.SS(segment, null)).toBe(0xD012);
     });
     test('write', () => {
-      let result = addr.SS(null, 0xFFFF);
+      let result = addr.SS(segment, null, 0xFFFF);
       expect(cpu.reg16[regSS]).toBe(0xFFFF);
       expect(result).toBe(0xFFFF);
     });
-    test('write cycles', () => {
-      addr.SS(null, 0xFFFF);
-      expect(cpu.instIPInc).toBe(0);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.SS(segment, 0xFF, 0xFFFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
@@ -1729,19 +1950,23 @@ describe('Addressing Modes', () => {
       // (0x1234 * 0x10) + (0x5678) =
       //    0x12340      +  0x5678  = 0x179B8
       cpu.mem8[0x179B8] = 0x90;
+      cpu.instIPInc = 1;
     });
 
-    test('read', () => {
-      // expect(addr.Ap(segment, null)).toBe(0x90);
-      expect(addr.Ap(segment, null)).toEqual([0x1234, 0x5678]);
+    test('address', () => {
+      expect(addr.Ap(segment)).toEqual(0x0001);
     });
-    test('read cycles', () => {
-      addr.Ap(segment, null);
+    test('addr cycles', () => {
+      addr.Ap(segment);
+      expect(cpu.instIPInc).toBe(1);
       expect(cpu.addrIPInc).toBe(4);
+    });
+    test('read', () => {
+      expect(addr.Ap(segment, 0x0001)).toEqual([0x1234, 0x5678]);
     });
     test('write throws', () => {
       expect(() => {
-        addr.Ap(segment, 0xFF);
+        addr.Ap(segment, 0x0001, 0xFF);
       }).toThrowError(InvalidAddressModeException);
     });
   });
@@ -1750,30 +1975,64 @@ describe('Addressing Modes', () => {
     beforeEach(() => {
       cpu.mem8[0xB36E3] = 0x90;
     });
-    test('read', () => {
-      expect(addr.Eb(segment, null)).toBe(0x90);
+    test('address', () => {
+      expect(addr.Eb(segment)).toBe(0x7A13);
     });
-    test('read cycles', () => {
-      addr.Eb(segment, null);
+    test('addr cycles', () => {
+      addr.Eb(segment);
+      expect(cpu.instIPInc).toBe(2);
       expect(cpu.addrIPInc).toBe(1);
+    });
+    test('read', () => {
+      expect(addr.Eb(segment, 0x7A13)).toBe(0x90);
     });
     test('write', () => {
-      addr.Eb(segment, 0xFF);
+      addr.Eb(segment, 0x7A13, 0xFF);
       expect(cpu.mem8[0xB36E3]).toBe(0xFF);
-    });
-    test('write cycles', () => {
-      addr.Eb(segment, 0xFF);
-      expect(cpu.addrIPInc).toBe(1);
     });
     test('addressing mode overrides operand-size bit', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
       cpu.decode();
-      expect(addr.Eb(segment, null)).toBe(0x90);
+      expect(addr.Eb(segment, 0x7A13)).toBe(0x90);
+    });
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.Eb(segment, 0xFF, 0xFFFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
   describe.skip('Ep', () => {
+    // TODO: Debug these tests. The read is failing because in readMem32 the
+    // the 24bit left shift overflows
+    // 0x90 << 24 | 0x90 << 16 | 0x80 << 8 | 0x80
+    // this is wierd and I don't know why it's happening
 
+    beforeEach(() => {
+      cpu.mem8[0xB36E3] = 0x90;
+      cpu.mem8[0xB36E4] = 0x90;
+      cpu.mem8[0xB36E5] = 0x80;
+      cpu.mem8[0xB36E6] = 0x80;
+
+      cpu.decode();
+    });
+
+    test('address', () => {
+      expect(addr.Ep(segment)).toBe(0x7A13);
+    });
+    test('address cycles', () => {
+      addr.Ep(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(1);
+    });
+    test('read', () => {
+      expect(addr.Ep(segment, 0x7A13)).toBe([0x8080, 0x9090]);
+    });
+    test('write throws', () => {
+      expect(() => {
+        addr.Ep(segment, 0x01, 0xFF);
+      }).toThrowError(InvalidAddressModeException);
+    });
   });
 
   describe('Ev', () => {
@@ -1781,21 +2040,26 @@ describe('Addressing Modes', () => {
       cpu.mem8[0xB36E3] = 0x90;
       cpu.mem8[0xB36E4] = 0x90;
     });
-    test('read', () => {
-      expect(addr.Ev(segment, null)).toBe(0x9090);
+    test('address', () => {
+      expect(addr.Ev(segment)).toBe(0x7A13);
     });
-    test('read cycles', () => {
-      addr.Ev(segment, null);
+    test('addr cycles', () => {
+      addr.Ev(segment);
+      expect(cpu.instIPInc).toBe(2);
       expect(cpu.addrIPInc).toBe(1);
     });
+    test('read', () => {
+      expect(addr.Ev(segment, 0x7A13)).toBe(0x9090);
+    });
     test('write', () => {
-      addr.Ev(segment, 0xFFFF);
+      addr.Ev(segment, 0x7A13, 0xFFFF);
       expect(cpu.mem8[0xB36E3]).toBe(0xFF);
       expect(cpu.mem8[0xB36E4]).toBe(0xFF);
     });
-    test('write cycles', () => {
-      addr.Ev(segment, 0xFFFF);
-      expect(cpu.addrIPInc).toBe(1);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.Ev(segment, 0x7A13, 0xFFFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
@@ -1803,54 +2067,58 @@ describe('Addressing Modes', () => {
     beforeEach(() => {
       cpu.mem8[0xB36E3] = 0x90;
       cpu.mem8[0xB36E4] = 0x90;
-
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
-      cpu.decode();
     });
-    test('read', () => {
-      expect(addr.Ew(segment, null)).toBe(0x9090);
+    test('address', () => {
+      let r = addr.Ew(segment);
+      expect(r).toBe(0x7A13);
     });
-    test('read cycles', () => {
-      addr.Ew(segment, null);
+    test('addr cycles', () => {
+      addr.Ew(segment);
+      expect(cpu.instIPInc).toBe(2);
       expect(cpu.addrIPInc).toBe(1);
     });
+    test('read', () => {
+      expect(addr.Ew(segment, 0x7A13)).toBe(0x9090);
+    });
     test('write', () => {
-      addr.Ew(segment, 0xFFFF);
+      addr.Ew(segment, 0x7A13, 0xFFFF);
       expect(cpu.mem8[0xB36E3]).toBe(0xFF);
       expect(cpu.mem8[0xB36E4]).toBe(0xFF);
     });
-    test('write cycles', () => {
-      addr.Ew(segment, 0xFFFF);
-      expect(cpu.addrIPInc).toBe(1);
-    });
-    test('addressing mode overrides operand-size bit', () => {
-      cpu.mem8[0xABCD0] = 0x00; // inst (byte)
-      cpu.decode();
-      expect(addr.Ew(segment, null)).toBe(0x9090);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.Ew(segment, 0x7A13, 0xFFFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
   describe('Gb', () => {
+    test('address', () => {
+      expect(addr.Gb(segment)).toBe(null);
+    });
+    test('addr cycles', () => {
+      addr.Gb(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
     test('read', () => {
       expect(addr.Gb(segment, null)).toBe(0x12);
     });
-    test('read cycles', () => {
-      addr.Gb(segment, null);
-      expect(cpu.instIPInc).toBe(0);
-    });
     test('write', () => {
-      addr.Gb(segment, 0xFF);
+      addr.Gb(segment, null, 0xFF);
       expect(cpu.reg8[regAL]).toBe(0xFF);
-    });
-    test('write cycles', () => {
-      addr.Gb(segment, 0xFF);
-      expect(cpu.instIPInc).toBe(0);
     });
     test('addressing mode overrides operand-size bit', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
       cpu.decode();
       let r = addr.Gb(segment, null);
       expect(r).toBe(0x12);
+    });
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.Gb(segment, 0x7A13, 0xFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
@@ -1859,20 +2127,26 @@ describe('Addressing Modes', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
       cpu.decode();
     });
+
+    test('address', () => {
+      expect(addr.Gv(segment)).toBe(null);
+    });
+    test('addr cycles', () => {
+      addr.Gv(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
     test('read', () => {
       expect(addr.Gv(segment, null)).toBe(0x1234);
     });
-    test('read cycles', () => {
-      addr.Gv(segment, null);
-      expect(cpu.instIPInc).toBe(0);
-    });
     test('write', () => {
-      addr.Gv(segment, 0xFFFF);
+      addr.Gv(segment, null, 0xFFFF);
       expect(cpu.reg16[regAX]).toBe(0xFFFF);
     });
-    test('write cycles', () => {
-      addr.Gv(segment, 0xFFFF);
-      expect(cpu.instIPInc).toBe(0);
+    test('write overflow throws', () => {
+      expect(() => {
+        addr.Gv(segment, 0x7A13, 0xFFFFF);
+      }).toThrowError(ValueOverflowException);
     });
   });
 
@@ -1883,19 +2157,30 @@ describe('Addressing Modes', () => {
       cpu.mem8[0xABCD3] = 0x78; // arg2 byte low
       cpu.mem8[0xABCD4] = 0x56; // arg2 byte high
 
+      cpu.mem8[0xABCD0] = 0x01; // inst (byte)
+
       cpu.instIPInc = 1; // usually the operation will do this
     });
-    test('read', () => {
-      expect(addr.Ib(segment, null)).toBe(0x34);
+    test('address', () => {
+      expect(addr.Ib(segment)).toBe(0x01);
     });
-    test('read cycles', () => {
-      addr.Ib(segment, null);
+    test('addr cycles', () => {
+      addr.Ib(segment);
+      expect(cpu.instIPInc).toBe(1);
       expect(cpu.addrIPInc).toBe(1);
+    });
+    test('read', () => {
+      expect(addr.Ib(segment, 0x01)).toBe(0x34);
+    });
+    test('write throws', () => {
+      expect(() => {
+        addr.Ib(segment, 0x01, 0xFF);
+      }).toThrowError(InvalidAddressModeException);
     });
     test('addressing mode overrides operand-size bit', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
       cpu.decode();
-      expect(addr.Ib(segment, null)).toBe(0x34);
+      expect(addr.Ib(segment, 0x01)).toBe(0x34);
     });
   });
 
@@ -1910,12 +2195,21 @@ describe('Addressing Modes', () => {
 
       cpu.instIPInc = 1; // usually the operation will do this
     });
-    test('read', () => {
-      expect(addr.Iv(segment, null)).toBe(0x1234);
+    test('address', () => {
+      expect(addr.Iv(segment)).toBe(0x01);
     });
-    test('read cycles', () => {
-      addr.Iv(segment, null);
+    test('addr cycles', () => {
+      addr.Iv(segment);
+      expect(cpu.instIPInc).toBe(1);
       expect(cpu.addrIPInc).toBe(2);
+    });
+    test('read', () => {
+      expect(addr.Iv(segment, 0x01)).toBe(0x1234);
+    });
+    test('write throws', () => {
+      expect(() => {
+        addr.Iv(segment, 0x01, 0xFF);
+      }).toThrowError(InvalidAddressModeException);
     });
   });
 
@@ -1926,19 +2220,30 @@ describe('Addressing Modes', () => {
       cpu.mem8[0xABCD3] = 0x78; // arg2 byte low
       cpu.mem8[0xABCD4] = 0x56; // arg2 byte high
 
+      cpu.mem8[0xABCD0] = 0x01; // inst (byte)
+
       cpu.instIPInc = 1; // usually the operation will do this
     });
-    test('read', () => {
-      expect(addr.Iw(segment, null)).toBe(0x1234);
+    test('address', () => {
+      expect(addr.Iw(segment)).toBe(0x01);
     });
-    test('read cycles', () => {
-      addr.Iw(segment, null);
+    test('addr cycles', () => {
+      addr.Iw(segment);
+      expect(cpu.instIPInc).toBe(1);
       expect(cpu.addrIPInc).toBe(2);
+    });
+    test('read', () => {
+      expect(addr.Iw(segment, 0x01)).toBe(0x1234);
+    });
+    test('write throws', () => {
+      expect(() => {
+        addr.Iw(segment, 0x01, 0xFF);
+      }).toThrowError(InvalidAddressModeException);
     });
     test('addressing mode overrides operand-size bit', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.decode();
-      expect(addr.Iw(segment, null)).toBe(0x1234);
+      expect(addr.Iw(segment, 0x01)).toBe(0x1234);
     });
   });
 
@@ -1953,22 +2258,27 @@ describe('Addressing Modes', () => {
 
       cpu.instIPInc = 1; // usually the operation will do this
     });
-    test('read', () => {
-      expect(addr.Jb(segment, null)).toBe(0x34 + 0x0011);
+
+    test('address', () => {
+      expect(addr.Jb(segment)).toBe(0x12);
     });
-    test('read cycles', () => {
-      addr.Jb(segment, null);
+    test('address cycles', () => {
+      addr.Jb(segment);
+      expect(cpu.instIPInc).toBe(1);
       expect(cpu.addrIPInc).toBe(1);
     });
-    test.skip('write throws', () => {
+    test('read', () => {
+      expect(addr.Jb(segment, 0x12)).toBe(0x34 + 0x0011);
+    });
+    test('write throws', () => {
       expect(() => {
-        addr.Jb(segment, 0xFF);
+        addr.Jb(segment, 0x12, 0xFF);
       }).toThrowError(InvalidAddressModeException);
     });
     test('addressing mode overrides operand-size bit', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
       cpu.decode();
-      expect(addr.Jb(segment, null)).toBe(0x34 + 0x0011);
+      expect(addr.Jb(segment, 0x12)).toBe(0x34 + 0x0011);
     });
   });
 
@@ -1985,17 +2295,27 @@ describe('Addressing Modes', () => {
 
       cpu.instIPInc = 1; // usually the operation will do this
     });
-    test('read', () => {
-      expect(addr.Jv(segment, null)).toBe(0x1234 + 0x0011);
+
+    test('address', () => {
+      expect(addr.Jv(segment)).toBe(0x12);
     });
-    test('read cycles', () => {
-      addr.Jv(segment, null);
+    test('address cycles', () => {
+      addr.Jv(segment);
+      expect(cpu.instIPInc).toBe(1);
       expect(cpu.addrIPInc).toBe(2);
     });
-    test.skip('write', () => {
+    test('read', () => {
+      expect(addr.Jv(segment, 0x12)).toBe(0x1234 + 0x0011);
+    });
+    test('write throws', () => {
       expect(() => {
-        addr.Jv(segment, 0xFFFF);
+        addr.Jv(segment, 0x12, 0xFF);
       }).toThrowError(InvalidAddressModeException);
+    });
+    test('addressing mode overrides operand-size bit', () => {
+      cpu.mem8[0xABCD0] = 0x01; // inst (byte)
+      cpu.decode();
+      expect(addr.Jv(segment, 0x12)).toBe(0x1234 + 0x0011);
     });
   });
 
@@ -2010,16 +2330,30 @@ describe('Addressing Modes', () => {
       cpu.decode();
     });
 
-    test('read', () => {
-      expect(addr.M(segment, null)).toEqual(0x9ABC + 0x1234);
+    test('address - Use R/M Table 1 for R/M operand', () => {
+      cpu.mem8[0xABCD1] = 0b00000101; // addr mode
+      cpu.decode();
+      expect(addr.M(segment)).toEqual(0x9ABC);
     });
-    test('read cycles', () => {
-      addr.M(segment, null);
+    test('address - Use R/M Table 2 with 8-bit displacement', () => {
+      cpu.mem8[0xABCD1] = 0b01000101; // addr mode
+      cpu.decode();
+      expect(addr.M(segment)).toEqual(0x9ABC + 0x34);
+    });
+    test('address - Use R/M Table 2 with 16-bit displacement', () => {
+      expect(addr.M(segment)).toEqual(0x9ABC + 0x1234);
+    });
+    test('address cycles', () => {
+      addr.M(segment);
+      expect(cpu.instIPInc).toBe(2);
       expect(cpu.addrIPInc).toBe(2);
+    });
+    test('read', () => {
+      expect(addr.M(segment, 0xFF)).toBe(0xFF);
     });
     test('write throws', () => {
       expect(() => {
-        addr.M(segment, 0xFF);
+        addr.M(segment, 0x01, 0xFF);
       }).toThrowError(InvalidAddressModeException);
     });
   });
@@ -2038,17 +2372,42 @@ describe('Addressing Modes', () => {
 
       cpu.decode();
     });
-
-    test('read', () => {
-      expect(addr.Mp(segment, null)).toEqual([0x9ABC, 0x5678]);
+    test('address - Use R/M Table 1 for R/M operand', () => {
+      expect(addr.Mp(segment)).toEqual(0x1234);
     });
-    test('read cycles', () => {
-      addr.Mp(segment, null);
+    test('address - Use R/M Table 2 with 8-bit displacement', () => {
+      // 0x789A + 0x34 = 0x78CE
+      // (0xABCD * 0x10) + 0x78CE = 0xB359E
+      cpu.mem8[0xABCD1] = 0b01000110; // addr mode
+      cpu.mem8[0xB359E] = 0x78; // v1 high
+      cpu.mem8[0xB359F] = 0x56; // v1 low
+      cpu.mem8[0xB35A0] = 0xBC; // v2 high
+      cpu.mem8[0xB35A1] = 0x9A; // v2 low
+      cpu.decode();
+      expect(addr.Mp(segment)).toEqual(0x78CE);
+    });
+    test('address - Use R/M Table 2 with 16-bit displacement', () => {
+      // 0x789A + 0x1234 = 0x8ACE
+      // (0xABCD * 0x10) + 0x8ACE = 0xB479E
+      cpu.mem8[0xABCD1] = 0b10000110; // addr mode
+      cpu.mem8[0xB479E] = 0x78; // v1 high
+      cpu.mem8[0xB479F] = 0x56; // v1 low
+      cpu.mem8[0xB47A0] = 0xBC; // v2 high
+      cpu.mem8[0xB47A1] = 0x9A; // v2 low
+      cpu.decode();
+      expect(addr.Mp(segment)).toEqual(0x8ACE);
+    });
+    test('address cycles', () => {
+      addr.Mp(segment);
+      expect(cpu.instIPInc).toBe(2);
       expect(cpu.addrIPInc).toBe(2);
+    });
+    test('read', () => {
+      expect(addr.Mp(segment, 0x1234)).toEqual([0x9ABC, 0x5678]);
     });
     test('write throws', () => {
       expect(() => {
-        addr.Mp(segment, 0xFF);
+        addr.Mp(segment, 0x01, 0xFF);
       }).toThrowError(InvalidAddressModeException);
     });
   });

@@ -14,6 +14,17 @@ import {
   InvalidAddressModeException
 } from "../utils/Exceptions";
 
+/**
+ * Instruction addressing modes
+ *
+ * Addressing mode methods operate in 3 ways. If only `segment` is provided
+ * (address mode) then the offset (not including segment) address of the
+ * addressing mode is calculated and returned. If `segment` and `offset` is
+ * provided (read mode) then the value at that address is read and returned.
+ * If `segment`, `offset` and `value` are provided (write mode) then the
+ * given value is written to the address offset with the segmented address
+ * calculated by this method.
+ */
 export default class Addressing {
   constructor(cpu) {
     this.cpu = cpu;
@@ -24,332 +35,588 @@ export default class Addressing {
   /**
    * Return a number value of 1.
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value - Not used in this addressing mode
-   * @return {number} Returns 0x01
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] NOT USED
+   * @param {(number|null)} [value] NOT USED
+   * @return {(number|null)} In read mode returns 0x01, else returns null
    */
-  _1 (segment, value) {
-    return 0x01;
+  _1 (segment, offset, value) {
+    if (offset === undefined && value === undefined) {
+      // No address calculation for constants
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return 0x01;
+    }
+    else {
+      // No writes for constants
+      throw new InvalidAddressModeException("_1 addressing mode can not set values");
+    }
   }
 
   /**
    * Return a number value of 3.
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value - Not used in this addressing mode
-   * @return {number} Returns 0x03
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] NOT USED
+   * @param {(number|null)} [value] NOT USED
+   * @return {number} In read mode returns 0x01, else returns null
    */
-  _3 (segment, value) {
-    return 0x03;
+  _3 (segment, offset, value) {
+    if (offset === undefined && value === undefined) {
+      // No address calculation for constants
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return 0x03;
+    }
+    else {
+      // No writes for constants
+      throw new InvalidAddressModeException("_1 addressing mode can not set values");
+    }
   }
 
   /**
    * Read or write a word value from/to the AX register.
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value Value to write (word)
-   * @return {number} For a read operation the value from the register is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] Memory offset NOT USED
+   * @param {(number|null)} [value] Value to write (word)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode returns the same value
+   *   provided.
    */
-  AX (segment, value) {
-    let result;
-    if (value || value === 0) result =  this.cpu.reg16[regAX] = value & 0xFFFF;
-    else result = this.cpu.reg16[regAX];
-    return result;
+  AX (segment, offset,  value) {
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.cpu.reg16[regAX];
+    }
+    else {
+      // Write value to register
+      return this.cpu.reg16[regAX] = value & 0xFFFF
+    }
   }
 
   /**
    * Read or write a byte value from/to the AH register.
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value Value to write (word)
-   * @return {number} For a read operation the value from the register is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] Memory offset NOT USED
+   * @param {(number|null)} [value] Value to write (word)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode returns the same value
+   *   provided.
    */
-  AH (segment, value) {
-    let result;
+  AH (segment, offset, value) {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
-    if (value || value === 0) result =  this.cpu.reg8[regAH] = value & 0xFF;
-    else result = this.cpu.reg8[regAH];
-    return result;
+
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.cpu.reg8[regAH];
+    }
+    else {
+      // Write value to register
+      return this.cpu.reg8[regAH] = value & 0xFF
+    }
   }
 
   /**
    * Read or write a byte value from/to the AL register.
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value Value to write (word)
-   * @return {number} For a read operation the value from the register is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] Memory offset NOT USED
+   * @param {(number|null)} [value] Value to write (word)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode returns the same value
+   *   provided.
    */
-  AL (segment, value) {
-    let result;
+  AL (segment, offset, value) {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
-    if (value || value === 0) result =  this.cpu.reg8[regAL] = value & 0xFF;
-    else result = this.cpu.reg8[regAL];
-    return result;
+
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.cpu.reg8[regAL];
+    }
+    else {
+      // Write value to register
+      return this.cpu.reg8[regAL] = value & 0xFF
+    }
   }
 
   /**
    * Read or write a word value from/to the BX register.
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value Value to write (word)
-   * @return {number} For a read operation the value from the register is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] Memory offset NOT USED
+   * @param {(number|null)} [value] Value to write (word)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode returns the same value
+   *   provided.
    */
-  BX (segment, value) {
-    let result;
-    if (value || value === 0) result =  this.cpu.reg16[regBX] = value & 0xFFFF;
-    else result = this.cpu.reg16[regBX];
-    return result;
+  BX (segment, offset, value) {
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.cpu.reg16[regBX];
+    }
+    else {
+      // Write value to register
+      return this.cpu.reg16[regBX] = value & 0xFFFF
+    }
   }
 
   /**
    * Read or write a byte value from/to the BH register.
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value Value to write (word)
-   * @return {number} For a read operation the value from the register is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] Memory offset NOT USED
+   * @param {(number|null)} [value] Value to write (word)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode returns the same value
+   *   provided.
    */
-  BH (segment, value) {
-    let result;
+  BH (segment, offset, value) {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
-    if (value || value === 0) result =  this.cpu.reg8[regBH] = value & 0xFF;
-    else result = this.cpu.reg8[regBH];
-    return result;
+
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.cpu.reg8[regBH];
+    }
+    else {
+      // Write value to register
+      return this.cpu.reg8[regBH] = value & 0xFF
+    }
   }
 
   /**
    * Read or write a byte value from/to the BL register.
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value Value to write (word)
-   * @return {number} For a read operation the value from the register is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] Memory offset NOT USED
+   * @param {(number|null)} [value] Value to write (word)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode returns the same value
+   *   provided.
    */
-  BL (segment, value) {
-    let result;
+  BL (segment, offset, value) {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
-    if (value || value === 0) result =  this.cpu.reg8[regBL] = value & 0xFF;
-    else result = this.cpu.reg8[regBL];
-    return result;
+
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.cpu.reg8[regBL];
+    }
+    else {
+      // Write value to register
+      return this.cpu.reg8[regBL] = value & 0xFF
+    }
   }
 
   /**
    * Read or write a word value from/to the CX register.
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value Value to write (word)
-   * @return {number} For a read operation the value from the register is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] Memory offset NOT USED
+   * @param {(number|null)} [value] Value to write (word)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode returns the same value
+   *   provided.
    */
-  CX (segment, value) {
-    let result;
-    if (value || value === 0) result =  this.cpu.reg16[regCX] = value & 0xFFFF;
-    else result = this.cpu.reg16[regCX];
-    return result;
+  CX (segment, offset, value) {
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.cpu.reg16[regCX];
+    }
+    else {
+      // Write value to register
+      return this.cpu.reg16[regCX] = value & 0xFFFF
+    }
   }
 
   /**
    * Read or write a byte value from/to the CH register.
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value Value to write (word)
-   * @return {number} For a read operation the value from the register is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] Memory offset NOT USED
+   * @param {(number|null)} [value] Value to write (word)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode returns the same value
+   *   provided.
    */
-  CH (segment, value) {
-    let result;
+  CH (segment, offset, value) {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
-    if (value || value === 0) result =  this.cpu.reg8[regCH] = value & 0xFF;
-    else result = this.cpu.reg8[regCH];
-    return result;
+
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.cpu.reg8[regCH];
+    }
+    else {
+      // Write value to register
+      return this.cpu.reg8[regCH] = value & 0xFF
+    }
   }
 
   /**
    * Read or write a byte value from/to the CL register.
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value Value to write (word)
-   * @return {number} For a read operation the value from the register is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] Memory offset NOT USED
+   * @param {(number|null)} [value] Value to write (word)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode returns the same value
+   *   provided.
    */
-  CL (segment, value) {
-    let result;
+  CL (segment, offset, value) {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
-    if (value || value === 0) result =  this.cpu.reg8[regCL] = value & 0xFF;
-    else result = this.cpu.reg8[regCL];
-    return result;
+
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.cpu.reg8[regCL];
+    }
+    else {
+      // Write value to register
+      return this.cpu.reg8[regCL] = value & 0xFF
+    }
   }
 
   /**
    * Read or write a word value from/to the DX register.
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value Value to write (word)
-   * @return {number} For a read operation the value from the register is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] Memory offset NOT USED
+   * @param {(number|null)} [value] Value to write (word)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode returns the same value
+   *   provided.
    */
-  DX (segment, value) {
-    let result;
-    if (value || value === 0) result =  this.cpu.reg16[regDX] = value & 0xFFFF;
-    else result = this.cpu.reg16[regDX];
-    return result;
+  DX (segment, offset, value) {
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.cpu.reg16[regDX];
+    }
+    else {
+      // Write value to register
+      return this.cpu.reg16[regDX] = value & 0xFFFF
+    }
   }
 
   /**
    * Read or write a byte value from/to the DH register.
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value Value to write (word)
-   * @return {number} For a read operation the value from the register is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] Memory offset NOT USED
+   * @param {(number|null)} [value] Value to write (word)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode returns the same value
+   *   provided.
    */
-  DH (segment, value) {
-    let result;
+  DH (segment, offset, value) {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
-    if (value || value === 0) result =  this.cpu.reg8[regDH] = value & 0xFF;
-    else result = this.cpu.reg8[regDH];
-    return result;
+
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.cpu.reg8[regDH];
+    }
+    else {
+      // Write value to register
+      return this.cpu.reg8[regDH] = value & 0xFF
+    }
   }
 
   /**
    * Read or write a byte value from/to the DL register.
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value Value to write (word)
-   * @return {number} For a read operation the value from the register is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] Memory offset NOT USED
+   * @param {(number|null)} [value] Value to write (word)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode returns the same value
+   *   provided.
    */
-  DL (segment, value) {
-    let result;
+  DL (segment, offset, value) {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
-    if (value || value === 0) result =  this.cpu.reg8[regDL] = value & 0xFF;
-    else result = this.cpu.reg8[regDL];
-    return result;
+
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.cpu.reg8[regDL];
+    }
+    else {
+      // Write value to register
+      return this.cpu.reg8[regDL] = value & 0xFF
+    }
   }
 
   /**
    * Read or write a word value from/to the SI register.
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value Value to write (word)
-   * @return {number} For a read operation the value from the register is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] Memory offset NOT USED
+   * @param {(number|null)} [value] Value to write (word)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode returns the same value
+   *   provided.
    */
-  SI (segment, value) {
-    let result;
-    if (value || value === 0) result =  this.cpu.reg16[regSI] = value & 0xFFFF;
-    else result = this.cpu.reg16[regSI];
-    return result;
+  SI (segment, offset, value) {
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.cpu.reg16[regSI];
+    }
+    else {
+      // Write value to register
+      return this.cpu.reg16[regSI] = value & 0xFFFF
+    }
   }
 
   /**
    * Read or write a word value from/to the DI register.
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value Value to write (word)
-   * @return {number} For a read operation the value from the register is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] Memory offset NOT USED
+   * @param {(number|null)} [value] Value to write (word)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode returns the same value
+   *   provided.
    */
-  DI (segment, value) {
-    let result;
-    if (value || value === 0) result =  this.cpu.reg16[regDI] = value & 0xFFFF;
-    else result = this.cpu.reg16[regDI];
-    return result;
+  DI (segment, offset, value) {
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.cpu.reg16[regDI];
+    }
+    else {
+      // Write value to register
+      return this.cpu.reg16[regDI] = value & 0xFFFF
+    }
   }
 
   /**
    * Read or write a word value from/to the BP register.
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value Value to write (word)
-   * @return {number} For a read operation the value from the register is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] Memory offset NOT USED
+   * @param {(number|null)} [value] Value to write (word)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode returns the same value
+   *   provided.
    */
-  BP (segment, value) {
-    let result;
-    if (value || value === 0) result =  this.cpu.reg16[regBP] = value & 0xFFFF;
-    else result = this.cpu.reg16[regBP];
-    return result;
+  BP (segment, offset, value) {
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.cpu.reg16[regBP];
+    }
+    else {
+      // Write value to register
+      return this.cpu.reg16[regBP] = value & 0xFFFF
+    }
   }
 
   /**
    * Read or write a word value from/to the SP register.
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value Value to write (word)
-   * @return {number} For a read operation the value from the register is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] Memory offset NOT USED
+   * @param {(number|null)} [value] Value to write (word)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode returns the same value
+   *   provided.
    */
-  SP (segment, value) {
-    let result;
-    if (value || value === 0) result =  this.cpu.reg16[regSP] = value & 0xFFFF;
-    else result = this.cpu.reg16[regSP];
-    return result;
+  SP (segment, offset, value) {
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.cpu.reg16[regSP];
+    }
+    else {
+      // Write value to register
+      return this.cpu.reg16[regSP] = value & 0xFFFF
+    }
   }
 
   /**
    * Read or write a word value from/to the CS register.
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value Value to write (word)
-   * @return {number} For a read operation the value from the register is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] Memory offset NOT USED
+   * @param {(number|null)} [value] Value to write (word)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode returns the same value
+   *   provided.
    */
-  CS (segment, value) {
-    let result;
-    if (value || value === 0) result =  this.cpu.reg16[regCS] = value & 0xFFFF;
-    else result = this.cpu.reg16[regCS];
-    return result;
+  CS (segment, offset, value) {
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.cpu.reg16[regCS];
+    }
+    else {
+      // Write value to register
+      return this.cpu.reg16[regCS] = value & 0xFFFF
+    }
   }
 
   /**
    * Read or write a word value from/to the DS register.
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value Value to write (word)
-   * @return {number} For a read operation the value from the register is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] Memory offset NOT USED
+   * @param {(number|null)} [value] Value to write (word)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode returns the same value
+   *   provided.
    */
-  DS (segment, value) {
-    let result;
-    if (value || value === 0) result =  this.cpu.reg16[regDS] = value & 0xFFFF;
-    else result = this.cpu.reg16[regDS];
-    return result;
+  DS (segment, offset, value) {
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.cpu.reg16[regDS];
+    }
+    else {
+      // Write value to register
+      return this.cpu.reg16[regDS] = value & 0xFFFF
+    }
   }
 
   /**
    * Read or write a word value from/to the ES register.
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value Value to write (word)
-   * @return {number} For a read operation the value from the register is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] Memory offset NOT USED
+   * @param {(number|null)} [value] Value to write (word)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode returns the same value
+   *   provided.
    */
-  ES (segment, value) {
-    let result;
-    if (value || value === 0) result =  this.cpu.reg16[regES] = value & 0xFFFF;
-    else result = this.cpu.reg16[regES];
-    return result;
+  ES (segment, offset, value) {
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.cpu.reg16[regES];
+    }
+    else {
+      // Write value to register
+      return this.cpu.reg16[regES] = value & 0xFFFF
+    }
   }
 
   /**
    * Read or write a word value from/to the SS register.
    *   - [3] p. A-1 to A-3
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value Value to write (word)
-   * @return {number} For a read operation the value from the register is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] Memory offset NOT USED
+   * @param {(number|null)} [value] Value to write (word)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode returns the same value
+   *   provided.
    */
-  SS (segment, value) {
-    let result;
-    if (value || value === 0) result =  this.cpu.reg16[regSS] = value & 0xFFFF;
-    else result = this.cpu.reg16[regSS];
-    return result;
+  SS (segment, offset, value) {
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.cpu.reg16[regSS];
+    }
+    else {
+      // Write value to register
+      return this.cpu.reg16[regSS] = value & 0xFFFF
+    }
   }
 
   /**
@@ -364,24 +631,36 @@ export default class Addressing {
    *
    * - [3] p. A-1 to A-3
    *
-   * @param {number|null} segment Memory segment
-   * @param {number|null} value NOT USED
-   * @return {number[]} An array containing the [segment, offset]
+   * @param {number} segment Memory segment
+   * @param {(number|null)} [offset] Memory offset
+   * @param {(number|null)} [value] NOT USED
+   * @return {number|number[]} In address mode returns the calculated address
+   * of the operand, in read mode returns an array containing the
+   * [segment, offset]
    */
-  Ap (segment, value) {
-    if (value)
-      throw new InvalidAddressModeException("Ap addressing mode can not set values");
-
+  Ap (segment, offset, value) {
     segment = this.cpu.reg16[regCS]; // Direct address values are in the CS segment
 
-    // Get the 32bit far address (segment:offset) from the instruction argument
-    let s = (this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 2, this.cpu)] << 8) |
-             this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 1, this.cpu)];
-    let o = (this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 4, this.cpu)] << 8) |
-             this.cpu.mem8[seg2abs(segment, this.cpu.reg16[regIP] + 3, this.cpu)];
-
-    this.cpu.addrIPInc += 4;
-    return [s, o];
+    if (offset === undefined && value === undefined) {
+      // Calculate address
+      let ipInc = this.cpu.instIPInc + this.cpu.addrIPInc;
+      let result = this.cpu.reg16[regIP] + ipInc;
+      this.cpu.addrIPInc += 4;
+      return result;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address by getting the 32bit far address
+      // (segment:offset) from the instruction argument
+      let s = (this.cpu.mem8[seg2abs(segment, offset + 1, this.cpu)] << 8) |
+               this.cpu.mem8[seg2abs(segment, offset,     this.cpu)];
+      let o = (this.cpu.mem8[seg2abs(segment, offset + 3, this.cpu)] << 8) |
+               this.cpu.mem8[seg2abs(segment, offset + 2, this.cpu)];
+      return [s, o];
+    }
+    else {
+      // Write value to address
+      throw new InvalidAddressModeException("Ap addressing mode can not set values");
+    }
   }
 
   /**
@@ -394,16 +673,28 @@ export default class Addressing {
    * The operand is a byte, regardless of operand-size attribute.
    *   - [3] p. A-1 to A-3
    *
-   * @param {number|null} segment Memory segment
-   * @param {number|null} value Value to write (byte)
-   * @return {number} For a read operation the value from the address is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment
+   * @param {(number|null)} [offset] Memory offset
+   * @param {(number|null)} [value] Value to write (byte)
+   * @return {(number|null)} In address mode returns the calculated address, in
+   *   read mode returns the value at the given address, in write mode writes
+   *   the given value to the given address
    */
-  Eb (segment, value) {
-    let result;
-    if (value || value === 0) result = this.writeRMReg8(segment, value & 0xFF);
-    else result = this.readRMReg8(segment);
-    return result;
+  Eb (segment, offset, value) {
+    if (value > 0xFF) throw new ValueOverflowException("Value too large for addressing mode");
+
+    if (offset === undefined && value === undefined) {
+      // Calculate address
+      return this.calcRMAddr();
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.readRMReg8(segment, offset)
+    }
+    else {
+      // Write value to address
+      return this.writeRMReg8(segment, offset, value);
+    }
   }
 
   /**
@@ -416,18 +707,29 @@ export default class Addressing {
    * 32-bit or 48-bit pointer, depending on operand-size attribute.
    *   - [3] p. A-1 to A-3
    *
-   * @param {number|null} segment Memory segment
-   * @param {number|null} value NOT USED
-   * @return {number[]} An array containing the [segment, offset]
+   * @param {number} segment Memory segment
+   * @param {(number|null)} [offset] Memory offset
+   * @param {(number|null)} [value] NOT USED
+   * @return {number|number[]} In address mode returns the calculated address
+   *   of the operand, in read mode returns an array containing the
+   *   [segment, offset]
    */
-  Ep (segment, value) {
-    if (value)
-      throw new InvalidAddressModeException("Ep addressing mode can not set values");
-    // segment = this.cpu.reg16[regCS]; // Ep values are in the CS segment
-    let result = this.readRMReg32(segment);
-    let s = result & 0x0000FFFF;
-    let o = (result & 0xFFFF0000) >> 16;
-    return [s, o];
+  Ep (segment, offset, value) {
+    if (offset === undefined && value === undefined) {
+      // Calculate address
+      return this.calcRMAddr();
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      let result = this.readRMReg32(segment, offset);
+      let s = result & 0x0000FFFF;
+      let o = (result & 0xFFFF0000) >> 16;
+      return [s, o];
+    }
+    else {
+      // Write value to address
+      throw new InvalidAddressModeException("Ap addressing mode can not set values");
+    }
   }
 
   /**
@@ -440,20 +742,28 @@ export default class Addressing {
    * The operand is a word or doubleword, depending on operand-size attribute.
    *   - [3] p. A-1 to A-3
    *
-   * @param {number|null} segment Memory segment
-   * @param {number|null} value Value to write (word|doubleword)
-   * @return {number} For a read operation the value from the address is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment
+   * @param {(number|null)} [offset] Memory offset
+   * @param {(number|null)} [value] Value to write (word|doubleword)
+   * @return {(number|null)} In address mode returns the calculated address, in
+   *   read mode returns the value at the given address, in write mode writes
+   *   the given value to the given address
    */
-  Ev (segment, value) {
-    let result;
-    if (value || value === 0) result = this.writeRMReg16(segment, value & 0xFFFF);
-    else result = this.readRMReg16(segment);
-    return result;
-  }
+  Ev (segment, offset,  value) {
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for addressing mode");
 
-  EvAddr () {
-
+    if (offset === undefined && value === undefined) {
+      // Calculate address
+      return this.calcRMAddr();
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.readRMReg16(segment, offset)
+    }
+    else {
+      // Write value to address
+      return this.writeRMReg16(segment, offset, value);
+    }
   }
 
   /**
@@ -466,16 +776,28 @@ export default class Addressing {
    * The operand is a word, regardless of operand-size attribute.
    *   - [3] p. A-1 to A-3
    *
-   * @param {number|null} segment Memory segment
-   * @param {number|null} value Value to write (word)
-   * @return {number} For a read operation the value from the address is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment
+   * @param {(number|null)} [offset] Memory offset
+   * @param {(number|null)} [value] Value to write (word)
+   * @return {(number|null)} In address mode returns the calculated address, in
+   *   read mode returns the value at the given address, in write mode writes
+   *   the given value to the given address
    */
-  Ew (segment, value) {
-    let result;
-    if (value || value === 0) result = this.writeRMReg16(segment, value & 0xFFFF);
-    else result = this.readRMReg16(segment);
-    return result;
+  Ew (segment, offset, value) {
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for addressing mode");
+
+    if (offset === undefined && value === undefined) {
+      // Calculate address
+      return this.calcRMAddr();
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.readRMReg16(segment, offset)
+    }
+    else {
+      // Write value to address
+      return this.writeRMReg16(segment, offset, value);
+    }
   }
 
   /**
@@ -485,16 +807,29 @@ export default class Addressing {
    * The operand is a byte, regardless of operand-size attribute.
    *   - [3] p. A-1 to A-3
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value Value to write (byte)
-   * @return {number} For a read operation the value from the address is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] Memory offset
+   * @param {(number|null)} [value] Value to write (byte)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode returns the same value
+   *   provided.
    */
-  Gb (segment, value) {
-    let result;
-    if (value || value === 0) result = this.writeRegVal(value & 0xFF, false, b);
-    else result = this.readRegVal(false, b);
-    return result;
+  Gb (segment, offset, value) {
+    if (value > 0xFF) throw new ValueOverflowException("Value too large for addressing mode");
+
+    // Calculate address
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.readRegVal(false, b);
+    }
+    else {
+      // Write value to address
+      return this.writeRegVal(value & 0xFF, false, b);
+    }
   }
 
   /**
@@ -504,16 +839,29 @@ export default class Addressing {
    * The operand is a word or doubleword, depending on operand-size attribute.
    *   - [3] p. A-1 to A-3
    *
-   * @param {number|null} segment Memory segment - Not used in this addressing mode
-   * @param {number|null} value Value to write (word|doubleword)
-   * @return {number} For a read operation the value from the address is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment NOT USED
+   * @param {(number|null)} [offset] Memory offset
+   * @param {(number|null)} [value] Value to write (word|doubleword)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode returns the same value
+   *   provided.
    */
-  Gv (segment, value) {
-    let result;
-    if (value || value === 0) result = this.writeRegVal(value & 0xFFFF, false, v);
-    else result = this.readRegVal(false, v);
-    return result;
+  Gv (segment, offset,  value) {
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+
+    // Calculate address
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.readRegVal(false, v);
+    }
+    else {
+      // Write value to address
+      return this.writeRegVal(value & 0xFFFF, false, v);
+    }
   }
 
   /**
@@ -523,22 +871,29 @@ export default class Addressing {
    * The operand is a byte, regardless of operand-size attribute.
    *   - [3] p. A-1 to A-3
    *
-   * @param {number|null} segment Memory segment
-   * @param {number|null} value NOT USED
-   * @return {number} For a read operation the value from the address is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment
+   * @param {(number|null)} [offset] Memory offset
+   * @param {(number|null)} [value] NOT USED
+   * @return {(number|null)} In address mode returns the calculated address, in
+   *   read mode returns the value at the given address
    */
-  Ib (segment, value) {
-    let result;
-
+  Ib (segment, offset, value) {
     segment = this.cpu.reg16[regCS]; // Imm values are in the CS segment
-    let offset = this.cpu.reg16[regIP] + this.cpu.instIPInc;
 
-    if (value || value === 0) throw new InvalidAddressModeException("Ib addressing mode can not set values");
-    else result = this.readMem8(segment, offset);
-
-    this.cpu.addrIPInc += 1;
-    return result;
+    if (offset === undefined && value === undefined) {
+      // Calculate address
+      let result = this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc;
+      this.cpu.addrIPInc += 1;
+      return result;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.readMem8(segment, offset);
+    }
+    else {
+      // Write value to address
+      throw new InvalidAddressModeException("Ib addressing mode can not set values");
+    }
   }
 
   /**
@@ -548,25 +903,29 @@ export default class Addressing {
    * The operand is a word or doubleword, depending on operand-size attribute.
    *   - [3] p. A-1 to A-3
    *
-   * @param {number|null} segment Memory segment
-   * @param {number|null} value NOT USED
-   * @return {number} For a read operation the value from the address is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment
+   * @param {(number|null)} [offset] Memory offset
+   * @param {(number|null)} [value] NOT USED
+   * @return {(number|null)} In address mode returns the calculated address, in
+   *   read mode returns the value at the given address
    */
-  Iv (segment, value) {
-    // this.blah = function() { console.log("HERE!"); };
-
-    let result;
-
+  Iv (segment, offset,  value) {
     segment = this.cpu.reg16[regCS]; // Imm values are in the CS segment
-    let offset = this.cpu.reg16[regIP] + this.cpu.instIPInc;
 
-    if (value || value === 0) throw new InvalidAddressModeException("Iv addressing mode can not set values");
-    else result = this.readMem16(segment, offset);
-
-    this.cpu.addrIPInc += 2;
-
-    return result;
+    if (offset === undefined && value === undefined) {
+      // Calculate address
+      let result = this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc;
+      this.cpu.addrIPInc += 2;
+      return result;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.readMem16(segment, offset);
+    }
+    else {
+      // Write value to address
+      throw new InvalidAddressModeException("Iv addressing mode can not set values");
+    }
   }
 
   /**
@@ -576,23 +935,29 @@ export default class Addressing {
    * The operand is a word, regardless of operand-size attribute.
    *   - [3] p. A-1 to A-3
    *
-   * @param {number|null} segment Memory segment
-   * @param {number|null} value NOT USED
-   * @return {number} For a read operation the value from the address is
-   *  returned. For a write operation the same value provided is returned.
+   * @param {number} segment Memory segment
+   * @param {(number|null)} [offset] Memory offset
+   * @param {(number|null)} [value] NOT USED
+   * @return {(number|null)} In address mode returns the calculated address, in
+   *   read mode returns the value at the given address
    */
-  Iw (segment, value) {
-    let result;
-
+  Iw (segment, offset, value) {
     segment = this.cpu.reg16[regCS]; // Imm values are in the CS segment
-    let offset = this.cpu.reg16[regIP] + this.cpu.instIPInc;
 
-    if (value || value === 0) InvalidAddressModeException("Iw addressing mode can not set values");
-    else result = this.readMem16(segment, offset);
-
-    this.cpu.addrIPInc += 2;
-
-    return result;
+    if (offset === undefined && value === undefined) {
+      // Calculate address
+      let result = this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc;
+      this.cpu.addrIPInc += 2;
+      return result;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.readMem16(segment, offset);
+    }
+    else {
+      // Write value to address
+      throw new InvalidAddressModeException("Iw addressing mode can not set values");
+    }
   }
 
   /**
@@ -602,20 +967,30 @@ export default class Addressing {
    * The operand is a word, regardless of operand-size attribute.
    *   - [3] p. A-1 to A-3
    *
-   * @param {number|null} segment NOT USED
-   * @param {number|null} value NOT USED
-   * @return {number} The value from the address is returned
+   * @param {number} segment NOT USED
+   * @param {(number|null)} [offset] Memory offset
+   * @param {(number|null)} [value] NOT USED
+   * @return {(number|null)} In address mode returns the calculated address, in
+   *   read mode returns the value at the given address
    */
-  Jb (segment, value) {
-    if (value) throw new InvalidAddressModeException("Jb addressing mode can not set values");
+  Jb (segment, offset, value) {
+    segment = this.cpu.reg16[regCS]; // Imm values are in the CS segment
 
-    let offset = this.cpu.reg16[regIP] + this.cpu.instIPInc;
-
-    let result = this.readMem8(this.cpu.reg16[regCS], offset);
-
-    this.cpu.addrIPInc += 1;
-
-    return this.cpu.reg16[regIP] + twosComplement2Int8(result);
+    if (offset === undefined && value === undefined) {
+      // Calculate address
+      let result = this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc;
+      this.cpu.addrIPInc += 1;
+      return result;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      let result = this.readMem8(segment, offset);
+      return this.cpu.reg16[regIP] + twosComplement2Int8(result);
+    }
+    else {
+      // Write value to address
+      throw new InvalidAddressModeException("Jb addressing mode can not set values");
+    }
   }
 
   /**
@@ -625,21 +1000,30 @@ export default class Addressing {
    * The operand is a word or doubleword, depending on operand-size attribute.
    *   - [3] p. A-1 to A-3
    *
-   * @param {number|null} segment Memory segment
-   * @param {number|null} value NOT USED
-   * @return {number} The value from the address is returned
+   * @param {number} segment Memory segment
+   * @param {(number|null)} [offset] Memory offset
+   * @param {(number|null)} [value] NOT USED
+   * @return {(number|null)} In address mode returns the calculated address, in
+   *   read mode returns the value at the given address
    */
-  Jv (segment, value) {
-    if (value)
-      throw new InvalidAddressModeException("Jv addressing mode can not set values")
+  Jv (segment, offset, value) {
+    segment = this.cpu.reg16[regCS]; // Imm values are in the CS segment
 
-    let offset = this.cpu.reg16[regIP] + this.cpu.instIPInc;
-
-    let result = this.readMem16(this.cpu.reg16[regCS], offset);
-
-    this.cpu.addrIPInc += 2;
-
-    return this.cpu.reg16[regIP] + twosComplement2Int16(result);
+    if (offset === undefined && value === undefined) {
+      // Calculate address
+      let result = this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc;
+      this.cpu.addrIPInc += 2;
+      return result;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      let result = this.readMem16(segment, offset);
+      return this.cpu.reg16[regIP] + twosComplement2Int16(result);
+    }
+    else {
+      // Write value to address
+      throw new InvalidAddressModeException("Jv addressing mode can not set values");
+    }
   }
 
   /**
@@ -647,25 +1031,37 @@ export default class Addressing {
    * LSS, LFS, LGS, CMPXCHG8B).
    *   - [3] p. A-1 to A-3
    *
-   * @param {number|null} segment Memory segment
-   * @param {number|null} value NOT USED
-   * @return {number} The value from the address is returned
+   * @param {number} segment Memory segment
+   * @param {(number|null)} [offset] Memory offset
+   * @param {(number|null)} [value] NOT USED
+   * @return {(number|null)} In address mode returns the calculated address
    */
-  M (segment, value) {
-    if (value)
+  M (segment, offset, value) {
+    if (offset === undefined && value === undefined) {
+      // Calculate address
+      let addr;
+      switch (this.cpu.opcode.mod) {
+        case 0b00: // Use R/M Table 1 for R/M operand
+          addr = this.calcRMAddr(segment);
+          break;
+        case 0b01: // Use R/M Table 2 with 8-bit displacement
+        case 0b10: // Use R/M Table 2 with 16-bit displacement
+          addr = this.calcRMAddrDisp(segment);
+          break;
+      }
+      return addr;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      // Since the value *is* the offset return that. We can't do the address
+      // calculation here and return null in the address mode because the
+      // addrIPInc must be calculated in the address mode of this method.
+      return offset
+    }
+    else {
+      // Write value to address
       throw new InvalidAddressModeException("M addressing mode can not set values");
-
-    let addr;
-    switch (this.cpu.opcode.mod) {
-      case 0b00: // Use R/M Table 1 for R/M operand
-        addr = this.calcRMAddr(segment);
-        break;
-      case 0b01: // Use R/M Table 2 with 8-bit displacement
-      case 0b10: // Use R/M Table 2 with 16-bit displacement
-        addr = this.calcRMDispAddr(segment);
-        break;
     }
-    return addr
   }
 
   /**
@@ -675,42 +1071,49 @@ export default class Addressing {
    * 32-bit or 48-bit pointer, depending on operand-size attribute.
    *   - [3] p. A-1 to A-3
    *
-   * @param {number|null} segment Memory segment
-   * @param {number|null} value NOT USED
-   * @return {number[]} An array containing the [segment, offset]
+   * @param {number} segment Memory segment
+   * @param {(number|null)} [offset] Memory offset
+   * @param {(number|null)} [value] NOT USED
+   * @return {number[]|null} In address mode returns the calculated address as
+   *   an array containing the [segment, offset]
    */
-  Mp (segment, value) {
-    if (value)
-      throw new InvalidAddressModeException("Mp addressing mode can not set values");
-
-    // segment = this.cpu.reg16[regCS]; // MP values are in the CS segment
-
-    let addr;
-    switch (this.cpu.opcode.mod) {
-      case 0b00: // Use R/M Table 1 for R/M operand
-        addr = this.calcRMAddr(segment);
-        break;
-      case 0b01: // Use R/M Table 2 with 8-bit displacement
-      case 0b10: // Use R/M Table 2 with 16-bit displacement
-        addr = this.calcRMDispAddr(segment);
-        break;
+  Mp (segment, offset, value) {
+    if (offset === undefined && value === undefined) {
+      // Calculate address
+      let addr;
+      switch (this.cpu.opcode.mod) {
+        case 0b00: // Use R/M Table 1 for R/M operand
+          addr = this.calcRMAddr(segment);
+          break;
+        case 0b01: // Use R/M Table 2 with 8-bit displacement
+        case 0b10: // Use R/M Table 2 with 16-bit displacement
+          addr = this.calcRMAddrDisp(segment);
+          break;
+      }
+      return addr;
     }
+    else if (value === undefined) {
+      // Read value from calculated address
+      let o = this.readMem16(segment, offset);
+      let s = this.readMem16(segment, offset + 2);
 
-    let o = this.readMem16(segment, addr);
-    let s = this.readMem16(segment, addr + 2);
-
-    return [s, o];
+      return [s, o];
+    }
+    else {
+      // Write value to address
+      throw new InvalidAddressModeException("Mp addressing mode can not set values");
+    }
   }
 
-  Ob (segment, value) {
+  Ob (segment, offset, value) {
 
   }
 
-  Ov (segment, value) {
+  Ov (segment, offset, value) {
 
   }
 
-  Sw (segment, value) {
+  Sw (segment, offset, value) {
 
   }
 
@@ -718,20 +1121,18 @@ export default class Addressing {
    * Read a byte from memory or a register as specified by the addressing
    * mode determined by the mod, reg and r/m values.
    *
-   * @param {number|null} segment Memory segment
+   * @param {number} segment Memory segment
+   * @param {(number|null)} [offset] Memory offset
    */
-  readRMReg8 (segment) {
-    let offset;
-    switch (this.cpu.opcode.mod) {
-      case 0b00: // Use R/M Table 1 for R/M operand
-        offset = this.calcRMAddr(segment);
-        return this.readMem8(segment, offset);
-      case 0b01: // Use R/M Table 2 with 8-bit displacement
-      case 0b10: // Use R/M Table 2 with 16-bit displacement
-        offset = this.calcRMDispAddr(segment);
-        return this.readMem8(segment, offset);
-      case 0b11: // Two register instruction; use REG table
-        return this.readRegVal(true);
+  readRMReg8 (segment, offset) {
+    if (this.cpu.opcode.mod === 0b11) {
+      // Two register instruction; use REG table
+      return this.readRegVal(true);
+    }
+    else {
+      // Use R/M Table 1 or 2 for R/M operand
+      // let offset = this.calcRMAddr(segment);
+      return this.readMem8(segment, offset);
     }
   }
 
@@ -740,19 +1141,17 @@ export default class Addressing {
    * mode determined by the mod, reg and r/m values.
    *
    * @param {number} segment Memory segment
+   * @param {(number|null)} [offset] Memory offset
    */
-  readRMReg16 (segment) {
-    let offset;
-    switch (this.cpu.opcode.mod) {
-      case 0b00: // Use R/M Table 1 for R/M operand
-        offset = this.calcRMAddr(segment);
-        return this.readMem16(segment, offset);
-      case 0b01: // Use R/M Table 2 with 8-bit displacement
-      case 0b10: // Use R/M Table 2 with 16-bit displacement
-        offset = this.calcRMDispAddr(segment);
-        return this.readMem16(segment, offset);
-      case 0b11: // Two register instruction; use REG table
-        return this.readRegVal(true);
+  readRMReg16 (segment, offset) {
+    if (this.cpu.opcode.mod === 0b11) {
+      // Two register instruction; use REG table
+      return this.readRegVal(true);
+    }
+    else {
+      // Use R/M Table 1 or 2 for R/M operand
+      // let offset = this.calcRMAddr(segment);
+      return this.readMem16(segment, offset);
     }
   }
 
@@ -761,19 +1160,17 @@ export default class Addressing {
    * addressing mode determined by the mod, reg and r/m values.
    *
    * @param {number} segment Memory segment
+   * @param {(number|null)} [offset] Memory offset
    */
-  readRMReg32 (segment) {
-    let offset;
-    switch (this.cpu.opcode.mod) {
-      case 0b00: // Use R/M Table 1 for R/M operand
-        offset = this.calcRMAddr(segment);
-        return this.readMem32(segment, offset);
-      case 0b01: // Use R/M Table 2 with 8-bit displacement
-      case 0b10: // Use R/M Table 2 with 16-bit displacement
-        offset = this.calcRMDispAddr(segment);
-        return this.readMem32(segment, offset);
-      case 0b11: // Two register instruction; use REG table
-        return this.readRegVal(true);
+  readRMReg32 (segment, offset) {
+    if (this.cpu.opcode.mod === 0b11) {
+      // Two register instruction; use REG table
+      return this.readRegVal(true);
+    }
+    else {
+      // Use R/M Table 1 or 2 for R/M operand
+      // let offset = this.calcRMAddr(segment);
+      return this.readMem32(segment, offset);
     }
   }
 
@@ -782,20 +1179,18 @@ export default class Addressing {
    * mode determined by the mod, reg and r/m values.
    *
    * @param {number} segment Memory segment
+   * @param {(number|null)} [offset] Memory offset
    * @param {number} value Value to write to memory (byte)
    */
-  writeRMReg8(segment, value) {
-    let offset;
-    switch (this.cpu.opcode.mod) {
-      case 0b00: // Use R/M Table 1 for R/M operand
-        offset = this.calcRMAddr(segment);
-        return this.writeMem8(segment, offset, value);
-      case 0b01: // Use R/M Table 2 with 8-bit displacement
-      case 0b10: // Use R/M Table 2 with 16-bit displacement
-        offset = this.calcRMDispAddr(segment);
-        return this.writeMem8(segment, offset, value);
-      case 0b11: // Two register instruction; use REG table
-        return this.writeRegVal(value, true);
+  writeRMReg8(segment, offset, value) {
+    if (this.cpu.opcode.mod === 0b11) {
+      // Two register instruction; use REG table
+      return this.writeRegVal(value, true);
+    }
+    else {
+      // Use R/M Table 1 or 2 for R/M operand
+      // let offset = this.calcRMAddr(segment);
+      return this.writeMem8(segment, offset, value);
     }
   }
 
@@ -804,21 +1199,35 @@ export default class Addressing {
    * mode determined by the mod, reg and r/m values.
    *
    * @param {number} segment Memory segment
+   * @param {(number|null)} [offset] Memory offset
    * @param {number} value Value to write to memory (word)
    */
-  writeRMReg16(segment, value) {
+  writeRMReg16(segment, offset, value) {
+    if (this.cpu.opcode.mod === 0b11) {
+      // Two register instruction; use REG table
+      return this.writeRegVal(value, true);
+    }
+    else {
+      // Use R/M Table 1 or 2 for R/M operand
+      // let offset = this.calcRMAddr(segment);
+      return this.writeMem16(segment, offset, value);
+    }
+  }
+
+  calcRMAddr (segment) {
     let offset;
     switch (this.cpu.opcode.mod) {
       case 0b00: // Use R/M Table 1 for R/M operand
-        offset = this.calcRMAddr(segment);
-        return this.writeMem16(segment, offset, value);
+        offset = this.calcRMAddrNoDisp(segment);
+        break;
       case 0b01: // Use R/M Table 2 with 8-bit displacement
       case 0b10: // Use R/M Table 2 with 16-bit displacement
-        offset = this.calcRMDispAddr(segment);
-        return this.writeMem16(segment, offset, value);
-      case 0b11: // Two register instruction; use REG table
-        return this.writeRegVal(value, true);
+        offset = this.calcRMAddrDisp(segment);
+        break;
+      case 0b11:
+        return null;
     }
+    return offset;
   }
 
   /**
@@ -835,7 +1244,7 @@ export default class Addressing {
    * @param {number} segment Memory segment
    * @return {number} Calculated address
    */
-  calcRMAddr (segment) {
+  calcRMAddrNoDisp (segment) {
     let addr;
 
     switch (this.cpu.opcode.rm)
@@ -863,9 +1272,11 @@ export default class Addressing {
       case 0b110 : // Direct Address
         // Direct address is always 2 bytes
         //   - yoshicapstonememo.googlecode.com/svn/trunk/4_2_86.pdf
-        addr = (this.cpu.mem8[seg2abs( this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 3, this.cpu)] << 8) |
-                this.cpu.mem8[seg2abs( this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 2, this.cpu)];
-        if (this.cpu.addrIPInc === 0) this.cpu.addrIPInc += 2;
+        let ipInc = this.cpu.instIPInc + this.cpu.addrIPInc;
+        addr = (this.cpu.mem8[seg2abs( this.cpu.reg16[regCS], this.cpu.reg16[regIP] + ipInc + 1, this.cpu)] << 8) |
+                this.cpu.mem8[seg2abs( this.cpu.reg16[regCS], this.cpu.reg16[regIP] + ipInc, this.cpu)];
+        // if (this.cpu.addrIPInc === 0) this.cpu.addrIPInc += 2;
+        this.cpu.addrIPInc += 2;
         break;
       case 0b111 : // [BX]
         addr = this.cpu.reg16[regBX];
@@ -883,19 +1294,21 @@ export default class Addressing {
    * @param {number} segment Memory segment
    * @return {number} Calculated address
    */
-  calcRMDispAddr (segment) {
+  calcRMAddrDisp (segment) {
     let addr, disp;
+    let ipInc = this.cpu.instIPInc + this.cpu.addrIPInc;
 
     switch (this.cpu.opcode.mod) {
       case 0b01: // Use R/M table 2 with 8-bit displacement
-        disp = this.cpu.mem8[seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 2, this.cpu)];
+        disp = this.cpu.mem8[seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + ipInc, this.cpu)];
         this.cpu.addrIPInc += 1;
         break;
       case 0b10: // Use R/M table 2 with 16-bit displacement
         disp = disp ||
-          ((this.cpu.mem8[seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 3, this.cpu)] << 8) |
-            this.cpu.mem8[seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + 2, this.cpu)] );
-        if (this.cpu.addrIPInc === 0) this.cpu.addrIPInc += 2;
+          ((this.cpu.mem8[seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + ipInc + 1, this.cpu)] << 8) |
+            this.cpu.mem8[seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + ipInc, this.cpu)] );
+        // if (this.cpu.addrIPInc === 0) this.cpu.addrIPInc += 2;
+        this.cpu.addrIPInc += 2;
     }
 
     switch (this.cpu.opcode.rm) {
@@ -932,7 +1345,7 @@ export default class Addressing {
    * and the reg lookup table.
    *
    * @param {boolean} useRM Use the RM value rather than the default REG value
-   * @param {number} sizeOverride If given override the w bit for the operand size
+   * @param {(number|null)} sizeOverride If given override the w bit for the operand size
    * @returns {number} The value of the register
    */
   readRegVal (useRM = false, sizeOverride=null) {
@@ -995,7 +1408,7 @@ export default class Addressing {
    *
    * @param {number} value Value to write to the register
    * @param {boolean} useRM Use the RM value rather than the default REG value
-   * @param {number} sizeOverride If given override the w bit for the operand size
+   * @param {(number|null)} sizeOverride If given override the w bit for the operand size
    */
   writeRegVal (value, useRM = false, sizeOverride=null) {
     let rmReg = useRM ? this.cpu.opcode.rm : this.cpu.opcode.reg;
@@ -1065,6 +1478,7 @@ export default class Addressing {
         }
         break;
     }
+    return value;
   }
 
   /**

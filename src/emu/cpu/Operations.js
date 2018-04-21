@@ -108,18 +108,22 @@ export default class Operations {
    */
   adc (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let d = dst(segment, null);
-    let s = src(segment, null);
-    if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
-      s = signExtend(s);
-    }
-    let result = d + s + (this.cpu.reg16[regFlags] & FLAG_CF_MASK);
+    let dstAddr = dst(segment);
+    let srcAddr = src(segment);
+    let dstVal = dst(segment, dstAddr);
+    let srcVal = src(segment, srcAddr);
 
-    this.flagAdd(d, s, result);
+    if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
+      srcVal = signExtend(srcVal);
+      dstVal = signExtend(dstVal);
+    }
+    let result = dstVal + srcVal + (this.cpu.reg16[regFlags] & FLAG_CF_MASK);
+
+    this.flagAdd(dstVal, srcVal, result);
 
     result = this.correctOverflow(result);
 
-    dst(segment, result);
+    dst(segment, dstAddr, result);
     return result;
   }
 
@@ -136,18 +140,22 @@ export default class Operations {
    */
   add (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let d = dst(segment, null);
-    let s = src(segment, null);
-    if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
-      s = signExtend(s);
-    }
-    let result = d + s;
+    let dstAddr = dst(segment);
+    let srcAddr = src(segment);
+    let dstVal = dst(segment, dstAddr);
+    let srcVal = src(segment, srcAddr);
 
-    this.flagAdd(d, s, result);
+    if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
+      srcVal = signExtend(srcVal);
+      dstVal = signExtend(dstVal);
+    }
+    let result = dstVal + srcVal;
+
+    this.flagAdd(dstVal, srcVal, result);
 
     result = this.correctOverflow(result);
 
-    dst(segment, result);
+    dst(segment, dstAddr, result);
     return result;
   };
 
@@ -165,11 +173,16 @@ export default class Operations {
    */
   and (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let result = dst(segment) & src(segment);
+    let dstAddr = dst(segment);
+    let srcAddr = src(segment);
+    let dstVal = dst(segment, dstAddr);
+    let srcVal = src(segment, srcAddr);
+
+    let result = dstVal & srcVal;
     this.setPF_FLAG(result);
     this.setSF_FLAG(result);
     this.setZF_FLAG(result);
-    dst(segment, result);
+    dst(segment, dstAddr, result);
   }
 
   /**
@@ -222,29 +235,30 @@ export default class Operations {
    */
   call (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let oper = dst(segment);
+    let dstAddr = dst(segment);
+    let dstVal = dst(segment, dstAddr);
 
     switch (this.cpu.opcode.opcode_byte) {
       case 0x9A: // CALL Ap (far)
         this.push16(this.cpu.reg16[regCS]);
         this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
-        this.cpu.reg16[regCS] = oper[0];
-        this.cpu.reg16[regIP] = oper[1];
+        this.cpu.reg16[regCS] = dstVal[0];
+        this.cpu.reg16[regIP] = dstVal[1];
         break;
       case 0xE8: // CALL Jv (near)
         this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
-        this.cpu.reg16[regIP] = oper;
+        this.cpu.reg16[regIP] = dstVal;
         break;
       case 0xFF:
         if (this.cpu.opcode.reg === 2) { // 0xFF (2) CALL Ev (near)
           this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
-          this.cpu.reg16[regIP] = oper;
+          this.cpu.reg16[regIP] = dstVal;
         }
-        else if (this.cpu.opcode.reg === 3) { // 0xFF (3) CALL Mp (far)
+        else if (this.cpu.opcode.reg === 3) { // 0xFF (3) CALL Ep (far)
           this.push16(this.cpu.reg16[regCS]);
           this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
-          this.cpu.reg16[regCS] = oper[0];
-          this.cpu.reg16[regIP] = oper[1];
+          this.cpu.reg16[regCS] = dstVal[0];
+          this.cpu.reg16[regIP] = dstVal[1];
         }
         break;
     }
@@ -352,15 +366,17 @@ export default class Operations {
    */
   cmp (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let d = dst(segment, null);
-    let s = src(segment, null);
+    let dstAddr = dst(segment);
+    let srcAddr = src(segment);
+    let dstVal = dst(segment, dstAddr);
+    let srcVal = src(segment, srcAddr);
     if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
-      s = signExtend(s);
+      srcVal = signExtend(srcVal);
     }
-    let result = d - s;
+    let result = dstVal - srcVal;
     result = this.correctUnderflow(result);
 
-    this.flagSub(d, s, result);
+    this.flagSub(dstVal, srcVal, result);
 
     return result;
   }
@@ -438,14 +454,16 @@ export default class Operations {
    */
   dec (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let d = dst(segment, null);
-    let s = 1;
-    let result = d - s;
+    let dstAddr = dst(segment);
+    let dstVal = dst(segment, dstAddr);
+    let srcVal = 1;
+
+    let result = dstVal - srcVal;
     result = this.correctUnderflow(result);
 
-    this.flagSub(d, s, result);
+    this.flagSub(dstVal, srcVal, result);
 
-    dst(segment, result);
+    dst(segment, dstAddr, result);
     return result;
   }
 
@@ -585,15 +603,17 @@ export default class Operations {
    */
   inc (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let d = dst(segment, null);
-    let s = 1;
-    let result = d + s;
+    let dstAddr = dst(segment);
+    let dstVal = dst(segment, dstAddr);
+    let srcVal = 1;
 
-    this.flagAdd(d, s, result);
+    let result = dstVal + srcVal;
+
+    this.flagAdd(dstVal, srcVal, result);
 
     result = this.correctOverflow(result);
 
-    dst(segment, result);
+    dst(segment, dstAddr, result);
   }
 
   int (dst, src) {
@@ -632,11 +652,12 @@ export default class Operations {
    */
   ja (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let offset = dst(segment);
+    let dstAddr = dst(segment);
+
     if ( (this.cpu.reg16[regFlags] & FLAG_ZF_MASK) === 0 ||
          (this.cpu.reg16[regFlags] & FLAG_CF_MASK) === 0)
     {
-      this.cpu.reg16[regIP] = offset;
+      this.cpu.reg16[regIP] = dst(segment, dstAddr);
       return true;
     }
     else {
@@ -670,9 +691,10 @@ export default class Operations {
    */
   jb (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let offset = dst(segment);
+    let dstAddr = dst(segment);
+
     if ((this.cpu.reg16[regFlags] & FLAG_CF_MASK) > 0) {
-      this.cpu.reg16[regIP] = offset;
+      this.cpu.reg16[regIP] = dst(segment, dstAddr);
       return true;
     }
     else {
@@ -706,11 +728,12 @@ export default class Operations {
    */
   jbe (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let offset = dst(segment);
+    let dstAddr = dst(segment);
+
     if ( (this.cpu.reg16[regFlags] & FLAG_ZF_MASK) > 0 ||
          (this.cpu.reg16[regFlags] & FLAG_CF_MASK) > 0)
     {
-      this.cpu.reg16[regIP] = offset;
+      this.cpu.reg16[regIP] = dst(segment, dstAddr);
       return true;
     }
     else {
@@ -733,9 +756,10 @@ export default class Operations {
    */
   jcxz (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let offset = dst(segment);
+    let dstAddr = dst(segment);
+
     if ( this.cpu.reg16[regCX] === 0) {
-      this.cpu.reg16[regIP] = offset;
+      this.cpu.reg16[regIP] = dst(segment, dstAddr);
       return true;
     }
     else {
@@ -769,12 +793,12 @@ export default class Operations {
    */
   jg (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let offset = dst(segment);
+    let dstAddr = dst(segment);
 
     if (((this.cpu.reg16[regFlags] & FLAG_SF_MASK) >> 7) ^ ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) >> 11) === 0 ||
          (this.cpu.reg16[regFlags] & FLAG_ZF_MASK) === 0)
     {
-      this.cpu.reg16[regIP] = offset;
+      this.cpu.reg16[regIP] = dst(segment, dstAddr);
       return true;
     }
     else {
@@ -808,12 +832,12 @@ export default class Operations {
    */
   jge (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let offset = dst(segment);
+    let dstAddr = dst(segment);
 
     if (((this.cpu.reg16[regFlags] & FLAG_SF_MASK) >> 7) ^
         ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) >> 11) === 0)
     {
-      this.cpu.reg16[regIP] = offset;
+      this.cpu.reg16[regIP] = dst(segment, dstAddr);
       return true;
     }
     else {
@@ -847,12 +871,12 @@ export default class Operations {
    */
   jl (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let offset = dst(segment);
+    let dstAddr = dst(segment);
 
     if (((this.cpu.reg16[regFlags] & FLAG_SF_MASK) >> 7) ^
         ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) >> 11) === 1)
     {
-      this.cpu.reg16[regIP] = offset;
+      this.cpu.reg16[regIP] = dst(segment, dstAddr);
       return true;
     }
     else {
@@ -886,12 +910,12 @@ export default class Operations {
    */
   jle (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let offset = dst(segment);
+    let dstAddr = dst(segment);
 
     if (((this.cpu.reg16[regFlags] & FLAG_SF_MASK) >> 7) ^ ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) >> 11) > 0 ||
         (this.cpu.reg16[regFlags] & FLAG_ZF_MASK) > 0)
     {
-      this.cpu.reg16[regIP] = offset;
+      this.cpu.reg16[regIP] = dst(segment, dstAddr);
       return true;
     }
     else {
@@ -936,7 +960,8 @@ export default class Operations {
    */
   jmp (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let oper = dst(segment);
+    let dstAddr = dst(segment);
+    let oper = dst(segment, dstAddr);
 
     switch (this.cpu.opcode.opcode_byte) {
       case 0xE9: // JMP Jv (near)
@@ -988,9 +1013,10 @@ export default class Operations {
    */
   jnb (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let offset = dst(segment);
+    let dstAddr = dst(segment);
+
     if ((this.cpu.reg16[regFlags] & FLAG_CF_MASK) === 0) {
-      this.cpu.reg16[regIP] = offset;
+      this.cpu.reg16[regIP] = dst(segment, dstAddr);
       return true;
     }
     else {
@@ -1024,9 +1050,10 @@ export default class Operations {
    */
   jno (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let offset = dst(segment);
+    let dstAddr = dst(segment);
+
     if ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) === 0) {
-      this.cpu.reg16[regIP] = offset;
+      this.cpu.reg16[regIP] = dst(segment, dstAddr);
       return true;
     }
     else {
@@ -1060,9 +1087,10 @@ export default class Operations {
    */
   jns (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let offset = dst(segment);
+    let dstAddr = dst(segment);
+
     if ((this.cpu.reg16[regFlags] & FLAG_SF_MASK) === 0) {
-      this.cpu.reg16[regIP] = offset;
+      this.cpu.reg16[regIP] = dst(segment, dstAddr);
       return true;
     }
     else {
@@ -1096,9 +1124,10 @@ export default class Operations {
    */
   jnz (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let offset = dst(segment);
+    let dstAddr = dst(segment);
+
     if ((this.cpu.reg16[regFlags] & FLAG_ZF_MASK) === 0) {
-      this.cpu.reg16[regIP] = offset;
+      this.cpu.reg16[regIP] = dst(segment, dstAddr);
       return true;
     }
     else {
@@ -1132,9 +1161,10 @@ export default class Operations {
    */
   jo (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let offset = dst(segment);
+    let dstAddr = dst(segment);
+
     if ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) > 0) {
-      this.cpu.reg16[regIP] = offset;
+      this.cpu.reg16[regIP] = dst(segment, dstAddr);
       return true;
     }
     else {
@@ -1168,9 +1198,10 @@ export default class Operations {
    */
   jpe (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let offset = dst(segment);
+    let dstAddr = dst(segment);
+
     if ((this.cpu.reg16[regFlags] & FLAG_PF_MASK) > 0) {
-      this.cpu.reg16[regIP] = offset;
+      this.cpu.reg16[regIP] = dst(segment, dstAddr);
       return true;
     }
     else {
@@ -1204,9 +1235,10 @@ export default class Operations {
    */
   jpo (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let offset = dst(segment);
+    let dstAddr = dst(segment);
+
     if ((this.cpu.reg16[regFlags] & FLAG_PF_MASK) === 0) {
-      this.cpu.reg16[regIP] = offset;
+      this.cpu.reg16[regIP] = dst(segment, dstAddr);
       return true;
     }
     else {
@@ -1240,9 +1272,10 @@ export default class Operations {
    */
   js (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let offset = dst(segment);
+    let dstAddr = dst(segment);
+
     if ((this.cpu.reg16[regFlags] & FLAG_SF_MASK) > 0) {
-      this.cpu.reg16[regIP] = offset;
+      this.cpu.reg16[regIP] = dst(segment, dstAddr);
       return true;
     }
     else {
@@ -1276,9 +1309,10 @@ export default class Operations {
    */
   jz (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let offset = dst(segment);
+    let dstAddr = dst(segment);
+
     if ((this.cpu.reg16[regFlags] & FLAG_ZF_MASK) > 0) {
-      this.cpu.reg16[regIP] = offset;
+      this.cpu.reg16[regIP] = dst(segment, dstAddr);
       return true;
     }
     else {
@@ -1325,8 +1359,11 @@ export default class Operations {
    */
   lds (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let srcVal = src(segment);
-    dst(segment, srcVal[1]);
+    let dstAddr = dst(segment);
+    let srcAddr = src(segment);
+    let srcVal = src(segment, srcAddr);
+
+    dst(segment, dstAddr, srcVal[1]);
     this.cpu.reg16[regDS] = srcVal[0];
   }
 
@@ -1347,8 +1384,11 @@ export default class Operations {
    */
   lea (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let srcVal = src(segment);
-    return dst(segment, srcVal);
+    let dstAddr = dst(segment);
+    let srcAddr = src(segment);
+    let srcVal = src(segment, srcAddr);
+
+    return dst(segment, dstAddr, srcVal);
   }
 
   /**
@@ -1370,8 +1410,11 @@ export default class Operations {
    */
   les (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let srcVal = src(segment);
-    dst(segment, srcVal[1]);
+    let dstAddr = dst(segment);
+    let srcAddr = src(segment);
+    let srcVal = src(segment, srcAddr);
+
+    dst(segment, dstAddr, srcVal[1]);
     this.cpu.reg16[regES] = srcVal[0];
   }
 
@@ -1402,12 +1445,13 @@ export default class Operations {
     this.cpu.reg16[regCX] -= 1;
 
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let operand = dst(segment);
+    let dstAddr = dst(segment);
+    let dstVal = dst(segment, dstAddr);
 
     if (this.cpu.reg16[regCX] !== 0 &&
       ((this.cpu.reg16[regFlags] & FLAG_ZF_MASK) === 0))
     {
-      this.cpu.reg16[regIP] = operand;
+      this.cpu.reg16[regIP] = dstVal;
       return true;
     }
     return false;
@@ -1431,12 +1475,13 @@ export default class Operations {
     this.cpu.reg16[regCX] -= 1;
 
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let operand = dst(segment);
+    let dstAddr = dst(segment);
+    let dstVal = dst(segment, dstAddr);
 
     if (this.cpu.reg16[regCX] !== 0 &&
       ((this.cpu.reg16[regFlags] & FLAG_ZF_MASK) > 0))
     {
-      this.cpu.reg16[regIP] = operand;
+      this.cpu.reg16[regIP] = dstVal;
       return true;
     }
     return false;
@@ -1457,10 +1502,11 @@ export default class Operations {
     this.cpu.reg16[regCX] -= 1;
 
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let operand = dst(segment);
+    let dstAddr = dst(segment);
+    let dstVal = dst(segment, dstAddr);
 
     if (this.cpu.reg16[regCX] !== 0) {
-      this.cpu.reg16[regIP] = operand;
+      this.cpu.reg16[regIP] = dstVal;
       return true;
     }
     return false;
@@ -1479,29 +1525,10 @@ export default class Operations {
    */
   mov (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    // dst.getAddr()
-    // src.getAddr()
-    //
-    // src.getValue()
-    // dst.setValue()
-    //
-    // src.blah();
-
-    // let s = src(segment);
-    // return dst(segment, s);
-
-    let s = src(segment);
-
-    let addrIPInc = this.cpu.addrIPInc;
-    let instIPInc = this.cpu.instIPInc;
-    this.cpu.addrIPInc = 0;
-    this.cpu.instIPInc = addrIPInc;
-
-    let r = dst(segment, s);
-
-    this.cpu.addrIPInc += addrIPInc;
-    this.cpu.instIPInc = instIPInc;
-    return r;
+    let dstAddr = dst(segment);
+    let srcAddr = src(segment);
+    let srcVal = src(segment, srcAddr);
+    dst(segment, dstAddr, srcVal);
   }
 
   movb (dst, src) {
@@ -1533,7 +1560,7 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   mul (dst, src) {
-
+    throw new FeatureNotImplementedException("Operation not implemented");
   }
 
   /**
@@ -1554,22 +1581,24 @@ export default class Operations {
    */
   neg (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let d = dst(segment, null);
-    let result = 0 - d;
+    let dstAddr = dst(segment);
+    let dstVal = dst(segment, dstAddr);
+
+    let result = 0 - dstVal;
     result = this.correctUnderflow(result);
 
-    this.flagSub(0, d, result);
+    this.flagSub(0, dstVal, result);
 
-    if (this.cpu.opcode.addrSize === b && d === 0x80) {
+    if (this.cpu.opcode.addrSize === b && dstVal === 0x80) {
       result = 0x80;
       this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
     }
-    else if (d === 0x8000) {
+    else if (dstVal === 0x8000) {
       result = 0x8000;
       this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
     }
 
-    dst(segment, result);
+    dst(segment, dstAddr, result);
     return result;
   }
 
@@ -1599,10 +1628,13 @@ export default class Operations {
    */
   not (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
+    let dstAddr = dst(segment);
+    let dstVal = dst(segment, dstAddr);
     let size = this.cpu.opcode.addrSize;
-    let value = dst(segment) ^ (size === b ? 0xFF : 0xFFFF);
 
-    dst(segment, value);
+    let value = dstVal ^ (size === b ? 0xFF : 0xFFFF);
+
+    dst(segment, dstAddr, value);
   }
 
   /**
@@ -1619,11 +1651,17 @@ export default class Operations {
    */
   or (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let result = dst(segment) | src(segment);
+    let dstAddr = dst(segment);
+    let srcAddr = src(segment);
+    let dstVal = dst(segment, dstAddr);
+    let srcVal = src(segment, srcAddr);
+
+    let result = dstVal | srcVal;
+
     this.setPF_FLAG(result);
     this.setSF_FLAG(result);
     this.setZF_FLAG(result);
-    dst(segment, result);
+    dst(segment, dstAddr, result);
   }
 
   /**
@@ -1658,7 +1696,9 @@ export default class Operations {
    */
   pop (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    dst(segment, this.pop16());
+    let dstAddr = dst(segment);
+
+    dst(segment, dstAddr, this.pop16());
   }
 
   /**
@@ -1696,7 +1736,10 @@ export default class Operations {
    */
   push (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    this.push16(dst(segment));
+    let dstAddr = dst(segment);
+    let dstVal = dst(segment, dstAddr);
+
+    this.push16(dstVal);
   }
 
   /**
@@ -1737,23 +1780,26 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   rcl (dst, src) {
-    let size = this.cpu.opcode.addrSize;
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let d = dst(segment);
-    let s = src(segment);
+    let dstAddr = dst(segment);
+    let srcAddr = src(segment);
+    let dstVal = dst(segment, dstAddr);
+    let srcVal = src(segment, srcAddr);
+    let size = this.cpu.opcode.addrSize;
+
     let oldcf, of, cf = this.cpu.reg16[regFlags] & 0x01;
 
-    for (let shift = 1; shift <= s; shift++) {
+    for (let shift = 1; shift <= srcVal; shift++) {
       oldcf = cf;
-      if (d & 0x80) cf = 1;
+      if (dstVal & 0x80) cf = 1;
       else cf = 0;
 
-      d = d << 1;
-      d = d | oldcf;
+      dstVal = dstVal << 1;
+      dstVal = dstVal | oldcf;
     }
 
-    if (s === 1) {
-      of = cf ^ ( (d >> (size === b ? 7 : 15)) & 1);
+    if (srcVal === 1) {
+      of = cf ^ ( (dstVal >> (size === b ? 7 : 15)) & 1);
     }
 
     if (cf === 1) {
@@ -1769,7 +1815,8 @@ export default class Operations {
       this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
     }
 
-    dst(segment, d);
+    dstVal = dstVal & (size === b ? 0xFF : 0xFFFF);
+    dst(segment, dstAddr, dstVal);
   }
 
   /**
@@ -1791,20 +1838,23 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   rcr (dst, src) {
-    let size = this.cpu.opcode.addrSize;
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let d = dst(segment);
-    let s = src(segment);
+    let dstAddr = dst(segment);
+    let srcAddr = src(segment);
+    let dstVal = dst(segment, dstAddr);
+    let srcVal = src(segment, srcAddr);
+    let size = this.cpu.opcode.addrSize;
+
     let oldcf, of, cf = this.cpu.reg16[regFlags] & 0x01;
 
-    for (let shift = 1; shift <= s; shift++) {
+    for (let shift = 1; shift <= srcVal; shift++) {
       oldcf = cf;
-      cf = d & 1;
-      d = (d >> 1) | (oldcf << (size === b ? 7 : 15));
+      cf = dstVal & 1;
+      dstVal = (dstVal >> 1) | (oldcf << (size === b ? 7 : 15));
     }
 
-    if (s === 1) {
-      of = (d >> (size === b ? 7 : 15)) ^ ( (d >> (size === b ? 6 : 14)) & 1);
+    if (srcVal === 1) {
+      of = (dstVal >> (size === b ? 7 : 15)) ^ ( (dstVal >> (size === b ? 6 : 14)) & 1);
     }
 
     if (cf === 1) {
@@ -1820,7 +1870,8 @@ export default class Operations {
       this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
     }
 
-    dst(segment, d);
+    dstVal = dstVal & (size === b ? 0xFF : 0xFFFF);
+    dst(segment, dstAddr, dstVal);
   }
 
   repnz (dst, src) {
@@ -1848,14 +1899,15 @@ export default class Operations {
     switch (this.cpu.opcode.opcode_byte) {
       case 0xC2: // RET Iw
         let segment = this.cpu.reg16[this.cpu.addrSeg];
-        this.cpu.reg16[regIP] = this.pop16() + dst(segment);
+        let dstAddr = dst(segment);
+        this.cpu.reg16[regIP] = this.pop16() + dst(segment, dstAddr);
         break;
       case 0xC3: // RET
         this.cpu.reg16[regIP] = this.pop16();
         break;
     }
 
-    // HACK! Or... is it?
+    // HACK! ... or is it?
     // The way the cycle code is structured we will end up with the IP being
     // incremented by the instruction base size if we don't reset it.
     this.cpu.instIPInc = 0;
@@ -1881,8 +1933,9 @@ export default class Operations {
     switch (this.cpu.opcode.opcode_byte) {
       case 0xCA: // RETF Iw
         let segment = this.cpu.reg16[this.cpu.addrSeg];
+        let dstAddr = dst(segment);
 
-        this.cpu.reg16[regIP] = this.pop16() + dst(segment);
+        this.cpu.reg16[regIP] = this.pop16() + dst(segment, dstAddr);
         this.cpu.reg16[regCS] = this.pop16();
         break;
       case 0xCB: // RETF
@@ -1911,23 +1964,24 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   rol (dst, src) {
-    let size = this.cpu.opcode.addrSize;
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let d = dst(segment);
-    let s = src(segment);
+    let dstAddr = dst(segment);
+    let srcAddr = src(segment);
+    let dstVal = dst(segment, dstAddr);
+    let srcVal = src(segment, srcAddr);
+    let size = this.cpu.opcode.addrSize;
     let cf, of;
 
-
-    for (let shift = 1; shift <= s; shift++) {
-      if (d & (size === b ? 0x80 : 0x8000)) cf = 1;
+    for (let shift = 1; shift <= srcVal; shift++) {
+      if (dstVal & (size === b ? 0x80 : 0x8000)) cf = 1;
       else cf = 0;
 
-      d = d << 1;
-      d = d | cf;
+      dstVal = dstVal << 1;
+      dstVal = dstVal | cf;
     }
 
-    if (s === 1) {
-      of = cf ^ ( (d >> (size === b ? 7 : 15)) & 1);
+    if (srcVal === 1) {
+      of = cf ^ ( (dstVal >> (size === b ? 7 : 15)) & 1);
     } else of = 0;
 
     if (cf === 1) {
@@ -1943,7 +1997,8 @@ export default class Operations {
       this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
     }
 
-    dst(segment, d);
+    dstVal = dstVal & (size === b ? 0xFF : 0xFFFF);
+    dst(segment, dstAddr, dstVal);
   }
 
   /**
@@ -1965,19 +2020,21 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   ror (dst, src) {
-    let size = this.cpu.opcode.addrSize;
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let d = dst(segment);
-    let s = src(segment);
+    let dstAddr = dst(segment);
+    let srcAddr = src(segment);
+    let dstVal = dst(segment, dstAddr);
+    let srcVal = src(segment, srcAddr);
+    let size = this.cpu.opcode.addrSize;
     let cf, of;
 
-    for (let shift = 1; shift <= s; shift++) {
-      cf = d & 1;
-      d = (d >> 1) | (cf << (size === b ? 7 : 15));
+    for (let shift = 1; shift <= srcVal; shift++) {
+      cf = dstVal & 1;
+      dstVal = (dstVal >> 1) | (cf << (size === b ? 7 : 15));
     }
 
-    if (s === 1) {
-      of = (d >> (size === b ? 7 : 15)) ^ ( (d >> (size === b ? 6 : 14)) & 1);
+    if (srcVal === 1) {
+      of = (dstVal >> (size === b ? 7 : 15)) ^ ( (dstVal >> (size === b ? 6 : 14)) & 1);
     }
 
     if (cf === 1) {
@@ -1993,7 +2050,8 @@ export default class Operations {
       this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
     }
 
-    dst(segment, d);
+    dstVal = dstVal & (size === b ? 0xFF : 0xFFFF);
+    dst(segment, dstAddr, dstVal);
   }
 
   /**
@@ -2031,16 +2089,18 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   sar (dst, src) {
-    let size = this.cpu.opcode.addrSize;
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let d = dst(segment);
-    let s = src(segment);
+    let dstAddr = dst(segment);
+    let srcAddr = src(segment);
+    let dstVal = dst(segment, dstAddr);
+    let srcVal = src(segment, srcAddr);
+    let size = this.cpu.opcode.addrSize;
     let cf = 0, msb;
 
-    for (let shift = 1; shift <= s; shift++) {
-      msb = d & (size === b ? 0x80 : 0x8000);
-      cf = d & 1;
-      d = (d >> 1) | msb;
+    for (let shift = 1; shift <= srcVal; shift++) {
+      msb = dstVal & (size === b ? 0x80 : 0x8000);
+      cf = dstVal & 1;
+      dstVal = (dstVal >> 1) | msb;
     }
 
     // Operand always keeps sign so clear OF
@@ -2053,11 +2113,12 @@ export default class Operations {
       this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
     }
 
-    this.setPF_FLAG(d);
-    this.setZF_FLAG(d);
-    this.setSF_FLAG(d);
+    this.setPF_FLAG(dstVal);
+    this.setZF_FLAG(dstVal);
+    this.setSF_FLAG(dstVal);
 
-    dst(segment, d);
+    dstVal = dstVal & (size === b ? 0xFF : 0xFFFF);
+    dst(segment, dstAddr, dstVal);
   }
 
   /**
@@ -2077,17 +2138,20 @@ export default class Operations {
    */
   sbb (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let d = dst(segment, null);
-    let s = src(segment, null);
+    let dstAddr = dst(segment);
+    let srcAddr = src(segment);
+    let dstVal = dst(segment, dstAddr);
+    let srcVal = src(segment, srcAddr);
+
     if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
-      s = signExtend(s);
+      srcVal = signExtend(srcVal);
     }
-    let result = d - s - (this.cpu.reg16[regFlags] & FLAG_CF_MASK);
+    let result = dstVal - srcVal - (this.cpu.reg16[regFlags] & FLAG_CF_MASK);
     result = this.correctUnderflow(result);
 
-    this.flagSub(d, s, result);
+    this.flagSub(dstVal, srcVal, result);
 
-    dst(segment, result);
+    dst(segment, dstAddr, result);
     return result;
   }
 
@@ -2112,16 +2176,18 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   shl (dst, src) {
-    let size = this.cpu.opcode.addrSize;
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let d = dst(segment);
-    let s = src(segment);
+    let dstAddr = dst(segment);
+    let srcAddr = src(segment);
+    let dstVal = dst(segment, dstAddr);
+    let srcVal = src(segment, srcAddr);
+    let size = this.cpu.opcode.addrSize;
     let cf = 0;
 
-    for (let shift = 1; shift <= s; shift++) {
-      if (d & (size === b ? 0x80 : 0x8000)) cf = 1;
+    for (let shift = 1; shift <= srcVal; shift++) {
+      if (dstVal & (size === b ? 0x80 : 0x8000)) cf = 1;
       else cf = 0;
-      d = (d << 1) & 0xFF;
+      dstVal = (dstVal << 1) & 0xFF;
     }
 
     // Set CF if a '1' shifted out
@@ -2132,21 +2198,21 @@ export default class Operations {
     }
 
     // Clamp the shifted value
-    d &= (size === b ? 0xFF : 0xFFFF);
+    dstVal &= (size === b ? 0xFF : 0xFFFF);
 
     // Set OF if the first operand changes sign
-    if ( (s === 1) && (cf === (d >> 7) ) ) {
+    if ( (srcVal === 1) && (cf === (dstVal >> 7) ) ) {
       this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
     }
     else {
       this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
     }
 
-    this.setPF_FLAG(d);
-    this.setZF_FLAG(d);
-    this.setSF_FLAG(d);
+    this.setPF_FLAG(dstVal);
+    this.setZF_FLAG(dstVal);
+    this.setSF_FLAG(dstVal);
 
-    dst(segment, d);
+    dst(segment, dstAddr, dstVal);
   }
 
   /**
@@ -2162,23 +2228,25 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   shr (dst, src) {
-    let size = this.cpu.opcode.addrSize;
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let d = dst(segment);
-    let s = src(segment);
+    let dstAddr = dst(segment);
+    let srcAddr = src(segment);
+    let dstVal = dst(segment, dstAddr);
+    let srcVal = src(segment, srcAddr);
+    let size = this.cpu.opcode.addrSize;
     let cf = 0;
 
     // Set OF if the first operand changes sign
-    if ( (s === 1) && (d & (size === b ? 0x80 : 0x8000)) ) {
+    if ( (srcVal === 1) && (dstVal & (size === b ? 0x80 : 0x8000)) ) {
       this.cpu.reg16[regFlags] |= FLAG_OF_MASK
     }
     else {
       this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK
     }
 
-    for (let shift = 1; shift <= s; shift++) {
-      cf = d & 1;
-      d = d >> 1;
+    for (let shift = 1; shift <= srcVal; shift++) {
+      cf = dstVal & 1;
+      dstVal = dstVal >> 1;
     }
 
     // Set CF if a '1' shifted out
@@ -2188,11 +2256,11 @@ export default class Operations {
       this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
     }
 
-    this.setPF_FLAG(d);
-    this.setZF_FLAG(d);
-    this.setSF_FLAG(d);
+    this.setPF_FLAG(dstVal);
+    this.setZF_FLAG(dstVal);
+    this.setSF_FLAG(dstVal);
 
-    dst(segment, d);
+    dst(segment, dstAddr, dstVal);
   }
 
   ss (dst, src) {
@@ -2266,17 +2334,20 @@ export default class Operations {
    */
   sub (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let d = dst(segment, null);
-    let s = src(segment, null);
+    let dstAddr = dst(segment);
+    let srcAddr = src(segment);
+    let dstVal = dst(segment, dstAddr);
+    let srcVal = src(segment, srcAddr);
+
     if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
-      s = signExtend(s);
+      srcVal = signExtend(srcVal);
     }
-    let result = d - s;
+    let result = dstVal - srcVal;
     result = this.correctUnderflow(result);
 
-    this.flagSub(d, s, result);
+    this.flagSub(dstVal, srcVal, result);
 
-    dst(segment, result);
+    dst(segment, dstAddr, result);
     return result;
   }
 
@@ -2295,7 +2366,12 @@ export default class Operations {
    */
   test (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let result = dst(segment) & src(segment);
+    let dstAddr = dst(segment);
+    let srcAddr = src(segment);
+    let dstVal = dst(segment, dstAddr);
+    let srcVal = src(segment, srcAddr);
+
+    let result = dstVal & srcVal;
     this.setPF_FLAG(result);
     this.setSF_FLAG(result);
     this.setZF_FLAG(result);
@@ -2320,9 +2396,13 @@ export default class Operations {
    */
   xchg (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let srcVal = src(segment);
-    src(segment, dst(segment));
-    dst(segment, srcVal);
+    let dstAddr = dst(segment);
+    let srcAddr = src(segment);
+    let dstVal = dst(segment, dstAddr);
+    let srcVal = src(segment, srcAddr);
+
+    src(segment, srcAddr, dstVal);
+    dst(segment, dstAddr, srcVal);
   }
 
   /**
@@ -2361,11 +2441,16 @@ export default class Operations {
    */
   xor (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
-    let result = dst(segment) ^ src(segment);
+    let dstAddr = dst(segment);
+    let srcAddr = src(segment);
+    let dstVal = dst(segment, dstAddr);
+    let srcVal = src(segment, srcAddr);
+
+    let result = dstVal ^ srcVal;
     this.setPF_FLAG(result);
     this.setSF_FLAG(result);
     this.setZF_FLAG(result);
-    dst(segment, result);
+    dst(segment, dstAddr, result);
   }
 
   notimp () {
