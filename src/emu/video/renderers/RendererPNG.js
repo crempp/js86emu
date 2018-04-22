@@ -8,15 +8,22 @@ import { PNG } from 'pngjs';
 export default class RendererPNG {
   constructor () {
     this.path = "screenOut";
+    this.width = null;
+    this.height = null;
 
     if (!fs.existsSync(this.path)){
       fs.mkdirSync(this.path);
     }
   }
 
-  render (screenData, width, height) {
+  setSize(width, height) {
+    this.width = width;
+    this.height = height;
+  }
+
+  render (screenData) {
     let filePath = `${this.path}/screen-${Date.now()}.png`;
-    this.savePNGAwait(filePath, screenData, width, height).then( () => {
+    this.savePNGAwait(filePath, screenData).then( () => {
       console.log(`Screen saved to ${filePath}`);
     });
   }
@@ -26,15 +33,13 @@ export default class RendererPNG {
    *
    * @param {string} path  Path to the file.
    * @param {Uint8Array} data Array (UInt8) with the raw image data
-   * @param {number} width Screen width
-   * @param {number} height Screen height
    * @return {Promise<any>}
    */
-  savePNGAwait (path, data, width, height) {
+  savePNGAwait (path, data) {
     return new Promise(resolve => {
       let newfile = new PNG({
-        width:          width,
-        height:         height,
+        width:          this.width,
+        height:         this.height,
         colorType:      6,
         inputColorType: 6,
         bitDepth:       8,

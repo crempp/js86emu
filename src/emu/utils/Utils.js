@@ -1,16 +1,9 @@
 import { PNG } from 'pngjs';
-import fs from 'fs';
+// import fs from 'fs';
 
 import {
-  regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
-  regAX, regBX, regCX, regDX,
-  regSI, regDI, regBP, regSP, regIP,
-  regCS, regDS, regES, regSS,
-  regFlags,
-  FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
-  FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
+  regIP, regCS, regDS, regES, regSS,
 } from '../Constants';
-import { hexString16, hexString32 } from "./Debug";
 
 /**
  * Convert a segmented (seg:offset) memory address into an absolute address.
@@ -96,11 +89,29 @@ export function signExtend(value) {
  * @return {Promise<any>} Promise to be fulfilled when the file is loaded.
  */
 export function loadPNGAwait (path) {
+  // return new Promise(resolve => {
+  //   let data = fs.readFileSync(path);
+  //   let png = PNG.sync.read(data, {
+  //     filterType: -1
+  //   });
+  //   resolve(png);
+  // });
   return new Promise(resolve => {
-    let data = fs.readFileSync(path);
-    let png = PNG.sync.read(data, {
-      filterType: -1
+    fetch(path).then(function(response) {
+      response.arrayBuffer().then((buffer) => {
+
+        new PNG({ filterType:-1 })
+          .parse( buffer, function(error, data)
+          {
+            // console.log(error, data)
+            resolve(data);
+          });
+
+        // let png = PNG.sync.read(buffer, {
+        //   filterType: -1
+        // });
+        // resolve(png);
+      });
     });
-    resolve(png);
   });
 }

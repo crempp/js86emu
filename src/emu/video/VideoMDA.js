@@ -30,10 +30,11 @@ export default class VideoMDA {
       }
     ];
     this.selectedFont = this.fontFiles[0];
+
+    renderer.setSize(this.screenWidth, this.screenHeight);
   }
 
   async init () {
-
     // Load font
     let path = `${FONT_PATH}${this.selectedFont["file"]}.png`;
     let fontImage = await loadPNGAwait(path);
@@ -120,6 +121,6 @@ export default class VideoMDA {
         }
       }
     }
-    this.renderer.render(screenData, this.screenWidth, this.screenHeight);
+    this.renderer.render(screenData);
   }
 }

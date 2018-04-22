@@ -1,3 +1,5 @@
+import hrtime from 'browser-process-hrtime';
+
 import CPUConfig from "./cpu/CPUConfig";
 import CPU8086 from "./cpu/8086";
 import {
@@ -7,13 +9,14 @@ import {
   regCS, regDS, regES, regSS, STATE_RUNNING, NS_PER_SEC, regFlags,
 } from './Constants';
 import VideoMDA from "./video/VideoMDA";
-import RendererPNG from "./video/renderers/RendererPNG";
+// import RendererPNG from "./video/renderers/RendererPNG";
+import RendererCanvas from "./video/renderers/RendererCanvas";
 import {formatFlags, formatMemory, formatOpcode, formatRegisters, formatStack, hexString16} from "./utils/Debug";
 import {segIP} from "./utils/Utils";
 import RendererBin from "./video/renderers/RendererBin";
 
 export default class System {
-  constructor () {
+  constructor (options) {
     this.cpuConfig = new CPUConfig({
       memorySize: 64 * (1024),
     });
@@ -24,8 +27,9 @@ export default class System {
     this.cpu.reg16[regSP] = 0x100;
     this.cpu.reg16[regCS] = 0x0000;
 
-    let renderer = new RendererPNG();
+    // let renderer = new RendererPNG();
     // let renderer = new RendererBin();
+    let renderer = new RendererCanvas(options.canvas);
     this.videoCard = new VideoMDA(this.cpu.mem8, renderer);
 
     /**
@@ -52,7 +56,7 @@ export default class System {
     this.cpu.state = STATE_RUNNING;
     let freq = this.cpu.frequency;
 
-    this.prevTiming = process.hrtime();
+    this.prevTiming = hrtime();
 
     let totalScans = 0;
 
@@ -86,7 +90,7 @@ export default class System {
     }
 
     console.log(`Done running - ${this.cycleCount} cycles`);
-    let diff       = process.hrtime(this.prevTiming);
+    let diff       = hrtime(this.prevTiming);
     let totalTime  = diff[0] * NS_PER_SEC + diff[1];
     let hz         = 1 / ((totalTime / this.cycleCount) / NS_PER_SEC);
     console.log(`  ran at ${(hz / (1000**2)).toFixed(6)} MHZ`);
@@ -95,7 +99,7 @@ export default class System {
   }
 
   timingCheck() {
-    let diff       = process.hrtime(this.prevTiming);
+    let diff       = hrtime(this.prevTiming);
     let totalTime  = diff[0] * NS_PER_SEC + diff[1];
     this.runningHz = 1 / ((totalTime / this.cycleCount) / NS_PER_SEC);
 
