@@ -1,5 +1,5 @@
 import CPU8086 from '../../src/emu/cpu/8086';
-import CPUConfig from '../../src/emu/cpu/CPUConfig';
+import SystemConfig from '../../src/emu/config/SystemConfig';
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
   regAX, regBX, regCX, regDX,
@@ -172,7 +172,7 @@ describe('Debug helpers', () => {
 describe('Debug formatters', () => {
   let cpu, addr, segment;
   beforeEach(() => {
-    cpu = new CPU8086(new CPUConfig({
+    cpu = new CPU8086(new SystemConfig({
       memorySize: 1048576
     }));
     cpu.reg16[regAX] = 0x1234;

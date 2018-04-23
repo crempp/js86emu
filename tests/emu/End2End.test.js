@@ -1,6 +1,6 @@
 import each from 'jest-each';
 import CPU8086 from '../../src/emu/cpu/8086';
-import CPUConfig from '../../src/emu/cpu/CPUConfig';
+import SystemConfig from '../../src/emu/config/SystemConfig';
 import {regCS, regIP, regSP} from "../../src/emu/Constants";
 
 describe('Code Golf', () => {
@@ -50,7 +50,7 @@ describe('Code Golf', () => {
       0x6C, 0x6C, 0x6F, 0x2C, 0x20, 0x77, 0x6F, 0x72, 0x6C, 0x64, 0x21, 0x00, 0x00,
       0x00];
 
-    let config = new CPUConfig({
+    let config = new SystemConfig({
       memorySize: 2**16,
     });
 

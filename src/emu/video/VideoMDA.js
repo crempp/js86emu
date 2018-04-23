@@ -4,9 +4,10 @@ import { FONT_PATH } from "../Constants";
 import { loadPNGAwait } from "../utils/Utils";
 
 export default class VideoMDA {
-  constructor (mem8, renderer) {
+  constructor (mem8, renderer, config) {
     this.mem8            = mem8;
     this.renderer        = renderer;
+    this.config          = config;
     this.verticalSync    = 50;       // Hertz
     this.memStart        = 0x8000;
     this.memSize         = 4 * 1024; // 4k
@@ -36,7 +37,7 @@ export default class VideoMDA {
 
   async init () {
     // Load font
-    let path = `${FONT_PATH}${this.selectedFont["file"]}.png`;
+    let path = `${this.config.fontPath}${this.selectedFont["file"]}.png`;
     let fontImage = await loadPNGAwait(path);
     this.selectedFont["width"] = fontImage.width;
     this.selectedFont["height"] = fontImage.height;

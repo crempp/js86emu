@@ -1,18 +1,35 @@
 import System from "./emu/System";
 import RendererCanvas from "./emu/video/renderers/RendererCanvas";
-// import BrowserFS from 'node_modules/browserfs';
-//
-// BrowserFS.install(window);
-// // Configures BrowserFS to use the LocalStorage file system.
-// BrowserFS.configure({
-//   fs: "LocalStorage"
-// }, function(e) {
-//   if (e) {
-//     // An error happened!
-//     throw e;
-//   }
-//   // Otherwise, BrowserFS is ready-to-use!
-// });
+import SystemConfig from "./emu/config/SystemConfig";
+
+let fsJSON = {
+  "files": {
+    "bios-roms": {
+      "asciicga.dat": null,
+      "asciivga.dat": null,
+      "et4000.bin": null,
+      "xtbios.bin": null
+    },
+    "boot-disks": {
+      "IBM_PS2_25": {
+        "25start.img": null,
+        "adv25dia.img": null
+      }
+    },
+    "data": {
+      "data.json": null
+    },
+    "fonts": {
+      "cga_cp_437.png": null,
+      "hercplus_14p.png": null,
+      "hercplus_8p.png": null,
+      "mda_cp_437.png": null
+    },
+    "program-blobs": {
+      "codegolf": null
+    }
+  }
+};
 
 let codegolf = [
   0x81, 0xFC, 0x00, 0x01, 0x74, 0x01, 0xF4, 0xBC, 0x00, 0x10, 0xB0, 0x2E, 0xBB,
@@ -53,35 +70,67 @@ let codegolf = [
   0x6C, 0x6C, 0x6F, 0x2C, 0x20, 0x77, 0x6F, 0x72, 0x6C, 0x64, 0x21, 0x00, 0x00,
   0x00];
 
-global.DEBUG = true;
+let system;
 
-let canvas = document.getElementById('screen');
+let p1 = function() {
 
-let system = new System({
-  canvas: canvas
-  // cpu : {
-  //   class: '8086'
-  // },
-  // memory: 64 * (1024),
-  // renderer: {
-  //   class: 'RendererCanvas',
-  //   options: {canvas: canvas}
-  // },
+  BrowserFS.configure({
+    fs: "MountableFileSystem",
+    options: {
+      '/files': {
+        fs: "HTTPRequest",
+        options: {
+          index: "files/fs.json",
+          baseUrl: "http://localhost:8080/files"
+        }
+      },
+      '/screenOut': {
+        fs: "LocalStorage"
+      },
+    }
+  }, (e, mfs) => {
+    if (e) throw e;
+    p2()
+  });
+};
 
-});
+let p2 = function () {
+  let sysConfig = new SystemConfig({
+    renderer: {
+      class: 'RendererCanvas',
+      // class: 'RendererPNG',
+      options: {canvas: document.getElementById('screen')}
+    },
+    registers16: [0, 0, 0, 0, 0, 0, 0, 0x0100, 0, 0, 0, 0, 0, 0],
+    fontPath: "/files/fonts/",
+    debug: true,
+  });
 
-system.loadMem(codegolf, 0x00);
+  system = new System(sysConfig);
 
-console.log("booting...");
-system.boot().then( () => {
-  console.log("running...");
-  system.run(50000);
+  system.loadMem(codegolf, 0x00);
 
-  // force a video scan at the end of the run
-  system.videoCard.scan();
+  console.log("booting...");
+  system.boot().then( () => {
+    console.log("running...");
+    system.run(50000);
 
-  // process.exit();
-}).catch( (error) => {
-  console.error(error);
-});
+    // force a video scan at the end of the run
+    system.videoCard.scan();
+
+  }).catch( (error) => {
+    console.error(error);
+  });
+};
+
+document.addEventListener("DOMContentLoaded", p1);
+
+
+
+
+
+
+
+
+
 

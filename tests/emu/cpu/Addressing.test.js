@@ -1,6 +1,6 @@
 import CPU8086 from '../../../src/emu/cpu/8086';
 import Addressing from '../../../src/emu/cpu/Addressing';
-import CPUConfig from '../../../src/emu/cpu/CPUConfig';
+import SystemConfig from '../../../src/emu/config/SystemConfig';
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
   regAX, regBX, regCX, regDX,
@@ -14,7 +14,7 @@ import {InvalidAddressModeException, ValueOverflowException} from "../../../src/
 // } from "../../../src/emu/utils/Debug";
 
 test('Addressing object constructs', () => {
-  let cpu = new CPU8086(new CPUConfig({
+  let cpu = new CPU8086(new SystemConfig({
     memorySize: 1048576
   }));
   let addr = new Addressing(cpu);
@@ -25,7 +25,7 @@ describe('Memory access methods', () => {
   let addr, cpu;
 
   beforeEach(() => {
-    cpu = new CPU8086(new CPUConfig({
+    cpu = new CPU8086(new SystemConfig({
       memorySize: 262400
     }));
     addr = new Addressing(cpu);
@@ -226,7 +226,7 @@ describe('Register access methods', () => {
   let addr, cpu;
 
   beforeEach(() => {
-    cpu = new CPU8086(new CPUConfig({
+    cpu = new CPU8086(new SystemConfig({
         memorySize: 1048576
     }));
     addr = new Addressing(cpu);
@@ -754,7 +754,7 @@ describe('Memory addressing mode methods', () => {
   let addr, cpu, segment;
 
   beforeEach(() => {
-    cpu = new CPU8086(new CPUConfig({
+    cpu = new CPU8086(new SystemConfig({
       memorySize: 1048576
     }));
     addr = new Addressing(cpu);
@@ -1099,7 +1099,7 @@ describe('rm/reg access methods', () => {
   let addr, cpu, segment;
 
   beforeEach(() => {
-    cpu = new CPU8086(new CPUConfig({
+    cpu = new CPU8086(new SystemConfig({
       memorySize: 1048576
     }));
     addr = new Addressing(cpu);
@@ -1395,7 +1395,7 @@ describe('Addressing Modes', () => {
   let addr, cpu, segment;
 
   beforeEach(() => {
-    cpu = new CPU8086(new CPUConfig({
+    cpu = new CPU8086(new SystemConfig({
       memorySize: 1048576
     }));
     addr = new Addressing(cpu);

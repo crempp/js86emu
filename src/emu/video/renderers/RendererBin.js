@@ -6,7 +6,7 @@
 // //   - https://nodejs.org/api/fs.html#fs_fs_writefile_file_data_options_callback
 //
 // export default class RendererBin {
-//   constructor () {
+//   constructor (options) {
 //     this.path = "screenOut";
 //
 //     if (!fs.existsSync(this.path)){

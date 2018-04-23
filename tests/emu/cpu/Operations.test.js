@@ -1,6 +1,6 @@
 import CPU8086 from '../../../src/emu/cpu/8086';
 import Addressing from '../../../src/emu/cpu/Addressing';
-import CPUConfig from '../../../src/emu/cpu/CPUConfig';
+import SystemConfig from '../../../src/emu/config/SystemConfig';
 import Operations from "../../../src/emu/cpu/Operations";
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
@@ -50,7 +50,7 @@ describe('Operation methods', () => {
   let cpu, addr, oper;
 
   beforeEach(() => {
-    cpu = new CPU8086(new CPUConfig({
+    cpu = new CPU8086(new SystemConfig({
       memorySize: 2 ** 20
     }));
     oper = new Operations(cpu);
@@ -2781,7 +2781,7 @@ describe('Utility methods', () => {
   let cpu, oper;
 
   beforeEach(() => {
-    cpu = new CPU8086(new CPUConfig({
+    cpu = new CPU8086(new SystemConfig({
       memorySize: 2 ** 16
     }));
     oper = new Operations(cpu);
@@ -2824,7 +2824,7 @@ describe('Regressions', () => {
   let cpu, addr, oper;
 
   beforeEach(() => {
-    cpu = new CPU8086(new CPUConfig({
+    cpu = new CPU8086(new SystemConfig({
       memorySize: 2 ** 20
     }));
     oper = new Operations(cpu);

@@ -8,7 +8,7 @@
   "main": "compiled.js",
   "dependencies": {
     "browser-process-hrtime": "^0.1.2",
-    "browserfs": "^1.4.3",
+    "browserfs": "^2.0.0",
     "bson": "^2.0.5",
     "compression": "^1.7.2",
     "connect": "^3.6.6",
@@ -30,7 +30,7 @@
     "webpack-cli": "^2.0.14"
   },
   "scripts": {
-    "build": "npm run build:cli && npm run build:web",
+    "build": "npm run build:files && npm run build:cli && npm run build:web",
     "build:cli": "babel src -d dist/cli --ignore src/site,src/web.js --source-maps --presets env -r babel-polyfill",
     "build:web": "webpack --mode=production",
     "build:files": "cp -r ./files ./dist",

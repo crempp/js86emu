@@ -1,8 +1,8 @@
 import Operations from './Operations.js'
 import Addressing from './Addressing.js'
 import CPU from './CPU';
-import { CPUConfigException } from '../utils/Exceptions';
-import CPUConfig from './CPUConfig';
+import { SystemConfigException } from '../utils/Exceptions';
+import SystemConfig from '../config/SystemConfig';
 import { segIP } from "../utils/Utils";
 import {
   regAX, regBX, regCX, regDX,
@@ -21,13 +21,6 @@ const DEBUG = false;
 export default class CPU8086 extends CPU {
   constructor(config) {
     super();
-    // console.log(8086.constructor()       :");
-
-    // Validate config
-    if (!(config instanceof CPUConfig)) {
-      throw new CPUConfigException("CPU Config Error - config is not a CPUConfig instance");
-    }
-    config.validate();
 
     /**
      * CPU frequency in hertz (cyles per second).
@@ -66,19 +59,26 @@ export default class CPU8086 extends CPU {
     // Registers
     this.reg8 = new Uint8Array(14 * 2);
     this.reg16 = new Uint16Array(this.reg8.buffer);
-    this.reg16[regAX] = 0x0000;
-    this.reg16[regBX] = 0x0000;
-    this.reg16[regCX] = 0x0000;
-    this.reg16[regDX] = 0x0000;
-    this.reg16[regSI] = 0x0000;
-    this.reg16[regDI] = 0x0000;
-    this.reg16[regBP] = 0x0000;
-    this.reg16[regSP] = 0x0000;
-    this.reg16[regIP] = 0x0000;
-    this.reg16[regCS] = 0x0000;
-    this.reg16[regDS] = 0x0000;
-    this.reg16[regES] = 0x0000;
-    this.reg16[regSS] = 0x0000;
+    if (config.registers16) {
+      for (let r = 0; r < config.registers16.length; r++) {
+        this.reg16[r] = config.registers16[r];
+      }
+    }
+    else {
+      this.reg16[regAX] = 0x0000;
+      this.reg16[regBX] = 0x0000;
+      this.reg16[regCX] = 0x0000;
+      this.reg16[regDX] = 0x0000;
+      this.reg16[regSI] = 0x0000;
+      this.reg16[regDI] = 0x0000;
+      this.reg16[regBP] = 0x0000;
+      this.reg16[regSP] = 0x0000;
+      this.reg16[regIP] = 0x0000;
+      this.reg16[regCS] = 0x0000;
+      this.reg16[regDS] = 0x0000;
+      this.reg16[regES] = 0x0000;
+      this.reg16[regSS] = 0x0000;
+    }
 
     // Flags
     this.reg16[regFlags] = 0x0000;

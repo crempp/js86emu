@@ -1,36 +1,38 @@
 import hrtime from 'browser-process-hrtime';
 
-import CPUConfig from "./cpu/CPUConfig";
 import CPU8086 from "./cpu/8086";
 import {
-  regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
-  regAX, regBX, regCX, regDX,
-  regSI, regDI, regBP, regSP, regIP,
-  regCS, regDS, regES, regSS, STATE_RUNNING, NS_PER_SEC, regFlags,
+  STATE_RUNNING, NS_PER_SEC,
 } from './Constants';
 import VideoMDA from "./video/VideoMDA";
-// import RendererPNG from "./video/renderers/RendererPNG";
-import RendererCanvas from "./video/renderers/RendererCanvas";
-import {formatFlags, formatMemory, formatOpcode, formatRegisters, formatStack, hexString16} from "./utils/Debug";
-import {segIP} from "./utils/Utils";
-import RendererBin from "./video/renderers/RendererBin";
+import { SystemConfigException } from "./utils/Exceptions";
+import SystemConfig from "./config/SystemConfig";
+
+// We don't know the renderer until runtime. Webpack is a static compiler and
+// thus can't require dynamically. Also I was having issues with dynamic
+// imports in node though it should work.
+// So import all renderers and look them up in the object at runtime.
+// Someday I will do more research to see if I can optimize this.
+import RendererBin from './video/renderers/RendererBin';
+import RendererCanvas from './video/renderers/RendererCanvas';
+import RendererPNG from './video/renderers/RendererPNG';
+const RENDERERS = {
+  "RendererBin": RendererBin,
+  "RendererCanvas": RendererCanvas,
+  "RendererPNG": RendererPNG,
+};
 
 export default class System {
-  constructor (options) {
-    this.cpuConfig = new CPUConfig({
-      memorySize: 64 * (1024),
-    });
+  constructor (config) {
+    if (!(config instanceof SystemConfig)) {
+      throw new SystemConfigException("System Config Error - config is not a SystemConfig instance");
+    }
+    config.validate();
 
-    this.cpu = new CPU8086(this.cpuConfig);
+    this.cpu = new CPU8086(config);
 
-    this.cpu.reg16[regIP] = 0;
-    this.cpu.reg16[regSP] = 0x100;
-    this.cpu.reg16[regCS] = 0x0000;
-
-    // let renderer = new RendererPNG();
-    // let renderer = new RendererBin();
-    let renderer = new RendererCanvas(options.canvas);
-    this.videoCard = new VideoMDA(this.cpu.mem8, renderer);
+    let renderer = new RENDERERS[config.renderer.class](config.renderer.options);
+    this.videoCard = new VideoMDA(this.cpu.mem8, renderer, config);
 
     /**
      * CPU cycle counter. This tracks the number of instruction cycles the CPU

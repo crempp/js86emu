@@ -6,14 +6,14 @@ import { PNG } from 'pngjs';
 //   - https://nodejs.org/api/fs.html#fs_fs_writefile_file_data_options_callback
 
 export default class RendererPNG {
-  constructor () {
+  constructor (options) {
     this.path = "screenOut";
     this.width = null;
     this.height = null;
 
-    if (!fs.existsSync(this.path)){
-      fs.mkdirSync(this.path);
-    }
+    // if (!fs.existsSync(this.path)){
+    //   fs.mkdirSync(this.path);
+    // }
   }
 
   setSize(width, height) {

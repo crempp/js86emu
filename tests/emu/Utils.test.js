@@ -1,6 +1,6 @@
 import CPU8086 from '../../src/emu/cpu/8086';
 import Addressing from '../../src/emu/cpu/Addressing';
-import CPUConfig from '../../src/emu/cpu/CPUConfig';
+import SystemConfig from '../../src/emu/config/SystemConfig';
 import { seg2abs } from "../../src/emu/utils/Utils";
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
@@ -16,7 +16,7 @@ describe('seg2abs() Segment to absolute memory address conversion', () => {
   let addr, cpu;
 
   beforeEach(() => {
-    cpu = new CPU8086(new CPUConfig({
+    cpu = new CPU8086(new SystemConfig({
       memory: 1024
     }));
     addr = new Addressing(cpu);

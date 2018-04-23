@@ -1,7 +1,7 @@
-export class CPUConfigException extends Error {
+export class SystemConfigException extends Error {
   constructor(...params) {
     super(...params);
-    Error.captureStackTrace(this, CPUConfigException);
+    Error.captureStackTrace(this, SystemConfigException);
   }
 }
 
