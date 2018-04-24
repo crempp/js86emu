@@ -2454,7 +2454,6 @@ export default class Operations {
   }
 
   notimp () {
-    // console.log(Operations - Instruction not implemented");
     console.log("Operations - Instruction not implemented")
   };
 

@@ -82,31 +82,50 @@ export function signExtend(value) {
 }
 
 /**
- * Load a PNG file in a wat that supports async and both node and browser.
- * NOTE: This is no longer asynchronous. Could easily make so again.
+ * Load a PNG file in a way that supports async and both node and browser.
  *
  * @param {string} path Path to the file.
  * @return {Promise<any>} Promise to be fulfilled when the file is loaded.
  */
-export function loadPNGAwait (path) {
+export function loadPNGAsync (path) {
   return new Promise(resolve => {
-    let data = fs.readFileSync(path);
-    let png = PNG.sync.read(data, {
-      filterType: -1
+    fs.readFile(path, (fileError, data) => {
+      if (fileError) throw fileError;
+      new PNG({ filterType: -1 }).parse( data, (pngError, png) => {
+        if (pngError) throw pngError;
+        resolve(png);
+      });
     });
-    resolve(png);
   });
+}
 
-  // return new Promise(resolve => {
-  //   fetch(path).then(function(response) {
-  //     response.arrayBuffer().then((buffer) => {
-  //
-  //       new PNG({ filterType:-1 })
-  //         .parse( buffer, function(error, data)
-  //         {
-  //           resolve(data);
-  //         });
-  //     });
-  //   });
-  // });
+/**
+ * Load a binary file in a way that supports async/await and both node and the
+ * browser
+ *
+ * @param {string} path Path to the file.
+ * @return {Promise<any>} Promise to be fulfilled when the file is loaded.
+ */
+export function loadBINAsync (path) {
+  return new Promise(resolve => {
+    fs.readFile(path, (e, data) => {
+      if (e) throw e;
+      resolve(new Uint8Array(data));
+    });
+  });
+}
+
+/**
+ * Promise support wrapper for BrowserFS.configure
+ *
+ * @param {Object} config BrowserFS config object
+ * @return {Promise<any>}
+ */
+export function BrowserFSAsync (config) {
+  return new Promise(resolve => {
+    BrowserFS.configure(config, (e) => {
+      if (e) throw e;
+      resolve();
+    });
+  });
 }

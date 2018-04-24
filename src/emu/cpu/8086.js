@@ -1,8 +1,6 @@
 import Operations from './Operations.js'
 import Addressing from './Addressing.js'
 import CPU from './CPU';
-import { SystemConfigException } from '../utils/Exceptions';
-import SystemConfig from '../config/SystemConfig';
 import { segIP } from "../utils/Utils";
 import {
   regAX, regBX, regCX, regDX,
@@ -16,16 +14,16 @@ import {
   formatStack
 } from '../utils/Debug'
 
-const DEBUG = false;
-
 export default class CPU8086 extends CPU {
   constructor(config) {
     super();
 
+    this.config = config;
+
     /**
      * CPU frequency in hertz (cyles per second).
      */
-    this.frequency = 10 * 1024**2; // 10 Mhz
+    this.frequency = config.cpu.frequency;
 
     /**
      * Segment register to use for addressing. Typically it is assumed to be
@@ -81,7 +79,7 @@ export default class CPU8086 extends CPU {
     }
 
     // Flags
-    this.reg16[regFlags] = 0x0000;
+    this.reg16[regFlags] = config.cpu.flags;
 
     // Opcode
     this.opcode = {};
@@ -92,8 +90,6 @@ export default class CPU8086 extends CPU {
     // Supporting modules
     let addr = new Addressing(this);
     let oper = new Operations(this);
-
-    // console.log("8086.constructor()       : Creating instruction table");
 
     /**
      * Wrapper class for instructions. I don't think I can move this to a
@@ -540,7 +536,7 @@ export default class CPU8086 extends CPU {
 
     this.opcode.addrSize = this.opcode.inst.addrSize;
 
-    if (global.DEBUG) this.opcode.string = this.opcode.inst.toString();
+    if (this.config.debug) this.opcode.string = this.opcode.inst.toString();
   }
 
   // TODO: I don't like this. Move this back into operations if possible

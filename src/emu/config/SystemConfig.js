@@ -7,22 +7,41 @@
 import { SystemConfigException } from '../utils/Exceptions';
 
 const DEFAULTS = {
-  cpu : {
-    class: '8086'
-  },
+
   memorySize: 64 * 1024,
-  video: {
-    class: 'VideoMDA',
-    memorySize: 4 * 1024,
-  },
-  renderer: {
-    class: 'RendererCanvas',
-    options: {canvas: null},
-  },
-  debug: false,
-  registers16: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   memory: null,
-  fontPath: "files/fonts/",
+
+  cpu : {
+    class:       '8086',
+    registers16: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    frequency:   10 * 1024**2, // 10 Mhz
+    flags:       0x0000,
+  },
+
+  video: {
+    class:        'VideoMDA',
+    fontPath:     "files/fonts/",
+    memorySize:   4 * 1024,
+    memoryStart:  0x8000,
+    verticalSync: 50,       // Hertz
+  },
+
+  renderer: {
+    class:   'RendererCanvas',
+    options: {
+      canvas: null,
+    },
+  },
+
+  debug: false,
+
+  programBlob: null,
+
+  /** The number of cycles between timing syncs */
+  timeSyncCycles: 4 * 1000000 / 100, // About 100 times per sec
+
+  /** Number of cycles per video sync. This is updated every timeSyncCycles */
+  videoSync: 10000,
 };
 
 export default class SystemConfig {
@@ -42,6 +61,7 @@ export default class SystemConfig {
       if (!(key in this)) this[key] = DEFAULTS[key];
     }
 
+    this.isNode = (typeof window === 'undefined');
   }
 
   validate() {

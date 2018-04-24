@@ -4,6 +4,7 @@
 * Don't return values from instructions
 * Fix Ep and Mp segments - still need done?
 * Fix seg2abs, it still uses overrides, should use cpu.addrSeg
+
 2
 * move to proper instructions for prefixes
 * Fix formatStack()
@@ -14,6 +15,7 @@
 
 4
 * Refactor timingCheck
+  - Is there a better way to prevent video sync skips
 * Async RendererPNG with createWriteStream
 * web workers for graphics rendering
 

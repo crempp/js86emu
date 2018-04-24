@@ -59,8 +59,6 @@ export const NS_PER_SEC = 1e9;
 // ...
 // PAUSED, STOPPED???
 
-// export const FONT_PATH = "files/fonts/";
-
 export const PARITY = [
   /*         0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
   /* 0x00 */ 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,

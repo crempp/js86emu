@@ -6,6 +6,12 @@ export default class RendererCanvas {
     this.height = null;
   }
 
+  /**
+   * Set the render size
+   *
+   * @param {number} width Renderer width
+   * @param {number} height Renderer height
+   */
   setSize(width, height) {
     this.width = width;
     this.height = height;
@@ -14,6 +20,11 @@ export default class RendererCanvas {
     this.canvas.height = height;
   }
 
+  /**
+   * Render the screen data
+   *
+   * @param {Uint8Array} screenData The raw screen data
+   */
   render (screenData) {
     let imageData = this.ctx.createImageData(this.width, this.height);
     for (let i=0; i < screenData.length; i+=4) {

@@ -16,6 +16,7 @@ import SystemConfig from "./config/SystemConfig";
 import RendererBin from './video/renderers/RendererBin';
 import RendererCanvas from './video/renderers/RendererCanvas';
 import RendererPNG from './video/renderers/RendererPNG';
+import {loadBINAsync} from "./utils/Utils";
 const RENDERERS = {
   "RendererBin": RendererBin,
   "RendererCanvas": RendererCanvas,
@@ -29,31 +30,49 @@ export default class System {
     }
     config.validate();
 
-    this.cpu = new CPU8086(config);
-
-    let renderer = new RENDERERS[config.renderer.class](config.renderer.options);
-    this.videoCard = new VideoMDA(this.cpu.mem8, renderer, config);
-
-    /**
-     * CPU cycle counter. This tracks the number of instruction cycles the CPU
-     * has executed.
-     */
+    this.config = config;
     this.cycleCount = 0;
-
+    this.timeSyncCycles = config.timeSyncCycles;
     this.prevTiming = null;
-
-    // TODO: See if there's a better way to prevent sync skips than using a prev
-    this.newVideoSync = 10000;  // cycles, start small until timingCheck() runs
-    this.videoSync = 10000;
+    this.videoSync = config.videoSync;
+    this.newVideoSync = config.videoSync;
     this.runningHz = 0;
 
-    this.timeSyncCycles = 4 * 1000000 / 100; // About 100 times per sec
+    // Create CPU
+    this.cpu = new CPU8086(config);
+
+    // Create video and renderer
+    if (config.isNode && config.renderer.class === 'RendererCanvas') {
+      throw new SystemConfigException(`RendererCanvas is not a valid renderer when running in nodejs`);
+    }
+    if (!(config.renderer.class in RENDERERS)) {
+      throw new SystemConfigException(`${config.renderer.class} is not a valid renderer`);
+    }
+    let renderer = new RENDERERS[config.renderer.class](config.renderer.options);
+    this.videoCard = new VideoMDA(this.cpu.mem8, renderer, config);
   }
 
+  /**
+   * System boot initialization. This method is asynchronous and returns a promise.
+   *
+   * @return {Promise<void>}
+   */
   async boot () {
     await this.videoCard.init();
+
+    // If there's a program blob specified load it
+    if (this.config.programBlob) {
+      let bin = await loadBINAsync(this.config.programBlob.file);
+      this.loadMem(bin, this.config.programBlob.addr);
+    }
   }
 
+  /**
+   * Run the CPU continously or if cyclesToRun is given only run the given
+   * number of cycles.
+   *
+   * @param {(number|null)} cyclesToRun The number of cycles to run
+   */
   run (cyclesToRun = null) {
     this.cpu.state = STATE_RUNNING;
     let freq = this.cpu.frequency;
@@ -96,10 +115,11 @@ export default class System {
     let totalTime  = diff[0] * NS_PER_SEC + diff[1];
     let hz         = 1 / ((totalTime / this.cycleCount) / NS_PER_SEC);
     console.log(`  ran at ${(hz / (1000**2)).toFixed(6)} MHZ`);
-    // console.log(`  completed in ${totalTime/NS_PER_SEC} seconds`);
-    // console.log(`  did ${totalScans} scans`);
   }
 
+  /**
+   * Check the timing and update the measured cycles per second in MHZ.
+   */
   timingCheck() {
     let diff       = hrtime(this.prevTiming);
     let totalTime  = diff[0] * NS_PER_SEC + diff[1];
@@ -113,6 +133,12 @@ export default class System {
     // console.log(`  videoSync = ${this.videoSync}`);
   }
 
+  /**
+   * Load an Uint8Array into memory starting at the given address.
+   *
+   * @param {Uint8Array} data Data array to be loaded into memory
+   * @param {number} from Memory address to begin loading data
+   */
   loadMem (data, from) {
     for (let i = 0; i < data.length; i++) {
       this.cpu.mem8[from + i] = data[i];

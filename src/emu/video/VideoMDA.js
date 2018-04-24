@@ -1,16 +1,16 @@
 // https://www.seasip.info/VintagePC/mda.html
 // http://www.oldskool.org/guides/oldonnew/resources/cgatech.txt
 import { FONT_PATH } from "../Constants";
-import { loadPNGAwait } from "../utils/Utils";
+import { loadPNGAsync } from "../utils/Utils";
 
 export default class VideoMDA {
   constructor (mem8, renderer, config) {
     this.mem8            = mem8;
     this.renderer        = renderer;
     this.config          = config;
-    this.verticalSync    = 50;       // Hertz
-    this.memStart        = 0x8000;
-    this.memSize         = 4 * 1024; // 4k
+    this.verticalSync    = config.video.verticalSync;
+    this.memStart        = config.video.memoryStart;
+    this.memSize         = config.video.memorySize;
     this.font            = [];
 
     this.screenWidth     = 720;
@@ -35,15 +35,25 @@ export default class VideoMDA {
     renderer.setSize(this.screenWidth, this.screenHeight);
   }
 
+  /**
+   * Initialize the video card asynchronously.
+   *
+   * @return {Promise<void>}
+   */
   async init () {
     // Load font
-    let path = `${this.config.fontPath}${this.selectedFont["file"]}.png`;
-    let fontImage = await loadPNGAwait(path);
+    let path = `${this.config.video.fontPath}${this.selectedFont["file"]}.png`;
+    let fontImage = await loadPNGAsync(path);
     this.selectedFont["width"] = fontImage.width;
     this.selectedFont["height"] = fontImage.height;
-    this.buildFontTable(fontImage);
+    this.buildFontTable(fontImage.data);
   }
 
+  /**
+   * Build the font table for the selected font
+   *
+   * @param {Uint8Array} fontImage Font image data
+   */
   buildFontTable (fontImage) {
     let fontCounter = 0;
     let imageWidth  = this.selectedFont["width"];
@@ -67,7 +77,7 @@ export default class VideoMDA {
 
             // The font files should be black & white so we just need
             // to check of one channel has a non-zero value
-            if (fontImage.data[glyphOffset] !== 0) {
+            if (fontImage[glyphOffset] !== 0) {
               glyphRow[fx] = 0;
             }
             else {
@@ -83,9 +93,10 @@ export default class VideoMDA {
     }
   }
 
+  /**
+   * Perform a video screen scan
+   */
   scan () {
-    // let fontWidth  = this.selectedFont["width"];
-    // let fontHeight = this.selectedFont["height"];
     let fontWidth = this.selectedFont["fontWidth"];
     let fontHeight = this.selectedFont["fontHeight"];
 
@@ -101,8 +112,6 @@ export default class VideoMDA {
 
         let glyph = this.font[this.mem8[memoryOffset]];
         // let attr  = this.mem8[memoryOffset + 1];
-
-        //console.log("off = ", memoryOffset, " val=(", gfxMem[memoryOffset], ",", gfxMem[memoryOffset + 1], ")");
 
         // Now loop through the pixels of the font
         for ( let fy = 0; fy < fontHeight; fy++) {
