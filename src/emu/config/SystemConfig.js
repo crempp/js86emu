@@ -18,6 +18,10 @@ const DEFAULTS = {
 
   programBlob: null,
 
+  bios: {
+    file: "8086-tiny-bios.bin"
+  },
+
   cpu : {
     class:       '8086',
     registers16: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -62,6 +66,7 @@ export default class SystemConfig {
     this.isNode = (typeof window === 'undefined');
 
     this.video.fontPath = "files/fonts/";
+    this.bios.biosPath = "files/bios-roms/";
   }
 
   validate() {

@@ -84,9 +84,6 @@ export default class CPU8086 extends CPU {
     // Opcode
     this.opcode = {};
 
-    // bios_rom_address: 0xF0100,
-    // video_rom_address: 0xC0000,
-
     // Supporting modules
     let addr = new Addressing(this);
     let oper = new Operations(this);

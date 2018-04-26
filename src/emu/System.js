@@ -3,11 +3,13 @@ import sys from 'sys';
 
 import CPU8086 from "./cpu/8086";
 import {
-  STATE_RUNNING, NS_PER_SEC, regIP, STATE_HALT,
+  regCS, regIP,
+  NS_PER_SEC, STATE_RUNNING, STATE_HALT,
 } from './Constants';
 import VideoMDA from "./video/VideoMDA";
 import { SystemConfigException } from "./utils/Exceptions";
 import SystemConfig from "./config/SystemConfig";
+import { seg2abs } from "./utils/Utils";
 
 // We don't know the renderer until runtime. Webpack is a static compiler and
 // thus can't require dynamically. Also I was having issues with dynamic
@@ -17,7 +19,7 @@ import SystemConfig from "./config/SystemConfig";
 import RendererBin from './video/renderers/RendererBin';
 import RendererCanvas from './video/renderers/RendererCanvas';
 import RendererPNG from './video/renderers/RendererPNG';
-import {loadBINAsync} from "./utils/Utils";
+import {loadBINAsync, segIP} from "./utils/Utils";
 const RENDERERS = {
   "RendererBin": RendererBin,
   "RendererCanvas": RendererCanvas,
@@ -38,6 +40,9 @@ export default class System {
     this.videoSync = config.videoSync;
     this.newVideoSync = config.videoSync;
     this.runningHz = 0;
+
+    this.biosROMAddress = [0xF000, 0x0100]; //0xF0100;
+    this.videoROMAddress = 0xC0000;
 
     // Create CPU
     this.cpu = new CPU8086(config);
@@ -62,8 +67,13 @@ export default class System {
     // Clear memory
 
     // Load BIOS
-    // let bios = await loadBINAsync(this.config.programBlob.file);
-    // this.loadMem(bin, this.config.programBlob.addr);
+    console.log("Loading BIOS...");
+    if (!this.config.programBlob) {
+      let addr = seg2abs(this.biosROMAddress[0], this.biosROMAddress[1], this.cpu)
+      let biosPath = `${this.config.bios.biosPath}${this.config.bios.file}`;
+      let bios = await loadBINAsync(biosPath);
+      this.loadMem(bios, addr);
+    }
 
     // Load video BIOS
 
@@ -72,6 +82,12 @@ export default class System {
     // Self test
 
     // Jump to BIOS
+    console.log("Jump to BIOS...");
+    if (!this.config.programBlob) {
+      this.cpu.reg16[regCS] = this.biosROMAddress[0];
+      this.cpu.reg16[regIP] = this.biosROMAddress[1];
+    }
+    let a = 1;
 
     // Init state
 
@@ -80,6 +96,7 @@ export default class System {
 
     // If there's a program blob specified load it
     if (this.config.programBlob) {
+      console.log(`Loading program blob ${this.config.programBlob.file}...`);
       let bin = await loadBINAsync(this.config.programBlob.file);
       this.loadMem(bin, this.config.programBlob.addr);
     }
@@ -125,7 +142,7 @@ export default class System {
         this.videoCard.scan();
       }
 
-      if (this.cycleCount >= 5102) {
+      if (this.cycleCount >= 0) {
       // if (this.cpu.reg16[regIP] === 0xE8) {
         let a = 1;
       }
