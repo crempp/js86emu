@@ -253,56 +253,56 @@ describe('Register access methods', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000000; // addr mode
       cpu.decode();
-      expect(addr.readRegVal()).toBe(0x12);
+      expect(addr.readRegVal()).toBe(0x34);
     });
 
     test('read byte from CL', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00001000; // addr mode
       cpu.decode();
-      expect(addr.readRegVal()).toBe(0x34);
+      expect(addr.readRegVal()).toBe(0x56);
     });
 
     test('read byte from DL', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00010000; // addr mode
       cpu.decode();
-      expect(addr.readRegVal()).toBe(0x45);
+      expect(addr.readRegVal()).toBe(0x67);
     });
 
     test('read byte from BL', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00011000; // addr mode
       cpu.decode();
-      expect(addr.readRegVal()).toBe(0x23);
+      expect(addr.readRegVal()).toBe(0x45);
     });
 
     test('read byte from AH', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00100000; // addr mode
       cpu.decode();
-      expect(addr.readRegVal()).toBe(0x34);
+      expect(addr.readRegVal()).toBe(0x12);
     });
 
     test('read byte from CH', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00101000; // addr mode
       cpu.decode();
-      expect(addr.readRegVal()).toBe(0x56);
+      expect(addr.readRegVal()).toBe(0x34);
     });
 
     test('read byte from DH', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00110000; // addr mode
       cpu.decode();
-      expect(addr.readRegVal()).toBe(0x67);
+      expect(addr.readRegVal()).toBe(0x45);
     });
 
     test('read byte from BH', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00111000; // addr mode
       cpu.decode();
-      expect(addr.readRegVal()).toBe(0x45);
+      expect(addr.readRegVal()).toBe(0x23);
     });
 
     test('read word from AX', () => {
@@ -365,56 +365,56 @@ describe('Register access methods', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00111000; // addr mode
       cpu.decode();
-      expect(addr.readRegVal(true)).toBe(0x12);
+      expect(addr.readRegVal(true)).toBe(0x34);
     });
 
     test('read byte from CL using RM', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00111001; // addr mode
       cpu.decode();
-      expect(addr.readRegVal(true)).toBe(0x34);
+      expect(addr.readRegVal(true)).toBe(0x56);
     });
 
     test('read byte from DL using RM', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00111010; // addr mode
       cpu.decode();
-      expect(addr.readRegVal(true)).toBe(0x45);
+      expect(addr.readRegVal(true)).toBe(0x67);
     });
 
     test('read byte from BL using RM', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00111011; // addr mode
       cpu.decode();
-      expect(addr.readRegVal(true)).toBe(0x23);
+      expect(addr.readRegVal(true)).toBe(0x45);
     });
 
     test('read byte from AH using RM', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00111100; // addr mode
       cpu.decode();
-      expect(addr.readRegVal(true)).toBe(0x34);
+      expect(addr.readRegVal(true)).toBe(0x12);
     });
 
     test('read byte from CH using RM', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00111101; // addr mode
       cpu.decode();
-      expect(addr.readRegVal(true)).toBe(0x56);
+      expect(addr.readRegVal(true)).toBe(0x34);
     });
 
     test('read byte from DH using RM', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00111110; // addr mode
       cpu.decode();
-      expect(addr.readRegVal(true)).toBe(0x67);
+      expect(addr.readRegVal(true)).toBe(0x45);
     });
 
     test('read byte from BH using RM', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b00000111; // addr mode
       cpu.decode();
-      expect(addr.readRegVal(true)).toBe(0x45);
+      expect(addr.readRegVal(true)).toBe(0x23);
     });
 
     test('read word from AX using RM', () => {
@@ -1189,7 +1189,7 @@ describe('rm/reg access methods', () => {
       cpu.addrIPInc = 0;
       let offset = addr.calcRMAddr(segment);
 
-      expect(addr.readRMReg8(segment, offset)).toBe(0x67);
+      expect(addr.readRMReg8(segment, offset)).toBe(0x45);
     });
   });
 
@@ -1491,7 +1491,7 @@ describe('Addressing Modes', () => {
       expect(cpu.addrIPInc).toBe(0);
     });
     test('read', () => {
-      expect(addr.AH(segment, null)).toBe(0x34);
+      expect(addr.AH(segment, null)).toBe(0x12);
     });
     test('write', () => {
       let result = addr.AH(segment, null, 0xFF);
@@ -1515,7 +1515,7 @@ describe('Addressing Modes', () => {
       expect(cpu.addrIPInc).toBe(0);
     });
     test('read', () => {
-      expect(addr.AL(segment, null)).toBe(0x12);
+      expect(addr.AL(segment, null)).toBe(0x34);
     });
     test('write', () => {
       let result = addr.AL(segment, null, 0xFF);
@@ -1563,7 +1563,7 @@ describe('Addressing Modes', () => {
       expect(cpu.addrIPInc).toBe(0);
     });
     test('read', () => {
-      expect(addr.BH(segment, null)).toBe(0x45);
+      expect(addr.BH(segment, null)).toBe(0x23);
     });
     test('write', () => {
       let result = addr.BH(segment, null, 0xFF);
@@ -1587,7 +1587,7 @@ describe('Addressing Modes', () => {
       expect(cpu.addrIPInc).toBe(0);
     });
     test('read', () => {
-      expect(addr.BL(segment, null)).toBe(0x23);
+      expect(addr.BL(segment, null)).toBe(0x45);
     });
     test('write', () => {
       let result = addr.BL(segment, null, 0xFF);
@@ -1635,7 +1635,7 @@ describe('Addressing Modes', () => {
       expect(cpu.addrIPInc).toBe(0);
     });
     test('read', () => {
-      expect(addr.CH(segment, null)).toBe(0x56);
+      expect(addr.CH(segment, null)).toBe(0x34);
     });
     test('write', () => {
       let result = addr.CH(segment, null, 0xFF);
@@ -1659,7 +1659,7 @@ describe('Addressing Modes', () => {
       expect(cpu.addrIPInc).toBe(0);
     });
     test('read', () => {
-      expect(addr.CL(segment, null)).toBe(0x34);
+      expect(addr.CL(segment, null)).toBe(0x56);
     });
     test('write', () => {
       let result = addr.CL(segment, null, 0xFF);
@@ -1708,7 +1708,7 @@ describe('Addressing Modes', () => {
       expect(cpu.addrIPInc).toBe(0);
     });
     test('read', () => {
-      expect(addr.DH(segment, null)).toBe(0x67);
+      expect(addr.DH(segment, null)).toBe(0x45);
     });
     test('write', () => {
       let result = addr.DH(segment, null, 0xFF);
@@ -1732,7 +1732,7 @@ describe('Addressing Modes', () => {
       expect(cpu.addrIPInc).toBe(0);
     });
     test('read', () => {
-      expect(addr.DL(segment, null)).toBe(0x45);
+      expect(addr.DL(segment, null)).toBe(0x67);
     });
     test('write', () => {
       let result = addr.DL(segment, null, 0xFF);
@@ -2103,7 +2103,7 @@ describe('Addressing Modes', () => {
       expect(cpu.addrIPInc).toBe(0);
     });
     test('read', () => {
-      expect(addr.Gb(segment, null)).toBe(0x12);
+      expect(addr.Gb(segment, null)).toBe(0x34);
     });
     test('write', () => {
       addr.Gb(segment, null, 0xFF);
@@ -2113,7 +2113,7 @@ describe('Addressing Modes', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
       cpu.decode();
       let r = addr.Gb(segment, null);
-      expect(r).toBe(0x12);
+      expect(r).toBe(0x34);
     });
     test('write overflow throws', () => {
       expect(() => {

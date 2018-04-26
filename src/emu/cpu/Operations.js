@@ -644,7 +644,12 @@ export default class Operations {
    *   - [1] p.2-44 to 2.46
    *
    * Modifies flags: NONE
-   * Condition Tested: (CF OR ZF)=O
+   * Condition Tested: (CF AND ZF)=O
+   *
+   * NOTE: The 8086 Family Users Manual appears to be wrong on condition
+   * tested. It states (CF OR ZF)=O but other resources
+   * (https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow) state
+   * (CF AND ZF)=O. The former doesn't work, the latter does.
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
@@ -654,7 +659,7 @@ export default class Operations {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
     let dstAddr = dst(segment);
 
-    if ( (this.cpu.reg16[regFlags] & FLAG_ZF_MASK) === 0 ||
+    if ( (this.cpu.reg16[regFlags] & FLAG_ZF_MASK) === 0 &&
          (this.cpu.reg16[regFlags] & FLAG_CF_MASK) === 0)
     {
       this.cpu.reg16[regIP] = dst(segment, dstAddr);

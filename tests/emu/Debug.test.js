@@ -278,10 +278,10 @@ describe('Debug formatters', () => {
     test('formatRegisters() should return correctly formatted string', () => {
       cpu.reg16[regIP] = 0xF123;
       expect(formatRegisters(cpu)).toBe(
-        "AX: 0x1234 AL: 0x12 AH: 0x34\n" +
-        "BX: 0x2345 BL: 0x23 BH: 0x45\n" +
-        "CX: 0x3456 CL: 0x34 CH: 0x56\n" +
-        "DX: 0x4567 DL: 0x45 DH: 0x67\n" +
+        "AX: 0x1234 AL: 0x34 AH: 0x12\n" +
+        "BX: 0x2345 BL: 0x45 BH: 0x23\n" +
+        "CX: 0x3456 CL: 0x56 CH: 0x34\n" +
+        "DX: 0x4567 DL: 0x67 DH: 0x45\n" +
         "SI: 0x5678 DI: 0x6789 BP: 0x789A SP: 0x89AB\n" +
         "CS: 0xABCD DS: 0xBCD0 ES: 0xCD01 SS: 0xD012\n" +
         "IP: 0xF123");
@@ -289,10 +289,10 @@ describe('Debug formatters', () => {
     test('formatRegisters() should indent formatted string', () => {
       cpu.reg16[regIP] = 0xF123;
       expect(formatRegisters(cpu, 4)).toBe(
-        "    AX: 0x1234 AL: 0x12 AH: 0x34\n" +
-        "    BX: 0x2345 BL: 0x23 BH: 0x45\n" +
-        "    CX: 0x3456 CL: 0x34 CH: 0x56\n" +
-        "    DX: 0x4567 DL: 0x45 DH: 0x67\n" +
+        "    AX: 0x1234 AL: 0x34 AH: 0x12\n" +
+        "    BX: 0x2345 BL: 0x45 BH: 0x23\n" +
+        "    CX: 0x3456 CL: 0x56 CH: 0x34\n" +
+        "    DX: 0x4567 DL: 0x67 DH: 0x45\n" +
         "    SI: 0x5678 DI: 0x6789 BP: 0x789A SP: 0x89AB\n" +
         "    CS: 0xABCD DS: 0xBCD0 ES: 0xCD01 SS: 0xD012\n" +
         "    IP: 0xF123");

@@ -609,6 +609,22 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
     });
+    test('[regression] cmp ax, 9', () => {
+      cpu.reg16[regAX] = 0x0001;
+      cpu.mem8[0x00FF] = 0x83;
+      cpu.mem8[0x0100] = 0xF8; // 0b11 111 000
+      cpu.mem8[0x0101] = 0x09;
+      cpu.instIPInc = 2;
+      cpu.decode();
+      oper.cmp(addr.Ev.bind(addr), addr.Ib.bind(addr));
+
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
   });
 
   describe('cmpsb', () => {
@@ -875,20 +891,20 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump executes if ZF = 0, CF = 1', () => {
+    test('jump does not execute if ZF = 0, CF = 1', () => {
       cpu.reg16[regFlags] = 0b0000000000000001;
       cpu.decode();
       oper.ja(addr.Jb.bind(addr), null);
-      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.reg16[regIP]).toBe(0xFF);
       expect(cpu.instIPInc).toBe(1);
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump executes if ZF = 1, CF = 0', () => {
+    test('jump does not execute if ZF = 1, CF = 0', () => {
       cpu.reg16[regFlags] = 0b0000000001000000;
       cpu.decode();
       oper.ja(addr.Jb.bind(addr), null);
-      expect(cpu.reg16[regIP]).toBe(0xFF + 0x12);
+      expect(cpu.reg16[regIP]).toBe(0xFF);
       expect(cpu.instIPInc).toBe(1);
       expect(cpu.addrIPInc).toBe(1);
     });
@@ -2343,7 +2359,7 @@ describe('Operation methods', () => {
 
     test('set flags', () => {
       cpu.reg16[regFlags] = 0b0000000000000010;
-      cpu.reg16[regAH] = 0b01111101;
+      cpu.reg8[regAH] = 0b01111101;
       oper.sahf(null, null);
 
       expect(cpu.reg16[regFlags]).toBe(0b01010111)

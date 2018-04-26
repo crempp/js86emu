@@ -57,9 +57,9 @@ export default class CPU8086 extends CPU {
     // Registers
     this.reg8 = new Uint8Array(14 * 2);
     this.reg16 = new Uint16Array(this.reg8.buffer);
-    if (config.registers16) {
-      for (let r = 0; r < config.registers16.length; r++) {
-        this.reg16[r] = config.registers16[r];
+    if (config.cpu.registers16) {
+      for (let r = 0; r < config.cpu.registers16.length; r++) {
+        this.reg16[r] = config.cpu.registers16[r];
       }
     }
     else {
@@ -603,13 +603,13 @@ export default class CPU8086 extends CPU {
     // If this is a prefix instruction, run it and move to the next instruction
     this.prefix();
 
-    // console.log("  INSTRUCTION: " +  this.opcode.string);
-    // console.log("  CS:IP:       " + hexString16(this.reg16[regCS]) + ":" + hexString16(this.reg16[regIP]));
-    // console.log("  OPCODE:      " + "\n" + formatOpcode(this.opcode, 11));
-    // console.log("  MEMORY INST: " + "\n" + formatMemory(this.mem8, segIP(this), segIP(this) + 6, 11));
-    // // console.log("  MEMORY STACK:" + "\n" + formatStack(this.mem8, this.reg16[regSP], 0x1000, 11));
-    // console.log("  REGISTERS    " + "\n" + formatRegisters(this, 11));
-    // console.log("  FLAGS:       " + "\n" + formatFlags(this.reg16[regFlags], 11));
+    console.log(`  INSTRUCTION: ${this.opcode.string}`);
+    console.log(`  CS:IP:       ${hexString16(this.reg16[regCS])}:${hexString16(this.reg16[regIP])}`);
+    console.log(`  OPCODE:      \n${formatOpcode(this.opcode, 11)}`);
+    console.log(`  MEMORY INST: \n${formatMemory(this.mem8, segIP(this), segIP(this) + 6, 11)}`);
+    // console.log(`  MEMORY STACK:\n${formatStack(this.mem8, this.reg16[regSP], 0x1000, 11)}`);
+    console.log(`  REGISTERS    \n${formatRegisters(this, 11)}`);
+    console.log(`  FLAGS:       \n${formatFlags(this.reg16[regFlags], 11)}`);
 
     // Increase the instIPInc by the instruction base size
     this.instIPInc += this.opcode.inst.baseSize;

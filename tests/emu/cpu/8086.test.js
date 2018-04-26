@@ -6,20 +6,6 @@ test('can create a cpu instance', () => {
   expect(new CPU8086(new SystemConfig())).toBeInstanceOf(CPU8086);
 });
 
-test('undefined config throws', () => {
-  expect(() => {
-    let cpu = new CPU8086();
-  }).toThrowError(SystemConfigException);
-});
-
-test('cpu validates config', () => {
-  expect(() => {
-    let cpu = new CPU8086(new SystemConfig({
-      memorySize: 0
-    }));
-  }).toThrowError(SystemConfigException);
-});
-
 test('memory size respects config value', () => {
   let cpu = new CPU8086(new SystemConfig({
     memorySize: 131072

@@ -1,8 +1,9 @@
 import hrtime from 'browser-process-hrtime';
+import sys from 'sys';
 
 import CPU8086 from "./cpu/8086";
 import {
-  STATE_RUNNING, NS_PER_SEC,
+  STATE_RUNNING, NS_PER_SEC, regIP,
 } from './Constants';
 import VideoMDA from "./video/VideoMDA";
 import { SystemConfigException } from "./utils/Exceptions";
@@ -58,6 +59,23 @@ export default class System {
    * @return {Promise<void>}
    */
   async boot () {
+    // Clear memory
+
+    // Load BIOS
+    // let bios = await loadBINAsync(this.config.programBlob.file);
+    // this.loadMem(bin, this.config.programBlob.addr);
+
+    // Load video BIOS
+
+    // Clear cache
+
+    // Self test
+
+    // Jump to BIOS
+
+    // Init state
+
+
     await this.videoCard.init();
 
     // If there's a program blob specified load it
@@ -75,15 +93,14 @@ export default class System {
    */
   run (cyclesToRun = null) {
     this.cpu.state = STATE_RUNNING;
-    let freq = this.cpu.frequency;
 
     this.prevTiming = hrtime();
 
     let totalScans = 0;
 
     while (cyclesToRun === null || cyclesToRun-- > 0) {
-      // console.log("-".repeat(80 - 7));
-      // console.log("8086.cycle()             : Running instruction cycle [" + this.cycleCount + "]");
+      console.log("-".repeat(80 - 7));
+      console.log(`8086.cycle()             : Running instruction cycle [${this.cycleCount}]\n`);
 
       // if (this.cpu.state === STATE_PAUSED) {
       //   break;
@@ -103,7 +120,8 @@ export default class System {
         this.videoCard.scan();
       }
 
-      if (this.cycleCount >= 1510) {
+      if (this.cycleCount >= 4499) {
+      // if (this.cpu.reg16[regIP] === 0x198) {
         let a = 1;
       }
 

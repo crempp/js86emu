@@ -25,16 +25,20 @@ const FS_CONFIG = {
 
 // System configuration
 let sysConfig = new SystemConfig({
+  cpu: {
+    registers16: [0, 0, 0, 0, 0, 0, 0, 0x0100, 0, 0, 0, 0, 0, 0],
+  },
+
   renderer: {
     class: 'RendererCanvas',
     options: {canvas: document.getElementById('screen')}
   },
-  registers16: [0, 0, 0, 0, 0, 0, 0, 0x0100, 0, 0, 0, 0, 0, 0],
-  fontPath: "/files/fonts/",
+
   programBlob: {
     file: "files/program-blobs/codegolf",
     addr: 0x00
   },
+
   debug: true,
 });
 
@@ -47,7 +51,7 @@ async function runEmulation () {
   await system.boot();
 
   console.log("running...");
-  system.run(50000);
+  system.run(5000);
 
   // force a video scan at the end of the run
   system.videoCard.scan();

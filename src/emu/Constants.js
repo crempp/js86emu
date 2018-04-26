@@ -1,12 +1,12 @@
 // Main Registers 8bit
-export const regAH = 0;
-export const regAL = 1;
-export const regBH = 2;
-export const regBL = 3;
-export const regCH = 4;
-export const regCL = 5;
-export const regDH = 6;
-export const regDL = 7;
+export const regAL = 0;
+export const regAH = 1;
+export const regBL = 2;
+export const regBH = 3;
+export const regCL = 4;
+export const regCH = 5;
+export const regDL = 6;
+export const regDH = 7;
 
 // Main Registers 16 bit
 export const regAX = 0;

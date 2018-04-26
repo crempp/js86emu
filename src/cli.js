@@ -26,10 +26,16 @@ async function runEmulation () {
   await system.boot();
 
   console.log("running...");
-  system.run(50000);
+  system.run(9000);
 
   // force a video scan at the end of the run
   system.videoCard.scan();
+}
+
+// This forces console.log to write, without this the process will usually exit
+// with unflushed writes
+if (sysConfig.debug) {
+  process.stdout._handle.setBlocking(true);
 }
 
 runEmulation().then(() => {

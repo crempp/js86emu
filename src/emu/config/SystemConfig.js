@@ -7,9 +7,16 @@
 import { SystemConfigException } from '../utils/Exceptions';
 
 const DEFAULTS = {
-
   memorySize: 64 * 1024,
   memory: null,
+
+  /** The number of cycles between timing syncs */
+  timeSyncCycles: 4 * 1000000 / 100, // About 100 times per sec
+
+  /** Number of cycles per video sync. This is updated every timeSyncCycles */
+  videoSync: 10000,
+
+  programBlob: null,
 
   cpu : {
     class:       '8086',
@@ -20,7 +27,6 @@ const DEFAULTS = {
 
   video: {
     class:        'VideoMDA',
-    fontPath:     "files/fonts/",
     memorySize:   4 * 1024,
     memoryStart:  0x8000,
     verticalSync: 50,       // Hertz
@@ -34,14 +40,6 @@ const DEFAULTS = {
   },
 
   debug: false,
-
-  programBlob: null,
-
-  /** The number of cycles between timing syncs */
-  timeSyncCycles: 4 * 1000000 / 100, // About 100 times per sec
-
-  /** Number of cycles per video sync. This is updated every timeSyncCycles */
-  videoSync: 10000,
 };
 
 export default class SystemConfig {
@@ -62,6 +60,8 @@ export default class SystemConfig {
     }
 
     this.isNode = (typeof window === 'undefined');
+
+    this.video.fontPath = "files/fonts/";
   }
 
   validate() {
