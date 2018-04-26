@@ -39,7 +39,7 @@ let sysConfig = new SystemConfig({
     addr: 0x00
   },
 
-  debug: true,
+  debug: false,
 });
 
 async function runEmulation () {
@@ -51,7 +51,7 @@ async function runEmulation () {
   await system.boot();
 
   console.log("running...");
-  system.run(5000);
+  system.run();
 
   // force a video scan at the end of the run
   system.videoCard.scan();

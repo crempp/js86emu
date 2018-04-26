@@ -51,7 +51,8 @@ describe('Operation methods', () => {
 
   beforeEach(() => {
     cpu = new CPU8086(new SystemConfig({
-      memorySize: 2 ** 20
+      memorySize: 2 ** 20,
+      debug: false,
     }));
     oper = new Operations(cpu);
     addr = new Addressing(cpu);
@@ -218,26 +219,6 @@ describe('Operation methods', () => {
       // Note that the result fits in the operand
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('dst (word) = src (byte) both are negative no carry', () => {
-      cpu.reg16[regFlags] = 0b0000000000000010;
-      cpu.reg16[regBX] = 0xFFFF;
-      // ADC BX,iv
-      // 0xFFFF + 0xFF = -1 + -1 + 1 = 0x1FFFF -> 0xFFFF
-      cpu.mem8[0x00FF] = 0x83; // inst
-      cpu.mem8[0x0100] = 0b11010011; // addr
-      cpu.mem8[0x0101] = 0xFF; // oper low
-      cpu.instIPInc = 2;
-      cpu.decode();
-      oper.adc(addr.Ev.bind(addr), addr.Ib.bind(addr));
-
-      expect(cpu.reg16[regBX]).toBe(0xFFFE);
-      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
-      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
-      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
-      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
-      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
-      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
-    });
   });
 
   describe('add', () => {
@@ -333,23 +314,21 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
     });
-    test('dst (word) = src (byte) both are negative', () => {
-      // ADD BX,iv
-      // 0xFFFF + 0xFF = -1 + -1
-      cpu.reg16[regBX] = 0xFFFF;
-      cpu.mem8[0x00FF] = 0x83; // inst
-      cpu.mem8[0x0100] = 0b11000011; // addr
-      cpu.mem8[0x0101] = 0xFF; // oper low
+    test('[regression] add dx,ax', () => {
+      cpu.reg16[regAX] = 0x0090;
+      cpu.reg16[regDX] = 0x0059;
+      cpu.mem8[0x00FF] = 0x01; // inst
+      cpu.mem8[0x0100] = 0xC2; // addr
       cpu.instIPInc = 2;
       cpu.decode();
-      oper.add(addr.Ev.bind(addr), addr.Ib.bind(addr));
+      oper.add(addr.Ev.bind(addr), addr.Gv.bind(addr));
 
-      expect(cpu.reg16[regBX]).toBe(0xFFFE);
-      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regDX]).toBe(0x00E9);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
-      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
-      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
   });
@@ -2662,25 +2641,6 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regAX]).toBe(0x7FFF);
     });
-    test('[regression] dst (word) = src (byte) both are negative', () => {
-      // SUB BX,iv
-      // 0xFFFF - 0xFF = -1 - -1
-      cpu.instIPInc = 2;
-      cpu.reg16[regBX] = 0xFFFF;
-      cpu.mem8[0x00FF] = 0x83; // inst
-      cpu.mem8[0x0100] = 0xFB; // addr
-      cpu.mem8[0x0101] = 0xFF; // oper low
-      cpu.decode();
-      oper.sub(addr.Ev.bind(addr), addr.Ib.bind(addr));
-
-      expect(cpu.reg16[regBX]).toBe(0x0000);
-      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
-      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
-      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
-      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBeGreaterThan(0);
-      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
-      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
-    });
     test('[regression] immediate value for dst doesn\'t double count IP increments', () => {
       // Data (dst)
       cpu.mem8[0x31D3] = 0x78;
@@ -2798,7 +2758,8 @@ describe('Utility methods', () => {
 
   beforeEach(() => {
     cpu = new CPU8086(new SystemConfig({
-      memorySize: 2 ** 16
+      memorySize: 2 ** 16,
+      debug: false,
     }));
     oper = new Operations(cpu);
     cpu.reg16[regIP] = 0x00FF;
@@ -2841,7 +2802,8 @@ describe('Regressions', () => {
 
   beforeEach(() => {
     cpu = new CPU8086(new SystemConfig({
-      memorySize: 2 ** 20
+      memorySize: 2 ** 20,
+      debug: false,
     }));
     oper = new Operations(cpu);
     addr = new Addressing(cpu);

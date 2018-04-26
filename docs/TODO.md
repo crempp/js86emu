@@ -4,7 +4,11 @@
 * Don't return values from instructions
 * Fix Ep and Mp segments - still need done?
 * Fix seg2abs, it still uses overrides, should use cpu.addrSeg
-
+* Fix CMP sign extend, it should only happen when
+  "If subtrahend is an immediate value it will be sign extended to the length of minuend"
+  https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Comparison_Instructions
+  IDEA: this only happens for EV Ib addressing combos which have a size set to "v"
+        so in Ib check if size is "v", if so sign extend
 2
 * move to proper instructions for prefixes
 * Fix formatStack()

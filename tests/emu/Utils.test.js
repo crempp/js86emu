@@ -148,4 +148,8 @@ describe.skip('twosComplement2Int8()', () => {});
 
 describe.skip('twosComplement2Int16()', () => {});
 
-describe.skip('signExtend()', () => {});
+describe('signExtend()', () => {
+  test('[regression] sign extend 0x90', () => {
+
+  });
+});

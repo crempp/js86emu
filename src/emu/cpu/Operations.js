@@ -113,10 +113,10 @@ export default class Operations {
     let dstVal = dst(segment, dstAddr);
     let srcVal = src(segment, srcAddr);
 
-    if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
-      srcVal = signExtend(srcVal);
-      dstVal = signExtend(dstVal);
-    }
+    // if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
+    //   srcVal = signExtend(srcVal);
+    //   dstVal = signExtend(dstVal);
+    // }
     let result = dstVal + srcVal + (this.cpu.reg16[regFlags] & FLAG_CF_MASK);
 
     this.flagAdd(dstVal, srcVal, result);
@@ -145,10 +145,10 @@ export default class Operations {
     let dstVal = dst(segment, dstAddr);
     let srcVal = src(segment, srcAddr);
 
-    if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
-      srcVal = signExtend(srcVal);
-      dstVal = signExtend(dstVal);
-    }
+    // if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
+    //   srcVal = signExtend(srcVal);
+    //   dstVal = signExtend(dstVal);
+    // }
     let result = dstVal + srcVal;
 
     this.flagAdd(dstVal, srcVal, result);
@@ -2148,9 +2148,9 @@ export default class Operations {
     let dstVal = dst(segment, dstAddr);
     let srcVal = src(segment, srcAddr);
 
-    if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
-      srcVal = signExtend(srcVal);
-    }
+    // if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
+    //   srcVal = signExtend(srcVal);
+    // }
     let result = dstVal - srcVal - (this.cpu.reg16[regFlags] & FLAG_CF_MASK);
     result = this.correctUnderflow(result);
 
@@ -2344,9 +2344,9 @@ export default class Operations {
     let dstVal = dst(segment, dstAddr);
     let srcVal = src(segment, srcAddr);
 
-    if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
-      srcVal = signExtend(srcVal);
-    }
+    // if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
+    //   srcVal = signExtend(srcVal);
+    // }
     let result = dstVal - srcVal;
     result = this.correctUnderflow(result);
 

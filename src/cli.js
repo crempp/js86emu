@@ -26,7 +26,7 @@ async function runEmulation () {
   await system.boot();
 
   console.log("running...");
-  system.run(9000);
+  system.run(15000);
 
   // force a video scan at the end of the run
   system.videoCard.scan();

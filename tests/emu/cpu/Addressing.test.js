@@ -15,7 +15,8 @@ import {InvalidAddressModeException, ValueOverflowException} from "../../../src/
 
 test('Addressing object constructs', () => {
   let cpu = new CPU8086(new SystemConfig({
-    memorySize: 1048576
+    memorySize: 1048576,
+    debug: false,
   }));
   let addr = new Addressing(cpu);
   expect(addr).toBeInstanceOf(Addressing);
@@ -26,7 +27,8 @@ describe('Memory access methods', () => {
 
   beforeEach(() => {
     cpu = new CPU8086(new SystemConfig({
-      memorySize: 262400
+      memorySize: 262400,
+      debug: false,
     }));
     addr = new Addressing(cpu);
     cpu.reg16[regCS] = 0x0001;
@@ -227,7 +229,8 @@ describe('Register access methods', () => {
 
   beforeEach(() => {
     cpu = new CPU8086(new SystemConfig({
-        memorySize: 1048576
+      memorySize: 1048576,
+      debug: false,
     }));
     addr = new Addressing(cpu);
     cpu.reg16[regAX] = 0x1234;
@@ -755,7 +758,8 @@ describe('Memory addressing mode methods', () => {
 
   beforeEach(() => {
     cpu = new CPU8086(new SystemConfig({
-      memorySize: 1048576
+      memorySize: 1048576,
+      debug: false,
     }));
     addr = new Addressing(cpu);
     cpu.reg16[regAX] = 0x1234;
@@ -1100,7 +1104,8 @@ describe('rm/reg access methods', () => {
 
   beforeEach(() => {
     cpu = new CPU8086(new SystemConfig({
-      memorySize: 1048576
+      memorySize: 1048576,
+      debug: false,
     }));
     addr = new Addressing(cpu);
     cpu.reg16[regAX] = 0x1234;
@@ -1396,7 +1401,8 @@ describe('Addressing Modes', () => {
 
   beforeEach(() => {
     cpu = new CPU8086(new SystemConfig({
-      memorySize: 1048576
+      memorySize: 1048576,
+      debug: false,
     }));
     addr = new Addressing(cpu);
     cpu.reg16[regAX] = 0x1234;

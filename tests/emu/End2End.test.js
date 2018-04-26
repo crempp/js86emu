@@ -52,6 +52,7 @@ describe('Code Golf', () => {
 
     let config = new SystemConfig({
       memorySize: 2**16,
+      debug: false,
     });
 
     cpu = new CPU8086(config);

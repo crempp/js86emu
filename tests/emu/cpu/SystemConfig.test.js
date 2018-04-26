@@ -2,7 +2,8 @@ import SystemConfig from "../../../src/emu/config/SystemConfig";
 import {SystemConfigException} from '../../../src/emu/utils/Exceptions';
 
 test('config instantiates', () => {
-  expect(new SystemConfig()).toBeInstanceOf(SystemConfig);
+  expect(new SystemConfig({debug: false,}))
+    .toBeInstanceOf(SystemConfig);
 });
 
 test('config ignores non-object initial parameter', () => {
@@ -12,14 +13,16 @@ test('config ignores non-object initial parameter', () => {
 
 test('config ignores initial values that are not accepted', () => {
   let config = new SystemConfig({
-    asdf: 1
+    asdf: 1,
+    debug: false,
   });
   expect(config.asdf).toBeUndefined()
 });
 
 test('config accepts memorySize as an initial value', () => {
   let config = new SystemConfig({
-    memorySize: 2048
+    memorySize: 2048,
+    debug: false,
   });
   expect(config.memorySize).toEqual(2048)
 });
@@ -27,7 +30,8 @@ test('config accepts memorySize as an initial value', () => {
 test('memory size too small throws', () => {
   expect(() => {
     let config = new SystemConfig({
-      memorySize: 0
+      memorySize: 0,
+      debug: false,
     });
     config.validate();
   }).toThrowError(SystemConfigException);
@@ -36,7 +40,8 @@ test('memory size too small throws', () => {
 test('memory size too large throws', () => {
   expect(() => {
     let config = new SystemConfig({
-      memorySize: 2097152
+      memorySize: 2097152,
+      debug: false,
     });
     config.validate();
   }).toThrowError(SystemConfigException);
@@ -45,7 +50,8 @@ test('memory size too large throws', () => {
 test('non-number memory size throws', () => {
   expect(() => {
     let config = new SystemConfig({
-      memorySize: "2097152"
+      memorySize: "2097152",
+      debug: false,
     });
     config.validate();
   }).toThrowError(SystemConfigException);
