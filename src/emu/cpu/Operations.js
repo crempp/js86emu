@@ -1426,11 +1426,65 @@ export default class Operations {
   lock (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * LODS (Load String) transfers the byte or word string element addressed by
+   * SI to register AL or AX, and updates SI to point to the next element in
+   * the string. This instruction is not ordinarily repeated since the
+   * accumulator would be over- written by each repetition, and only the last
+   * element would be retained. However, LODS is very useful in software loops
+   * as part of a more com- plex string function built up from string
+   * primitives and other instructions.
+   *   - [1] p.2-43
+   *
+   * Load byte at address DS:(E)SI into AL
+   *   - [3] p.3-369
+   *
+   * Modifies flags: NONE
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   lodsb (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let addr = seg2abs(this.cpu.reg16[regDS], this.cpu.reg16[regSI], this.cpu);
+    this.cpu.reg8[regAL] = this.cpu.mem8[addr];
+
+    if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
+      this.cpu.reg16[regSI] += 1;
+    }
+    else {
+      this.cpu.reg16[regSI] -= 1;
+    }
   }
+
+  /**
+   * LODS (Load String) transfers the byte or word string element addressed by
+   * SI to register AL or AX, and updates SI to point to the next element in
+   * the string. This instruction is not ordinarily repeated since the
+   * accumulator would be over- written by each repetition, and only the last
+   * element would be retained. However, LODS is very useful in software loops
+   * as part of a more com- plex string function built up from string
+   * primitives and other instructions.
+   *   - [1] p.2-43
+   *
+   * Load byte at address DS:(E)SI into AL
+   *   - [3] p.3-369
+   *
+   * Modifies flags: NONE
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   lodsw (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let addr = seg2abs(this.cpu.reg16[regDS], this.cpu.reg16[regSI], this.cpu);
+    this.cpu.reg16[regAX] = this.cpu.mem8[addr + 1] << 8 | this.cpu.mem8[addr];
+
+    if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
+      this.cpu.reg16[regSI] += 2;
+    }
+    else {
+      this.cpu.reg16[regSI] -= 2;
+    }
   }
 
   /**
@@ -2317,11 +2371,61 @@ export default class Operations {
     this.cpu.reg16[regFlags] |= FLAG_IF_MASK
   }
 
+  /**
+   * STOS (Store String) transfers a byte or word from register AL or AX to the
+   * string element addressed by DI and updates DI to point to the next
+   * location in the string. As a repeated operation, STOS pro- vides a
+   * convenient way to initialize a string to a constant value (e.g., to blank
+   * out a print line).
+   *   - [1] p.2-43
+   *
+   * Store AL at address ES:(E)DI
+   *   - [3] p.3-668
+   *
+   * Modifies flags: NONE
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   stosb (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let addr = seg2abs(this.cpu.reg16[regES], this.cpu.reg16[regDI], this.cpu);
+    this.cpu.mem8[addr] = this.cpu.reg8[regAL];
+
+    if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
+      this.cpu.reg16[regDI] += 1;
+    }
+    else {
+      this.cpu.reg16[regDI] -= 1;
+    }
   }
+
+  /**
+   * STOS (Store String) transfers a byte or word from register AL or AX to the
+   * string element addressed by DI and updates DI to point to the next
+   * location in the string. As a repeated operation, STOS pro- vides a
+   * convenient way to initialize a string to a constant value (e.g., to blank
+   * out a print line).
+   *   - [1] p.2-43
+   *
+   * Store AX at address ES:(E)DI
+   *   - [3] p.3-668
+   *
+   * Modifies flags: NONE
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   stosw (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let addr = seg2abs(this.cpu.reg16[regES], this.cpu.reg16[regDI], this.cpu);
+    this.cpu.mem8[addr] = (this.cpu.reg16[regAX] & 0x00FF);
+    this.cpu.mem8[addr + 1] = (this.cpu.reg16[regAX] >> 8);
+
+    if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
+      this.cpu.reg16[regDI] += 2;
+    }
+    else {
+      this.cpu.reg16[regDI] -= 2;
+    }
   }
 
   /**

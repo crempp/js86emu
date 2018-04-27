@@ -1668,18 +1668,62 @@ describe('Operation methods', () => {
   });
 
   describe('lodsb', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.lodsb();
-      }).toThrowError(FeatureNotImplementedException);
+    test('lodsb increment', () => {
+      // 0x2345 * 0x10 + 0x5678
+      cpu.mem8[0x28AC8] = 0x12;
+      cpu.reg16[regDS] = 0x2345;
+      cpu.reg16[regSI] = 0x5678;
+      cpu.reg16[regFlags] = 0b0000010000000000;
+      cpu.mem8[0x00FF] = 0xAC;
+      cpu.decode();
+      oper.lodsb();
+
+      expect(cpu.reg8[regAL]).toBe(0x12);
+      expect(cpu.reg16[regSI]).toBe(0x5679);
+    });
+    test('lodsb decrement', () => {
+      // 0x2345 * 0x10 + 0x5678
+      cpu.mem8[0x28AC8] = 0x12;
+      cpu.reg16[regDS] = 0x2345;
+      cpu.reg16[regSI] = 0x5678;
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.mem8[0x00FF] = 0xAC;
+      cpu.decode();
+      oper.lodsb();
+
+      expect(cpu.reg8[regAL]).toBe(0x12);
+      expect(cpu.reg16[regSI]).toBe(0x5677);
     });
   });
 
   describe('lodsw', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.lodsw();
-      }).toThrowError(FeatureNotImplementedException);
+    test('lodsw increment', () => {
+      // 0x2345 * 0x10 + 0x5678
+      cpu.mem8[0x28AC8] = 0x34;
+      cpu.mem8[0x28AC9] = 0x12;
+      cpu.reg16[regDS] = 0x2345;
+      cpu.reg16[regSI] = 0x5678;
+      cpu.reg16[regFlags] = 0b0000010000000000;
+      cpu.mem8[0x00FF] = 0xAD;
+      cpu.decode();
+      oper.lodsw();
+
+      expect(cpu.reg16[regAX]).toBe(0x1234);
+      expect(cpu.reg16[regSI]).toBe(0x567A);
+    });
+    test('lodsw decrement', () => {
+      // 0x2345 * 0x10 + 0x5678
+      cpu.mem8[0x28AC8] = 0x34;
+      cpu.mem8[0x28AC9] = 0x12;
+      cpu.reg16[regDS] = 0x2345;
+      cpu.reg16[regSI] = 0x5678;
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.mem8[0x00FF] = 0xAD;
+      cpu.decode();
+      oper.lodsw();
+
+      expect(cpu.reg16[regAX]).toBe(0x1234);
+      expect(cpu.reg16[regSI]).toBe(0x5676);
     });
   });
 
@@ -2555,18 +2599,62 @@ describe('Operation methods', () => {
   });
 
   describe('stosb', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.stosb();
-      }).toThrowError(FeatureNotImplementedException);
+    test('stosb increment', () => {
+      cpu.reg8[regAL] = 0x12;
+      cpu.reg16[regES] = 0x2345;
+      cpu.reg16[regDI] = 0x5678;
+      cpu.reg16[regFlags] = 0b0000010000000000;
+      cpu.mem8[0x00FF] = 0xAA;
+      cpu.decode();
+      oper.stosb();
+
+      // 0x2345 * 0x10 + 0x5678
+      expect(cpu.mem8[0x28AC8]).toBe(0x12);
+      expect(cpu.reg16[regDI]).toBe(0x5679);
+    });
+    test('stosb decrement', () => {
+      cpu.reg8[regAL] = 0x12;
+      cpu.reg16[regES] = 0x2345;
+      cpu.reg16[regDI] = 0x5678;
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.mem8[0x00FF] = 0xAA;
+      cpu.decode();
+      oper.stosb();
+
+      // 0x2345 * 0x10 + 0x5678
+      expect(cpu.mem8[0x28AC8]).toBe(0x12);
+      expect(cpu.reg16[regDI]).toBe(0x5677);
     });
   });
 
   describe('stosw', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.stosw();
-      }).toThrowError(FeatureNotImplementedException);
+    test('stosw increment', () => {
+      cpu.reg16[regAX] = 0x1234;
+      cpu.reg16[regES] = 0x2345;
+      cpu.reg16[regDI] = 0x5678;
+      cpu.reg16[regFlags] = 0b0000010000000000;
+      cpu.mem8[0x00FF] = 0xAB;
+      cpu.decode();
+      oper.stosw();
+
+      // 0x2345 * 0x10 + 0x5678
+      expect(cpu.mem8[0x28AC8]).toBe(0x34);
+      expect(cpu.mem8[0x28AC9]).toBe(0x12);
+      expect(cpu.reg16[regDI]).toBe(0x567A);
+    });
+    test('stosw decrement', () => {
+      cpu.reg16[regAX] = 0x1234;
+      cpu.reg16[regES] = 0x2345;
+      cpu.reg16[regDI] = 0x5678;
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.mem8[0x00FF] = 0xAB;
+      cpu.decode();
+      oper.stosw();
+
+      // 0x2345 * 0x10 + 0x5678
+      expect(cpu.mem8[0x28AC8]).toBe(0x34);
+      expect(cpu.mem8[0x28AC9]).toBe(0x12);
+      expect(cpu.reg16[regDI]).toBe(0x5676);
     });
   });
 

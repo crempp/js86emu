@@ -103,8 +103,8 @@ String 2-40
 	  MOVSB/MOVSW
 	  CMPS
 	  SCAS
-	  LODS
-	  STOS
+	√ LODS
+	√ STOS
 
 Program Transfer 2-43
 ---------------------
