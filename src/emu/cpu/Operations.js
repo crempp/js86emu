@@ -381,12 +381,98 @@ export default class Operations {
     return result;
   }
 
+  /**
+   * CMPS(Compare String) subtracts the destination byte or word (addressed by
+   * DI) from the source byte or word (addressed by SI). CMPS affects the
+   * flags but does not alter either operand, updates SI and DI to point to the
+   * next string element and updates AF, CF, OF, PF, SF and ZF to reflect the
+   * relationship of the destination element to the source element. For
+   * example, if a JG (Jump if Greater) instruction follows CMPS, the jump is
+   * taken if the destination element is greater than the source element. If
+   * CMPS is prefixed with REPE or REPZ, the operation is interpreted as
+   * "compare while not end-of-string (CX not zero) and strings are equal
+   * (ZF = 1)." If CMPS is preceded by REPNE or REPNZ, the operation is
+   * interpreted as "compare while not end-of-string (CX not zero) and strings
+   * are not equal (ZF = 0)." Thus, CMPS can be used to find matching or
+   * differing string elements.
+   *   - [1] p.2-42
+   *
+   * Compares byte at address DS:(E)SI with byte at address ES:(E)DI and sets
+   * the status flags accordingly
+   *   - [3] p.3-87
+   *
+   * Modifies flags: AF, CF, OF, PF, SF, ZF
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   cmpsb (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let dstAddr = seg2abs(this.cpu.reg16[regES], this.cpu.reg16[regDI], this.cpu);
+    let srcAddr = seg2abs(this.cpu.reg16[regDS], this.cpu.reg16[regSI], this.cpu);
+    let dstVal = this.cpu.mem8[dstAddr];
+    let srcVal = this.cpu.mem8[srcAddr];
+    let result = srcVal - dstVal;
+
+    result = this.correctUnderflow(result);
+
+    this.flagSub(srcVal, dstVal, result);
+
+    if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
+      this.cpu.reg16[regDI] += 1;
+      this.cpu.reg16[regSI] += 1;
+    }
+    else {
+      this.cpu.reg16[regDI] -= 1;
+      this.cpu.reg16[regSI] -= 1;
+    }
   }
+
+  /**
+   * CMPS(Compare String) subtracts the destination byte or word (addressed by
+   * DI) from the source byte or word (addressed by SI). CMPS affects the
+   * flags but does not alter either operand, updates SI and DI to point to the
+   * next string element and updates AF, CF, OF, PF, SF and ZF to reflect the
+   * relationship of the destination element to the source element. For
+   * example, if a JG (Jump if Greater) instruction follows CMPS, the jump is
+   * taken if the destination element is greater than the source element. If
+   * CMPS is prefixed with REPE or REPZ, the operation is interpreted as
+   * "compare while not end-of-string (CX not zero) and strings are equal
+   * (ZF = 1)." If CMPS is preceded by REPNE or REPNZ, the operation is
+   * interpreted as "compare while not end-of-string (CX not zero) and strings
+   * are not equal (ZF = 0)." Thus, CMPS can be used to find matching or
+   * differing string elements.
+   *   - [1] p.2-42
+   *
+   * Compares byte at address DS:(E)SI with byte at address ES:(E)DI and sets
+   * the status flags accordingly
+   *   - [3] p.3-87
+   *
+   * Modifies flags: AF, CF, OF, PF, SF, ZF
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   cmpsw (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let dstAddr = seg2abs(this.cpu.reg16[regES], this.cpu.reg16[regDI], this.cpu);
+    let srcAddr = seg2abs(this.cpu.reg16[regDS], this.cpu.reg16[regSI], this.cpu);
+    let dstVal = this.cpu.mem8[dstAddr + 1] << 8 | this.cpu.mem8[dstAddr];
+    let srcVal = this.cpu.mem8[srcAddr + 1] << 8 | this.cpu.mem8[srcAddr];
+    let result = srcVal - dstVal;
+
+    result = this.correctUnderflow(result);
+
+    this.flagSub(srcVal, dstVal, result);
+
+    if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
+      this.cpu.reg16[regDI] += 2;
+      this.cpu.reg16[regSI] += 2;
+    }
+    else {
+      this.cpu.reg16[regDI] -= 2;
+      this.cpu.reg16[regSI] -= 2;
+    }
   }
+
   cs (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -2750,11 +2836,15 @@ export default class Operations {
    * multibyte (e.g., 32-bit, 64-bit) addition and subtraction.
    *   - [1] p.2-35
    *
+   * @param {number} v1 Destination operand
+   * @param {number} v2 Source operand
    * @param {number} result Result of the operation to set the flag for
+   * @param {boolean} sub Is the operation subtraction? Otherwise it's addition.
    */
-  setCF_FLAG (result) {
+  setCF_FLAG (v1, v2, result, sub=false) {
     let size = this.cpu.opcode.addrSize;
-    if (result & (size === b ? 0xFF00 : 0xFFFF0000)) {
+
+    if ((sub && v1 < v2) || (result & (size === b ? 0xFF00 : 0xFFFF0000))) {
       this.cpu.reg16[regFlags] |= FLAG_CF_MASK
     } else {
       this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
@@ -2836,7 +2926,7 @@ export default class Operations {
   flagAdd (v1, v2, result) {
     let size = this.cpu.opcode.addrSize;
     let clampedResult = result & (size === b ? 0xFF : 0xFFFF);
-    this.setCF_FLAG(result);
+    this.setCF_FLAG(v1, v2, result);
     this.setPF_FLAG(clampedResult);
     this.setAF_Flag(v1, v2, result);
     this.setZF_FLAG(clampedResult);
@@ -2852,7 +2942,7 @@ export default class Operations {
    * @param {number} result Subtraction result
    */
   flagSub (v1, v2, result) {
-    this.setCF_FLAG(v1 - v2);
+    this.setCF_FLAG(v1, v2, result, true);
     this.setPF_FLAG(result);
     this.setAF_Flag(v1, v2, result);
     this.setZF_FLAG(result);

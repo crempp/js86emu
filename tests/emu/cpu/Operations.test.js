@@ -607,18 +607,97 @@ describe('Operation methods', () => {
   });
 
   describe('cmpsb', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.cmpsb();
-      }).toThrowError(FeatureNotImplementedException);
+    beforeEach(() => {
+      cpu.mem8[0x00FF] = 0xAF;
+      // ES:DI = 0x1234 * 0x10 + 0x3456 = 0x15796
+      cpu.reg16[regES] = 0x1234;
+      cpu.reg16[regDI] = 0x3456;
+      cpu.mem8[0x15796] = 0x89;
+      cpu.mem8[0x15797] = 0x67;
+      // DS:SI = 0x2345 * 0x10 + 0x4567 = 0x279B7
+      cpu.reg16[regDS] = 0x2345;
+      cpu.reg16[regSI] = 0x4567;
+      cpu.mem8[0x279B7] = 0x78;
+      cpu.mem8[0x279B8] = 0x56;
+      cpu.instIPInc = 1;
     });
+    test('cmpsb increment', () => {
+      cpu.reg16[regFlags] = 0b0000010000000000;
+      cpu.decode();
+      oper.cmpsb();
+
+      // 0x78 - 0x89 = 0xEF (-17)
+      expect(cpu.reg16[regDI]).toBe(0x3457);
+      expect(cpu.reg16[regSI]).toBe(0x4568);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+    test('cmpsb decrement', () => {
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.cmpsb();
+
+      // 0x78 - 0x89 = 0xEF (-17)
+      expect(cpu.reg16[regDI]).toBe(0x3455);
+      expect(cpu.reg16[regSI]).toBe(0x4566);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    })
   });
 
   describe('cmpsw', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.cmpsw();
-      }).toThrowError(FeatureNotImplementedException);
+    beforeEach(() => {
+      cpu.mem8[0x00FF] = 0xAF;
+      // ES:DI = 0x1234 * 0x10 + 0x3456 = 0x15796
+      cpu.reg16[regES] = 0x1234;
+      cpu.reg16[regDI] = 0x3456;
+      cpu.mem8[0x15796] = 0x89;
+      cpu.mem8[0x15797] = 0x67;
+      // DS:SI = 0x2345 * 0x10 + 0x4567 = 0x279B7
+      cpu.reg16[regDS] = 0x2345;
+      cpu.reg16[regSI] = 0x4567;
+      cpu.mem8[0x279B7] = 0x78;
+      cpu.mem8[0x279B8] = 0x56;
+      cpu.instIPInc = 1;
+    });
+    test('cmpsw increment', () => {
+      cpu.reg16[regFlags] = 0b0000010000000000;
+      cpu.decode();
+      oper.cmpsw();
+
+      // 0x5678 - 0x6789 = 0xEEEF (-4369)
+      // 0x78 - 0x89 = 0xEF (-17)
+      expect(cpu.reg16[regDI]).toBe(0x3458);
+      expect(cpu.reg16[regSI]).toBe(0x4569);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+    test('cmpsw decrement', () => {
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.cmpsw();
+
+      // 0x5678 - 0x6789 = 0xEEEF (-4369)
+      expect(cpu.reg16[regDI]).toBe(0x3454);
+      expect(cpu.reg16[regSI]).toBe(0x4565);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
   });
 
