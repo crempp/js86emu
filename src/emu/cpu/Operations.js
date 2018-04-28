@@ -124,7 +124,6 @@ export default class Operations {
     result = this.correctOverflow(result);
 
     dst(segment, dstAddr, result);
-    return result;
   }
 
   /**
@@ -156,7 +155,6 @@ export default class Operations {
     result = this.correctOverflow(result);
 
     dst(segment, dstAddr, result);
-    return result;
   };
 
   /**
@@ -231,7 +229,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
-   * @return {boolean} True if the jump was made, false otherwise
    */
   call (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -362,7 +359,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
-   * @return {number} Result of the operation
    */
   cmp (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -377,8 +373,6 @@ export default class Operations {
     result = this.correctUnderflow(result);
 
     this.flagSub(dstVal, srcVal, result);
-
-    return result;
   }
 
   /**
@@ -407,8 +401,8 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   cmpsb (dst, src) {
-    let dstAddr = seg2abs(this.cpu.reg16[regES], this.cpu.reg16[regDI], this.cpu);
-    let srcAddr = seg2abs(this.cpu.reg16[regDS], this.cpu.reg16[regSI], this.cpu);
+    let dstAddr = seg2abs(this.cpu.reg16[regES], this.cpu.reg16[regDI]);
+    let srcAddr = seg2abs(this.cpu.reg16[regDS], this.cpu.reg16[regSI]);
     let dstVal = this.cpu.mem8[dstAddr];
     let srcVal = this.cpu.mem8[srcAddr];
     let result = srcVal - dstVal;
@@ -453,8 +447,8 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   cmpsw (dst, src) {
-    let dstAddr = seg2abs(this.cpu.reg16[regES], this.cpu.reg16[regDI], this.cpu);
-    let srcAddr = seg2abs(this.cpu.reg16[regDS], this.cpu.reg16[regSI], this.cpu);
+    let dstAddr = seg2abs(this.cpu.reg16[regES], this.cpu.reg16[regDI]);
+    let srcAddr = seg2abs(this.cpu.reg16[regDS], this.cpu.reg16[regSI]);
     let dstVal = this.cpu.mem8[dstAddr + 1] << 8 | this.cpu.mem8[dstAddr];
     let srcVal = this.cpu.mem8[srcAddr + 1] << 8 | this.cpu.mem8[srcAddr];
     let result = srcVal - dstVal;
@@ -536,7 +530,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
-   * @return {number} Result of the operation
    */
   dec (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -550,7 +543,6 @@ export default class Operations {
     this.flagSub(dstVal, srcVal, result);
 
     dst(segment, dstAddr, result);
-    return result;
   }
 
   /**
@@ -739,7 +731,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
-   * @return {boolean} True if the jump was made, false otherwise
    */
   ja (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -749,10 +740,6 @@ export default class Operations {
          (this.cpu.reg16[regFlags] & FLAG_CF_MASK) === 0)
     {
       this.cpu.reg16[regIP] = dst(segment, dstAddr);
-      return true;
-    }
-    else {
-      return false;
     }
   }
 
@@ -778,7 +765,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
-   * @return {boolean} True if the jump was made, false otherwise
    */
   jb (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -786,10 +772,6 @@ export default class Operations {
 
     if ((this.cpu.reg16[regFlags] & FLAG_CF_MASK) > 0) {
       this.cpu.reg16[regIP] = dst(segment, dstAddr);
-      return true;
-    }
-    else {
-      return false;
     }
   }
 
@@ -815,7 +797,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
-   * @return {boolean} True if the jump was made, false otherwise
    */
   jbe (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -825,10 +806,6 @@ export default class Operations {
          (this.cpu.reg16[regFlags] & FLAG_CF_MASK) > 0)
     {
       this.cpu.reg16[regIP] = dst(segment, dstAddr);
-      return true;
-    }
-    else {
-      return false;
     }
   }
 
@@ -843,7 +820,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
-   * @return {boolean} True if the jump was made, false otherwise
    */
   jcxz (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -851,10 +827,6 @@ export default class Operations {
 
     if ( this.cpu.reg16[regCX] === 0) {
       this.cpu.reg16[regIP] = dst(segment, dstAddr);
-      return true;
-    }
-    else {
-      return false;
     }
   }
 
@@ -880,7 +852,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
-   * @return {boolean} True if the jump was made, false otherwise
    */
   jg (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -890,10 +861,6 @@ export default class Operations {
          (this.cpu.reg16[regFlags] & FLAG_ZF_MASK) === 0)
     {
       this.cpu.reg16[regIP] = dst(segment, dstAddr);
-      return true;
-    }
-    else {
-      return false;
     }
   }
 
@@ -919,7 +886,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
-   * @return {boolean} True if the jump was made, false otherwise
    */
   jge (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -929,10 +895,6 @@ export default class Operations {
         ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) >> 11) === 0)
     {
       this.cpu.reg16[regIP] = dst(segment, dstAddr);
-      return true;
-    }
-    else {
-      return false;
     }
   }
 
@@ -958,7 +920,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
-   * @return {boolean} True if the jump was made, false otherwise
    */
   jl (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -968,10 +929,6 @@ export default class Operations {
         ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) >> 11) === 1)
     {
       this.cpu.reg16[regIP] = dst(segment, dstAddr);
-      return true;
-    }
-    else {
-      return false;
     }
   }
 
@@ -997,7 +954,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
-   * @return {boolean} True if the jump was made, false otherwise
    */
   jle (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -1007,10 +963,6 @@ export default class Operations {
         (this.cpu.reg16[regFlags] & FLAG_ZF_MASK) > 0)
     {
       this.cpu.reg16[regIP] = dst(segment, dstAddr);
-      return true;
-    }
-    else {
-      return false;
     }
   }
 
@@ -1047,7 +999,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
-   * @return {boolean} True
    */
   jmp (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -1075,7 +1026,6 @@ export default class Operations {
         }
         break;
     }
-    return true;
   }
 
   /**
@@ -1100,7 +1050,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
-   * @return {boolean} True if the jump was made, false otherwise
    */
   jnb (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -1108,10 +1057,6 @@ export default class Operations {
 
     if ((this.cpu.reg16[regFlags] & FLAG_CF_MASK) === 0) {
       this.cpu.reg16[regIP] = dst(segment, dstAddr);
-      return true;
-    }
-    else {
-      return false;
     }
   }
 
@@ -1137,7 +1082,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
-   * @return {boolean} True if the jump was made, false otherwise
    */
   jno (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -1145,10 +1089,6 @@ export default class Operations {
 
     if ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) === 0) {
       this.cpu.reg16[regIP] = dst(segment, dstAddr);
-      return true;
-    }
-    else {
-      return false;
     }
   }
 
@@ -1174,7 +1114,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
-   * @return {boolean} True if the jump was made, false otherwise
    */
   jns (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -1182,10 +1121,6 @@ export default class Operations {
 
     if ((this.cpu.reg16[regFlags] & FLAG_SF_MASK) === 0) {
       this.cpu.reg16[regIP] = dst(segment, dstAddr);
-      return true;
-    }
-    else {
-      return false;
     }
   }
 
@@ -1211,7 +1146,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
-   * @return {boolean} True if the jump was made, false otherwise
    */
   jnz (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -1219,10 +1153,6 @@ export default class Operations {
 
     if ((this.cpu.reg16[regFlags] & FLAG_ZF_MASK) === 0) {
       this.cpu.reg16[regIP] = dst(segment, dstAddr);
-      return true;
-    }
-    else {
-      return false;
     }
   }
 
@@ -1248,7 +1178,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
-   * @return {boolean} True if the jump was made, false otherwise
    */
   jo (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -1256,10 +1185,6 @@ export default class Operations {
 
     if ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) > 0) {
       this.cpu.reg16[regIP] = dst(segment, dstAddr);
-      return true;
-    }
-    else {
-      return false;
     }
   }
 
@@ -1285,7 +1210,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
-   * @return {boolean} True if the jump was made, false otherwise
    */
   jpe (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -1293,10 +1217,6 @@ export default class Operations {
 
     if ((this.cpu.reg16[regFlags] & FLAG_PF_MASK) > 0) {
       this.cpu.reg16[regIP] = dst(segment, dstAddr);
-      return true;
-    }
-    else {
-      return false;
     }
   }
 
@@ -1322,7 +1242,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
-   * @return {boolean} True if the jump was made, false otherwise
    */
   jpo (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -1330,10 +1249,6 @@ export default class Operations {
 
     if ((this.cpu.reg16[regFlags] & FLAG_PF_MASK) === 0) {
       this.cpu.reg16[regIP] = dst(segment, dstAddr);
-      return true;
-    }
-    else {
-      return false;
     }
   }
 
@@ -1359,7 +1274,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
-   * @return {boolean} True if the jump was made, false otherwise
    */
   js (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -1367,10 +1281,6 @@ export default class Operations {
 
     if ((this.cpu.reg16[regFlags] & FLAG_SF_MASK) > 0) {
       this.cpu.reg16[regIP] = dst(segment, dstAddr);
-      return true;
-    }
-    else {
-      return false;
     }
   }
 
@@ -1396,7 +1306,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
-   * @return {boolean} True if the jump was made, false otherwise
    */
   jz (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -1404,10 +1313,6 @@ export default class Operations {
 
     if ((this.cpu.reg16[regFlags] & FLAG_ZF_MASK) > 0) {
       this.cpu.reg16[regIP] = dst(segment, dstAddr);
-      return true;
-    }
-    else {
-      return false;
     }
   }
 
@@ -1479,7 +1384,7 @@ export default class Operations {
     let srcAddr = src(segment);
     let srcVal = src(segment, srcAddr);
 
-    return dst(segment, dstAddr, srcVal);
+    dst(segment, dstAddr, srcVal);
   }
 
   /**
@@ -1532,7 +1437,7 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   lodsb (dst, src) {
-    let addr = seg2abs(this.cpu.reg16[regDS], this.cpu.reg16[regSI], this.cpu);
+    let addr = seg2abs(this.cpu.reg16[regDS], this.cpu.reg16[regSI]);
     this.cpu.reg8[regAL] = this.cpu.mem8[addr];
 
     if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
@@ -1562,7 +1467,7 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   lodsw (dst, src) {
-    let addr = seg2abs(this.cpu.reg16[regDS], this.cpu.reg16[regSI], this.cpu);
+    let addr = seg2abs(this.cpu.reg16[regDS], this.cpu.reg16[regSI]);
     this.cpu.reg16[regAX] = this.cpu.mem8[addr + 1] << 8 | this.cpu.mem8[addr];
 
     if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
@@ -1584,7 +1489,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
-   * @return {boolean} True if the jump was made, false otherwise
    */
   loopnz (dst, src) {
     this.cpu.reg16[regCX] -= 1;
@@ -1597,9 +1501,7 @@ export default class Operations {
       ((this.cpu.reg16[regFlags] & FLAG_ZF_MASK) === 0))
     {
       this.cpu.reg16[regIP] = dstVal;
-      return true;
     }
-    return false;
   }
 
   /**
@@ -1614,7 +1516,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
-   * @return {boolean} True if the jump was made, false otherwise
    */
   loopz (dst, src) {
     this.cpu.reg16[regCX] -= 1;
@@ -1627,9 +1528,7 @@ export default class Operations {
       ((this.cpu.reg16[regFlags] & FLAG_ZF_MASK) > 0))
     {
       this.cpu.reg16[regIP] = dstVal;
-      return true;
     }
-    return false;
   }
 
   /**
@@ -1641,7 +1540,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
-   * @return {boolean} True if the jump was made, false otherwise
    */
   loop (dst, src) {
     this.cpu.reg16[regCX] -= 1;
@@ -1652,9 +1550,7 @@ export default class Operations {
 
     if (this.cpu.reg16[regCX] !== 0) {
       this.cpu.reg16[regIP] = dstVal;
-      return true;
     }
-    return false;
   }
 
   /**
@@ -1666,7 +1562,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
-   * @return {number} Result of the operation
    */
   mov (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -1676,12 +1571,34 @@ export default class Operations {
     dst(segment, dstAddr, srcVal);
   }
 
-  movb (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
-  }
+  /**
+   * MOVS (Move String) transfers a byte or a word from the source string
+   * (addressed by SI) to the destination string (addressed by DI) and updates
+   * SI and DI to point to the next string element. When used in conjunction
+   * with REP, MOYS performs a memory-to-memory block transfer.
+   *    - [1] p.2-42
+   *
+   * Modifies flags: NONE
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   movsb (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
+  /**
+   * MOVS (Move String) transfers a byte or a word from the source string
+   * (addressed by SI) to the destination string (addressed by DI) and updates
+   * SI and DI to point to the next string element. When used in conjunction
+   * with REP, MOYS performs a memory-to-memory block transfer.
+   *    - [1] p.2-42
+   *
+   * Modifies flags: NONE
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   movsw (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -1722,7 +1639,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
-   * @return {number} Result of the operation
    */
   neg (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -1744,7 +1660,6 @@ export default class Operations {
     }
 
     dst(segment, dstAddr, result);
-    return result;
   }
 
   /**
@@ -2279,7 +2194,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
-   * @return {number} Result of the operation
    */
   sbb (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -2297,7 +2211,6 @@ export default class Operations {
     this.flagSub(dstVal, srcVal, result);
 
     dst(segment, dstAddr, result);
-    return result;
   }
 
   /**
@@ -2321,7 +2234,7 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   scasb (dst, src) {
-    let addr = seg2abs(this.cpu.reg16[regES], this.cpu.reg16[regDI], this.cpu);
+    let addr = seg2abs(this.cpu.reg16[regES], this.cpu.reg16[regDI]);
     let dstVal = this.cpu.mem8[addr];
     let srcVal = this.cpu.reg8[regAL];
     let result = srcVal - dstVal;
@@ -2359,8 +2272,8 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   scasw (dst, src) {
-    let addr = seg2abs(this.cpu.reg16[regES], this.cpu.reg16[regDI], this.cpu);
-    let dstVal = this.cpu.mem8[addr + 1] << 8 | this.cpu.mem8[addr];;
+    let addr = seg2abs(this.cpu.reg16[regES], this.cpu.reg16[regDI]);
+    let dstVal = this.cpu.mem8[addr + 1] << 8 | this.cpu.mem8[addr];
     let srcVal = this.cpu.reg16[regAX];
     let result = srcVal - dstVal;
 
@@ -2543,7 +2456,7 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   stosb (dst, src) {
-    let addr = seg2abs(this.cpu.reg16[regES], this.cpu.reg16[regDI], this.cpu);
+    let addr = seg2abs(this.cpu.reg16[regES], this.cpu.reg16[regDI]);
     this.cpu.mem8[addr] = this.cpu.reg8[regAL];
 
     if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
@@ -2571,7 +2484,7 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   stosw (dst, src) {
-    let addr = seg2abs(this.cpu.reg16[regES], this.cpu.reg16[regDI], this.cpu);
+    let addr = seg2abs(this.cpu.reg16[regES], this.cpu.reg16[regDI]);
     this.cpu.mem8[addr] = (this.cpu.reg16[regAX] & 0x00FF);
     this.cpu.mem8[addr + 1] = (this.cpu.reg16[regAX] >> 8);
 
@@ -2594,7 +2507,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
-   * @return {number} Result of the operation
    */
   sub (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -2612,7 +2524,6 @@ export default class Operations {
     this.flagSub(dstVal, srcVal, result);
 
     dst(segment, dstAddr, result);
-    return result;
   }
 
   /**
@@ -2656,7 +2567,6 @@ export default class Operations {
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
-   * @return {number}
    */
   xchg (dst, src) {
     let segment = this.cpu.reg16[this.cpu.addrSeg];
@@ -2734,8 +2644,8 @@ export default class Operations {
     // Update stack pointer
     this.cpu.reg16[regSP] -= 2;
 
-    this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP], this.cpu)]     = (value & 0x00FF);
-    this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP] + 1, this.cpu)] = (value >> 8);
+    this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP]    )] = (value & 0x00FF);
+    this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP] + 1)] = (value >> 8);
   }
 
   /**
@@ -2746,8 +2656,8 @@ export default class Operations {
    */
   pop16 () {
     // Get the value from the stack
-    let value = this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP] + 1, this.cpu)] << 8 |
-                this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP], this.cpu)];
+    let value = this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP] + 1)] << 8 |
+                this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP]    )];
 
     this.cpu.reg16[regSP] += 2;
 

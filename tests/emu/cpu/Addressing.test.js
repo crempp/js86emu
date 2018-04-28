@@ -53,30 +53,6 @@ describe('Memory access methods', () => {
       cpu.mem8[0x040FF] = 0x12;
       expect(addr.readMem8(cpu.reg16[regSS], 0x00FF)).toBe(0x12);
     });
-
-    test('Memory read with CS segment override is correct', () => {
-      cpu.CS_OVERRIDE = true;
-      cpu.mem8[0x0010F] = 0x12;
-      expect(addr.readMem8(cpu.reg16[regDS], 0x00FF)).toBe(0x12);
-    });
-
-    test('Memory read with DS segment override is correct', () => {
-      cpu.DS_OVERRIDE = true;
-      cpu.mem8[0x002FF] = 0x12;
-      expect(addr.readMem8(cpu.reg16[regCS], 0x00FF)).toBe(0x12);
-    });
-
-    test('Memory read with ES segment override is correct', () => {
-      cpu.ES_OVERRIDE = true;
-      cpu.mem8[0x030FF] = 0x12;
-      expect(addr.readMem8(cpu.reg16[regSS], 0x00FF)).toBe(0x12);
-    });
-
-    test('Memory read with SS segment override is correct', () => {
-      cpu.SS_OVERRIDE = true;
-      cpu.mem8[0x040FF] = 0x12;
-      expect(addr.readMem8(cpu.reg16[regES], 0x00FF)).toBe(0x12);
-    });
   });
 
   describe('readMem16()', () => {
@@ -100,34 +76,6 @@ describe('Memory access methods', () => {
       cpu.mem8[0x04100] = 0x12;
       expect(addr.readMem16(cpu.reg16[regSS], 0x00FF)).toBe(0x1234);
     });
-
-    test('Memory read with CS segment override is correct', () => {
-      cpu.CS_OVERRIDE = true;
-      cpu.mem8[0x0010F] = 0x34;
-      cpu.mem8[0x00110] = 0x12;
-      expect(addr.readMem16(cpu.reg16[regDS], 0x00FF)).toBe(0x1234);
-    });
-
-    test('Memory read with DS segment override is correct', () => {
-      cpu.DS_OVERRIDE = true;
-      cpu.mem8[0x002FF] = 0x34;
-      cpu.mem8[0x00300] = 0x12;
-      expect(addr.readMem16(cpu.reg16[regCS], 0x00FF)).toBe(0x1234);
-    });
-
-    test('Memory read with ES segment override is correct', () => {
-      cpu.ES_OVERRIDE = true;
-      cpu.mem8[0x030FF] = 0x34;
-      cpu.mem8[0x03100] = 0x12;
-      expect(addr.readMem16(cpu.reg16[regSS], 0x00FF)).toBe(0x1234);
-    });
-
-    test('Memory read with SS segment override is correct', () => {
-      cpu.SS_OVERRIDE = true;
-      cpu.mem8[0x040FF] = 0x34;
-      cpu.mem8[0x04100] = 0x12;
-      expect(addr.readMem16(cpu.reg16[regES], 0x00FF)).toBe(0x1234);
-    });
   });
 
   describe('writeMem8()', () => {
@@ -144,30 +92,6 @@ describe('Memory access methods', () => {
       addr.writeMem8(cpu.reg16[regES], 0x00FF, 0x12);
       expect(cpu.mem8[0x030FF]).toBe(0x12);
       addr.writeMem8(cpu.reg16[regSS], 0x00FF, 0x12);
-      expect(cpu.mem8[0x040FF]).toBe(0x12);
-    });
-
-    test('Memory writes with CS segment override is correct', () => {
-      cpu.CS_OVERRIDE = true;
-      addr.writeMem8(cpu.reg16[regDS], 0x00FF, 0x12);
-      expect(cpu.mem8[0x0010F]).toBe(0x12);
-    });
-
-    test('Memory writes with DS segment override is correct', () => {
-      cpu.DS_OVERRIDE = true;
-      addr.writeMem8(cpu.reg16[regCS], 0x00FF, 0x12);
-      expect(cpu.mem8[0x002FF]).toBe(0x12);
-    });
-
-    test('Memory writes with ES segment override is correct', () => {
-      cpu.ES_OVERRIDE = true;
-      addr.writeMem8(cpu.reg16[regSS], 0x00FF, 0x12);
-      expect(cpu.mem8[0x030FF]).toBe(0x12);
-    });
-
-    test('Memory writes with SS segment override is correct', () => {
-      cpu.SS_OVERRIDE = true;
-      addr.writeMem8(cpu.reg16[regES], 0x00FF, 0x12);
       expect(cpu.mem8[0x040FF]).toBe(0x12);
     });
   });
@@ -190,34 +114,6 @@ describe('Memory access methods', () => {
       expect(cpu.mem8[0x030FF]).toBe(0x34);
       expect(cpu.mem8[0x03100]).toBe(0x12);
       addr.writeMem16(cpu.reg16[regSS], 0x00FF, 0x1234);
-      expect(cpu.mem8[0x040FF]).toBe(0x34);
-      expect(cpu.mem8[0x04100]).toBe(0x12);
-    });
-
-    test('Memory writes with CS segment override is correct', () => {
-      cpu.CS_OVERRIDE = true;
-      addr.writeMem16(cpu.reg16[regDS], 0x00FF, 0x1234);
-      expect(cpu.mem8[0x0010F]).toBe(0x34);
-      expect(cpu.mem8[0x00110]).toBe(0x12);
-    });
-
-    test('Memory writes with DS segment override is correct', () => {
-      cpu.DS_OVERRIDE = true;
-      addr.writeMem16(cpu.reg16[regCS], 0x00FF, 0x1234);
-      expect(cpu.mem8[0x002FF]).toBe(0x34);
-      expect(cpu.mem8[0x00300]).toBe(0x12);
-    });
-
-    test('Memory writes with ES segment override is correct', () => {
-      cpu.ES_OVERRIDE = true;
-      addr.writeMem16(cpu.reg16[regSS], 0x00FF, 0x1234);
-      expect(cpu.mem8[0x030FF]).toBe(0x34);
-      expect(cpu.mem8[0x03100]).toBe(0x12);
-    });
-
-    test('Memory writes with SS segment override is correct', () => {
-      cpu.SS_OVERRIDE = true;
-      addr.writeMem16(cpu.reg16[regES], 0x00FF, 0x1234);
       expect(cpu.mem8[0x040FF]).toBe(0x34);
       expect(cpu.mem8[0x04100]).toBe(0x12);
     });
@@ -1476,9 +1372,8 @@ describe('Addressing Modes', () => {
       expect(addr.AX(segment, null)).toBe(0x1234);
     });
     test('write', () => {
-      let result = addr.AX(segment, null, 0xFFFF);
+      addr.AX(segment, null, 0xFFFF);
       expect(cpu.reg16[regAX]).toBe(0xFFFF);
-      expect(result).toBe(0xFFFF);
     });
     test('write overflow throws', () => {
       expect(() => {
@@ -1500,9 +1395,8 @@ describe('Addressing Modes', () => {
       expect(addr.AH(segment, null)).toBe(0x12);
     });
     test('write', () => {
-      let result = addr.AH(segment, null, 0xFF);
+      addr.AH(segment, null, 0xFF);
       expect(cpu.reg8[regAH]).toBe(0xFF);
-      expect(result).toBe(0xFF);
     });
     test('write overflow throws', () => {
       expect(() => {
@@ -1524,9 +1418,8 @@ describe('Addressing Modes', () => {
       expect(addr.AL(segment, null)).toBe(0x34);
     });
     test('write', () => {
-      let result = addr.AL(segment, null, 0xFF);
+      addr.AL(segment, null, 0xFF);
       expect(cpu.reg8[regAL]).toBe(0xFF);
-      expect(result).toBe(0xFF);
     });
     test('write overflow throws', () => {
       expect(() => {
@@ -1548,9 +1441,8 @@ describe('Addressing Modes', () => {
       expect(addr.BX(segment, null)).toBe(0x2345);
     });
     test('write', () => {
-      let result = addr.BX(segment, null, 0xFFFF);
+      addr.BX(segment, null, 0xFFFF);
       expect(cpu.reg16[regBX]).toBe(0xFFFF);
-      expect(result).toBe(0xFFFF);
     });
     test('write overflow throws', () => {
       expect(() => {
@@ -1572,9 +1464,8 @@ describe('Addressing Modes', () => {
       expect(addr.BH(segment, null)).toBe(0x23);
     });
     test('write', () => {
-      let result = addr.BH(segment, null, 0xFF);
+      addr.BH(segment, null, 0xFF);
       expect(cpu.reg8[regBH]).toBe(0xFF);
-      expect(result).toBe(0xFF);
     });
     test('write overflow throws', () => {
       expect(() => {
@@ -1596,9 +1487,8 @@ describe('Addressing Modes', () => {
       expect(addr.BL(segment, null)).toBe(0x45);
     });
     test('write', () => {
-      let result = addr.BL(segment, null, 0xFF);
+      addr.BL(segment, null, 0xFF);
       expect(cpu.reg8[regBL]).toBe(0xFF);
-      expect(result).toBe(0xFF);
     });
     test('write overflow throws', () => {
       expect(() => {
@@ -1620,9 +1510,8 @@ describe('Addressing Modes', () => {
       expect(addr.CX(segment, null)).toBe(0x3456);
     });
     test('write', () => {
-      let result = addr.CX(segment, null, 0xFFFF);
+      addr.CX(segment, null, 0xFFFF);
       expect(cpu.reg16[regCX]).toBe(0xFFFF);
-      expect(result).toBe(0xFFFF);
     });
     test('write overflow throws', () => {
       expect(() => {
@@ -1644,9 +1533,8 @@ describe('Addressing Modes', () => {
       expect(addr.CH(segment, null)).toBe(0x34);
     });
     test('write', () => {
-      let result = addr.CH(segment, null, 0xFF);
+      addr.CH(segment, null, 0xFF);
       expect(cpu.reg8[regCH]).toBe(0xFF);
-      expect(result).toBe(0xFF);
     });
     test('write overflow throws', () => {
       expect(() => {
@@ -1668,9 +1556,8 @@ describe('Addressing Modes', () => {
       expect(addr.CL(segment, null)).toBe(0x56);
     });
     test('write', () => {
-      let result = addr.CL(segment, null, 0xFF);
+      addr.CL(segment, null, 0xFF);
       expect(cpu.reg8[regCL]).toBe(0xFF);
-      expect(result).toBe(0xFF);
     });
     test('write overflow throws', () => {
       expect(() => {
@@ -1693,9 +1580,8 @@ describe('Addressing Modes', () => {
       expect(cpu.instIPInc).toBe(2);
     });
     test('write', () => {
-      let result = addr.DX(segment, null, 0xFFFF);
+      addr.DX(segment, null, 0xFFFF);
       expect(cpu.reg16[regDX]).toBe(0xFFFF);
-      expect(result).toBe(0xFFFF);
     });
     test('write overflow throws', () => {
       expect(() => {
@@ -1717,9 +1603,8 @@ describe('Addressing Modes', () => {
       expect(addr.DH(segment, null)).toBe(0x45);
     });
     test('write', () => {
-      let result = addr.DH(segment, null, 0xFF);
+      addr.DH(segment, null, 0xFF);
       expect(cpu.reg8[regDH]).toBe(0xFF);
-      expect(result).toBe(0xFF);
     });
     test('write overflow throws', () => {
       expect(() => {
@@ -1741,9 +1626,8 @@ describe('Addressing Modes', () => {
       expect(addr.DL(segment, null)).toBe(0x67);
     });
     test('write', () => {
-      let result = addr.DL(segment, null, 0xFF);
+      addr.DL(segment, null, 0xFF);
       expect(cpu.reg8[regDL]).toBe(0xFF);
-      expect(result).toBe(0xFF);
     });
     test('write overflow throws', () => {
       expect(() => {
@@ -1765,9 +1649,8 @@ describe('Addressing Modes', () => {
       expect(addr.SI(segment, null)).toBe(0x5678);
     });
     test('write', () => {
-      let result = addr.SI(segment, null, 0xFFFF);
+      addr.SI(segment, null, 0xFFFF);
       expect(cpu.reg16[regSI]).toBe(0xFFFF);
-      expect(result).toBe(0xFFFF);
     });
     test('write overflow throws', () => {
       expect(() => {
@@ -1789,9 +1672,8 @@ describe('Addressing Modes', () => {
       expect(addr.DI(segment, null)).toBe(0x6789);
     });
     test('write', () => {
-      let result = addr.DI(segment, null, 0xFFFF);
+      addr.DI(segment, null, 0xFFFF);
       expect(cpu.reg16[regDI]).toBe(0xFFFF);
-      expect(result).toBe(0xFFFF);
     });
     test('write overflow throws', () => {
       expect(() => {
@@ -1813,9 +1695,8 @@ describe('Addressing Modes', () => {
       expect(addr.BP(segment, null)).toBe(0x789A);
     });
     test('write', () => {
-      let result = addr.BP(segment, null, 0xFFFF);
+      addr.BP(segment, null, 0xFFFF);
       expect(cpu.reg16[regBP]).toBe(0xFFFF);
-      expect(result).toBe(0xFFFF);
     });
     test('write overflow throws', () => {
       expect(() => {
@@ -1837,9 +1718,8 @@ describe('Addressing Modes', () => {
       expect(addr.SP(segment, null)).toBe(0x89AB);
     });
     test('write', () => {
-      let result = addr.SP(segment, null, 0xFFFF);
+      addr.SP(segment, null, 0xFFFF);
       expect(cpu.reg16[regSP]).toBe(0xFFFF);
-      expect(result).toBe(0xFFFF);
     });
     test('write overflow throws', () => {
       expect(() => {
@@ -1861,9 +1741,8 @@ describe('Addressing Modes', () => {
       expect(addr.CS(segment, null)).toBe(0xABCD);
     });
     test('write', () => {
-      let result = addr.CS(segment, null, 0xFFFF);
+      addr.CS(segment, null, 0xFFFF);
       expect(cpu.reg16[regCS]).toBe(0xFFFF);
-      expect(result).toBe(0xFFFF);
     });
     test('write overflow throws', () => {
       expect(() => {
@@ -1885,9 +1764,8 @@ describe('Addressing Modes', () => {
       expect(addr.DS(segment, null)).toBe(0xBCD0);
     });
     test('write', () => {
-      let result = addr.DS(segment, null, 0xFFFF);
+      addr.DS(segment, null, 0xFFFF);
       expect(cpu.reg16[regDS]).toBe(0xFFFF);
-      expect(result).toBe(0xFFFF);
     });
     test('write overflow throws', () => {
       expect(() => {
@@ -1909,9 +1787,8 @@ describe('Addressing Modes', () => {
       expect(addr.ES(segment, null)).toBe(0xCD01);
     });
     test('write', () => {
-      let result = addr.ES(segment, null, 0xFFFF);
+      addr.ES(segment, null, 0xFFFF);
       expect(cpu.reg16[regES]).toBe(0xFFFF);
-      expect(result).toBe(0xFFFF);
     });
     test('write overflow throws', () => {
       expect(() => {
@@ -1933,9 +1810,8 @@ describe('Addressing Modes', () => {
       expect(addr.SS(segment, null)).toBe(0xD012);
     });
     test('write', () => {
-      let result = addr.SS(segment, null, 0xFFFF);
+      addr.SS(segment, null, 0xFFFF);
       expect(cpu.reg16[regSS]).toBe(0xFFFF);
-      expect(result).toBe(0xFFFF);
     });
     test('write overflow throws', () => {
       expect(() => {

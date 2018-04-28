@@ -12,16 +12,9 @@ import {
  *
  * @param {number} segment Segment register
  * @param {number} offset Offset amount from segment
- * @param {Cpu} cpu Cpu instance to perform conversion for
  * @return {number} Absolute memory address
  */
-export function seg2abs (segment, offset, cpu) {
-  // Handle segment overrides
-  if      (cpu.CS_OVERRIDE) segment = cpu.reg16[regCS];
-  else if (cpu.DS_OVERRIDE) segment = cpu.reg16[regDS];
-  else if (cpu.ES_OVERRIDE) segment = cpu.reg16[regES];
-  else if (cpu.SS_OVERRIDE) segment = cpu.reg16[regSS];
-
+export function seg2abs (segment, offset) {
   return (segment * 0x10) + offset;
 }
 

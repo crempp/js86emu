@@ -85,8 +85,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode returns the same value
-   *   provided.
+   *   the value from the register, in write mode does not return a value
    */
   AX (segment, offset,  value) {
     if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
@@ -101,7 +100,7 @@ export default class Addressing {
     }
     else {
       // Write value to register
-      return this.cpu.reg16[regAX] = value & 0xFFFF
+      this.cpu.reg16[regAX] = value & 0xFFFF
     }
   }
 
@@ -112,8 +111,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode returns the same value
-   *   provided.
+   *   the value from the register, in write mode does not return a value
    */
   AH (segment, offset, value) {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
@@ -128,7 +126,7 @@ export default class Addressing {
     }
     else {
       // Write value to register
-      return this.cpu.reg8[regAH] = value & 0xFF
+      this.cpu.reg8[regAH] = value & 0xFF
     }
   }
 
@@ -139,8 +137,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode returns the same value
-   *   provided.
+   *   the value from the register, in write mode does not return a value
    */
   AL (segment, offset, value) {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
@@ -155,7 +152,7 @@ export default class Addressing {
     }
     else {
       // Write value to register
-      return this.cpu.reg8[regAL] = value & 0xFF
+      this.cpu.reg8[regAL] = value & 0xFF
     }
   }
 
@@ -166,8 +163,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode returns the same value
-   *   provided.
+   *   the value from the register, in write mode does not return a value
    */
   BX (segment, offset, value) {
     if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
@@ -182,7 +178,7 @@ export default class Addressing {
     }
     else {
       // Write value to register
-      return this.cpu.reg16[regBX] = value & 0xFFFF
+      this.cpu.reg16[regBX] = value & 0xFFFF
     }
   }
 
@@ -193,8 +189,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode returns the same value
-   *   provided.
+   *   the value from the register, in write mode does not return a value
    */
   BH (segment, offset, value) {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
@@ -209,7 +204,7 @@ export default class Addressing {
     }
     else {
       // Write value to register
-      return this.cpu.reg8[regBH] = value & 0xFF
+      this.cpu.reg8[regBH] = value & 0xFF
     }
   }
 
@@ -220,8 +215,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode returns the same value
-   *   provided.
+   *   the value from the register, in write mode does not return a value
    */
   BL (segment, offset, value) {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
@@ -236,7 +230,7 @@ export default class Addressing {
     }
     else {
       // Write value to register
-      return this.cpu.reg8[regBL] = value & 0xFF
+      this.cpu.reg8[regBL] = value & 0xFF
     }
   }
 
@@ -247,8 +241,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode returns the same value
-   *   provided.
+   *   the value from the register, in write mode does not return a value
    */
   CX (segment, offset, value) {
     if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
@@ -263,7 +256,7 @@ export default class Addressing {
     }
     else {
       // Write value to register
-      return this.cpu.reg16[regCX] = value & 0xFFFF
+      this.cpu.reg16[regCX] = value & 0xFFFF
     }
   }
 
@@ -274,8 +267,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode returns the same value
-   *   provided.
+   *   the value from the register, in write mode does not return a value
    */
   CH (segment, offset, value) {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
@@ -290,7 +282,7 @@ export default class Addressing {
     }
     else {
       // Write value to register
-      return this.cpu.reg8[regCH] = value & 0xFF
+      this.cpu.reg8[regCH] = value & 0xFF
     }
   }
 
@@ -301,8 +293,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode returns the same value
-   *   provided.
+   *   the value from the register, in write mode does not return a value
    */
   CL (segment, offset, value) {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
@@ -317,7 +308,7 @@ export default class Addressing {
     }
     else {
       // Write value to register
-      return this.cpu.reg8[regCL] = value & 0xFF
+      this.cpu.reg8[regCL] = value & 0xFF
     }
   }
 
@@ -328,8 +319,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode returns the same value
-   *   provided.
+   *   the value from the register, in write mode does not return a value
    */
   DX (segment, offset, value) {
     if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
@@ -344,7 +334,7 @@ export default class Addressing {
     }
     else {
       // Write value to register
-      return this.cpu.reg16[regDX] = value & 0xFFFF
+      this.cpu.reg16[regDX] = value & 0xFFFF
     }
   }
 
@@ -355,8 +345,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode returns the same value
-   *   provided.
+   *   the value from the register, in write mode does not return a value
    */
   DH (segment, offset, value) {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
@@ -371,7 +360,7 @@ export default class Addressing {
     }
     else {
       // Write value to register
-      return this.cpu.reg8[regDH] = value & 0xFF
+      this.cpu.reg8[regDH] = value & 0xFF
     }
   }
 
@@ -382,8 +371,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode returns the same value
-   *   provided.
+   *   the value from the register, in write mode does not return a value
    */
   DL (segment, offset, value) {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
@@ -398,7 +386,7 @@ export default class Addressing {
     }
     else {
       // Write value to register
-      return this.cpu.reg8[regDL] = value & 0xFF
+      this.cpu.reg8[regDL] = value & 0xFF
     }
   }
 
@@ -409,8 +397,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode returns the same value
-   *   provided.
+   *   the value from the register, in write mode does not return a value
    */
   SI (segment, offset, value) {
     if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
@@ -425,7 +412,7 @@ export default class Addressing {
     }
     else {
       // Write value to register
-      return this.cpu.reg16[regSI] = value & 0xFFFF
+      this.cpu.reg16[regSI] = value & 0xFFFF
     }
   }
 
@@ -436,8 +423,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode returns the same value
-   *   provided.
+   *   the value from the register, in write mode does not return a value
    */
   DI (segment, offset, value) {
     if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
@@ -452,7 +438,7 @@ export default class Addressing {
     }
     else {
       // Write value to register
-      return this.cpu.reg16[regDI] = value & 0xFFFF
+      this.cpu.reg16[regDI] = value & 0xFFFF
     }
   }
 
@@ -463,8 +449,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode returns the same value
-   *   provided.
+   *   the value from the register, in write mode does not return a value
    */
   BP (segment, offset, value) {
     if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
@@ -479,7 +464,7 @@ export default class Addressing {
     }
     else {
       // Write value to register
-      return this.cpu.reg16[regBP] = value & 0xFFFF
+      this.cpu.reg16[regBP] = value & 0xFFFF
     }
   }
 
@@ -490,8 +475,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode returns the same value
-   *   provided.
+   *   the value from the register, in write mode does not return a value
    */
   SP (segment, offset, value) {
     if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
@@ -506,7 +490,7 @@ export default class Addressing {
     }
     else {
       // Write value to register
-      return this.cpu.reg16[regSP] = value & 0xFFFF
+      this.cpu.reg16[regSP] = value & 0xFFFF
     }
   }
 
@@ -517,8 +501,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode returns the same value
-   *   provided.
+   *   the value from the register, in write mode does not return a value
    */
   CS (segment, offset, value) {
     if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
@@ -533,7 +516,7 @@ export default class Addressing {
     }
     else {
       // Write value to register
-      return this.cpu.reg16[regCS] = value & 0xFFFF
+      this.cpu.reg16[regCS] = value & 0xFFFF
     }
   }
 
@@ -544,8 +527,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode returns the same value
-   *   provided.
+   *   the value from the register, in write mode does not return a value
    */
   DS (segment, offset, value) {
     if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
@@ -560,7 +542,7 @@ export default class Addressing {
     }
     else {
       // Write value to register
-      return this.cpu.reg16[regDS] = value & 0xFFFF
+      this.cpu.reg16[regDS] = value & 0xFFFF
     }
   }
 
@@ -571,8 +553,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode returns the same value
-   *   provided.
+   *   the value from the register, in write mode does not return a value
    */
   ES (segment, offset, value) {
     if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
@@ -587,7 +568,7 @@ export default class Addressing {
     }
     else {
       // Write value to register
-      return this.cpu.reg16[regES] = value & 0xFFFF
+      this.cpu.reg16[regES] = value & 0xFFFF
     }
   }
 
@@ -599,8 +580,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode returns the same value
-   *   provided.
+   *   the value from the register, in write mode does not return a value
    */
   SS (segment, offset, value) {
     if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
@@ -615,7 +595,7 @@ export default class Addressing {
     }
     else {
       // Write value to register
-      return this.cpu.reg16[regSS] = value & 0xFFFF
+      this.cpu.reg16[regSS] = value & 0xFFFF
     }
   }
 
@@ -651,10 +631,10 @@ export default class Addressing {
     else if (value === undefined) {
       // Read value from calculated address by getting the 32bit far address
       // (segment:offset) from the instruction argument
-      let s = (this.cpu.mem8[seg2abs(segment, offset + 1, this.cpu)] << 8) |
-               this.cpu.mem8[seg2abs(segment, offset,     this.cpu)];
-      let o = (this.cpu.mem8[seg2abs(segment, offset + 3, this.cpu)] << 8) |
-               this.cpu.mem8[seg2abs(segment, offset + 2, this.cpu)];
+      let s = (this.cpu.mem8[seg2abs(segment, offset + 1)] << 8) |
+               this.cpu.mem8[seg2abs(segment, offset    )];
+      let o = (this.cpu.mem8[seg2abs(segment, offset + 3)] << 8) |
+               this.cpu.mem8[seg2abs(segment, offset + 2)];
       return [s, o];
     }
     else {
@@ -693,7 +673,7 @@ export default class Addressing {
     }
     else {
       // Write value to address
-      return this.writeRMReg8(segment, offset, value);
+      this.writeRMReg8(segment, offset, value);
     }
   }
 
@@ -762,7 +742,7 @@ export default class Addressing {
     }
     else {
       // Write value to address
-      return this.writeRMReg16(segment, offset, value);
+      this.writeRMReg16(segment, offset, value);
     }
   }
 
@@ -796,7 +776,7 @@ export default class Addressing {
     }
     else {
       // Write value to address
-      return this.writeRMReg16(segment, offset, value);
+      this.writeRMReg16(segment, offset, value);
     }
   }
 
@@ -811,8 +791,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] Memory offset
    * @param {(number|null)} [value] Value to write (byte)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode returns the same value
-   *   provided.
+   *   the value from the register, in write mode does not return a value
    */
   Gb (segment, offset, value) {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for addressing mode");
@@ -828,7 +807,7 @@ export default class Addressing {
     }
     else {
       // Write value to address
-      return this.writeRegVal(value & 0xFF, false, b);
+      this.writeRegVal(value & 0xFF, false, b);
     }
   }
 
@@ -843,8 +822,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] Memory offset
    * @param {(number|null)} [value] Value to write (word|doubleword)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode returns the same value
-   *   provided.
+   *   the value from the register, in write mode does not return a value
    */
   Gv (segment, offset,  value) {
     if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
@@ -860,7 +838,7 @@ export default class Addressing {
     }
     else {
       // Write value to address
-      return this.writeRegVal(value & 0xFFFF, false, v);
+      this.writeRegVal(value & 0xFFFF, false, v);
     }
   }
 
@@ -1185,12 +1163,12 @@ export default class Addressing {
   writeRMReg8(segment, offset, value) {
     if (this.cpu.opcode.mod === 0b11) {
       // Two register instruction; use REG table
-      return this.writeRegVal(value, true);
+      this.writeRegVal(value, true);
     }
     else {
       // Use R/M Table 1 or 2 for R/M operand
       // let offset = this.calcRMAddr(segment);
-      return this.writeMem8(segment, offset, value);
+      this.writeMem8(segment, offset, value);
     }
   }
 
@@ -1205,12 +1183,12 @@ export default class Addressing {
   writeRMReg16(segment, offset, value) {
     if (this.cpu.opcode.mod === 0b11) {
       // Two register instruction; use REG table
-      return this.writeRegVal(value, true);
+      this.writeRegVal(value, true);
     }
     else {
       // Use R/M Table 1 or 2 for R/M operand
       // let offset = this.calcRMAddr(segment);
-      return this.writeMem16(segment, offset, value);
+      this.writeMem16(segment, offset, value);
     }
   }
 
@@ -1273,8 +1251,8 @@ export default class Addressing {
         // Direct address is always 2 bytes
         //   - yoshicapstonememo.googlecode.com/svn/trunk/4_2_86.pdf
         let ipInc = this.cpu.instIPInc + this.cpu.addrIPInc;
-        addr = (this.cpu.mem8[seg2abs( this.cpu.reg16[regCS], this.cpu.reg16[regIP] + ipInc + 1, this.cpu)] << 8) |
-                this.cpu.mem8[seg2abs( this.cpu.reg16[regCS], this.cpu.reg16[regIP] + ipInc, this.cpu)];
+        addr = (this.cpu.mem8[seg2abs( this.cpu.reg16[regCS], this.cpu.reg16[regIP] + ipInc + 1)] << 8) |
+                this.cpu.mem8[seg2abs( this.cpu.reg16[regCS], this.cpu.reg16[regIP] + ipInc)];
         // if (this.cpu.addrIPInc === 0) this.cpu.addrIPInc += 2;
         this.cpu.addrIPInc += 2;
         break;
@@ -1300,13 +1278,13 @@ export default class Addressing {
 
     switch (this.cpu.opcode.mod) {
       case 0b01: // Use R/M table 2 with 8-bit displacement
-        disp = this.cpu.mem8[seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + ipInc, this.cpu)];
+        disp = this.cpu.mem8[seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + ipInc)];
         this.cpu.addrIPInc += 1;
         break;
       case 0b10: // Use R/M table 2 with 16-bit displacement
         disp = disp ||
-          ((this.cpu.mem8[seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + ipInc + 1, this.cpu)] << 8) |
-            this.cpu.mem8[seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + ipInc, this.cpu)] );
+          ((this.cpu.mem8[seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + ipInc + 1)] << 8) |
+            this.cpu.mem8[seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP] + ipInc    )] );
         // if (this.cpu.addrIPInc === 0) this.cpu.addrIPInc += 2;
         this.cpu.addrIPInc += 2;
     }
@@ -1478,7 +1456,6 @@ export default class Addressing {
         }
         break;
     }
-    return value;
   }
 
   /**
@@ -1489,7 +1466,7 @@ export default class Addressing {
    * @return {number} Value from memory as a byte
    */
   readMem8(segment, offset) {
-    return this.cpu.mem8[seg2abs(segment, offset, this.cpu)];
+    return this.cpu.mem8[seg2abs(segment, offset)];
   }
 
   /**
@@ -1500,8 +1477,8 @@ export default class Addressing {
    * @return {number} Value from memory as a word
    */
   readMem16(segment, offset) {
-    return ((this.cpu.mem8[seg2abs(segment, offset + 1, this.cpu)] << 8) |
-             this.cpu.mem8[seg2abs(segment, offset, this.cpu)]);
+    return ((this.cpu.mem8[seg2abs(segment, offset + 1)] << 8) |
+             this.cpu.mem8[seg2abs(segment, offset    )]);
   }
 
   /**
@@ -1512,10 +1489,10 @@ export default class Addressing {
    * @return {number} Value from memory as a double word
    */
   readMem32(segment, offset) {
-    return ((this.cpu.mem8[seg2abs(segment, offset + 1, this.cpu)] << 24) |
-            (this.cpu.mem8[seg2abs(segment, offset    , this.cpu)] << 16) |
-            (this.cpu.mem8[seg2abs(segment, offset + 3, this.cpu)] << 8) |
-             this.cpu.mem8[seg2abs(segment, offset + 2, this.cpu)]);
+    return ((this.cpu.mem8[seg2abs(segment, offset + 1)] << 24) |
+            (this.cpu.mem8[seg2abs(segment, offset    )] << 16) |
+            (this.cpu.mem8[seg2abs(segment, offset + 3)] << 8) |
+             this.cpu.mem8[seg2abs(segment, offset + 2)]);
   }
 
   /**
@@ -1526,7 +1503,7 @@ export default class Addressing {
    * @param {number} value
    */
   writeMem8(segment, offset, value) {
-    this.cpu.mem8[seg2abs(segment, offset, this.cpu)] = (value & 0x00FF);
+    this.cpu.mem8[seg2abs(segment, offset)] = (value & 0x00FF);
   }
 
   /**
@@ -1537,7 +1514,7 @@ export default class Addressing {
    * @param {number} value
    */
   writeMem16(segment, offset, value) {
-    this.cpu.mem8[seg2abs(segment, offset, this.cpu)] = (value & 0x00FF);
-    this.cpu.mem8[seg2abs(segment, offset + 1, this.cpu)] = (value >> 8 & 0x00FF);
+    this.cpu.mem8[seg2abs(segment, offset    )] = (value & 0x00FF);
+    this.cpu.mem8[seg2abs(segment, offset + 1)] = (value >> 8 & 0x00FF);
   }
 }

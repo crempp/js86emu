@@ -69,7 +69,7 @@ export default class System {
     // Load BIOS
     console.log("Loading BIOS...");
     if (!this.config.programBlob) {
-      let addr = seg2abs(this.biosROMAddress[0], this.biosROMAddress[1], this.cpu)
+      let addr = seg2abs(this.biosROMAddress[0], this.biosROMAddress[1]);
       let biosPath = `${this.config.bios.biosPath}${this.config.bios.file}`;
       let bios = await loadBINAsync(biosPath);
       this.loadMem(bios, addr);

@@ -1,9 +1,9 @@
 ## TODO
 
 1
-* Don't return values from instructions
-* Fix Ep and Mp segments - still need done?
-* Fix seg2abs, it still uses overrides, should use cpu.addrSeg
+* √ Don't return values from instructions
+* √ Fix Ep and Mp segments - still need done?
+* √ Fix seg2abs, it still uses overrides, should use cpu.addrSeg
 * Fix CMP sign extend, it should only happen when
   "If subtrahend is an immediate value it will be sign extended to the length of minuend"
   https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Comparison_Instructions
@@ -12,15 +12,16 @@
 2
 * move to proper instructions for prefixes
 * Fix formatStack()
+* Script to generate fs.json
 
 3
 * Refactor CPU state as a class
-* add register values to CPUConfig (and more?)
+* √ add register values to CPUConfig (and more?)
 
 4
 * Refactor timingCheck
   - Is there a better way to prevent video sync skips
-* Async RendererPNG with createWriteStream
+* √ Async RendererPNG with createWriteStream
 * web workers for graphics rendering
 
 5

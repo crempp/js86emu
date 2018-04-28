@@ -2011,14 +2011,6 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('movb', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.movb();
-      }).toThrowError(FeatureNotImplementedException);
-    });
-  });
-
   describe('movsb', () => {
     test('NOT IMPLEMENTED', () => {
       expect(() => {
