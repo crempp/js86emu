@@ -2499,18 +2499,83 @@ describe('Operation methods', () => {
   });
 
   describe('scasb', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.scasb();
-      }).toThrowError(FeatureNotImplementedException);
+    beforeEach(() => {
+      cpu.mem8[0x00FF] = 0xAE;
+      // 0x2345 * 0x10 + 0x5678
+      cpu.mem8[0x28AC8] = 0x34;
+      cpu.reg8[regAL] = 0x12;
+      cpu.reg16[regES] = 0x2345;
+      cpu.reg16[regDI] = 0x5678;
+      cpu.instIPInc = 1;
+    });
+    test('scasb increment', () => {
+      cpu.reg16[regFlags] = 0b0000010000000000;
+      cpu.decode();
+      oper.scasb();
+
+      // 0x12 - 0x34 = 0xDE (-22)
+      expect(cpu.reg16[regDI]).toBe(0x5679);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+    test('stosb decrement', () => {
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.scasb();
+
+      // 0x12 - 0x34 = 0xDE (-22)
+      expect(cpu.reg16[regDI]).toBe(0x5677);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
   });
 
   describe('scasw', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.scasw();
-      }).toThrowError(FeatureNotImplementedException);
+    beforeEach(() => {
+      cpu.mem8[0x00FF] = 0xAF;
+      // 0x2345 * 0x10 + 0x5678
+      cpu.mem8[0x28AC8] = 0x45;
+      cpu.mem8[0x28AC9] = 0x23;
+      cpu.reg16[regAX] = 0x1234;
+      cpu.reg16[regES] = 0x2345;
+      cpu.reg16[regDI] = 0x5678;
+      cpu.instIPInc = 1;
+    });
+    test('scasw increment', () => {
+      cpu.reg16[regFlags] = 0b0000010000000000;
+      cpu.decode();
+      oper.scasw();
+
+      // 0x1234 - 0x2345 = 0xEEEF (-4369)
+      expect(cpu.reg16[regDI]).toBe(0x567A);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+    test('scasw decrement', () => {
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.scasw();
+
+      // 0x1234 - 0x2345 = 0xEEEF (-4369)
+      expect(cpu.reg16[regDI]).toBe(0x5676);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_PF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
   });
 

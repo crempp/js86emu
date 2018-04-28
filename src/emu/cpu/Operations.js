@@ -2214,11 +2214,80 @@ export default class Operations {
     return result;
   }
 
+  /**
+   * SCAS (Scan String) subtracts the destination string element (byte or word)
+   * addressed by DI from the content of AL (byte string) or AX (word string)
+   * and updates the flags, but does not alter the destination string or the
+   * accumulator. SCAS also updates DI to point to the next string element and
+   * AF, CF, OF, PF, SF and ZF to reflect the relationship of the scan value in
+   * AL/AX to the string element. If SCAS is prefixed with REPE or REPZ, the
+   * operation is interpreted as "scan while not end-of-string (CX not 0) and
+   * string-element = scan-value (ZF = 1)." This form may be used to scan for
+   * departure from a given value. If SCAS is prefixed with REPNE or REPNZ,
+   * the operation is interpreted as "scan while not end-of-string (CX not 0)
+   * and string-element is not equal to scan-value (ZF = 0)." This form may be
+   * used to locate a value in a string.
+   *   - [1] p.2-43
+   *
+   * Modifies flags: AF, CF, OF, PF, SF, ZF
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   scasb (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let addr = seg2abs(this.cpu.reg16[regES], this.cpu.reg16[regDI], this.cpu);
+    let dstVal = this.cpu.mem8[addr];
+    let srcVal = this.cpu.reg8[regAL];
+    let result = srcVal - dstVal;
+
+    result = this.correctUnderflow(result);
+
+    this.flagSub(srcVal, dstVal, result);
+
+    if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
+      this.cpu.reg16[regDI] += 1;
+    }
+    else {
+      this.cpu.reg16[regDI] -= 1;
+    }
   }
+
+  /**
+   * SCAS (Scan String) subtracts the destination string element (byte or word)
+   * addressed by DI from the content of AL (byte string) or AX (word string)
+   * and updates the flags, but does not alter the destination string or the
+   * accumulator. SCAS also updates DI to point to the next string element and
+   * AF, CF, OF, PF, SF and ZF to reflect the relationship of the scan value in
+   * AL/AX to the string element. If SCAS is prefixed with REPE or REPZ, the
+   * operation is interpreted as "scan while not end-of-string (CX not 0) and
+   * string-element = scan-value (ZF = 1)." This form may be used to scan for
+   * departure from a given value. If SCAS is prefixed with REPNE or REPNZ,
+   * the operation is interpreted as "scan while not end-of-string (CX not 0)
+   * and string-element is not equal to scan-value (ZF = 0)." This form may be
+   * used to locate a value in a string.
+   *   - [1] p.2-43
+   *
+   * Modifies flags: AF, CF, OF, PF, SF, ZF
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   scasw (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let addr = seg2abs(this.cpu.reg16[regES], this.cpu.reg16[regDI], this.cpu);
+    let dstVal = this.cpu.mem8[addr + 1] << 8 | this.cpu.mem8[addr];;
+    let srcVal = this.cpu.reg16[regAX];
+    let result = srcVal - dstVal;
+
+    result = this.correctUnderflow(result);
+
+    this.flagSub(srcVal, dstVal, result);
+
+    if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
+      this.cpu.reg16[regDI] += 2;
+    }
+    else {
+      this.cpu.reg16[regDI] -= 2;
+    }
   }
 
   /**

@@ -7,7 +7,7 @@
 import { SystemConfigException } from '../utils/Exceptions';
 
 const DEFAULTS = {
-  memorySize: 64 * 1024,
+  memorySize: 1024 * 1024,
   memory: null,
 
   /** The number of cycles between timing syncs */
@@ -32,7 +32,7 @@ const DEFAULTS = {
   video: {
     class:        'VideoMDA',
     memorySize:   4 * 1024,
-    memoryStart:  0x8000,
+    memoryStart:  0xB8000,
     verticalSync: 50,       // Hertz
   },
 

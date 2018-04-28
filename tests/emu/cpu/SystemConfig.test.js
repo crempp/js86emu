@@ -8,7 +8,7 @@ test('config instantiates', () => {
 
 test('config ignores non-object initial parameter', () => {
   let config = new SystemConfig('asdf');
-  expect(config.memorySize).toEqual(65536)
+  expect(config.memorySize).toEqual(1048576)
 });
 
 test('config ignores initial values that are not accepted', () => {

@@ -102,7 +102,7 @@ String 2-40
 	  MOVS
 	  MOVSB/MOVSW
 	  CMPS
-	  SCAS
+	√ SCAS
 	√ LODS
 	√ STOS
 
@@ -135,7 +135,7 @@ flag
 	√ CLI
 	√ STI
 external sync
-	  HLT
+	- HLT
 	  WAIT
 	  ESC
 	  LOCK

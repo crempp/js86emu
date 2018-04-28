@@ -1,7 +1,7 @@
 import System from "./emu/System";
 import SystemConfig from "./emu/config/SystemConfig";
 
-let sysConfig = new SystemConfig({
+let codeGolfConfig = new SystemConfig({
   memorySize: 1024 * 1024,
 
   cpu: {
@@ -12,15 +12,29 @@ let sysConfig = new SystemConfig({
     class: 'RendererPNG',
   },
 
-  // programBlob: {
-  //   file: "files/program-blobs/codegolf",
-  //   addr: 0x00
-  // },
+  programBlob: {
+    file: "files/program-blobs/codegolf",
+    addr: 0x00
+  },
+
+  video: {
+    memoryStart:  0x8000,
+  },
 
   debug: true,
 });
 
-let system = new System(sysConfig);
+let sysConfig = new SystemConfig({
+  renderer: {
+    class: 'RendererPNG',
+  },
+
+  debug: true,
+});
+
+/*****************************************************************************/
+let config = sysConfig;
+let system = new System(config);
 
 async function runEmulation () {
   console.log("booting...");
@@ -35,7 +49,7 @@ async function runEmulation () {
 
 // This forces console.log to write, without this the process will usually exit
 // with unflushed writes
-if (sysConfig.debug) {
+if (config.debug) {
   process.stdout._handle.setBlocking(true);
 }
 
