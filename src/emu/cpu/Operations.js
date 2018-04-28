@@ -113,15 +113,11 @@ export default class Operations {
     let dstVal = dst(segment, dstAddr);
     let srcVal = src(segment, srcAddr);
 
-    // if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
-    //   srcVal = signExtend(srcVal);
-    //   dstVal = signExtend(dstVal);
-    // }
     let result = dstVal + srcVal + (this.cpu.reg16[regFlags] & FLAG_CF_MASK);
 
     this.flagAdd(dstVal, srcVal, result);
 
-    result = this.correctOverflow(result);
+    result = this.correctAddition(result);
 
     dst(segment, dstAddr, result);
   }
@@ -144,15 +140,11 @@ export default class Operations {
     let dstVal = dst(segment, dstAddr);
     let srcVal = src(segment, srcAddr);
 
-    // if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
-    //   srcVal = signExtend(srcVal);
-    //   dstVal = signExtend(dstVal);
-    // }
     let result = dstVal + srcVal;
 
     this.flagAdd(dstVal, srcVal, result);
 
-    result = this.correctOverflow(result);
+    result = this.correctAddition(result);
 
     dst(segment, dstAddr, result);
   };
@@ -236,22 +228,26 @@ export default class Operations {
     let dstVal = dst(segment, dstAddr);
 
     switch (this.cpu.opcode.opcode_byte) {
-      case 0x9A: // CALL Ap (far)
+      case 0x9A:
+        // CALL Ap (far)
         this.push16(this.cpu.reg16[regCS]);
         this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
         this.cpu.reg16[regCS] = dstVal[0];
         this.cpu.reg16[regIP] = dstVal[1];
         break;
-      case 0xE8: // CALL Jv (near)
+      case 0xE8:
+        // CALL Jv (near)
         this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
         this.cpu.reg16[regIP] = dstVal;
         break;
       case 0xFF:
-        if (this.cpu.opcode.reg === 2) { // 0xFF (2) CALL Ev (near)
+        if (this.cpu.opcode.reg === 2) {
+          // 0xFF (2) CALL Ev (near)
           this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
           this.cpu.reg16[regIP] = dstVal;
         }
-        else if (this.cpu.opcode.reg === 3) { // 0xFF (3) CALL Ep (far)
+        else if (this.cpu.opcode.reg === 3) {
+          // 0xFF (3) CALL Ep (far)
           this.push16(this.cpu.reg16[regCS]);
           this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
           this.cpu.reg16[regCS] = dstVal[0];
@@ -370,7 +366,7 @@ export default class Operations {
       srcVal = signExtend(srcVal);
     }
     let result = dstVal - srcVal;
-    result = this.correctUnderflow(result);
+    result = this.correctSubtraction(result);
 
     this.flagSub(dstVal, srcVal, result);
   }
@@ -407,7 +403,7 @@ export default class Operations {
     let srcVal = this.cpu.mem8[srcAddr];
     let result = srcVal - dstVal;
 
-    result = this.correctUnderflow(result);
+    result = this.correctSubtraction(result);
 
     this.flagSub(srcVal, dstVal, result);
 
@@ -453,7 +449,7 @@ export default class Operations {
     let srcVal = this.cpu.mem8[srcAddr + 1] << 8 | this.cpu.mem8[srcAddr];
     let result = srcVal - dstVal;
 
-    result = this.correctUnderflow(result);
+    result = this.correctSubtraction(result);
 
     this.flagSub(srcVal, dstVal, result);
 
@@ -538,7 +534,7 @@ export default class Operations {
     let srcVal = 1;
 
     let result = dstVal - srcVal;
-    result = this.correctUnderflow(result);
+    result = this.correctSubtraction(result);
 
     this.flagSub(dstVal, srcVal, result);
 
@@ -573,6 +569,7 @@ export default class Operations {
   ds (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
   es (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -689,7 +686,7 @@ export default class Operations {
 
     this.flagAdd(dstVal, srcVal, result);
 
-    result = this.correctOverflow(result);
+    result = this.correctAddition(result);
 
     dst(segment, dstAddr, result);
   }
@@ -697,9 +694,11 @@ export default class Operations {
   int (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
   into (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
   iret (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -1006,21 +1005,26 @@ export default class Operations {
     let oper = dst(segment, dstAddr);
 
     switch (this.cpu.opcode.opcode_byte) {
-      case 0xE9: // JMP Jv (near)
+      case 0xE9:
+        // JMP Jv (near)
         this.cpu.reg16[regIP] = oper;
         break;
-      case 0xEA: // JMP Ap (far)
+      case 0xEA:
+        // JMP Ap (far)
         this.cpu.reg16[regCS] = oper[0];
         this.cpu.reg16[regIP] = oper[1];
         break;
-      case 0xEB: // JMP Jb (short)
+      case 0xEB:
+        // JMP Jb (short)
         this.cpu.reg16[regIP] = oper;
         break;
       case 0xFF:
-        if (this.cpu.opcode.reg === 4) { // JMP Ev (near)
+        if (this.cpu.opcode.reg === 4) {
+          // JMP Ev (near)
           this.cpu.reg16[regIP] = oper;
         }
-        else if (this.cpu.opcode.reg === 5) { // JMP Mp (far)
+        else if (this.cpu.opcode.reg === 5) {
+          // JMP Mp (far)
           this.cpu.reg16[regCS] = oper[0];
           this.cpu.reg16[regIP] = oper[1];
         }
@@ -1671,7 +1675,7 @@ export default class Operations {
     let dstVal = dst(segment, dstAddr);
 
     let result = 0 - dstVal;
-    result = this.correctUnderflow(result);
+    result = this.correctSubtraction(result);
 
     this.flagSub(0, dstVal, result);
 
@@ -1962,6 +1966,7 @@ export default class Operations {
   repnz (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
+
   repz (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -1982,12 +1987,14 @@ export default class Operations {
    */
   ret (dst, src) {
     switch (this.cpu.opcode.opcode_byte) {
-      case 0xC2: // RET Iw
+      case 0xC2:
+        // RET Iw
         let segment = this.cpu.reg16[this.cpu.addrSeg];
         let dstAddr = dst(segment);
         this.cpu.reg16[regIP] = this.pop16() + dst(segment, dstAddr);
         break;
-      case 0xC3: // RET
+      case 0xC3:
+        // RET
         this.cpu.reg16[regIP] = this.pop16();
         break;
     }
@@ -2016,14 +2023,16 @@ export default class Operations {
    */
   retf (dst, src) {
     switch (this.cpu.opcode.opcode_byte) {
-      case 0xCA: // RETF Iw
+      case 0xCA:
+        // RETF Iw
         let segment = this.cpu.reg16[this.cpu.addrSeg];
         let dstAddr = dst(segment);
 
         this.cpu.reg16[regIP] = this.pop16() + dst(segment, dstAddr);
         this.cpu.reg16[regCS] = this.pop16();
         break;
-      case 0xCB: // RETF
+      case 0xCB:
+        // RETF
         this.cpu.reg16[regIP] = this.pop16();
         this.cpu.reg16[regCS] = this.pop16();
         break;
@@ -2227,11 +2236,8 @@ export default class Operations {
     let dstVal = dst(segment, dstAddr);
     let srcVal = src(segment, srcAddr);
 
-    // if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
-    //   srcVal = signExtend(srcVal);
-    // }
     let result = dstVal - srcVal - (this.cpu.reg16[regFlags] & FLAG_CF_MASK);
-    result = this.correctUnderflow(result);
+    result = this.correctSubtraction(result);
 
     this.flagSub(dstVal, srcVal, result);
 
@@ -2264,7 +2270,7 @@ export default class Operations {
     let srcVal = this.cpu.reg8[regAL];
     let result = srcVal - dstVal;
 
-    result = this.correctUnderflow(result);
+    result = this.correctSubtraction(result);
 
     this.flagSub(srcVal, dstVal, result);
 
@@ -2302,7 +2308,7 @@ export default class Operations {
     let srcVal = this.cpu.reg16[regAX];
     let result = srcVal - dstVal;
 
-    result = this.correctUnderflow(result);
+    result = this.correctSubtraction(result);
 
     this.flagSub(srcVal, dstVal, result);
 
@@ -2540,11 +2546,8 @@ export default class Operations {
     let dstVal = dst(segment, dstAddr);
     let srcVal = src(segment, srcAddr);
 
-    // if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
-    //   srcVal = signExtend(srcVal);
-    // }
     let result = dstVal - srcVal;
-    result = this.correctUnderflow(result);
+    result = this.correctSubtraction(result);
 
     this.flagSub(dstVal, srcVal, result);
 
@@ -2666,7 +2669,6 @@ export default class Operations {
    * @param {number} value Word value to push onto the stack
    */
   push16 (value) {
-    // Update stack pointer
     this.cpu.reg16[regSP] -= 2;
 
     this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP]    )] = (value & 0x00FF);
@@ -2680,7 +2682,6 @@ export default class Operations {
    * @return {number} Word value popped off the stack
    */
   pop16 () {
-    // Get the value from the stack
     let value = this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP] + 1)] << 8 |
                 this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP]    )];
 
@@ -2689,21 +2690,33 @@ export default class Operations {
     return value;
   }
 
-
-  correctUnderflow (result) {
-    if (result < 0) {
-      let size = this.cpu.opcode.addrSize;
-      return result + 1 + (size === b ? 0xFF : 0xFFFF);
-    }
-    return result;
-  }
-
-  correctOverflow (result) {
+  /**
+   * Correct for non-binary subtraction. To make things simple we subtract
+   * regular integers using the built-in javascript "-" opererator. This does
+   * not result in a twos-complement result. This method converts a negative
+   * number to twos-complement and clamps any over/underflow.
+   *
+   * @param {number} result The result to correct
+   * @return {number} Corrected result
+   */
+  correctSubtraction (result) {
     let size = this.cpu.opcode.addrSize;
+    if (result < 0) {
+      result = result + 1 + (size === b ? 0xFF : 0xFFFF);
+    }
     return result & (size === b ? 0xFF : 0xFFFF);
   }
 
-  // https://en.wikipedia.org/wiki/FLAGS_register
+  /**
+   * Correct for addition overflow.
+   *
+   * @param {number} result The result to correct
+   * @return {number} Corrected result
+   */
+  correctAddition (result) {
+    let size = this.cpu.opcode.addrSize;
+    return result & (size === b ? 0xFF : 0xFFFF);
+  }
 
   /**
    * PF (parity flag): If the low-order eight bits of an arithmetic or logical

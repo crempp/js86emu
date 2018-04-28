@@ -3067,8 +3067,8 @@ describe('Utility methods', () => {
   });
 
   test.skip('pop16()', () => {});
-  test.skip('correctUnderflow()', () => {});
-  test.skip('correctOverflow()', () => {});
+  test.skip('correctSubtraction()', () => {});
+  test.skip('correctAddition()', () => {});
   test.skip('setPF_FLAG()', () => {});
   test.skip('setSF_FLAG()', () => {});
   test.skip('setZF_FLAG()', () => {});

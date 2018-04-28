@@ -9,8 +9,10 @@
   https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Comparison_Instructions
   IDEA: this only happens for EV Ib addressing combos which have a size set to "v"
         so in Ib check if size is "v", if so sign extend
+
 2
 * move to proper instructions for prefixes
+* catch up on tests
 * Fix formatStack()
 * Script to generate fs.json
 
