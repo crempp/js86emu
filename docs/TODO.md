@@ -100,8 +100,8 @@ rotates
 String 2-40
 -----------
 	  REP/REPE/REPZ/REPNE/REPNZ
-	  MOVS
-	  MOVSB/MOVSW
+	√ MOVS
+	√ MOVSB/MOVSW
 	√ CMPS
 	√ SCAS
 	√ LODS

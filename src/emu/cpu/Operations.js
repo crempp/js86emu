@@ -1584,7 +1584,19 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   movsb (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let dstAddr = seg2abs(this.cpu.reg16[regES], this.cpu.reg16[regDI]);
+    let srcAddr = seg2abs(this.cpu.reg16[regDS], this.cpu.reg16[regSI]);
+
+    this.cpu.mem8[dstAddr] = this.cpu.mem8[srcAddr];
+
+    if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
+      this.cpu.reg16[regDI] += 1;
+      this.cpu.reg16[regSI] += 1;
+    }
+    else {
+      this.cpu.reg16[regDI] -= 1;
+      this.cpu.reg16[regSI] -= 1;
+    }
   }
 
   /**
@@ -1600,7 +1612,20 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   movsw (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let dstAddr = seg2abs(this.cpu.reg16[regES], this.cpu.reg16[regDI]);
+    let srcAddr = seg2abs(this.cpu.reg16[regDS], this.cpu.reg16[regSI]);
+
+    this.cpu.mem8[dstAddr] = this.cpu.mem8[srcAddr];
+    this.cpu.mem8[dstAddr + 1] = this.cpu.mem8[srcAddr + 1];
+
+    if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
+      this.cpu.reg16[regDI] += 2;
+      this.cpu.reg16[regSI] += 2;
+    }
+    else {
+      this.cpu.reg16[regDI] -= 2;
+      this.cpu.reg16[regSI] -= 2;
+    }
   }
 
   /**

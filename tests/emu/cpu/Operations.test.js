@@ -2012,19 +2012,75 @@ describe('Operation methods', () => {
   });
 
   describe('movsb', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.movsb();
-      }).toThrowError(FeatureNotImplementedException);
+    beforeEach(() => {
+      cpu.mem8[0x00FF] = 0xAF;
+      // ES:DI = 0x1234 * 0x10 + 0x3456 = 0x15796
+      cpu.reg16[regES] = 0x1234;
+      cpu.reg16[regDI] = 0x3456;
+      cpu.mem8[0x15796] = 0x89;
+      cpu.mem8[0x15797] = 0x67;
+      // DS:SI = 0x2345 * 0x10 + 0x4567 = 0x279B7
+      cpu.reg16[regDS] = 0x2345;
+      cpu.reg16[regSI] = 0x4567;
+      cpu.mem8[0x279B7] = 0x78;
+      cpu.mem8[0x279B8] = 0x56;
+      cpu.instIPInc = 1;
     });
+    test('movsb increment', () => {
+      cpu.reg16[regFlags] = 0b0000010000000000;
+      cpu.decode();
+      oper.movsb();
+
+      expect(cpu.mem8[0x15796]).toBe(0x78);
+      expect(cpu.reg16[regDI]).toBe(0x3457);
+      expect(cpu.reg16[regSI]).toBe(0x4568);
+    });
+    test('movsb decrement', () => {
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.movsb();
+
+      expect(cpu.mem8[0x15796]).toBe(0x78);
+      expect(cpu.reg16[regDI]).toBe(0x3455);
+      expect(cpu.reg16[regSI]).toBe(0x4566);
+    })
   });
 
   describe('movsw', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.movsw();
-      }).toThrowError(FeatureNotImplementedException);
+    beforeEach(() => {
+      cpu.mem8[0x00FF] = 0xAF;
+      // ES:DI = 0x1234 * 0x10 + 0x3456 = 0x15796
+      cpu.reg16[regES] = 0x1234;
+      cpu.reg16[regDI] = 0x3456;
+      cpu.mem8[0x15796] = 0x89;
+      cpu.mem8[0x15797] = 0x67;
+      // DS:SI = 0x2345 * 0x10 + 0x4567 = 0x279B7
+      cpu.reg16[regDS] = 0x2345;
+      cpu.reg16[regSI] = 0x4567;
+      cpu.mem8[0x279B7] = 0x78;
+      cpu.mem8[0x279B8] = 0x56;
+      cpu.instIPInc = 1;
     });
+    test('movsw increment', () => {
+      cpu.reg16[regFlags] = 0b0000010000000000;
+      cpu.decode();
+      oper.movsw();
+
+      expect(cpu.mem8[0x15796]).toBe(0x78);
+      expect(cpu.mem8[0x15797]).toBe(0x56);
+      expect(cpu.reg16[regDI]).toBe(0x3458);
+      expect(cpu.reg16[regSI]).toBe(0x4569);
+    });
+    test('movsw decrement', () => {
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.decode();
+      oper.movsw();
+
+      expect(cpu.mem8[0x15796]).toBe(0x78);
+      expect(cpu.mem8[0x15797]).toBe(0x56);
+      expect(cpu.reg16[regDI]).toBe(0x3454);
+      expect(cpu.reg16[regSI]).toBe(0x4565);
+    })
   });
 
   describe('mul', () => {
