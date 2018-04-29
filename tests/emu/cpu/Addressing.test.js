@@ -1885,11 +1885,6 @@ describe('Addressing Modes', () => {
   });
 
   describe.skip('Ep', () => {
-    // TODO: Debug these tests. The read is failing because in readMem32 the
-    // the 24bit left shift overflows
-    // 0x90 << 24 | 0x90 << 16 | 0x80 << 8 | 0x80
-    // this is wierd and I don't know why it's happening
-
     beforeEach(() => {
       cpu.mem8[0xB36E3] = 0x90;
       cpu.mem8[0xB36E4] = 0x90;

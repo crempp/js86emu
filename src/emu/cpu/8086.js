@@ -7,13 +7,19 @@ import {
   regSI, regDI, regBP, regSP, regIP,
   regCS, regDS, regES, regSS,
   regFlags,
-  b, w, v, d, u, STATE_HALT,
+  b, w, v, d, u,
+  FLAG_ZF_MASK,
+  STATE_HALT, STATE_REP_NONE, STATE_REP_Z, STATE_REP, STATE_REP_NZ,
 } from '../Constants';
 import {
   hexString16, formatOpcode, formatMemory, formatFlags, formatRegisters,
   formatStack
 } from '../utils/Debug'
 
+/**
+ * @class
+ * @extends CPU
+ */
 export default class CPU8086 extends CPU {
   constructor(config) {
     super();
@@ -35,7 +41,7 @@ export default class CPU8086 extends CPU {
     /**
      *
      */
-    this.repType = null;
+    this.prefixRepeatState = STATE_REP_NONE;
 
     /**
      * Instruction Pointer increment counter. This tracks the amount to
@@ -105,7 +111,7 @@ export default class CPU8086 extends CPU {
         return this.op(this.dst, this.src);
       }
       toString() {
-        return this.opName() + " " + this.dstName() + ", " + this.srcName();
+        return `${this.opName()} ${this.dstName()}, ${this.srcName()}`;
       }
       opName () {
         return typeof this.op === 'function' ? this.op.name.replace("bound ", "") : "[Unknown Op]";
@@ -536,7 +542,6 @@ export default class CPU8086 extends CPU {
     if (this.config.debug) this.opcode.string = this.opcode.inst.toString();
   }
 
-  // TODO: I don't like this. Move this back into operations if possible
   // http://www.c-jump.com/CIS77/CPU/x86/X77_0240_prefix.htm
   prefix () {
     let inst = this.opcode.opcode_byte;
@@ -562,18 +567,6 @@ export default class CPU8086 extends CPU {
         break;
       case 0x36: // SS segment prefix
         this.addrSeg = regSS;
-        this.reg16[regIP] += 1;
-        this.decode();
-        this.opcode.prefix = inst;
-        break;
-      case 0xF3: // REP/REPE/REPZ
-        this.repType = 1;
-        this.reg16[regIP] += 1;
-        this.decode();
-        this.opcode.prefix = inst;
-        break;
-      case 0xF2: // REPNE/REPNZ
-        this.repType = 2;
         this.reg16[regIP] += 1;
         this.decode();
         this.opcode.prefix = inst;
@@ -611,10 +604,38 @@ export default class CPU8086 extends CPU {
     }
 
     // Increase the instIPInc by the instruction base size
-    this.instIPInc += this.opcode.inst.baseSize;
+    if (this.prefixRepeatState === STATE_REP_NONE) {
+      this.instIPInc += this.opcode.inst.baseSize;
+    }
 
     // Run the instruction
     this.opcode.inst.run();
+
+    // If we are in a repeat state and termination conditions are met then
+    // leave the repeat state.
+    //
+    // Repeat Prefix | Term Condition 1 | Term Condition 2
+    // REP           |       CX=0       |       None
+    // REPE/REPZ     |       CX=0       |       ZF=0
+    // REPNE/REPNZ   |       CX=0       |       ZF=1
+    if (
+      // Don't check if we just ran a REP(Z)(NZ)
+      (this.opcode.opcode_byte !== 0xF2 && this.opcode.opcode_byte !== 0xF3) &&
+      (
+        // REP end state
+        (this.prefixRepeatState === STATE_REP && this.reg16[regCX] === 0) ||
+        // REPZ end state
+        (this.prefixRepeatState === STATE_REP_Z &&
+          (this.reg16[regCX] === 0 || (this.reg16[regFlags] & FLAG_ZF_MASK) === 0)) ||
+        // REPNZ end state
+        (this.prefixRepeatState === STATE_REP_NZ &&
+          (this.reg16[regCX] === 0 || (this.reg16[regFlags] & FLAG_ZF_MASK) > 0))
+      )
+    )
+    {
+      this.instIPInc += this.opcode.inst.baseSize;
+      this.prefixRepeatState = STATE_REP_NONE;
+    }
 
     // Move the IP
     this.reg16[regIP] += this.instIPInc + this.addrIPInc;

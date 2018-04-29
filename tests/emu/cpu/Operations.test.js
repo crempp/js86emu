@@ -9,7 +9,8 @@ import {
   regCS, regDS, regES, regSS,
   regFlags,
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
-  FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK, STATE_HALT,
+  FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
+  STATE_HALT, STATE_REP_Z, STATE_REP, STATE_REP_NZ,
 } from '../../../src/emu/Constants';
 import {FeatureNotImplementedException, InvalidAddressModeException, ValueOverflowException} from "../../../src/emu/utils/Exceptions";
 import {
@@ -17,22 +18,6 @@ import {
   formatMemory, formatRegisters
 } from "../../../src/emu/utils/Debug";
 import {seg2abs, segIP} from "../../../src/emu/utils/Utils";
-
-//   7   6   5   4   3   2   1   0
-// +---+---+---+---+---+---+---+---+
-// |     opcode            | d | w |
-// +---+---+---+---+---+---+---+---+
-// +---+---+---+---+---+---+---+---+
-// |  mod  |    reg    |    r/m    |
-// +---+---+---+---+---+---+---+---+
-// console.log(
-//   "INSTRUCTION: " + cpu.opcode.string + "\n" +
-//   "opcode_byte: " + hexString16(cpu.mem8[segIP(cpu)]) + "\n" +
-//   "CS:IP: " + hexString16(cpu.reg16[regCS]) + ":" + hexString16(cpu.reg16[regIP]) +  " -> " + hexString32(segIP(cpu)) + "\n" +
-//   "MEMORY:\n" + formatMemory(cpu.mem8, segIP(cpu), segIP(cpu) + 7, 11) + "\n" +
-//   "OPCODE:\n" + formatOpcode(cpu.opcode, 11) + "\n" +
-//   "REGISTERS\n" + formatRegisters(cpu, 11)  + "\n" +
-//   "FLAGS:\n" + formatFlags(cpu.reg16[regFlags], 10));
 
 function clearMemory(cpu) {
   for (let i = 0; i < cpu.mem8.length; i++) {
@@ -622,7 +607,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
     test('cmpsb increment', () => {
-      cpu.reg16[regFlags] = 0b0000010000000000;
+      cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.cmpsb();
 
@@ -637,7 +622,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
     test('cmpsb decrement', () => {
-      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.reg16[regFlags] = 0b0000010000000000;
       cpu.decode();
       oper.cmpsb();
 
@@ -669,7 +654,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
     test('cmpsw increment', () => {
-      cpu.reg16[regFlags] = 0b0000010000000000;
+      cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.cmpsw();
 
@@ -685,7 +670,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
     test('cmpsw decrement', () => {
-      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.reg16[regFlags] = 0b0000010000000000;
       cpu.decode();
       oper.cmpsw();
 
@@ -1752,7 +1737,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x28AC8] = 0x12;
       cpu.reg16[regDS] = 0x2345;
       cpu.reg16[regSI] = 0x5678;
-      cpu.reg16[regFlags] = 0b0000010000000000;
+      cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.mem8[0x00FF] = 0xAC;
       cpu.decode();
       oper.lodsb();
@@ -1765,7 +1750,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x28AC8] = 0x12;
       cpu.reg16[regDS] = 0x2345;
       cpu.reg16[regSI] = 0x5678;
-      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.reg16[regFlags] = 0b0000010000000000;
       cpu.mem8[0x00FF] = 0xAC;
       cpu.decode();
       oper.lodsb();
@@ -1782,7 +1767,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x28AC9] = 0x12;
       cpu.reg16[regDS] = 0x2345;
       cpu.reg16[regSI] = 0x5678;
-      cpu.reg16[regFlags] = 0b0000010000000000;
+      cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.mem8[0x00FF] = 0xAD;
       cpu.decode();
       oper.lodsw();
@@ -1796,7 +1781,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x28AC9] = 0x12;
       cpu.reg16[regDS] = 0x2345;
       cpu.reg16[regSI] = 0x5678;
-      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.reg16[regFlags] = 0b0000010000000000;
       cpu.mem8[0x00FF] = 0xAD;
       cpu.decode();
       oper.lodsw();
@@ -2027,7 +2012,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
     test('movsb increment', () => {
-      cpu.reg16[regFlags] = 0b0000010000000000;
+      cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.movsb();
 
@@ -2036,7 +2021,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regSI]).toBe(0x4568);
     });
     test('movsb decrement', () => {
-      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.reg16[regFlags] = 0b0000010000000000;
       cpu.decode();
       oper.movsb();
 
@@ -2062,7 +2047,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
     test('movsw increment', () => {
-      cpu.reg16[regFlags] = 0b0000010000000000;
+      cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.movsw();
 
@@ -2072,7 +2057,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regSI]).toBe(0x4569);
     });
     test('movsw decrement', () => {
-      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.reg16[regFlags] = 0b0000010000000000;
       cpu.decode();
       oper.movsw();
 
@@ -2375,18 +2360,29 @@ describe('Operation methods', () => {
   });
 
   describe('repnz', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.repnz();
-      }).toThrowError(FeatureNotImplementedException);
+    test('repnz', () => {
+      oper.repnz();
+
+      expect(cpu.prefixRepeatState).toBe(STATE_REP_NZ);
     });
   });
 
   describe('repz', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.repz();
-      }).toThrowError(FeatureNotImplementedException);
+    test('repz - rep instruction', () => {
+      cpu.mem8[0x000FF] = 0xF3; // REP
+      cpu.mem8[0x00100] = 0xAB; // STOSW
+      cpu.decode();
+      oper.repz();
+
+      expect(cpu.prefixRepeatState).toBe(STATE_REP);
+    });
+    test('repz - repz instruction', () => {
+      cpu.mem8[0x000FF] = 0xF3; // REP
+      cpu.mem8[0x00100] = 0xA6; // CMPSB
+      cpu.decode();
+      oper.repz();
+
+      expect(cpu.prefixRepeatState).toBe(STATE_REP_Z);
     });
   });
 
@@ -2636,7 +2632,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
     test('scasb increment', () => {
-      cpu.reg16[regFlags] = 0b0000010000000000;
+      cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.scasb();
 
@@ -2650,7 +2646,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
     test('stosb decrement', () => {
-      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.reg16[regFlags] = 0b0000010000000000;
       cpu.decode();
       oper.scasb();
 
@@ -2677,7 +2673,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
     test('scasw increment', () => {
-      cpu.reg16[regFlags] = 0b0000010000000000;
+      cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.scasw();
 
@@ -2691,7 +2687,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
     test('scasw decrement', () => {
-      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.reg16[regFlags] = 0b0000010000000000;
       cpu.decode();
       oper.scasw();
 
@@ -2795,7 +2791,7 @@ describe('Operation methods', () => {
       cpu.reg8[regAL] = 0x12;
       cpu.reg16[regES] = 0x2345;
       cpu.reg16[regDI] = 0x5678;
-      cpu.reg16[regFlags] = 0b0000010000000000;
+      cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.mem8[0x00FF] = 0xAA;
       cpu.decode();
       oper.stosb();
@@ -2808,7 +2804,7 @@ describe('Operation methods', () => {
       cpu.reg8[regAL] = 0x12;
       cpu.reg16[regES] = 0x2345;
       cpu.reg16[regDI] = 0x5678;
-      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.reg16[regFlags] = 0b0000010000000000;
       cpu.mem8[0x00FF] = 0xAA;
       cpu.decode();
       oper.stosb();
@@ -2824,7 +2820,7 @@ describe('Operation methods', () => {
       cpu.reg16[regAX] = 0x1234;
       cpu.reg16[regES] = 0x2345;
       cpu.reg16[regDI] = 0x5678;
-      cpu.reg16[regFlags] = 0b0000010000000000;
+      cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.mem8[0x00FF] = 0xAB;
       cpu.decode();
       oper.stosw();
@@ -2838,7 +2834,7 @@ describe('Operation methods', () => {
       cpu.reg16[regAX] = 0x1234;
       cpu.reg16[regES] = 0x2345;
       cpu.reg16[regDI] = 0x5678;
-      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.reg16[regFlags] = 0b0000010000000000;
       cpu.mem8[0x00FF] = 0xAB;
       cpu.decode();
       oper.stosw();

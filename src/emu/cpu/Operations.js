@@ -1,4 +1,4 @@
-import {seg2abs, signExtend} from "../utils/Utils";
+import {seg2abs, segIP, signExtend} from "../utils/Utils";
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
   regAX, regBX, regCX, regDX,
@@ -8,7 +8,8 @@ import {
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
   b, w, v, u,
-  PARITY, STATE_HALT,
+  PARITY, REP_INSTS,
+  STATE_HALT, STATE_REP_Z, STATE_REP_NZ, STATE_REP_NONE, STATE_REP,
 } from '../Constants';
 import { FeatureNotImplementedException } from "../utils/Exceptions";
 
@@ -408,12 +409,16 @@ export default class Operations {
     this.flagSub(srcVal, dstVal, result);
 
     if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
+      this.cpu.reg16[regDI] -= 1;
+      this.cpu.reg16[regSI] -= 1;
+    }
+    else {
       this.cpu.reg16[regDI] += 1;
       this.cpu.reg16[regSI] += 1;
     }
-    else {
-      this.cpu.reg16[regDI] -= 1;
-      this.cpu.reg16[regSI] -= 1;
+
+    if (this.cpu.prefixRepeatState !== STATE_REP_NONE) {
+      this.cpu.reg16[regCX] -= 1;
     }
   }
 
@@ -454,12 +459,16 @@ export default class Operations {
     this.flagSub(srcVal, dstVal, result);
 
     if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
+      this.cpu.reg16[regDI] -= 2;
+      this.cpu.reg16[regSI] -= 2;
+    }
+    else {
       this.cpu.reg16[regDI] += 2;
       this.cpu.reg16[regSI] += 2;
     }
-    else {
-      this.cpu.reg16[regDI] -= 2;
-      this.cpu.reg16[regSI] -= 2;
+
+    if (this.cpu.prefixRepeatState !== STATE_REP_NONE) {
+      this.cpu.reg16[regCX] -= 1;
     }
   }
 
@@ -1428,7 +1437,7 @@ export default class Operations {
    * the string. This instruction is not ordinarily repeated since the
    * accumulator would be over- written by each repetition, and only the last
    * element would be retained. However, LODS is very useful in software loops
-   * as part of a more com- plex string function built up from string
+   * as part of a more complex string function built up from string
    * primitives and other instructions.
    *   - [1] p.2-43
    *
@@ -1445,10 +1454,14 @@ export default class Operations {
     this.cpu.reg8[regAL] = this.cpu.mem8[addr];
 
     if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
-      this.cpu.reg16[regSI] += 1;
+      this.cpu.reg16[regSI] -= 1;
     }
     else {
-      this.cpu.reg16[regSI] -= 1;
+      this.cpu.reg16[regSI] += 1;
+    }
+
+    if (this.cpu.prefixRepeatState !== STATE_REP_NONE) {
+      this.cpu.reg16[regCX] -= 1;
     }
   }
 
@@ -1458,7 +1471,7 @@ export default class Operations {
    * the string. This instruction is not ordinarily repeated since the
    * accumulator would be over- written by each repetition, and only the last
    * element would be retained. However, LODS is very useful in software loops
-   * as part of a more com- plex string function built up from string
+   * as part of a more complex string function built up from string
    * primitives and other instructions.
    *   - [1] p.2-43
    *
@@ -1475,10 +1488,14 @@ export default class Operations {
     this.cpu.reg16[regAX] = this.cpu.mem8[addr + 1] << 8 | this.cpu.mem8[addr];
 
     if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
-      this.cpu.reg16[regSI] += 2;
+      this.cpu.reg16[regSI] -= 2;
     }
     else {
-      this.cpu.reg16[regSI] -= 2;
+      this.cpu.reg16[regSI] += 2;
+    }
+
+    if (this.cpu.prefixRepeatState !== STATE_REP_NONE) {
+      this.cpu.reg16[regCX] -= 1;
     }
   }
 
@@ -1594,12 +1611,16 @@ export default class Operations {
     this.cpu.mem8[dstAddr] = this.cpu.mem8[srcAddr];
 
     if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
+      this.cpu.reg16[regDI] -= 1;
+      this.cpu.reg16[regSI] -= 1;
+    }
+    else {
       this.cpu.reg16[regDI] += 1;
       this.cpu.reg16[regSI] += 1;
     }
-    else {
-      this.cpu.reg16[regDI] -= 1;
-      this.cpu.reg16[regSI] -= 1;
+
+    if (this.cpu.prefixRepeatState !== STATE_REP_NONE) {
+      this.cpu.reg16[regCX] -= 1;
     }
   }
 
@@ -1623,12 +1644,16 @@ export default class Operations {
     this.cpu.mem8[dstAddr + 1] = this.cpu.mem8[srcAddr + 1];
 
     if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
+      this.cpu.reg16[regDI] -= 2;
+      this.cpu.reg16[regSI] -= 2;
+    }
+    else {
       this.cpu.reg16[regDI] += 2;
       this.cpu.reg16[regSI] += 2;
     }
-    else {
-      this.cpu.reg16[regDI] -= 2;
-      this.cpu.reg16[regSI] -= 2;
+
+    if (this.cpu.prefixRepeatState !== STATE_REP_NONE) {
+      this.cpu.reg16[regCX] -= 1;
     }
   }
 
@@ -1963,12 +1988,103 @@ export default class Operations {
     dst(segment, dstAddr, dstVal);
   }
 
+  /**
+   * Repeat, Repeat While Equal, Repeat While Zero, Repeat While Not Equal and
+   * Repeat While Not Zero are five mnemonics for two forms of the prefix byte
+   * that controls repetition of a subsequent string instruction. The different
+   * mnemonics are provided to improve program clarity. The repeat prefixes do
+   * not affect the flags.
+   *
+   * REP is used in conjunction with the MOVS (Move String) and STOS (Store
+   * String) instructions and is interpreted as "repeat while not
+   * end-of-string" (CX not 0). REPE and REPZ operate identically and are
+   * physically the same prefix byte as REP. These instructions are used with
+   * the CMPS (Compare String) and SCAS (Scan String) instructions and require
+   * ZF (posted by these instructions) to be set before initiating the next
+   * repetition. REPNE and REPNZ are two mnemonics for the same prefix byte.
+   * These instructions function the same as REPE and REPZ except that the zero
+   * flag must be cleared or the repetition is terminated. Note that ZF does
+   * not need to be initialized before executing the repeated string
+   * instruction.
+   *
+   * Repeated string sequences are interruptable; the processor will recognize
+   * the interrupt before pro- cessing the next string element. System
+   * interrupt processing is not affected in any way. Upon return from the
+   * interrupt, the repeated operation is resumed from the point of
+   * interruption. Note, however, that execution does not resume properly if a
+   * second or third prefix (i.e., segment override or LOCK) has been
+   * specified in addition to any of the repeat prefixes. The processor
+   * "remembers" only one prefix in effect at the time of the interrupt, the
+   * prefix that immediately precedes the string instruction. After returning
+   * from the interrupt, processing resumes at this point, but any additional
+   * prefixes specified are not in effect. If more than one prefix must be used
+   * with a string instruction, interrupts may be disabled for the duration of
+   * the repeated execution. However, this will not prevent a non-maskable
+   * interrupt from being recognized. Also, the time that the system is unable
+   * to respond to interrupts may be unacceptable if long strings are being
+   * processed.
+   *   - [1] p.2-42
+   *
+   * Modifies flags: NONE
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   repnz (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.prefixRepeatState = STATE_REP_NZ;
   }
 
+  /**
+   * Repeat, Repeat While Equal, Repeat While Zero, Repeat While Not Equal and
+   * Repeat While Not Zero are five mnemonics for two forms of the prefix byte
+   * that controls repetition of a subsequent string instruction. The different
+   * mnemonics are provided to improve program clarity. The repeat prefixes do
+   * not affect the flags.
+   *
+   * REP is used in conjunction with the MOVS (Move String) and STOS (Store
+   * String) instructions and is interpreted as "repeat while not
+   * end-of-string" (CX not 0). REPE and REPZ operate identically and are
+   * physically the same prefix byte as REP. These instructions are used with
+   * the CMPS (Compare String) and SCAS (Scan String) instructions and require
+   * ZF (posted by these instructions) to be set before initiating the next
+   * repetition. REPNE and REPNZ are two mnemonics for the same prefix byte.
+   * These instructions function the same as REPE and REPZ except that the zero
+   * flag must be cleared or the repetition is terminated. Note that ZF does
+   * not need to be initialized before executing the repeated string
+   * instruction.
+   *
+   * Repeated string sequences are interruptable; the processor will recognize
+   * the interrupt before pro- cessing the next string element. System
+   * interrupt processing is not affected in any way. Upon return from the
+   * interrupt, the repeated operation is resumed from the point of
+   * interruption. Note, however, that execution does not resume properly if a
+   * second or third prefix (i.e., segment override or LOCK) has been
+   * specified in addition to any of the repeat prefixes. The processor
+   * "remembers" only one prefix in effect at the time of the interrupt, the
+   * prefix that immediately precedes the string instruction. After returning
+   * from the interrupt, processing resumes at this point, but any additional
+   * prefixes specified are not in effect. If more than one prefix must be used
+   * with a string instruction, interrupts may be disabled for the duration of
+   * the repeated execution. However, this will not prevent a non-maskable
+   * interrupt from being recognized. Also, the time that the system is unable
+   * to respond to interrupts may be unacceptable if long strings are being
+   * processed.
+   *   - [1] p.2-42
+   *
+   * Modifies flags: NONE
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   repz (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    // Get the next opcode
+    let nextOpCode = this.cpu.mem8[segIP(this.cpu) + 1];
+    if (REP_INSTS.includes(nextOpCode)) {
+      this.cpu.prefixRepeatState = STATE_REP;
+    }
+    else {
+      this.cpu.prefixRepeatState = STATE_REP_Z;
+    }
   }
 
   /**
@@ -2275,10 +2391,14 @@ export default class Operations {
     this.flagSub(srcVal, dstVal, result);
 
     if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
-      this.cpu.reg16[regDI] += 1;
+      this.cpu.reg16[regDI] -= 1;
     }
     else {
-      this.cpu.reg16[regDI] -= 1;
+      this.cpu.reg16[regDI] += 1;
+    }
+
+    if (this.cpu.prefixRepeatState !== STATE_REP_NONE) {
+      this.cpu.reg16[regCX] -= 1;
     }
   }
 
@@ -2313,10 +2433,14 @@ export default class Operations {
     this.flagSub(srcVal, dstVal, result);
 
     if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
-      this.cpu.reg16[regDI] += 2;
+      this.cpu.reg16[regDI] -= 2;
     }
     else {
-      this.cpu.reg16[regDI] -= 2;
+      this.cpu.reg16[regDI] += 2;
+    }
+
+    if (this.cpu.prefixRepeatState !== STATE_REP_NONE) {
+      this.cpu.reg16[regCX] -= 1;
     }
   }
 
@@ -2473,7 +2597,7 @@ export default class Operations {
   /**
    * STOS (Store String) transfers a byte or word from register AL or AX to the
    * string element addressed by DI and updates DI to point to the next
-   * location in the string. As a repeated operation, STOS pro- vides a
+   * location in the string. As a repeated operation, STOS provides a
    * convenient way to initialize a string to a constant value (e.g., to blank
    * out a print line).
    *   - [1] p.2-43
@@ -2491,17 +2615,21 @@ export default class Operations {
     this.cpu.mem8[addr] = this.cpu.reg8[regAL];
 
     if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
-      this.cpu.reg16[regDI] += 1;
+      this.cpu.reg16[regDI] -= 1;
     }
     else {
-      this.cpu.reg16[regDI] -= 1;
+      this.cpu.reg16[regDI] += 1;
+    }
+
+    if (this.cpu.prefixRepeatState !== STATE_REP_NONE) {
+      this.cpu.reg16[regCX] -= 1;
     }
   }
 
   /**
    * STOS (Store String) transfers a byte or word from register AL or AX to the
    * string element addressed by DI and updates DI to point to the next
-   * location in the string. As a repeated operation, STOS pro- vides a
+   * location in the string. As a repeated operation, STOS provides a
    * convenient way to initialize a string to a constant value (e.g., to blank
    * out a print line).
    *   - [1] p.2-43
@@ -2520,10 +2648,14 @@ export default class Operations {
     this.cpu.mem8[addr + 1] = (this.cpu.reg16[regAX] >> 8);
 
     if ((this.cpu.reg16[regFlags] & FLAG_DF_MASK) > 0) {
-      this.cpu.reg16[regDI] += 2;
+      this.cpu.reg16[regDI] -= 2;
     }
     else {
-      this.cpu.reg16[regDI] -= 2;
+      this.cpu.reg16[regDI] += 2;
+    }
+
+    if (this.cpu.prefixRepeatState !== STATE_REP_NONE) {
+      this.cpu.reg16[regCX] -= 1;
     }
   }
 

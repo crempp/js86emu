@@ -55,6 +55,16 @@ export const u = 4; // Unknown
 export const STATE_RUNNING = 0;
 export const STATE_HALT    = 1;
 
+// Repeat Prefix State
+export const STATE_REP_NONE = 0;
+export const STATE_REP      = 1;
+export const STATE_REP_Z    = 2;
+export const STATE_REP_NZ   = 3;
+
+export const REP_INSTS = [0x6C, 0x6D, 0x6E, 0x6F, 0xA4, 0xA5, 0xAA, 0xAB, 0xAC, 0xAD];
+export const REP_Z_INSTS = [0xA6, 0xA7, 0xAE, 0xAF];
+export const REP_NZ_INSTS = [0xA6, 0xA7, 0xAE, 0xAF];
+
 export const NS_PER_SEC = 1e9;
 // ...
 // PAUSED, STOPPED???

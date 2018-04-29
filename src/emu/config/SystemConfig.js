@@ -24,7 +24,7 @@ const DEFAULTS = {
 
   cpu : {
     class:       '8086',
-    registers16: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    registers16: null, //[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     frequency:   10 * 1024**2, // 10 Mhz
     flags:       0x0000,
   },

@@ -83,11 +83,10 @@ export default class System {
 
     // Jump to BIOS
     console.log("Jump to BIOS...");
-    if (!this.config.programBlob) {
+    if (!this.config.programBlob && !this.config.cpu.registers16) {
       this.cpu.reg16[regCS] = this.biosROMAddress[0];
       this.cpu.reg16[regIP] = this.biosROMAddress[1];
     }
-    let a = 1;
 
     // Init state
 

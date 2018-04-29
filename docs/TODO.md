@@ -9,10 +9,12 @@
   https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Comparison_Instructions
   IDEA: this only happens for EV Ib addressing combos which have a size set to "v"
         so in Ib check if size is "v", if so sign extend
+* Add these values to state
+  * prefixRepeatState
 
 2
-* move to proper instructions for prefixes
-* catch up on tests
+* - move to proper instructions for prefixes
+* LOTS OF TESTS, catch up on tests
 * Fix formatStack()
 * Script to generate fs.json
 
@@ -22,7 +24,7 @@
 
 4
 * Refactor timingCheck
-  - Is there a better way to prevent video sync skips
+  * Is there a better way to prevent video sync skips
 * √ Async RendererPNG with createWriteStream
 * web workers for graphics rendering
 
@@ -32,7 +34,9 @@
 
 Tests
 * writeMem8 and readMem8 - should be the same
-* TODO: writeMem16 and readMem16 - should be the same
+* 8086: memory fill
+* 8086: All instructions exist
+* 8086: register array access is correct
 
 Data Transfer 2-31
 ------------------
