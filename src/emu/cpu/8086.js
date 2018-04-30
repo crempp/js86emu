@@ -28,6 +28,8 @@ export default class CPU8086 extends CPU {
 
     this.config = config;
 
+    this.PORT_COUNT = 0x10000;
+
     /**
      * CPU frequency in hertz (cyles per second).
      */
@@ -98,6 +100,10 @@ export default class CPU8086 extends CPU {
 
     // Flags
     this.reg16[regFlags] = config.cpu.flags;
+
+    // Ports
+    this.ports8 = new Uint8Array(this.PORT_COUNT);
+    this.ports16 = new Uint16Array(this.ports8.buffer);
 
     // Opcode
     this.opcode = {};
@@ -439,17 +445,17 @@ export default class CPU8086 extends CPU {
     this.inst[0xE1]    = new inst(oper.loopz,  1, b, addr.Jb         );
     this.inst[0xE2]    = new inst(oper.loop,   1, b, addr.Jb         );
     this.inst[0xE3]    = new inst(oper.jcxz,   1, b, addr.Jb         );
-    this.inst[0xE4]    = new inst(oper.iin,    1, b, addr.AL, addr.Ib);
-    this.inst[0xE5]    = new inst(oper.iin,    1, w, addr.AX, addr.Ib);
+    this.inst[0xE4]    = new inst(oper.in,     1, b, addr.AL, addr.Ib);
+    this.inst[0xE5]    = new inst(oper.in,     1, w, addr.AX, addr.Ib);
     this.inst[0xE6]    = new inst(oper.out,    1, b, addr.Ib, addr.AL);
-    this.inst[0xE7]    = new inst(oper.out,    1, b, addr.Ib, addr.AX);
+    this.inst[0xE7]    = new inst(oper.out,    1, w, addr.Ib, addr.AX);
     this.inst[0xE8]    = new inst(oper.call,   1, v, addr.Jv         );
     this.inst[0xE9]    = new inst(oper.jmp,    1, v, addr.Jv         );
     this.inst[0xEA]    = new inst(oper.jmp,    1, d, addr.Ap         );
     this.inst[0xEB]    = new inst(oper.jmp,    1, b, addr.Jb         );
-    this.inst[0xEC]    = new inst(oper.iin,    1, b, addr.AL, addr.DX);
-    this.inst[0xED]    = new inst(oper.iin,    1, w, addr.AX, addr.DX);
-    this.inst[0xEE]    = new inst(oper.out,    1, w, addr.DX, addr.AL);
+    this.inst[0xEC]    = new inst(oper.in,     1, b, addr.AL, addr.DX);
+    this.inst[0xED]    = new inst(oper.in,     1, w, addr.AX, addr.DX);
+    this.inst[0xEE]    = new inst(oper.out,    1, b, addr.DX, addr.AL);
     this.inst[0xEF]    = new inst(oper.out,    1, w, addr.DX, addr.AX);
     this.inst[0xF0]    = new inst(oper.lock,   1, u                  );
     this.inst[0xF1]    = new inst(oper.notimp, 0, u                  );

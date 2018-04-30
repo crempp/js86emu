@@ -829,18 +829,49 @@ describe('Operation methods', () => {
   });
 
   describe('in', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.in();
-      }).toThrowError(FeatureNotImplementedException);
-    });
-  });
+    test('IN AL, 0xF8', () => {
+      cpu.ports8[0xF8] = 0xCC;
+      cpu.ports8[0xF9] = 0xBB;
+      cpu.mem8[0x00FF] = 0xE4;
+      cpu.mem8[0x0100] = 0xF8;
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.in(addr.AL.bind(addr), addr.Ib.bind(addr));
 
-  describe('iin', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.iin();
-      }).toThrowError(FeatureNotImplementedException);
+      expect(cpu.reg8[regAL]).toBe(0xCC);
+    });
+    test('IN AX, 0xF8', () => {
+      cpu.ports8[0xF8] = 0xCC;
+      cpu.ports8[0xF9] = 0xBB;
+      cpu.mem8[0x00FF] = 0xE5;
+      cpu.mem8[0x0100] = 0xF8;
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.in(addr.AX.bind(addr), addr.Ib.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0xBBCC);
+    });
+    test('IN AL, DX', () => {
+      cpu.ports8[0xF84E] = 0xCC;
+      cpu.ports8[0xF84F] = 0xBB;
+      cpu.reg16[regDX] = 0xF84E;
+      cpu.mem8[0x00FF] = 0xEC;
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.in(addr.AL.bind(addr), addr.DX.bind(addr));
+
+      expect(cpu.reg8[regAL]).toBe(0xCC);
+    });
+    test('IN AX, DX', () => {
+      cpu.ports8[0xF84E] = 0xCC;
+      cpu.ports8[0xF84F] = 0xBB;
+      cpu.reg16[regDX] = 0xF84E;
+      cpu.mem8[0x00FF] = 0xED;
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.in(addr.AX.bind(addr), addr.DX.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0xBBCC);
     });
   });
 
@@ -2223,10 +2254,47 @@ describe('Operation methods', () => {
   });
 
   describe('out', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.out();
-      }).toThrowError(FeatureNotImplementedException);
+    test('OUT 0xF8, AL', () => {
+      cpu.reg8[regAL] = 0xBB;
+      cpu.mem8[0x00FF] = 0xE6;
+      cpu.mem8[0x0100] = 0xF8;
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.out(addr.Ib.bind(addr), addr.AL.bind(addr));
+
+      expect(cpu.ports8[0xF8]).toBe(0xBB);
+    });
+    test('OUT 0xF8, AX', () => {
+      cpu.reg16[regAX] = 0xBBCC;
+      cpu.mem8[0x00FF] = 0xE7;
+      cpu.mem8[0x0100] = 0xF8;
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.out(addr.Ib.bind(addr), addr.AX.bind(addr));
+
+      expect(cpu.ports8[0xF8]).toBe(0xCC);
+      expect(cpu.ports8[0xF9]).toBe(0xBB);
+    });
+    test('OUT DX, AL', () => {
+      cpu.reg8[regAL] = 0xBB;
+      cpu.reg16[regDX] = 0xF84E;
+      cpu.mem8[0x00FF] = 0xEE;
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.out(addr.DX.bind(addr), addr.AL.bind(addr));
+
+      expect(cpu.ports8[0xF84E]).toBe(0xBB);
+    });
+    test('OUT DX, AX', () => {
+      cpu.reg16[regAX] = 0xBBCC;
+      cpu.reg16[regDX] = 0xF84E;
+      cpu.mem8[0x00FF] = 0xEF;
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.out(addr.DX.bind(addr), addr.AX.bind(addr));
+
+      expect(cpu.ports8[0xF84E]).toBe(0xCC);
+      expect(cpu.ports8[0xF84F]).toBe(0xBB);
     });
   });
 

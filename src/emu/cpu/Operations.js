@@ -690,17 +690,28 @@ export default class Operations {
    * 65,535.
    *   - [1] p.2-32
    *
-   * Modifies flags: ?
+   * Modifies flags: NONE
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
    */
   in (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
-  }
+    let segment = 0x0000;
+    let size = this.cpu.opcode.addrSize;
+    let dstAddr = dst(segment);
+    let srcAddr = src(segment);
+    let srcVal = src(segment, srcAddr);
 
-  iin (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let portVal = this.cpu.ports8[srcVal];
+    if (size !== b) {
+      portVal = (this.cpu.ports8[srcVal + 1] << 8) | portVal;
+    }
+
+    dst(segment, dstAddr, portVal);
+    // this.cpu.ports8[dstVal] = (srcVal & 0x00FF);
+    // if (size !== b) {
+    //   this.cpu.ports8[dstVal + 1] = (srcVal >> 8 & 0x00FF);
+    // }
   }
 
   /**
@@ -1814,15 +1825,24 @@ export default class Operations {
    * through 255, or with a number previously placed in register DX, allowing
    * variable access (by changing the value in DX) to ports numbered from 0
    * through 65,535.
-   *   - [1] p.2-31
+   *   - [1] p.2-32
    *
-   * Modifies flags: ?
+   * Modifies flags: NONE
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
    */
   out (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let dstAddr = dst(0x0000);
+    let srcAddr = src(0x0000);
+    let dstVal = dst(0x0000, dstAddr);
+    let srcVal = src(0x0000, srcAddr);
+    let size = this.cpu.opcode.addrSize;
+
+    this.cpu.ports8[dstVal] = (srcVal & 0x00FF);
+    if (size !== b) {
+      this.cpu.ports8[dstVal + 1] = (srcVal >> 8 & 0x00FF);
+    }
   }
 
   /**
