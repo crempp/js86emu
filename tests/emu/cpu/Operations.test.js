@@ -10,7 +10,7 @@ import {
   regFlags,
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
-  STATE_HALT, STATE_REP_Z, STATE_REP, STATE_REP_NZ,
+  STATE_HALT, STATE_REP_Z, STATE_REP, STATE_REP_NZ, STATE_SEG_CS, STATE_SEG_DS, STATE_SEG_ES, STATE_SEG_SS,
 } from '../../../src/emu/Constants';
 import {FeatureNotImplementedException, InvalidAddressModeException, ValueOverflowException} from "../../../src/emu/utils/Exceptions";
 import {
@@ -686,6 +686,15 @@ describe('Operation methods', () => {
     });
   });
 
+  describe('cs', () => {
+    test('CS sets addrSeg', () => {
+      oper.cs();
+
+      expect(cpu.addrSeg).toBe(regCS);
+      expect(cpu.prefixSegmentState).toBe(STATE_SEG_CS);
+    })
+  });
+
   describe('cwd', () => {
     test('NOT IMPLEMENTED', () => {
       expect(() => {
@@ -779,19 +788,21 @@ describe('Operation methods', () => {
   });
 
   describe('ds', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.ds();
-      }).toThrowError(FeatureNotImplementedException);
-    });
+    test('DS sets addrSeg', () => {
+      oper.ds();
+
+      expect(cpu.addrSeg).toBe(regDS);
+      expect(cpu.prefixSegmentState).toBe(STATE_SEG_DS);
+    })
   });
 
   describe('es', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.es();
-      }).toThrowError(FeatureNotImplementedException);
-    });
+    test('ES sets addrSeg', () => {
+      oper.es();
+
+      expect(cpu.addrSeg).toBe(regES);
+      expect(cpu.prefixSegmentState).toBe(STATE_SEG_ES);
+    })
   });
 
   describe('hlt', () => {
@@ -2743,11 +2754,12 @@ describe('Operation methods', () => {
   });
 
   describe('ss', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.ss();
-      }).toThrowError(FeatureNotImplementedException);
-    });
+    test('SS sets addrSeg', () => {
+      oper.ss();
+
+      expect(cpu.addrSeg).toBe(regSS);
+      expect(cpu.prefixSegmentState).toBe(STATE_SEG_SS);
+    })
   });
 
   describe('stc', () => {

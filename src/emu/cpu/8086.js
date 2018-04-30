@@ -9,7 +9,9 @@ import {
   regFlags,
   b, w, v, d, u,
   FLAG_ZF_MASK,
-  STATE_HALT, STATE_REP_NONE, STATE_REP_Z, STATE_REP, STATE_REP_NZ,
+  STATE_HALT,
+  STATE_REP_NONE, STATE_REP_Z, STATE_REP, STATE_REP_NZ,
+  STATE_SEG_NONE, SEG_PREFIX_INSTS,
 } from '../Constants';
 import {
   hexString16, formatOpcode, formatMemory, formatFlags, formatRegisters,
@@ -39,9 +41,14 @@ export default class CPU8086 extends CPU {
     this.addrSeg = regDS;
 
     /**
-     *
+     * Repeat prefix state
      */
     this.prefixRepeatState = STATE_REP_NONE;
+
+    /**
+     * Segment override state
+     */
+    this.prefixSegmentState = STATE_SEG_NONE;
 
     /**
      * Instruction Pointer increment counter. This tracks the amount to
@@ -49,6 +56,11 @@ export default class CPU8086 extends CPU {
      */
     this.instIPInc = 0;
 
+    /**
+     * Address pointer increment counter. This tracks the amount to increment
+     * the instruction pointer based on addressing used during the current
+     * instruction.
+     */
     this.addrIPInc = 0;
 
     /**
@@ -542,39 +554,50 @@ export default class CPU8086 extends CPU {
     if (this.config.debug) this.opcode.string = this.opcode.inst.toString();
   }
 
-  // http://www.c-jump.com/CIS77/CPU/x86/X77_0240_prefix.htm
-  prefix () {
-    let inst = this.opcode.opcode_byte;
-    // Instruction prefix check
-    switch (this.opcode.opcode_byte) {
-      case 0x2E: // CS segment prefix
-        this.addrSeg = regCS;
-        this.reg16[regIP] += 1;
-        this.decode();
-        this.opcode.prefix = inst;
-        break;
-      case 0x3E: // DS segment prefix
-        this.addrSeg = regDS;
-        this.reg16[regIP] += 1;
-        this.decode();
-        this.opcode.prefix = inst;
-        break;
-      case 0x26: // ES segment prefix
-        this.addrSeg = regES;
-        this.reg16[regIP] += 1;
-        this.decode();
-        this.opcode.prefix = inst;
-        break;
-      case 0x36: // SS segment prefix
-        this.addrSeg = regSS;
-        this.reg16[regIP] += 1;
-        this.decode();
-        this.opcode.prefix = inst;
-        break;
-      default:
-        this.addrSeg = regDS;
-        this.repType = 0;
-        break;
+  /**
+   * End prefix state if conditions met
+   *
+   * REPEAT PREFIX
+   *   If we are in a repeat state and termination conditions are met then
+   *   leave the repeat state.
+   *
+   *   Repeat Prefix | Term Condition 1 | Term Condition 2
+   *   REP           |       CX=0       |       None
+   *   REPE/REPZ     |       CX=0       |       ZF=0
+   *   REPNE/REPNZ   |       CX=0       |       ZF=1
+   *
+   * SEGMENT PREFIX
+   *   If we are in a segment prefix state and the current instruction is not
+   *   a segment prefix leave the prefix state.
+   */
+  prefixTermination () {
+
+    if (
+      // Don't check if we just ran a REP(Z)(NZ)
+      (this.opcode.opcode_byte !== 0xF2 && this.opcode.opcode_byte !== 0xF3) &&
+      (
+        // REP end state
+        (this.prefixRepeatState === STATE_REP && this.reg16[regCX] === 0) ||
+        // REPZ end state
+        (this.prefixRepeatState === STATE_REP_Z &&
+          (this.reg16[regCX] === 0 || (this.reg16[regFlags] & FLAG_ZF_MASK) === 0)) ||
+        // REPNZ end state
+        (this.prefixRepeatState === STATE_REP_NZ &&
+          (this.reg16[regCX] === 0 || (this.reg16[regFlags] & FLAG_ZF_MASK) > 0))
+      )
+    )
+    {
+      this.instIPInc += this.opcode.inst.baseSize;
+      this.prefixRepeatState = STATE_REP_NONE;
+    }
+
+    // If we just executed an instruction following a segment prefix leave the
+    // state
+    if (this.prefixSegmentState !== STATE_SEG_NONE &&
+        !SEG_PREFIX_INSTS.includes(this.opcode.opcode_byte))
+    {
+      this.prefixSegmentState = STATE_SEG_NONE;
+      this.addrSeg = regDS;
     }
   }
 
@@ -585,13 +608,9 @@ export default class CPU8086 extends CPU {
     // Reset per-cycle values
     this.instIPInc = 0;
     this.addrIPInc = 0;
-    this.addrSeg = regDS;
 
     // Decode the instruction
     this.decode();
-
-    // If this is a prefix instruction, run it and move to the next instruction
-    this.prefix();
 
     if (this.config.debug) {
       console.log(`  INSTRUCTION: ${this.opcode.string}`);
@@ -611,31 +630,7 @@ export default class CPU8086 extends CPU {
     // Run the instruction
     this.opcode.inst.run();
 
-    // If we are in a repeat state and termination conditions are met then
-    // leave the repeat state.
-    //
-    // Repeat Prefix | Term Condition 1 | Term Condition 2
-    // REP           |       CX=0       |       None
-    // REPE/REPZ     |       CX=0       |       ZF=0
-    // REPNE/REPNZ   |       CX=0       |       ZF=1
-    if (
-      // Don't check if we just ran a REP(Z)(NZ)
-      (this.opcode.opcode_byte !== 0xF2 && this.opcode.opcode_byte !== 0xF3) &&
-      (
-        // REP end state
-        (this.prefixRepeatState === STATE_REP && this.reg16[regCX] === 0) ||
-        // REPZ end state
-        (this.prefixRepeatState === STATE_REP_Z &&
-          (this.reg16[regCX] === 0 || (this.reg16[regFlags] & FLAG_ZF_MASK) === 0)) ||
-        // REPNZ end state
-        (this.prefixRepeatState === STATE_REP_NZ &&
-          (this.reg16[regCX] === 0 || (this.reg16[regFlags] & FLAG_ZF_MASK) > 0))
-      )
-    )
-    {
-      this.instIPInc += this.opcode.inst.baseSize;
-      this.prefixRepeatState = STATE_REP_NONE;
-    }
+    this.prefixTermination();
 
     // Move the IP
     this.reg16[regIP] += this.instIPInc + this.addrIPInc;

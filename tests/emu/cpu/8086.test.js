@@ -1,6 +1,10 @@
 import CPU8086 from '../../../src/emu/cpu/8086';
 import SystemConfig from "../../../src/emu/config/SystemConfig";
-import {FLAG_ZF_MASK, regAL, regAX, regCX, regDI, regDS, regES, regFlags, regIP, regSI, STATE_REP_NONE} from "../../../src/emu/Constants";
+import {
+  regAX, regAL, regCS, regCX, regDI, regDS, regES,
+  regSI, regSS, regIP, regFlags,
+  FLAG_ZF_MASK, STATE_REP_NONE
+} from "../../../src/emu/Constants";
 
 function loadMem (data, from, cpu) {
   for (let i = 0; i < data.length; i++) {
@@ -519,5 +523,98 @@ describe('Repeat prefix', () => {
       expect(cpu.reg16[regIP]).toBe(0x02);
       expect(cpu.prefixRepeatState).toBe(STATE_REP_NONE);
     });
+  });
+});
+
+describe('Segment prefix', () => {
+  let cpu;
+  beforeEach(() => {
+    cpu = new CPU8086(new SystemConfig({
+      memorySize: 1048576,
+      debug: false,
+    }));
+    cpu.reg16[regIP] = 0x00FF;
+    cpu.reg16[regCS] = 0x0000;
+    cpu.reg16[regDS] = 0x0300;
+    cpu.reg16[regES] = 0x0400;
+    cpu.reg16[regSS] = 0x0500;
+    cpu.reg16[regFlags] = 0x0000;
+  });
+
+  test('MOV DI, WORD PTR CS:0x1D3', () => {
+    cpu.instIPInc = 2;
+    cpu.mem8[0x00FF] = 0x2E; // CS
+    cpu.mem8[0x0100] = 0x8B; // MOV
+    cpu.mem8[0x0101] = 0x3E; // Addressing
+    cpu.mem8[0x0102] = 0xD3; // Operand low
+    cpu.mem8[0x0103] = 0x01; // Operand high
+    // Data
+    // 0x0000 * 0x10 + 0x01D3 = 0x001D3
+    cpu.mem8[0x001D3] = 0xCC;
+    cpu.mem8[0x001D4] = 0xBB;
+
+    cpu.cycle(); // CS Inst
+    cpu.cycle(); // Mov Inst
+
+    expect(cpu.reg16[regDI]).toBe(0xBBCC);
+    expect(cpu.instIPInc).toBe(2);
+    expect(cpu.addrIPInc).toBe(2);
+  });
+  test('MOV DI, WORD PTR DS:0x1D3', () => {
+    cpu.instIPInc = 2;
+    cpu.mem8[0x00FF] = 0x3E; // DS
+    cpu.mem8[0x0100] = 0x8B; // MOV
+    cpu.mem8[0x0101] = 0x3E; // Addressing
+    cpu.mem8[0x0102] = 0xD3; // Operand low
+    cpu.mem8[0x0103] = 0x01; // Operand high
+    // Data
+    // 0x0300 * 0x10 + 0x01D3 = 0x031D3
+    cpu.mem8[0x031D3] = 0xCC;
+    cpu.mem8[0x031D4] = 0xBB;
+
+    cpu.cycle(); // DS Inst
+    cpu.cycle(); // Mov Inst
+
+    expect(cpu.reg16[regDI]).toBe(0xBBCC);
+    expect(cpu.instIPInc).toBe(2);
+    expect(cpu.addrIPInc).toBe(2);
+  });
+  test('MOV DI, WORD PTR ES:0x1D3', () => {
+    cpu.instIPInc = 2;
+    cpu.mem8[0x00FF] = 0x26; // ES
+    cpu.mem8[0x0100] = 0x8B; // MOV
+    cpu.mem8[0x0101] = 0x3E; // Addressing
+    cpu.mem8[0x0102] = 0xD3; // Operand low
+    cpu.mem8[0x0103] = 0x01; // Operand high
+    // Data
+    // 0x0400 * 0x10 + 0x01D3 = 0x041D3
+    cpu.mem8[0x041D3] = 0xCC;
+    cpu.mem8[0x041D4] = 0xBB;
+
+    cpu.cycle(); // ES Inst
+    cpu.cycle(); // Mov Inst
+
+    expect(cpu.reg16[regDI]).toBe(0xBBCC);
+    expect(cpu.instIPInc).toBe(2);
+    expect(cpu.addrIPInc).toBe(2);
+  });
+  test('MOV DI, WORD PTR SS:0x1D3', () => {
+    cpu.instIPInc = 2;
+    cpu.mem8[0x00FF] = 0x36; // SS
+    cpu.mem8[0x0100] = 0x8B; // MOV
+    cpu.mem8[0x0101] = 0x3E; // Addressing
+    cpu.mem8[0x0102] = 0xD3; // Operand low
+    cpu.mem8[0x0103] = 0x01; // Operand high
+    // Data
+    // 0x0500 * 0x10 + 0x01D3 = 0x051D3
+    cpu.mem8[0x051D3] = 0xCC;
+    cpu.mem8[0x051D4] = 0xBB;
+
+    cpu.cycle(); // SS Inst
+    cpu.cycle(); // Mov Inst
+
+    expect(cpu.reg16[regDI]).toBe(0xBBCC);
+    expect(cpu.instIPInc).toBe(2);
+    expect(cpu.addrIPInc).toBe(2);
   });
 });

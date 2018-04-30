@@ -9,7 +9,9 @@ import {
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
   b, w, v, u,
   PARITY, REP_INSTS,
-  STATE_HALT, STATE_REP_Z, STATE_REP_NZ, STATE_REP_NONE, STATE_REP,
+  STATE_HALT,
+  STATE_REP_Z, STATE_REP_NZ, STATE_REP_NONE, STATE_REP,
+  STATE_SEG_CS, STATE_SEG_DS, STATE_SEG_ES, STATE_SEG_SS,
 } from '../Constants';
 import { FeatureNotImplementedException } from "../utils/Exceptions";
 
@@ -472,8 +474,17 @@ export default class Operations {
     }
   }
 
+  /**
+   * CS addressing prefix
+   *
+   * Modifies flags: NONE
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   cs (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.addrSeg = regCS;
+    this.cpu.prefixSegmentState = STATE_SEG_CS;
   }
 
   /**
@@ -575,12 +586,30 @@ export default class Operations {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
 
+  /**
+   * DS addressing prefix
+   *
+   * Modifies flags: NONE
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   ds (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.addrSeg = regDS;
+    this.cpu.prefixSegmentState = STATE_SEG_DS;
   }
 
+  /**
+   * ES addressing prefix
+   *
+   * Modifies flags: NONE
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   es (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.addrSeg = regES;
+    this.cpu.prefixSegmentState = STATE_SEG_ES;
   }
 
   /**
@@ -2545,8 +2574,17 @@ export default class Operations {
     dst(segment, dstAddr, dstVal);
   }
 
+  /**
+   * SS addressing prefix
+   *
+   * Modifies flags: NONE
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   ss (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.addrSeg = regSS;
+    this.cpu.prefixSegmentState = STATE_SEG_SS;
   }
 
   /**

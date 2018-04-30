@@ -9,11 +9,11 @@
   https://en.wikibooks.org/wiki/X86_Assembly/Control_Flow#Comparison_Instructions
   IDEA: this only happens for EV Ib addressing combos which have a size set to "v"
         so in Ib check if size is "v", if so sign extend
-* Add these values to state
+* √ Add these values to state
   * prefixRepeatState
 
 2
-* - move to proper instructions for prefixes
+* √ move to proper instructions for prefixes
 * LOTS OF TESTS, catch up on tests
 * Fix formatStack()
 * Script to generate fs.json
@@ -85,7 +85,7 @@ division
 	  CBW
 	  CWD
 
-Bit Manipulation 2-38
+√ Bit Manipulation 2-38
 ---------------------
 logical
 	√ NOT
@@ -103,9 +103,10 @@ rotates
 	√ RCL
 	√ RCR
 
-String 2-40
+√ String 2-40
 -----------
-	  REP/REPE/REPZ/REPNE/REPNZ
+String
+	√ REP/REPE/REPZ/REPNE/REPNZ
 	√ MOVS
 	√ MOVSB/MOVSW
 	√ CMPS
@@ -148,16 +149,3 @@ external sync
 	  LOCK
 no operation
 	√ NOP
-
-
-
-
-
-
-
-
-
-
-
-
-
