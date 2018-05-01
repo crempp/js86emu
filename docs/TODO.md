@@ -38,6 +38,8 @@
 ## v0.5
 * Doc generation
 * Review what flags each inst modifies
+* Debug tooling
+  * Add memory break points
 
 Tests
 * writeMem8 and readMem8 - should be the same
