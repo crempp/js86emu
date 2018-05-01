@@ -2846,7 +2846,8 @@ export default class Operations {
   }
 
   notimp () {
-    console.log("Operations - Instruction not implemented")
+    console.log("Operations - Instruction not implemented");
+    throw new FeatureNotImplementedException("Operation not implemented");
   };
 
   /**

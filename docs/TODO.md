@@ -1,6 +1,9 @@
-## TODO
+# TODO
 
-1
+## v0.1
+* All instructions and addressing modes
+
+*Refactor/fixes*
 * √ Don't return values from instructions
 * √ Fix Ep and Mp segments - still need done?
 * √ Fix seg2abs, it still uses overrides, should use cpu.addrSeg
@@ -11,24 +14,28 @@
         so in Ib check if size is "v", if so sign extend
 * √ Add these values to state
   * prefixRepeatState
+* Clean up documentation
 
-2
+## v0.2
+*Refactor/fixes*
 * √ move to proper instructions for prefixes
 * LOTS OF TESTS, catch up on tests
 * Fix formatStack()
 * Script to generate fs.json
+* figure out a way to conditionally use optimizing flags in node. These don't work on my work laptop
+  node --max_inlined_source_size=1200 --serialize_eager --max_inlining_levels=12 --max_inlined_nodes=2000 --max_inlined_nodes_absolute=12000 --max_inlined_nodes_cumulative=1000 --max_inlined_nodes_small=100 --min_inlining_frequency=0.6 ./dist/cli/cli.js"
 
-3
+## v0.3
 * Refactor CPU state as a class
 * √ add register values to CPUConfig (and more?)
 
-4
+## v0.4
 * Refactor timingCheck
   * Is there a better way to prevent video sync skips
 * √ Async RendererPNG with createWriteStream
 * web workers for graphics rendering
 
-5
+## v0.5
 * Doc generation
 * Review what flags each inst modifies
 
@@ -38,8 +45,11 @@ Tests
 * 8086: All instructions exist
 * 8086: register array access is correct
 
-Data Transfer 2-31
+## Instruction TODO List
 ------------------
+
+### Data Transfer 2-31
+
 general
 	√ MOV
 	√ PUSH
@@ -58,8 +68,8 @@ flag
 	√ PUSHF
 	√ POPF
 
-Arithmetic 2-33
----------------
+### Arithmetic 2-33
+
 addition
 	√ ADD
 	√ ADC
@@ -85,8 +95,7 @@ division
 	  CBW
 	  CWD
 
-√ Bit Manipulation 2-38
----------------------
+### √ Bit Manipulation 2-38
 logical
 	√ NOT
 	√ AND
@@ -103,8 +112,8 @@ rotates
 	√ RCL
 	√ RCR
 
-√ String 2-40
------------
+### √ String 2-40
+
 String
 	√ REP/REPE/REPZ/REPNE/REPNZ
 	√ MOVS
@@ -114,8 +123,8 @@ String
 	√ LODS
 	√ STOS
 
-Program Transfer 2-43
----------------------
+### Program Transfer 2-43
+
 unconditional
 	√ CALL
 	√ RET
@@ -132,8 +141,8 @@ interupt
 	  INTO
 	  IRET
 
-Processor Control 2-47
-----------------------
+### Processor Control 2-47
+
 flag
 	√ CLC
 	√ CMC
@@ -149,3 +158,44 @@ external sync
 	  LOCK
 no operation
 	√ NOP
+
+## Addressing TODO List
+  √ 1
+  √ 3
+  √ AX
+  √ AL
+  √ AH
+  √ BX
+  √ BL
+  √ BH
+  √ CX
+  √ CL
+  √ CH
+  √ DX
+  √ DL
+  √ DH
+  √ SI
+  √ DI
+  √ BP
+  √ SP
+  √ CS
+  √ DS
+  √ ES
+  √ SS
+  √ Ap
+  √ Eb
+  √ Ep
+  √ Ev
+  √ Ew
+  √ Gb
+  √ Gv
+  √ Ib
+  √ Iv
+  √ Iw
+  √ Jb
+  √ Jv
+  √ M
+  √ Mp
+  √ Ob
+  √ Ov
+    Sw

@@ -13,6 +13,10 @@ These documents were used while researching the x86 platform.
 * http://ece-research.unm.edu/jimp/310/slides/8086_IO1.html
 * https://en.wikipedia.org/wiki/Intel_8237
 
-## D
+## CGA
+* https://www.seasip.info/VintagePC/mda.html
+* http://www.oldskool.org/guides/oldonnew/resources/cgatech.txt
+
+## Dissasembly
 https://onlinedisassembler.com/odaweb/
 https://onlinedisassembler.com/odaweb/Hl2HomgI/0

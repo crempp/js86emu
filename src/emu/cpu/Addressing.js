@@ -1083,12 +1083,71 @@ export default class Addressing {
     }
   }
 
+  /**
+   * The instruction has no ModR/M byte; the offset of the operand is coded as
+   * a word or double word (depending on address size attribute) in the
+   * instruction. No base register, index register, or scaling factor can be
+   * applied (for example, MOV (A0–A3)).
+   *   - [3] p. A-1 to A-3
+   *
+   * @param {number} segment Memory segment
+   * @param {(number|null)} [offset] Memory offset
+   * @param {(number|null)} [value] Value to write (byte)
+   * @return {(number|null)} In address mode returns the calculated address, in
+   *   read mode returns the value at the given address, in write mode writes
+   *   the given value to the given address
+   */
   Ob (segment, offset, value) {
+    let immSegment = this.cpu.reg16[regCS]; // Imm values are in the CS segment
 
+    if (offset === undefined && value === undefined) {
+      // Calculate address
+      let result = this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc;
+      this.cpu.addrIPInc += 1;
+      return this.readMem8(immSegment, result);
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.readMem8(segment, offset);
+    }
+    else {
+      // Write value to address
+      this.writeMem8(segment, offset, value);
+    }
   }
 
+  /**
+   * The instruction has no ModR/M byte; the offset of the operand is coded as
+   * a word or double word (depending on address size attribute) in the
+   * instruction. No base register, index register, or scaling factor can be
+   * applied (for example, MOV (A0–A3)).
+   *   - [3] p. A-1 to A-3
+   *
+   * @param {number} segment Memory segment
+   * @param {(number|null)} [offset] Memory offset
+   * @param {(number|null)} [value] Value to write (word)
+   * @return {(number|null)} In address mode returns the calculated address, in
+   *   read mode returns the value at the given address, in write mode writes
+   *   the given value to the given address
+   */
   Ov (segment, offset, value) {
+    let immSegment = this.cpu.reg16[regCS]; // Imm values are in the CS segment
 
+    if (offset === undefined && value === undefined) {
+      // Calculate address
+      let result = this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc;
+      let v = this.readMem16(immSegment, result);
+      this.cpu.addrIPInc += 2;
+      return v;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      return this.readMem16(segment, offset);
+    }
+    else {
+      // Write value to address
+      this.writeMem16(segment, offset, value);
+    }
   }
 
   Sw (segment, offset, value) {

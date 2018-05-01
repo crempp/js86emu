@@ -3100,11 +3100,18 @@ describe('Operation methods', () => {
   });
 
   describe('notimp', () => {
-    test('not implemented instruction moves to next instruction', () => {
-      cpu.mem8[0x00FF] = 0xC8;
-      cpu.decode();
-      oper.notimp();
-      expect(cpu.instIPInc).toBe(0);
+    test('not implemented throws', () => {
+      // Not sure if I want this to throw or just move to the next instruction
+      // For now it's more helpful to thow. Replace with the lower commented
+      // section to switch behavior.
+      expect(() => {
+        oper.notimp();
+      }).toThrowError(FeatureNotImplementedException);
+
+      // cpu.mem8[0x00FF] = 0xC8;
+      // cpu.decode();
+      // oper.notimp();
+      // expect(cpu.instIPInc).toBe(0);
     });
   });
 });

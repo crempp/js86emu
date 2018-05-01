@@ -95,7 +95,7 @@ async function runEmulation () {
   // console.log(`BEFORE: \n${formatMemory(system.cpu.mem8, 0x01020, 0x01020 + 0x10)}`);
 
   console.log("running...");
-  system.run(25);
+  system.run(60);
 
   // console.log(`AFTER : \n${formatMemory(system.cpu.mem8, 0x01020, 0x01020 + 0x10)}`);
 

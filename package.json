@@ -37,7 +37,7 @@
     "build:cli:watch": "npm run build:cli -- -w",
     "build:web:watch": "webpack --mode=production --watch --progress",
     "test": "jest",
-    "run:cli": "node --max_inlined_source_size=1200 --serialize_eager --max_inlining_levels=12 --max_inlined_nodes=2000 --max_inlined_nodes_absolute=12000 --max_inlined_nodes_cumulative=1000 --max_inlined_nodes_small=100 --min_inlining_frequency=0.6 ./dist/cli/cli.js",
+    "run:cli": "node ./dist/cli/cli.js",
     "run:web": "node ./dist/cli/server/server.js"
   }
 }
