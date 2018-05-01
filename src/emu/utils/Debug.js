@@ -85,9 +85,9 @@ export function formatMemory(mem8, from, to, indentSize=0) {
 
   let count = 1;
   for (let i = from; i <= to; i++) {
-    str += "[" + hexString32(i) + "]: " + binString8(mem8[i]) + "(" + hexString8(mem8[i]) + ")";
+    str += "[" + hexString32(i) + "]: " + hexString8(mem8[i]);
     if (count++ % 4 === 0 && i !== to) str += "\n" + indent;
-    else if (i !== to) str += " ";
+    else if (i !== to) str += "    ";
   }
 
   return str;

@@ -622,7 +622,7 @@ export default class CPU8086 extends CPU {
       console.log(`  INSTRUCTION: ${this.opcode.string}`);
       console.log(`  CS:IP:       ${hexString16(this.reg16[regCS])}:${hexString16(this.reg16[regIP])}`);
       console.log(`  OPCODE:      \n${formatOpcode(this.opcode, 11)}`);
-      console.log(`  MEMORY INST: \n${formatMemory(this.mem8, segIP(this), segIP(this) + 6, 11)}`);
+      console.log(`  MEMORY INST: \n${formatMemory(this.mem8, segIP(this), segIP(this) + 11, 11)}`);
       // console.log(`  MEMORY STACK:\n${formatStack(this.mem8, this.reg16[regSP], 0x1000, 11)}`);
       console.log(`  REGISTERS    \n${formatRegisters(this, 11)}`);
       console.log(`  FLAGS:       \n${formatFlags(this.reg16[regFlags], 11)}`);
