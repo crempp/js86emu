@@ -1103,8 +1103,8 @@ export default class Addressing {
     if (offset === undefined && value === undefined) {
       // Calculate address
       let result = this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc;
-      this.cpu.addrIPInc += 1;
-      return this.readMem8(immSegment, result);
+      this.cpu.addrIPInc += 2;
+      return this.readMem16(immSegment, result);
     }
     else if (value === undefined) {
       // Read value from calculated address

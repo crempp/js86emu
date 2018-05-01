@@ -2293,42 +2293,43 @@ describe('Addressing Modes', () => {
     beforeEach(() => {
       cpu.mem8[0xABCD0] = 0xA2; // inst (byte)
       cpu.mem8[0xABCD1] = 0x34; // arg1 byte low
+      cpu.mem8[0xABCD2] = 0x56; // arg1 byte high
       cpu.instIPInc = 1; // usually the operation will do this
 
-      // 0xABCD * 10 + 0x34 = 0xABD04
-      cpu.mem8[0xABD04] = 0xDD;
-      // 0xCD01 * 10 + 0x34 = 0xCD044
-      cpu.mem8[0xCD044] = 0xEE;
+      // 0xABCD * 10 + 0x5634 = 0xB1304
+      cpu.mem8[0xB1304] = 0xDD;
+      // 0xCD01 * 10 + 0x5634 = 0xD2644
+      cpu.mem8[0xD2644] = 0xEE;
     });
     test('address', () => {
-      expect(addr.Ob(segment)).toBe(0x34);
+      expect(addr.Ob(segment)).toBe(0x5634);
     });
     test('address with segment prefix ES', () => {
       segment = cpu.reg16[regES];
-      expect(addr.Ob(segment)).toBe(0x34);
+      expect(addr.Ob(segment)).toBe(0x5634);
     });
     test('addr cycles', () => {
       addr.Ob(segment);
       expect(cpu.instIPInc).toBe(1);
-      expect(cpu.addrIPInc).toBe(1);
+      expect(cpu.addrIPInc).toBe(2);
     });
     test('read', () => {
-      expect(addr.Ob(segment, 0x34)).toBe(0xDD);
+      expect(addr.Ob(segment, 0x5634)).toBe(0xDD);
     });
     test('read with segment prefix ES', () => {
       segment = cpu.reg16[regES];
-      expect(addr.Ob(segment, 0x34)).toBe(0xEE);
+      expect(addr.Ob(segment, 0x5634)).toBe(0xEE);
     });
     test('write', () => {
-      addr.Ob(segment, 0x34, 0xAA);
+      addr.Ob(segment, 0x5634, 0xAA);
 
-      expect(cpu.mem8[0xABD04]).toBe(0xAA);
+      expect(cpu.mem8[0xB1304]).toBe(0xAA);
     });
     test('write with segment prefix ES', () => {
       segment = cpu.reg16[regES];
-      addr.Ob(segment, 0x34, 0xBB);
+      addr.Ob(segment, 0x5634, 0xBB);
 
-      expect(cpu.mem8[0xCD044]).toBe(0xBB);
+      expect(cpu.mem8[0xD2644]).toBe(0xBB);
     });
   });
 
