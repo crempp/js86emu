@@ -20,3 +20,7 @@ These documents were used while researching the x86 platform.
 ## Dissasembly
 https://onlinedisassembler.com/odaweb/
 https://onlinedisassembler.com/odaweb/Hl2HomgI/0
+
+## Files
+http://bochs.sourceforge.net/diskimages.html
+https://sourceforge.net/projects/opensoc86/files/bios/pcxtbios25/
