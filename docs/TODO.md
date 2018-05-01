@@ -198,4 +198,4 @@ no operation
   √ Mp
   √ Ob
   √ Ov
-    Sw
+  √ Sw

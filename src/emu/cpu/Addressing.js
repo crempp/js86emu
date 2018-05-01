@@ -787,8 +787,8 @@ export default class Addressing {
    * The operand is a byte, regardless of operand-size attribute.
    *   - [3] p. A-1 to A-3
    *
-   * @param {number} segment Memory segment NOT USED
-   * @param {(number|null)} [offset] Memory offset
+   * @param {number} segment NOT USED
+   * @param {(number|null)} [offset] NOT USED
    * @param {(number|null)} [value] Value to write (byte)
    * @return {(number|null)} In address mode returns null, in read mode returns
    *   the value from the register, in write mode does not return a value
@@ -818,8 +818,8 @@ export default class Addressing {
    * The operand is a word or doubleword, depending on operand-size attribute.
    *   - [3] p. A-1 to A-3
    *
-   * @param {number} segment Memory segment NOT USED
-   * @param {(number|null)} [offset] Memory offset
+   * @param {number} segment NOT USED
+   * @param {(number|null)} [offset] NOT USED
    * @param {(number|null)} [value] Value to write (word|doubleword)
    * @return {(number|null)} In address mode returns null, in read mode returns
    *   the value from the register, in write mode does not return a value
@@ -1150,8 +1150,59 @@ export default class Addressing {
     }
   }
 
+  /**
+   * The reg field of the ModR/M byte selects a segment register (for example,
+   * MOV (8C,8E)).
+   *   - [3] p. A-1 to A-3
+   *
+   * When an instruction operates on a segment register, the reg field in the
+   * ModR/M byte is called the sreg field and is used to specify the segment
+   * register. Table B-6 shows the encoding of the sreg field. This field is
+   * sometimes a 2-bit field (sreg2) and other times a 3-bit field (sreg3).
+   *   - [3] p. B-4
+   *
+   * @param {number} segment NOT USED
+   * @param {(number|null)} [offset] NOT USED
+   * @param {(number|null)} [value] Value to write (word|doubleword)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode does not return a value
+   */
   Sw (segment, offset, value) {
-
+    // Calculate address
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      switch (this.cpu.opcode.reg) {
+        case 0b000:
+          return this.cpu.reg16[regES];
+        case 0b001:
+          return this.cpu.reg16[regCS];
+        case 0b010:
+          return this.cpu.reg16[regSS];
+        case 0b011:
+          return this.cpu.reg16[regDS];
+      }
+    }
+    else {
+      // Write value to address
+      switch (this.cpu.opcode.reg) {
+        case 0b000:
+          this.cpu.reg16[regES] = value;
+          break;
+        case 0b001:
+          this.cpu.reg16[regCS] = value;
+          break;
+        case 0b010:
+          this.cpu.reg16[regSS] = value;
+          break;
+        case 0b011:
+          this.cpu.reg16[regDS] = value;
+          break;
+      }
+    }
   }
 
   /**
