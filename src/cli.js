@@ -43,15 +43,15 @@ let codeGolfConfig = new SystemConfig({
 
 let sysConfig = new SystemConfig({
   bios: {
-    file: "PCXTBIOS.BIN"
-    // file: "8086-tiny-bios.bin"
+    // file: "PCXTBIOS.BIN"
+    file: "8086-tiny-bios.bin"
   },
 
   renderer: {
     class: 'RendererPNG',
   },
 
-  // debug: true,
+  debug: true,
 });
 
 let repConfig = new SystemConfig({
@@ -100,7 +100,7 @@ async function runEmulation () {
   // console.log(`BEFORE: \n${formatMemory(system.cpu.mem8, 0x01020, 0x01020 + 0x10)}`);
 
   console.log("running...");
-  system.run(1200000);
+  system.run(70535);
 
   // console.log(`AFTER : \n${formatMemory(system.cpu.mem8, 0x01020, 0x01020 + 0x10)}`);
 
