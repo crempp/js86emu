@@ -740,12 +740,89 @@ export default class Operations {
     dst(segment, dstAddr, result);
   }
 
+  /**
+   * INT (Interrupt) activates the interrupt procedure specified by the
+   * interrupt-type operand. INT decrements the stack pointer by two, pushes
+   * the flags onto the stack, and clears the trap (TF) and interrupt-enable
+   * (IF) flags to disable single-step and maskable interrupts. The flags are
+   * stored in the format used by the PUSHF instruction. SP is decremented
+   * again by two, and the es register is pushed onto the stack. The address of
+   * the inter- rupt pointer is calculated by multiplying interrupt-type by
+   * four; the second word of the in- terrupt pointer replaces CS. SP again is
+   * decremented by two, and IP is pushed onto the stack and is replaced by the
+   * first word of the inter- rupt pointer. If interrupt-type = 3, the
+   * assembler generates a short (1 byte) form of the instruction, known as the
+   * breakpoint interrupt.
+   *
+   * Software interrupts can be used as "supervisor calls," i.e., requests for
+   * service from an operating system. A different interrupt-type can be used
+   * for each type of service that the operating system could supply for an
+   * application program. Soft- ware interrupts also may be used to check out
+   * interrupt service procedures written for hardware- initiated interrupts.
+   *   - [1] p.2-46
+   *
+   * Modifies flags: IF, TF
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src NOT USED
+   */
   int (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
+    let dstAddr = dst(segment);
+    let dstVal = dst(segment, dstAddr);
+
+    // 1. Flag register value is pushed on to the stack.
+    this.push16(this.cpu.reg16[regFlags]);
+    // 2. CS value of the Return address and IP value of the Return address
+    //    are push edon to the stack.
+    this.push16(this.cpu.reg16[regCS]);
+    this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
+    // 3. IP is loaded from the contents of the word location N x 4.
+    this.cpu.reg16[regIP] = ((this.cpu.mem8[seg2abs(0x0000, dstVal * 4 + 1)] << 8) |
+                              this.cpu.mem8[seg2abs(0x0000, dstVal * 4    )]);
+    // 4. CS is loaded from the contents of the next word location.
+    this.cpu.reg16[regCS] = ((this.cpu.mem8[seg2abs(0x0000, dstVal * 4 + 3)] << 8) |
+                              this.cpu.mem8[seg2abs(0x0000, dstVal * 4 + 2)]);
+    // 5. Interrupt Flag and Trap Flag are reset to 0.
+    this.cpu.reg16[regFlags] &= ~FLAG_IF_MASK;
+    this.cpu.reg16[regFlags] &= ~FLAG_TF_MASK;
   }
 
+  /**
+   * INTO (Interrupt on Overflow) generates a soft- ware interrupt if the
+   * overflow flag (OF) is set; otherwise control proceeds to the following
+   * instruction without activating an interrupt pro- cedure. INTO addresses
+   * the target interrupt pro- cedure (its type is 4) through the interrupt
+   * pointer at location IOH; it clears the TF and IF flags and otherwise
+   * operates like INT. INTO may be writ- ten following an arithmetic or
+   * logical operation to activate an interrupt procedure if overflow occurs.
+   *   - [1] p.2-46
+   *
+   * Modifies flags: IF, TF
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   into (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    if ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) > 0) {
+      let dstVal = 4;
+
+      // 1. Flag register value is pushed on to the stack.
+      this.push16(this.cpu.reg16[regFlags]);
+      // 2. CS value of the Return address and IP value of the Return address
+      //    are push edon to the stack.
+      this.push16(this.cpu.reg16[regCS]);
+      this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
+      // 3. IP is loaded from the contents of the word location N x 4.
+      this.cpu.reg16[regIP] = ((this.cpu.mem8[seg2abs(0x0000, dstVal * 4 + 1)] << 8) |
+        this.cpu.mem8[seg2abs(0x0000, dstVal * 4)]);
+      // 4. CS is loaded from the contents of the next word location.
+      this.cpu.reg16[regCS] = ((this.cpu.mem8[seg2abs(0x0000, dstVal * 4 + 3)] << 8) |
+        this.cpu.mem8[seg2abs(0x0000, dstVal * 4 + 2)]);
+      // 5. Interrupt Flag and Trap Flag are reset to 0.
+      this.cpu.reg16[regFlags] &= ~FLAG_IF_MASK;
+      this.cpu.reg16[regFlags] &= ~FLAG_TF_MASK;
+    }
   }
 
   iret (dst, src) {

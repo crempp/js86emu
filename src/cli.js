@@ -3,6 +3,14 @@ import SystemConfig from "./emu/config/SystemConfig";
 import {segIP} from "./emu/utils/Utils";
 import {formatMemory} from "./emu/utils/Debug";
 
+function waitAndExit(wait=1000) {
+  // If we're using RendererPNG or RendererBin we can't exit right away or the
+  // writes won't finish
+  setTimeout(() => {
+    process.exit();
+  }, wait);
+}
+
 let codeGolfConfig = new SystemConfig({
   memorySize: 1024 * 1024,
 
@@ -100,7 +108,7 @@ async function runEmulation () {
   // console.log(`BEFORE: \n${formatMemory(system.cpu.mem8, 0x01020, 0x01020 + 0x10)}`);
 
   console.log("running...");
-  system.run(70535);
+  system.run(100000);
 
   // console.log(`AFTER : \n${formatMemory(system.cpu.mem8, 0x01020, 0x01020 + 0x10)}`);
 
@@ -115,11 +123,9 @@ if (config.debug) {
 }
 
 runEmulation().then(() => {
-  // If we're using RendererPNG or RendererBin we can't exit right away or the
-  // writes won't finish
-  setTimeout(() => {
-    process.exit();
-  }, 1000);
+  waitAndExit();
 }).catch((e) => {
   console.error(e);
+  waitAndExit();
 });
+

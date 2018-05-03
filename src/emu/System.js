@@ -141,7 +141,7 @@ export default class System {
         this.videoCard.scan();
       }
 
-      if (this.cycleCount >= 0) {
+      if (this.cycleCount >= 70545) {
       // if (this.cpu.reg16[regIP] === 0xE8) {
         let a = 1;
       }
