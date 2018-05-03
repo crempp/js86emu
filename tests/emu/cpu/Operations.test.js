@@ -1077,10 +1077,26 @@ describe('Operation methods', () => {
   });
 
   describe('iret', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.iret();
-      }).toThrowError(FeatureNotImplementedException);
+    test('IRET', () => {
+      cpu.mem8[0x022FF] = 0xCF; // inst (byte)
+      cpu.reg16[regSP] = 0x01A;
+
+      cpu.mem8[0x401F] = 0x55;
+      cpu.mem8[0x401E] = 0xAA;
+      cpu.mem8[0x401D] = 0x02;
+      cpu.mem8[0x401C] = 0x20;
+      cpu.mem8[0x401B] = 0x01;
+      cpu.mem8[0x401A] = 0x01;
+
+      cpu.decode();
+      cpu.instIPInc = 1;
+      oper.iret(null, null);
+
+      expect(cpu.reg16[regIP]).toBe(0x0101);
+      expect(cpu.reg16[regCS]).toBe(0x0220);
+      expect(cpu.reg16[regFlags]).toBe(0x55AA);
+      expect(cpu.instIPInc).toBe(1);
+      expect(cpu.addrIPInc).toBe(0);
     });
   });
 

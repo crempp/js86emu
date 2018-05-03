@@ -708,10 +708,6 @@ export default class Operations {
     }
 
     dst(segment, dstAddr, portVal);
-    // this.cpu.ports8[dstVal] = (srcVal & 0x00FF);
-    // if (size !== b) {
-    //   this.cpu.ports8[dstVal + 1] = (srcVal >> 8 & 0x00FF);
-    // }
   }
 
   /**
@@ -825,8 +821,23 @@ export default class Operations {
     }
   }
 
+  /**
+   * IRET (Interrupt Return) transfers control back to the point of
+   * interruption by popping IP, CS and the flags from the stack. IRET thus
+   * affects all flags by restoring them to previously saved values. IRET is
+   * used to exit any interrupt procedure, whether activated by hardware or
+   * software.
+   *   - [1] p.2-46
+   *
+   * Modifies flags: ?
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   iret (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.reg16[regIP] = this.pop16();
+    this.cpu.reg16[regCS] = this.pop16();
+    this.cpu.reg16[regFlags] = this.pop16();
   }
 
   /**

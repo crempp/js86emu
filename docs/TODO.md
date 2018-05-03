@@ -56,8 +56,8 @@ general
 	√ POP
 	√ XCHG
 	  XLAT
-	  IN
-	  OUT
+	√ IN
+	√ OUT
 address object
 	√ LEA
 	√ LDS
@@ -123,7 +123,7 @@ String
 	√ LODS
 	√ STOS
 
-### Program Transfer 2-43
+### √ Program Transfer 2-43
 
 unconditional
 	√ CALL
@@ -136,10 +136,10 @@ iteration control
 	√ LOOPE/LOOPZ
 	√ LOOPNE/LOOPNZ
 	√ JCXZ
-interupt
-	  INT
-	  INTO
-	  IRET
+interrupt
+	√ INT
+	√ INTO
+	√ IRET
 
 ### Processor Control 2-47
 
