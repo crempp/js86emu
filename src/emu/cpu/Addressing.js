@@ -1215,7 +1215,7 @@ export default class Addressing {
   readRMReg8 (segment, offset) {
     if (this.cpu.opcode.mod === 0b11) {
       // Two register instruction; use REG table
-      return this.readRegVal(true);
+      return this.readRegVal(true, b);
     }
     else {
       // Use R/M Table 1 or 2 for R/M operand
@@ -1234,7 +1234,7 @@ export default class Addressing {
   readRMReg16 (segment, offset) {
     if (this.cpu.opcode.mod === 0b11) {
       // Two register instruction; use REG table
-      return this.readRegVal(true);
+      return this.readRegVal(true, w);
     }
     else {
       // Use R/M Table 1 or 2 for R/M operand
@@ -1253,6 +1253,7 @@ export default class Addressing {
   readRMReg32 (segment, offset) {
     if (this.cpu.opcode.mod === 0b11) {
       // Two register instruction; use REG table
+      // TODO: Is this codepath ever hit? Becuase I don't think it'll work
       return this.readRegVal(true);
     }
     else {

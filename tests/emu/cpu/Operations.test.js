@@ -2177,6 +2177,20 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(2);
       expect(cpu.addrIPInc).toBe(4);
     });
+    test('[regression] mov ES AX - where ES is Sw and Ax is Ew', () => {
+      cpu.instIPInc = 2;
+      cpu.mem8[0x00FF] = 0x8E; // Instruction
+      cpu.mem8[0x0100] = 0xC0; // Addressing
+      cpu.reg16[regAX] = 0xFFFF;
+      cpu.reg16[regES] = 0x0000;
+
+      cpu.decode();
+      oper.mov(addr.Sw.bind(addr), addr.Ew.bind(addr));
+
+      expect(cpu.reg16[regES]).toBe(0xFFFF);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
   });
 
   describe('movsb', () => {
