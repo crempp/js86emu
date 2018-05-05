@@ -1016,8 +1016,8 @@ describe('Operation methods', () => {
       // CS and IP updated to called location
       expect(cpu.reg16[regIP]).toBe(0xBC9A);
       expect(cpu.reg16[regCS]).toBe(0xF0DE);
-      expect(cpu.instIPInc).toBe(1);
-      expect(cpu.addrIPInc).toBe(1);
+      expect(cpu.instIPInc).toBe(0);
+      expect(cpu.addrIPInc).toBe(0);
     });
   });
 
@@ -1071,7 +1071,7 @@ describe('Operation methods', () => {
       // CS and IP updated to called location
       expect(cpu.reg16[regIP]).toBe(0x3412);
       expect(cpu.reg16[regCS]).toBe(0x7856);
-      expect(cpu.instIPInc).toBe(1);
+      expect(cpu.instIPInc).toBe(0);
       expect(cpu.addrIPInc).toBe(0);
     });
   });

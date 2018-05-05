@@ -618,3 +618,39 @@ describe('Segment prefix', () => {
     expect(cpu.addrIPInc).toBe(2);
   });
 });
+
+
+describe('Regressions', () => {
+  let cpu;
+  beforeEach(() => {
+    cpu = new CPU8086(new SystemConfig({
+      memorySize: 1048576,
+      debug: false,
+    }));
+    cpu.reg16[regIP] = 0x00FF;
+    cpu.reg16[regCS] = 0x0000;
+    cpu.reg16[regDS] = 0x0300;
+    cpu.reg16[regES] = 0x0400;
+    cpu.reg16[regSS] = 0x0500;
+    cpu.reg16[regFlags] = 0x0000;
+  });
+  test('[regression] Interrupt jumping to 2 bytes past the intended target', () => {
+    cpu.instIPInc = 2;
+    // IVT
+    cpu.mem8[0x004C] = 0xAF;
+    cpu.mem8[0x004D] = 0x0C;
+    cpu.mem8[0x004E] = 0x00;
+    cpu.mem8[0x004F] = 0xF0;
+
+    // Jump location
+    cpu.mem8[0xF0CAF] = 0x90;
+
+    cpu.mem8[0x00FF] = 0xCD; // INT
+    cpu.mem8[0x0100] = 0x13; // 0x13
+
+    cpu.cycle(); // INT
+
+    expect(cpu.reg16[regIP]).toBe(0x0CAF);
+    expect(cpu.reg16[regCS]).toBe(0xF000);
+  });
+});

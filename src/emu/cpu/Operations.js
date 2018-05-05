@@ -782,6 +782,12 @@ export default class Operations {
     // 5. Interrupt Flag and Trap Flag are reset to 0.
     this.cpu.reg16[regFlags] &= ~FLAG_IF_MASK;
     this.cpu.reg16[regFlags] &= ~FLAG_TF_MASK;
+
+    // HACK! ... or is it?
+    // The way the cycle code is structured we will end up with the IP being
+    // incremented by the instruction base size if we don't reset it.
+    this.cpu.instIPInc = 0;
+    this.cpu.addrIPInc = 0;
   }
 
   /**
@@ -818,6 +824,12 @@ export default class Operations {
       // 5. Interrupt Flag and Trap Flag are reset to 0.
       this.cpu.reg16[regFlags] &= ~FLAG_IF_MASK;
       this.cpu.reg16[regFlags] &= ~FLAG_TF_MASK;
+
+      // HACK! ... or is it?
+      // The way the cycle code is structured we will end up with the IP being
+      // incremented by the instruction base size if we don't reset it.
+      this.cpu.instIPInc = 0;
+      this.cpu.addrIPInc = 0;
     }
   }
 
