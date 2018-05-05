@@ -1095,7 +1095,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regIP]).toBe(0x0101);
       expect(cpu.reg16[regCS]).toBe(0x0220);
       expect(cpu.reg16[regFlags]).toBe(0x55AA);
-      expect(cpu.instIPInc).toBe(1);
+      expect(cpu.instIPInc).toBe(0);
       expect(cpu.addrIPInc).toBe(0);
     });
   });
@@ -2266,10 +2266,41 @@ describe('Operation methods', () => {
   });
 
   describe('mul', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.mul();
-      }).toThrowError(FeatureNotImplementedException);
+    test('multiply by zero', () => {
+      // MUL BX
+      cpu.reg16[regFlags] = 0xFFFF;
+      cpu.mem8[0x00FF] = 0xF7; // Inst
+      cpu.mem8[0x0100] = 0xE3; // Addr byte
+      cpu.reg16[regAX] = 0x0112;
+      cpu.reg16[regBX] = 0x0000;
+      cpu.reg16[regDX] = 0xFFFF;
+
+      cpu.decode();
+      oper.mul(addr.Ev.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x0000);
+      expect(cpu.reg16[regDX]).toBe(0x0000);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+    test('unsigned multiply', () => {
+      // MUL BX
+      cpu.reg16[regFlags] = 0x0000;
+      cpu.mem8[0x00FF] = 0xF7; // Inst
+      cpu.mem8[0x0100] = 0xE3; // Addr byte
+      cpu.reg16[regAX] = 0x1234;
+      cpu.reg16[regBX] = 0x2345;
+      cpu.reg16[regDX] = 0xFFFF;
+
+      cpu.decode();
+      oper.mul(addr.Ev.bind(addr));
+
+      // 0x1234 * 0x2345 = 0x2820404
+      // => 0x0282, 0x0404
+      expect(cpu.reg16[regAX]).toBe(0x0404);
+      expect(cpu.reg16[regDX]).toBe(0x0282);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
     });
   });
 

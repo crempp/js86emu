@@ -850,6 +850,12 @@ export default class Operations {
     this.cpu.reg16[regIP] = this.pop16();
     this.cpu.reg16[regCS] = this.pop16();
     this.cpu.reg16[regFlags] = this.pop16();
+
+    // HACK! ... or is it?
+    // The way the cycle code is structured we will end up with the IP being
+    // incremented by the instruction base size if we don't reset it.
+    this.cpu.instIPInc = 0;
+    this.cpu.addrIPInc = 0;
   }
 
   /**
@@ -1810,13 +1816,50 @@ export default class Operations {
    * AF, PF, SF and ZF is undefined following execution of MUL.
    *   - [1] p.2-36
    *
-   * Modifies flags: ?
+   * Modifies flags: CF, OF
    *
    * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} src NOT USED
    */
   mul (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let segment = this.cpu.reg16[this.cpu.addrSeg];
+    let dstAddr = dst(segment);
+    let dstVal = dst(segment, dstAddr);
+    let multipler, result;
+
+    if (this.cpu.opcode.addrSize === b) {
+      multipler = this.cpu.reg8[regAL];
+      result = multipler * dstVal;
+      this.cpu.reg16[regAX] = result;
+
+      if ((result >> 8 & 0xFF) === 0) {
+        // Clear
+        this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
+        this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
+      }
+      else {
+        // Set
+        this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
+        this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
+      }
+    }
+    else {
+      multipler = this.cpu.reg16[regAX];
+      result = multipler * dstVal;
+      this.cpu.reg16[regDX] = (result >> 16 & 0xFFFF);
+      this.cpu.reg16[regAX] = (result & 0xFFFF);
+
+      if ((result >> 16 & 0xFFFF) === 0) {
+        // Clear
+        this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
+        this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
+      }
+      else {
+        // Set
+        this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
+        this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
+      }
+    }
   }
 
   /**

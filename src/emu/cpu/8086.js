@@ -478,13 +478,13 @@ export default class CPU8086 extends CPU {
     // Group 3b instructions
     this.inst[0xF7] = [];
     this.inst[0xF7][0] = new inst(oper.test,   2, v, addr.Ev, addr.Iv);
-    this.inst[0xF7][1] = new inst(oper.notimp, 0, u                 );
+    this.inst[0xF7][1] = new inst(oper.notimp, 0, u                  );
     this.inst[0xF7][2] = new inst(oper.not,    2, v, addr.Ev,        );
     this.inst[0xF7][3] = new inst(oper.neg,    2, v, addr.Ev,        );
     this.inst[0xF7][4] = new inst(oper.mul,    2, v, addr.Ev,        );
-    this.inst[0xF7][5] = new inst(oper.imul,   0, v, addr.Ev,        );
-    this.inst[0xF7][6] = new inst(oper.div,    0, v, addr.Ev,        );
-    this.inst[0xF7][7] = new inst(oper.idiv,   0, v, addr.Ev,        );
+    this.inst[0xF7][5] = new inst(oper.imul,   2, v, addr.Ev,        );
+    this.inst[0xF7][6] = new inst(oper.div,    2, v, addr.Ev,        );
+    this.inst[0xF7][7] = new inst(oper.idiv,   2, v, addr.Ev,        );
 
     this.inst[0xF8]    = new inst(oper.clc,    1, u                  );
     this.inst[0xF9]    = new inst(oper.stc,    1, u                  );

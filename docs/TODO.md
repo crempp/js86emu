@@ -85,7 +85,7 @@ subtraction
 	  AAS
 	  DAS
 multiplication
-	  MUL
+	√ MUL
 	  IMUL
 	  AAM
 division
