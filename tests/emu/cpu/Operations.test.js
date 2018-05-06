@@ -414,8 +414,8 @@ describe('Operation methods', () => {
       expect(cpu.mem8[0x401C]).toBe(0x04);
       expect(cpu.mem8[0x401D]).toBe(0x01);
       // CS and IP updated to called location
-      expect(cpu.reg16[regCS]).toBe(0x5678);
-      expect(cpu.reg16[regIP]).toBe(0x9ABC);
+      expect(cpu.reg16[regCS]).toBe(0x9ABC);
+      expect(cpu.reg16[regIP]).toBe(0x5678);
       expect(cpu.instIPInc).toBe(1);
       expect(cpu.addrIPInc).toBe(4);
     });
@@ -1489,8 +1489,8 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x1234);
-      expect(cpu.instIPInc).toBe(1);
-      expect(cpu.addrIPInc).toBe(2);
+      expect(cpu.instIPInc).toBe(0);
+      expect(cpu.addrIPInc).toBe(0);
     });
     test('JMP Jv (near) negative offset', () => {
       cpu.instIPInc = 1;
@@ -1502,8 +1502,8 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0xFF - 0x0A);
-      expect(cpu.instIPInc).toBe(1);
-      expect(cpu.addrIPInc).toBe(2);
+      expect(cpu.instIPInc).toBe(0);
+      expect(cpu.addrIPInc).toBe(0);
     });
     test('JMP Ap (far)', () => {
       cpu.instIPInc = 1;
@@ -1515,10 +1515,10 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jmp(addr.Ap.bind(addr), null);
 
-      expect(cpu.reg16[regCS]).toBe(0x5678);
-      expect(cpu.reg16[regIP]).toBe(0x9ABC);
-      expect(cpu.instIPInc).toBe(1);
-      expect(cpu.addrIPInc).toBe(4);
+      expect(cpu.reg16[regCS]).toBe(0x9ABC);
+      expect(cpu.reg16[regIP]).toBe(0x5678);
+      expect(cpu.instIPInc).toBe(0);
+      expect(cpu.addrIPInc).toBe(0);
     });
     test('JMP Jb (short) positive offset', () => {
       cpu.instIPInc = 1;
@@ -1529,8 +1529,8 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x56);
-      expect(cpu.instIPInc).toBe(1);
-      expect(cpu.addrIPInc).toBe(1);
+      expect(cpu.instIPInc).toBe(0);
+      expect(cpu.addrIPInc).toBe(0);
     });
     test('JMP Jb (short) negative offset', () => {
       cpu.instIPInc = 1;
@@ -1541,8 +1541,8 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0xFF - 0x0A);
-      expect(cpu.instIPInc).toBe(1);
-      expect(cpu.addrIPInc).toBe(1);
+      expect(cpu.instIPInc).toBe(0);
+      expect(cpu.addrIPInc).toBe(0);
     });
     test('JMP Ev (near)', () => {
       cpu.instIPInc = 2;
@@ -1554,7 +1554,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0x1234);
-      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.instIPInc).toBe(0);
       expect(cpu.addrIPInc).toBe(0);
     });
     test('JMP Mp (far)', () => {
@@ -1571,7 +1571,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regIP]).toBe(0x5678);
       expect(cpu.reg16[regCS]).toBe(0x9ABC);
-      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.instIPInc).toBe(0);
       expect(cpu.addrIPInc).toBe(0);
     });
   });

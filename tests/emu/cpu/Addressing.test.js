@@ -1844,7 +1844,7 @@ describe('Addressing Modes', () => {
       expect(cpu.addrIPInc).toBe(4);
     });
     test('read', () => {
-      expect(addr.Ap(segment, 0x0001)).toEqual([0x1234, 0x5678]);
+      expect(addr.Ap(segment, 0x0001)).toEqual([0x5678, 0x1234]);
     });
     test('write throws', () => {
       expect(() => {

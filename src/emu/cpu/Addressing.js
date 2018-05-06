@@ -631,9 +631,9 @@ export default class Addressing {
     else if (value === undefined) {
       // Read value from calculated address by getting the 32bit far address
       // (segment:offset) from the instruction argument
-      let s = (this.cpu.mem8[seg2abs(segment, offset + 1)] << 8) |
+      let o = (this.cpu.mem8[seg2abs(segment, offset + 1)] << 8) |
                this.cpu.mem8[seg2abs(segment, offset    )];
-      let o = (this.cpu.mem8[seg2abs(segment, offset + 3)] << 8) |
+      let s = (this.cpu.mem8[seg2abs(segment, offset + 3)] << 8) |
                this.cpu.mem8[seg2abs(segment, offset + 2)];
       return [s, o];
     }

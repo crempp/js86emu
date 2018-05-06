@@ -786,8 +786,7 @@ export default class Operations {
     // HACK! ... or is it?
     // The way the cycle code is structured we will end up with the IP being
     // incremented by the instruction base size if we don't reset it.
-    this.cpu.instIPInc = 0;
-    this.cpu.addrIPInc = 0;
+    this.cpu.instIPInc = this.cpu.addrIPInc = 0;
   }
 
   /**
@@ -828,8 +827,7 @@ export default class Operations {
       // HACK! ... or is it?
       // The way the cycle code is structured we will end up with the IP being
       // incremented by the instruction base size if we don't reset it.
-      this.cpu.instIPInc = 0;
-      this.cpu.addrIPInc = 0;
+      this.cpu.instIPInc = this.cpu.addrIPInc = 0;
     }
   }
 
@@ -854,8 +852,7 @@ export default class Operations {
     // HACK! ... or is it?
     // The way the cycle code is structured we will end up with the IP being
     // incremented by the instruction base size if we don't reset it.
-    this.cpu.instIPInc = 0;
-    this.cpu.addrIPInc = 0;
+    this.cpu.instIPInc = this.cpu.addrIPInc = 0;
   }
 
   /**
@@ -1185,6 +1182,11 @@ export default class Operations {
         }
         break;
     }
+
+    // HACK! ... or is it?
+    // The way the cycle code is structured we will end up with the IP being
+    // incremented by the instruction base size if we don't reset it.
+    this.cpu.instIPInc = this.cpu.addrIPInc = 0;
   }
 
   /**
@@ -2310,7 +2312,7 @@ export default class Operations {
     // HACK! ... or is it?
     // The way the cycle code is structured we will end up with the IP being
     // incremented by the instruction base size if we don't reset it.
-    this.cpu.instIPInc = 0;
+    this.cpu.instIPInc = this.cpu.addrIPInc = 0;
   }
 
   /**
