@@ -43,6 +43,8 @@ const DEFAULTS = {
     },
   },
 
+  debugAtCycle: null,
+  debugAtIP: null,
   debug: false,
 };
 

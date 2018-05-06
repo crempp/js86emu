@@ -1,7 +1,6 @@
 import System from "./emu/System";
 import SystemConfig from "./emu/config/SystemConfig";
-import {segIP} from "./emu/utils/Utils";
-import {formatMemory} from "./emu/utils/Debug";
+import { debug } from "./emu/utils/Debug";
 
 function waitAndExit(wait=1000) {
   // If we're using RendererPNG or RendererBin we can't exit right away or the
@@ -51,66 +50,31 @@ let codeGolfConfig = new SystemConfig({
 
 let sysConfig = new SystemConfig({
   bios: {
-    // file: "PCXTBIOS.BIN"
-    file: "8086-tiny-bios.bin"
+    file: "PCXTBIOS.BIN"
   },
 
   renderer: {
     class: 'RendererPNG',
   },
 
-  debug: true,
-});
-
-let repConfig = new SystemConfig({
-  cpu: {
-    registers16: [
-      /* AX */ 0x00AA,
-      /* BX */ 0,
-      /* CX */ 0x0010,
-      /* DX */ 0,
-      /* SI */ 0,
-      /* DI */ 0x0020,
-      /* BP */ 0,
-      /* SP */ 0,
-      /* IP */ 0,
-      /* CS */ 0,
-      /* DS */ 0,
-      /* ES */ 0x0100,
-      /* SS */ 0,
-      /* FL */ 0
-    ],
-  },
-
-  renderer: {
-    class: 'RendererPNG',
-  },
-
-  debug: true,
+  // debugAtCycle: 8258,
+  // debugAtCycle: 361079,
+  debugAtCycle: 459598,
+  // debugAtIP: 0,
+  debug: false,
 });
 
 /*****************************************************************************/
 let config = sysConfig;
+// let config = codeGolfConfig;
 let system = new System(config);
-
-// system.cpu.mem8[0x00] = 0xF3;
-// system.cpu.mem8[0x01] = 0xAA;
-// system.cpu.mem8[0x02] = 0xF4;
-// system.loadMem([
-//   0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-//   0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10
-// ], 0x01020);
 
 async function runEmulation () {
   console.log("booting...");
   await system.boot();
 
-  // console.log(`BEFORE: \n${formatMemory(system.cpu.mem8, 0x01020, 0x01020 + 0x10)}`);
-
   console.log("running...");
-  system.run(100000);
-
-  // console.log(`AFTER : \n${formatMemory(system.cpu.mem8, 0x01020, 0x01020 + 0x10)}`);
+  system.run(1000000);
 
   // force a video scan at the end of the run
   system.videoCard.scan();
@@ -125,6 +89,7 @@ if (config.debug) {
 runEmulation().then(() => {
   waitAndExit();
 }).catch((e) => {
+  debug(system);
   console.error(e);
   waitAndExit();
 });

@@ -13,20 +13,19 @@ import {
   STATE_REP_NONE, STATE_REP_Z, STATE_REP, STATE_REP_NZ,
   STATE_SEG_NONE, SEG_PREFIX_INSTS,
 } from '../Constants';
-import {
-  hexString16, formatOpcode, formatMemory, formatFlags, formatRegisters,
-  formatStack
-} from '../utils/Debug'
+import { debug } from '../utils/Debug'
 
 /**
  * @class
  * @extends CPU
  */
 export default class CPU8086 extends CPU {
-  constructor(config) {
+  constructor(config, system) {
     super();
 
     this.config = config;
+
+    this.system = system;
 
     this.PORT_COUNT = 0x10000;
 
@@ -132,7 +131,7 @@ export default class CPU8086 extends CPU {
         return `${this.opName()} ${this.dstName()}, ${this.srcName()}`;
       }
       opName () {
-        return typeof this.op === 'function' ? this.op.name.replace("bound ", "") : "[Unknown Op]";
+        return typeof this.op === 'function' ? this.op.name.replace("bound ", "").replace("_", "") : "[Unknown Op]";
       }
       dstName () {
         return typeof this.dst === 'function' ? this.dst.name.replace("bound ", "") : "";
@@ -618,19 +617,16 @@ export default class CPU8086 extends CPU {
     // Decode the instruction
     this.decode();
 
-    if (this.config.debug) {
-      console.log(`  INSTRUCTION: ${this.opcode.string}`);
-      console.log(`  CS:IP:       ${hexString16(this.reg16[regCS])}:${hexString16(this.reg16[regIP])}`);
-      console.log(`  OPCODE:      \n${formatOpcode(this.opcode, 11)}`);
-      console.log(`  MEMORY INST: \n${formatMemory(this.mem8, segIP(this), segIP(this) + 11, 11)}`);
-      // console.log(`  MEMORY STACK:\n${formatStack(this.mem8, this.reg16[regSP], 0x1000, 11)}`);
-      console.log(`  REGISTERS    \n${formatRegisters(this, 11)}`);
-      console.log(`  FLAGS:       \n${formatFlags(this.reg16[regFlags], 11)}`);
-    }
+    // if (this.system.cycleCount > 6 && this.opcode.opcode_byte === 0xFA) this.config.debug = true;
 
     // Increase the instIPInc by the instruction base size
     if (this.prefixRepeatState === STATE_REP_NONE) {
       this.instIPInc += this.opcode.inst.baseSize;
+    }
+
+    if (this.config.debug) {
+      debug(this.system);
+      debugger;
     }
 
     // Run the instruction
