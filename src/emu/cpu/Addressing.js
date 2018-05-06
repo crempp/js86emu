@@ -1274,7 +1274,7 @@ export default class Addressing {
   writeRMReg8(segment, offset, value) {
     if (this.cpu.opcode.mod === 0b11) {
       // Two register instruction; use REG table
-      this.writeRegVal(value, true);
+      this.writeRegVal(value, true, b);
     }
     else {
       // Use R/M Table 1 or 2 for R/M operand
@@ -1294,7 +1294,7 @@ export default class Addressing {
   writeRMReg16(segment, offset, value) {
     if (this.cpu.opcode.mod === 0b11) {
       // Two register instruction; use REG table
-      this.writeRegVal(value, true);
+      this.writeRegVal(value, true, w);
     }
     else {
       // Use R/M Table 1 or 2 for R/M operand

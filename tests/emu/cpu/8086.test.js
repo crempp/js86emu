@@ -653,4 +653,16 @@ describe('Regressions', () => {
     expect(cpu.reg16[regIP]).toBe(0x0CAF);
     expect(cpu.reg16[regCS]).toBe(0xF000);
   });
+
+  test('[regression] MOV AX CS where AX is from Ew and CS is from Sw ', () => {
+    // cpu.instIPInc = 2;
+    cpu.reg16[regAX] = 0xFF23;
+    cpu.reg16[regCS] = 0xF000;
+    cpu.mem8[0xF00FF] = 0x8C; // MOV
+    cpu.mem8[0xF0100] = 0xC8; // Addr
+
+    cpu.cycle();
+
+    expect(cpu.reg16[regAX]).toBe(0xF000);
+  });
 });
