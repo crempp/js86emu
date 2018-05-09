@@ -1098,13 +1098,14 @@ export default class Addressing {
    *   the given value to the given address
    */
   Ob (segment, offset, value) {
-    let immSegment = this.cpu.reg16[regCS]; // Imm values are in the CS segment
+
 
     if (offset === undefined && value === undefined) {
       // Calculate address
-      let result = this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc;
+      let operandSeg = this.cpu.reg16[regCS]; // Imm values are in the CS segment
+      let operandAddr = this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc;
       this.cpu.addrIPInc += 2;
-      return this.readMem16(immSegment, result);
+      return this.readMem16(operandSeg, operandAddr);
     }
     else if (value === undefined) {
       // Read value from calculated address
@@ -1131,14 +1132,13 @@ export default class Addressing {
    *   the given value to the given address
    */
   Ov (segment, offset, value) {
-    let immSegment = this.cpu.reg16[regCS]; // Imm values are in the CS segment
-
     if (offset === undefined && value === undefined) {
       // Calculate address
-      let result = this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc;
-      let v = this.readMem16(immSegment, result);
+      let operandSeg = this.cpu.reg16[regCS]; // Imm values are in the CS segment
+      let operandAddr = this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc;
+      let operand = this.readMem16(operandSeg, operandAddr);
       this.cpu.addrIPInc += 2;
-      return v;
+      return operand;
     }
     else if (value === undefined) {
       // Read value from calculated address
