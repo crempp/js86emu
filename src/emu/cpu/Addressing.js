@@ -6,7 +6,7 @@ import {
   regCS, regDS, regES, regSS,
   regFlags,
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
-  FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK, b, w, v
+  FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK, b, w, v, STATE_SEG_NONE
 } from '../Constants';
 import { formatOpcode, hexString16, hexString32 } from "../utils/Debug";
 import {
@@ -1303,6 +1303,12 @@ export default class Addressing {
     }
   }
 
+  /**
+   * Calculate an offset address in RM addressing mode
+   *
+   * @param {number} segment Memory segment
+   * @return {number} Calculated address
+   */
   calcRMAddr (segment) {
     let offset;
     switch (this.cpu.opcode.mod) {
@@ -1320,7 +1326,7 @@ export default class Addressing {
   }
 
   /**
-   * Calculate an offset address in RM addressing mode
+   * Calculate an offset address in RM addressing mode with a displacement
    *
    * I don't think there's a difference between the functionality for a byte
    * or a word for calcRMAddr. If I'm wrong come back to this.
@@ -1346,11 +1352,11 @@ export default class Addressing {
         break;
       case 0b010 : // [BP + SI]
         addr = this.cpu.reg16[regBP] + this.cpu.reg16[regSI];
-        this.cpu.addrSeg = regSS;
+        if (this.cpu.prefixSegmentState === STATE_SEG_NONE) this.cpu.addrSeg = regSS;
         break;
       case 0b011 : // [BP + DI]
         addr = this.cpu.reg16[regBP] + this.cpu.reg16[regDI];
-        this.cpu.addrSeg = regSS;
+        if (this.cpu.prefixSegmentState === STATE_SEG_NONE) this.cpu.addrSeg = regSS;
         break;
       case 0b100 : // [SI]
         addr = this.cpu.reg16[regSI];
@@ -1409,9 +1415,11 @@ export default class Addressing {
         break;
       case 0b010 : // [BP + SI] + disp
         addr = this.cpu.reg16[regBP] + this.cpu.reg16[regSI] + disp;
+        if (this.cpu.prefixSegmentState === STATE_SEG_NONE) this.cpu.addrSeg = regSS;
         break;
       case 0b011 : // [BP + DI] + disp
         addr = this.cpu.reg16[regBP] + this.cpu.reg16[regDI] + disp;
+        if (this.cpu.prefixSegmentState === STATE_SEG_NONE) this.cpu.addrSeg = regSS;
         break;
       case 0b100 : // [SI] + disp
         addr = this.cpu.reg16[regSI] + disp;
@@ -1421,6 +1429,7 @@ export default class Addressing {
         break;
       case 0b110 : // [BP] + disp
         addr = this.cpu.reg16[regBP] + disp;
+        if (this.cpu.prefixSegmentState === STATE_SEG_NONE) this.cpu.addrSeg = regSS;
         break;
       case 0b111 : // [BX] + disp
         addr = this.cpu.reg16[regBX] + disp;

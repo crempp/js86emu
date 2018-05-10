@@ -1,8 +1,8 @@
 import CPU8086 from '../../../src/emu/cpu/8086';
 import SystemConfig from "../../../src/emu/config/SystemConfig";
 import {
-  regAX, regAL, regCS, regCX, regDI, regDS, regES,
-  regSI, regSS, regIP, regFlags,
+  regAX, regAL, regBX, regCS, regCX, regDI, regDS, regES,
+  regBP, regSI, regSS, regIP, regFlags,
   FLAG_ZF_MASK, STATE_REP_NONE
 } from "../../../src/emu/Constants";
 
@@ -654,7 +654,6 @@ describe('Regressions', () => {
     expect(cpu.reg16[regCS]).toBe(0xF000);
   });
   test('[regression] MOV AX CS where AX is from Ew and CS is from Sw ', () => {
-    // cpu.instIPInc = 2;
     cpu.reg16[regAX] = 0xFF23;
     cpu.reg16[regCS] = 0xF000;
     cpu.mem8[0xF00FF] = 0x8C; // MOV
@@ -664,10 +663,7 @@ describe('Regressions', () => {
 
     expect(cpu.reg16[regAX]).toBe(0xF000);
   });
-
-
   test('[regression] AND AL 0b00110000 - IP increments correctly ', () => {
-    // cpu.instIPInc = 2;
     cpu.reg16[regAX] = 0x0000;
     cpu.mem8[0x00FF] = 0x24; // AND
     cpu.mem8[0x0100] = 0x30; // Operand
@@ -678,5 +674,43 @@ describe('Regressions', () => {
     expect(cpu.reg16[regIP]).toBe(0x0101);
     expect(cpu.instIPInc).toBe(1);
     expect(cpu.instIPInc).toBe(1);
+  });
+  test('[regression] MOV BX, [BP+0] - BP uses SS segment ', () => {
+    cpu.reg16[regBX] = 0x0000;
+    cpu.reg16[regBP] = 0x00E6;
+    cpu.reg16[regSS] = 0x0030;
+    cpu.mem8[0x03E6] = 0x00;
+    cpu.mem8[0x03E7] = 0xB0;
+
+    cpu.mem8[0x00FF] = 0x8B; // MOV
+    cpu.mem8[0x0100] = 0x5E; // Addr
+    cpu.mem8[0x0101] = 0x00; // Operand
+
+
+    cpu.cycle();
+
+    expect(cpu.reg16[regBX]).toBe(0xB000);
+    expect(cpu.instIPInc).toBe(2);
+    expect(cpu.addrIPInc).toBe(1);
+  });
+  test('[regression] MOV BX, [BP+0] - BP does not use SS segment if override', () => {
+    cpu.reg16[regBX] = 0x0000;
+    cpu.reg16[regBP] = 0x00E6;
+    cpu.reg16[regSS] = 0x0030;
+    cpu.reg16[regES] = 0x0040;
+    cpu.mem8[0x04E6] = 0x00;
+    cpu.mem8[0x04E7] = 0xB0;
+
+    cpu.mem8[0x00FF] = 0x26; // ES
+    cpu.mem8[0x0100] = 0x8B; // MOV
+    cpu.mem8[0x0101] = 0x5E; // Addr
+    cpu.mem8[0x0102] = 0x00; // Operand
+
+    cpu.cycle();
+    cpu.cycle();
+
+    expect(cpu.reg16[regBX]).toBe(0xB000);
+    expect(cpu.instIPInc).toBe(2);
+    expect(cpu.addrIPInc).toBe(1);
   });
 });

@@ -2707,8 +2707,8 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regIP]).toBe(0x1234 + 0x0101);
       expect(cpu.reg16[regCS]).toBe(0x0202);
-      expect(cpu.instIPInc).toBe(1);
-      expect(cpu.addrIPInc).toBe(2);
+      expect(cpu.instIPInc).toBe(0);
+      expect(cpu.addrIPInc).toBe(0);
     });
 
     test('RETF', () => {
