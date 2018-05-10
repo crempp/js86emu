@@ -556,7 +556,9 @@ export default class CPU8086 extends CPU {
 
     this.opcode.addrSize = this.opcode.inst.addrSize;
 
-    if (this.config.debug) this.opcode.string = this.opcode.inst.toString();
+    if (this.config.debug || this.config.debugOpString) {
+      this.opcode.string = this.opcode.inst.toString();
+    }
   }
 
   /**
@@ -628,6 +630,11 @@ export default class CPU8086 extends CPU {
       debug(this.system);
       debugger;
     }
+
+    // if (this.system.cycleCount > 370137 && this.opcode.inst.opName() === "mov") {
+    //   debug(this.system);
+    //   debugger;
+    // }
 
     // Run the instruction
     this.opcode.inst.run();

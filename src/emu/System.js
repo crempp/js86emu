@@ -18,7 +18,7 @@ import { debug } from "./utils/Debug";
 import RendererBin from './video/renderers/RendererBin';
 import RendererCanvas from './video/renderers/RendererCanvas';
 import RendererPNG from './video/renderers/RendererPNG';
-import {loadBINAsync, segIP} from "./utils/Utils";
+import {loadBINAsync, seg2abs, segIP} from "./utils/Utils";
 import {hexString32} from "./utils/Debug";
 const RENDERERS = {
   "RendererBin": RendererBin,
@@ -121,7 +121,7 @@ export default class System {
     while (cyclesToRun === null || cyclesToRun-- > 0) {
 
       if (this.cycleCount === this.config.debugAtCycle ||
-          this.cpu.reg16[regIP] === this.config.debugAtIP)
+          seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP]) === this.config.debugAtIP)
       {
         this.config.debug = true;
       }

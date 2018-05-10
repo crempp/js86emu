@@ -53,15 +53,21 @@ let sysConfig = new SystemConfig({
     file: "PCXTBIOS.BIN"
   },
 
+  video: {
+    class:        'VideoMDA',
+    memorySize:   4 * 1024,
+    memoryStart:  0xB0000,
+    verticalSync: 50,       // Hertz
+  },
+
   renderer: {
     class: 'RendererPNG',
   },
 
-  // debugAtCycle: 8258,
-  // debugAtCycle: 361079,
-  debugAtCycle: 459598,
-  // debugAtIP: 0,
+  // debugAtCycle: 378329,
+  debugAtCycle: 1,
   debug: false,
+  debugOpString: true,
 });
 
 /*****************************************************************************/
@@ -74,7 +80,7 @@ async function runEmulation () {
   await system.boot();
 
   console.log("running...");
-  system.run(1000000);
+  system.run(4000000);
 
   // force a video scan at the end of the run
   system.videoCard.scan();

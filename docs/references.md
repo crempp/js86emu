@@ -12,11 +12,24 @@ The following documents are referenced in the code.
 These documents were used while researching the x86 platform.
 
 ## IO
+* http://bochs.sourceforge.net/techspec/PORTS.LST
+* http://www.tuner.tw/OMEGA%20CD/zsection/MEM__MAP.PDF
 * http://ece-research.unm.edu/jimp/310/slides/8086_IO1.html
 * https://en.wikipedia.org/wiki/Intel_8237
 
-## CGA
+
+## Video
+https://en.wikipedia.org/wiki/INT_10H
+
+
+## MDA
 * https://www.seasip.info/VintagePC/mda.html
+* https://en.wikipedia.org/wiki/Motorola_6845
+* http://www.tinyvga.com/6845
+* http://webpages.charter.net/danrollins/techhelp/0089.HTM
+
+
+## CGA
 * http://www.oldskool.org/guides/oldonnew/resources/cgatech.txt
 
 ## Interupts
@@ -30,3 +43,7 @@ These documents were used while researching the x86 platform.
 ## Files
 * http://bochs.sourceforge.net/diskimages.html
 * https://sourceforge.net/projects/opensoc86/files/bios/pcxtbios25/
+
+## Other Projects
+http://fake86.rubbermallet.org/
+https://github.com/adriancable/8086tiny
