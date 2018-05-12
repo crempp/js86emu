@@ -1,6 +1,6 @@
 # js86emu
 
-<img align="right" width="50%" height="50%"
+<img align="right" width="25%" height="25%"
      title="Size Limit logo" src="./docs/images/logo.svg">
 
 js86emu is an x86 emulator written entirely in Javascript. The current goal is to correctly
@@ -83,10 +83,12 @@ node --prof-process isolate-0x102801e00-v8.log
 * [References](docs/references.md) - Throughout the code are references to
 documentation those are are located here. Also, any helpful references used
 during the development of js86emu are listed here.
-* [TODO](docs/TODO.md) - Roadmap and general TODO items.
+* [Roadmap](docs/roadmap.md) - Roadmap and general TODO items.
 
 ### x86 Architecture
 * [Addressing](docs/x86/addressing.md)
 * [Flags](docs/x86/flags.md)
 
 # License
+
+[MIT](LICENSE.md)

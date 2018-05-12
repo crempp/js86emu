@@ -3,9 +3,10 @@
   "version": "0.3.0",
   "description": "x86 emulator written in Javascript.",
   "author": "Chad Rempp",
-  "license": "GPL-2.0",
+  "license": "MIT",
   "repository": "https://github.com/crempp/js86emu",
-  "main": "compiled.js",
+  "homepage": "http://js86emu.chadrempp.com",
+  "main": "./dist/cli/cli.js",
   "dependencies": {
     "browser-process-hrtime": "^0.1.2",
     "browserfs": "^2.0.0",
