@@ -19,6 +19,60 @@ import {
 } from "../../../src/emu/utils/Debug";
 import {seg2abs, segIP} from "../../../src/emu/utils/Utils";
 
+let IVT = [
+  /* INT   |   Offset   | Segment  */
+  /* 0x00 */ 0x12, 0x34, 0x56, 0x78,
+  /* 0x01 */ 0x9A, 0xBC, 0xDE, 0xF0,
+  /* 0x02 */ 0x12, 0x34, 0x56, 0x78,
+  /* 0x03 */ 0x9A, 0xBC, 0xDE, 0xF0,
+  /* 0x04 */ 0x12, 0x34, 0x56, 0x78,
+  /* 0x05 */ 0x9A, 0xBC, 0xDE, 0xF0,
+  /* 0x06 */ 0x12, 0x34, 0x56, 0x78,
+  /* 0x07 */ 0x9A, 0xBC, 0xDE, 0xF0,
+  /* 0x08 */ 0x12, 0x34, 0x56, 0x78,
+  /* 0x09 */ 0x9A, 0xBC, 0xDE, 0xF0,
+  /* 0x0A */ 0x12, 0x34, 0x56, 0x78,
+  /* 0x0B */ 0x9A, 0xBC, 0xDE, 0xF0,
+  /* 0x0C */ 0x12, 0x34, 0x56, 0x78,
+  /* 0x0D */ 0x9A, 0xBC, 0xDE, 0xF0,
+  /* 0x0E */ 0x12, 0x34, 0x56, 0x78,
+  /* 0x0F */ 0x9A, 0xBC, 0xDE, 0xF0,
+  /* 0x10 */ 0x12, 0x34, 0x56, 0x78,
+  /* 0x11 */ 0x9A, 0xBC, 0xDE, 0xF0,
+  /* 0x12 */ 0x12, 0x34, 0x56, 0x78,
+  /* 0x13 */ 0x9A, 0xBC, 0xDE, 0xF0,
+  /* 0x14 */ 0x12, 0x34, 0x56, 0x78,
+  /* 0x15 */ 0x9A, 0xBC, 0xDE, 0xF0,
+  /* 0x16 */ 0x12, 0x34, 0x56, 0x78,
+  /* 0x17 */ 0x9A, 0xBC, 0xDE, 0xF0,
+  /* 0x18 */ 0x12, 0x34, 0x56, 0x78,
+  /* 0x19 */ 0x9A, 0xBC, 0xDE, 0xF0,
+  /* 0x1A */ 0x12, 0x34, 0x56, 0x78,
+  /* 0x1B */ 0x9A, 0xBC, 0xDE, 0xF0,
+  /* 0x1C */ 0x12, 0x34, 0x56, 0x78,
+  /* 0x1D */ 0x9A, 0xBC, 0xDE, 0xF0,
+  /* 0x1E */ 0x12, 0x34, 0x56, 0x78,
+  /* 0x1F */ 0x9A, 0xBC, 0xDE, 0xF0,
+  /* 0x20 */ 0x12, 0x34, 0x56, 0x78,
+  /* 0x21 */ 0x9A, 0xBC, 0xDE, 0xF0,
+  /* 0x22 */ 0x12, 0x34, 0x56, 0x78,
+  /* 0x23 */ 0x9A, 0xBC, 0xDE, 0xF0,
+  /* 0x24 */ 0x12, 0x34, 0x56, 0x78,
+  /* 0x25 */ 0x9A, 0xBC, 0xDE, 0xF0,
+  /* 0x26 */ 0x12, 0x34, 0x56, 0x78,
+  /* 0x27 */ 0x9A, 0xBC, 0xDE, 0xF0,
+  /* 0x28 */ 0x12, 0x34, 0x56, 0x78,
+  /* 0x29 */ 0x9A, 0xBC, 0xDE, 0xF0,
+  // ...
+];
+
+function loadIVT (cpu) {
+  for (let i = 0; i < IVT.length; i++) {
+    cpu.mem8[i] = IVT[i];
+  }
+}
+
+
 function clearMemory(cpu) {
   for (let i = 0; i < cpu.mem8.length; i++) {
     cpu.mem8[i] = 0;
@@ -360,8 +414,8 @@ describe('Operation methods', () => {
       expect(cpu.mem8[0x401C]).toBe(0x04);
       expect(cpu.mem8[0x401D]).toBe(0x01);
       // CS and IP updated to called location
-      expect(cpu.reg16[regCS]).toBe(0x5678);
-      expect(cpu.reg16[regIP]).toBe(0x9ABC);
+      expect(cpu.reg16[regCS]).toBe(0x9ABC);
+      expect(cpu.reg16[regIP]).toBe(0x5678);
       expect(cpu.instIPInc).toBe(1);
       expect(cpu.addrIPInc).toBe(4);
     });
@@ -936,26 +990,113 @@ describe('Operation methods', () => {
   });
 
   describe('int', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.int();
-      }).toThrowError(FeatureNotImplementedException);
+    beforeEach(() => {
+      // setup a fake interupt vector table
+      loadIVT(cpu);
+      cpu.reg16[regFlags] = 0x55AA;
+      cpu.reg16[regCS] = 0x0220;
+    });
+    test('INT 0x13', () => {
+      cpu.mem8[0x022FF] = 0xCD; // inst (byte)
+      cpu.mem8[0x02300] = 0x13; // arg
+
+      cpu.decode();
+      cpu.instIPInc = 1;
+      oper.int(addr.Ib.bind(addr), null);
+
+      // Flags on stack
+      expect(cpu.mem8[0x401E]).toBe(0xAA);
+      expect(cpu.mem8[0x401F]).toBe(0x55);
+      // CS on stack
+      expect(cpu.mem8[0x401C]).toBe(0x20);
+      expect(cpu.mem8[0x401D]).toBe(0x02);
+      // IP on stack
+      expect(cpu.mem8[0x401A]).toBe(0x01);
+      expect(cpu.mem8[0x401B]).toBe(0x01);
+      // CS and IP updated to called location
+      expect(cpu.reg16[regIP]).toBe(0xBC9A);
+      expect(cpu.reg16[regCS]).toBe(0xF0DE);
+      expect(cpu.instIPInc).toBe(0);
+      expect(cpu.addrIPInc).toBe(0);
     });
   });
 
   describe('into', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.into();
-      }).toThrowError(FeatureNotImplementedException);
+    beforeEach(() => {
+      // setup a fake interupt vector table
+      loadIVT(cpu);
+      cpu.reg16[regFlags] = 0x55AA;
+      cpu.reg16[regCS] = 0x0220;
+    });
+    test('INTO no overflow', () => {
+      cpu.reg16[regFlags] = 0b0000000000000000;
+      cpu.mem8[0x022FF] = 0xCE; // inst (byte)
+
+      cpu.decode();
+      cpu.instIPInc = 1;
+      oper.into(addr.Ib.bind(addr), null);
+
+      // Stack unchanged
+      expect(cpu.mem8[0x401E]).toBe(0x00);
+      expect(cpu.mem8[0x401F]).toBe(0x00);
+      expect(cpu.mem8[0x401C]).toBe(0x00);
+      expect(cpu.mem8[0x401D]).toBe(0x00);
+      expect(cpu.mem8[0x401A]).toBe(0x00);
+      expect(cpu.mem8[0x401B]).toBe(0x00);
+      // CS and IP have not changed (the increment happens after instruction
+      // execution)
+      expect(cpu.reg16[regIP]).toBe(0x00FF);
+      expect(cpu.reg16[regCS]).toBe(0x0220);
+      expect(cpu.instIPInc).toBe(1);
+      expect(cpu.addrIPInc).toBe(0);
+    });
+    test('INTO overflow', () => {
+      cpu.reg16[regFlags] = 0b0101110110101010;
+      cpu.mem8[0x022FF] = 0xCD; // inst (byte)
+      cpu.mem8[0x02300] = 0x13; // arg
+
+      cpu.decode();
+      cpu.instIPInc = 1;
+      oper.into(addr.Ib.bind(addr), null);
+
+      // Flags on stack
+      expect(cpu.mem8[0x401E]).toBe(0xAA);
+      expect(cpu.mem8[0x401F]).toBe(0x5D);
+      // CS on stack
+      expect(cpu.mem8[0x401C]).toBe(0x20);
+      expect(cpu.mem8[0x401D]).toBe(0x02);
+      // IP on stack
+      expect(cpu.mem8[0x401A]).toBe(0x00);
+      expect(cpu.mem8[0x401B]).toBe(0x01);
+      // CS and IP updated to called location
+      expect(cpu.reg16[regIP]).toBe(0x3412);
+      expect(cpu.reg16[regCS]).toBe(0x7856);
+      expect(cpu.instIPInc).toBe(0);
+      expect(cpu.addrIPInc).toBe(0);
     });
   });
 
   describe('iret', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.iret();
-      }).toThrowError(FeatureNotImplementedException);
+    test('IRET', () => {
+      cpu.mem8[0x022FF] = 0xCF; // inst (byte)
+      cpu.reg16[regSP] = 0x01A;
+
+      cpu.mem8[0x401F] = 0x55;
+      cpu.mem8[0x401E] = 0xAA;
+      cpu.mem8[0x401D] = 0x02;
+      cpu.mem8[0x401C] = 0x20;
+      cpu.mem8[0x401B] = 0x01;
+      cpu.mem8[0x401A] = 0x01;
+
+      cpu.decode();
+      cpu.instIPInc = 1;
+      oper.iret(null, null);
+
+      expect(cpu.reg16[regIP]).toBe(0x0101);
+      expect(cpu.reg16[regCS]).toBe(0x0220);
+      expect(cpu.reg16[regFlags]).toBe(0x55AA);
+      expect(cpu.instIPInc).toBe(0);
+      expect(cpu.addrIPInc).toBe(0);
     });
   });
 
@@ -1348,8 +1489,8 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x1234);
-      expect(cpu.instIPInc).toBe(1);
-      expect(cpu.addrIPInc).toBe(2);
+      expect(cpu.instIPInc).toBe(0);
+      expect(cpu.addrIPInc).toBe(0);
     });
     test('JMP Jv (near) negative offset', () => {
       cpu.instIPInc = 1;
@@ -1361,8 +1502,8 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0xFF - 0x0A);
-      expect(cpu.instIPInc).toBe(1);
-      expect(cpu.addrIPInc).toBe(2);
+      expect(cpu.instIPInc).toBe(0);
+      expect(cpu.addrIPInc).toBe(0);
     });
     test('JMP Ap (far)', () => {
       cpu.instIPInc = 1;
@@ -1374,10 +1515,10 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.jmp(addr.Ap.bind(addr), null);
 
-      expect(cpu.reg16[regCS]).toBe(0x5678);
-      expect(cpu.reg16[regIP]).toBe(0x9ABC);
-      expect(cpu.instIPInc).toBe(1);
-      expect(cpu.addrIPInc).toBe(4);
+      expect(cpu.reg16[regCS]).toBe(0x9ABC);
+      expect(cpu.reg16[regIP]).toBe(0x5678);
+      expect(cpu.instIPInc).toBe(0);
+      expect(cpu.addrIPInc).toBe(0);
     });
     test('JMP Jb (short) positive offset', () => {
       cpu.instIPInc = 1;
@@ -1388,8 +1529,8 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0xFF + 0x56);
-      expect(cpu.instIPInc).toBe(1);
-      expect(cpu.addrIPInc).toBe(1);
+      expect(cpu.instIPInc).toBe(0);
+      expect(cpu.addrIPInc).toBe(0);
     });
     test('JMP Jb (short) negative offset', () => {
       cpu.instIPInc = 1;
@@ -1400,8 +1541,8 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0xFF - 0x0A);
-      expect(cpu.instIPInc).toBe(1);
-      expect(cpu.addrIPInc).toBe(1);
+      expect(cpu.instIPInc).toBe(0);
+      expect(cpu.addrIPInc).toBe(0);
     });
     test('JMP Ev (near)', () => {
       cpu.instIPInc = 2;
@@ -1413,7 +1554,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
       expect(cpu.reg16[regIP]).toBe(0x1234);
-      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.instIPInc).toBe(0);
       expect(cpu.addrIPInc).toBe(0);
     });
     test('JMP Mp (far)', () => {
@@ -1430,7 +1571,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regIP]).toBe(0x5678);
       expect(cpu.reg16[regCS]).toBe(0x9ABC);
-      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.instIPInc).toBe(0);
       expect(cpu.addrIPInc).toBe(0);
     });
   });
@@ -2036,6 +2177,20 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(2);
       expect(cpu.addrIPInc).toBe(4);
     });
+    test('[regression] mov ES AX - where ES is Sw and Ax is Ew', () => {
+      cpu.instIPInc = 2;
+      cpu.mem8[0x00FF] = 0x8E; // Instruction
+      cpu.mem8[0x0100] = 0xC0; // Addressing
+      cpu.reg16[regAX] = 0xFFFF;
+      cpu.reg16[regES] = 0x0000;
+
+      cpu.decode();
+      oper.mov(addr.Sw.bind(addr), addr.Ew.bind(addr));
+
+      expect(cpu.reg16[regES]).toBe(0xFFFF);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
   });
 
   describe('movsb', () => {
@@ -2111,10 +2266,41 @@ describe('Operation methods', () => {
   });
 
   describe('mul', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.mul();
-      }).toThrowError(FeatureNotImplementedException);
+    test('multiply by zero', () => {
+      // MUL BX
+      cpu.reg16[regFlags] = 0xFFFF;
+      cpu.mem8[0x00FF] = 0xF7; // Inst
+      cpu.mem8[0x0100] = 0xE3; // Addr byte
+      cpu.reg16[regAX] = 0x0112;
+      cpu.reg16[regBX] = 0x0000;
+      cpu.reg16[regDX] = 0xFFFF;
+
+      cpu.decode();
+      oper.mul(addr.Ev.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x0000);
+      expect(cpu.reg16[regDX]).toBe(0x0000);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+    test('unsigned multiply', () => {
+      // MUL BX
+      cpu.reg16[regFlags] = 0x0000;
+      cpu.mem8[0x00FF] = 0xF7; // Inst
+      cpu.mem8[0x0100] = 0xE3; // Addr byte
+      cpu.reg16[regAX] = 0x1234;
+      cpu.reg16[regBX] = 0x2345;
+      cpu.reg16[regDX] = 0xFFFF;
+
+      cpu.decode();
+      oper.mul(addr.Ev.bind(addr));
+
+      // 0x1234 * 0x2345 = 0x2820404
+      // => 0x0282, 0x0404
+      expect(cpu.reg16[regAX]).toBe(0x0404);
+      expect(cpu.reg16[regDX]).toBe(0x0282);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
     });
   });
 
@@ -2521,8 +2707,8 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regIP]).toBe(0x1234 + 0x0101);
       expect(cpu.reg16[regCS]).toBe(0x0202);
-      expect(cpu.instIPInc).toBe(1);
-      expect(cpu.addrIPInc).toBe(2);
+      expect(cpu.instIPInc).toBe(0);
+      expect(cpu.addrIPInc).toBe(0);
     });
 
     test('RETF', () => {

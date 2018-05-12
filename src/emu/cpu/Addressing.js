@@ -6,7 +6,7 @@ import {
   regCS, regDS, regES, regSS,
   regFlags,
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
-  FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK, b, w, v
+  FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK, b, w, v, STATE_SEG_NONE
 } from '../Constants';
 import { formatOpcode, hexString16, hexString32 } from "../utils/Debug";
 import {
@@ -631,9 +631,9 @@ export default class Addressing {
     else if (value === undefined) {
       // Read value from calculated address by getting the 32bit far address
       // (segment:offset) from the instruction argument
-      let s = (this.cpu.mem8[seg2abs(segment, offset + 1)] << 8) |
+      let o = (this.cpu.mem8[seg2abs(segment, offset + 1)] << 8) |
                this.cpu.mem8[seg2abs(segment, offset    )];
-      let o = (this.cpu.mem8[seg2abs(segment, offset + 3)] << 8) |
+      let s = (this.cpu.mem8[seg2abs(segment, offset + 3)] << 8) |
                this.cpu.mem8[seg2abs(segment, offset + 2)];
       return [s, o];
     }
@@ -787,8 +787,8 @@ export default class Addressing {
    * The operand is a byte, regardless of operand-size attribute.
    *   - [3] p. A-1 to A-3
    *
-   * @param {number} segment Memory segment NOT USED
-   * @param {(number|null)} [offset] Memory offset
+   * @param {number} segment NOT USED
+   * @param {(number|null)} [offset] NOT USED
    * @param {(number|null)} [value] Value to write (byte)
    * @return {(number|null)} In address mode returns null, in read mode returns
    *   the value from the register, in write mode does not return a value
@@ -818,8 +818,8 @@ export default class Addressing {
    * The operand is a word or doubleword, depending on operand-size attribute.
    *   - [3] p. A-1 to A-3
    *
-   * @param {number} segment Memory segment NOT USED
-   * @param {(number|null)} [offset] Memory offset
+   * @param {number} segment NOT USED
+   * @param {(number|null)} [offset] NOT USED
    * @param {(number|null)} [value] Value to write (word|doubleword)
    * @return {(number|null)} In address mode returns null, in read mode returns
    *   the value from the register, in write mode does not return a value
@@ -1098,13 +1098,14 @@ export default class Addressing {
    *   the given value to the given address
    */
   Ob (segment, offset, value) {
-    let immSegment = this.cpu.reg16[regCS]; // Imm values are in the CS segment
+
 
     if (offset === undefined && value === undefined) {
       // Calculate address
-      let result = this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc;
+      let operandSeg = this.cpu.reg16[regCS]; // Imm values are in the CS segment
+      let operandAddr = this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc;
       this.cpu.addrIPInc += 2;
-      return this.readMem16(immSegment, result);
+      return this.readMem16(operandSeg, operandAddr);
     }
     else if (value === undefined) {
       // Read value from calculated address
@@ -1131,14 +1132,13 @@ export default class Addressing {
    *   the given value to the given address
    */
   Ov (segment, offset, value) {
-    let immSegment = this.cpu.reg16[regCS]; // Imm values are in the CS segment
-
     if (offset === undefined && value === undefined) {
       // Calculate address
-      let result = this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc;
-      let v = this.readMem16(immSegment, result);
+      let operandSeg = this.cpu.reg16[regCS]; // Imm values are in the CS segment
+      let operandAddr = this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc;
+      let operand = this.readMem16(operandSeg, operandAddr);
       this.cpu.addrIPInc += 2;
-      return v;
+      return operand;
     }
     else if (value === undefined) {
       // Read value from calculated address
@@ -1150,8 +1150,59 @@ export default class Addressing {
     }
   }
 
+  /**
+   * The reg field of the ModR/M byte selects a segment register (for example,
+   * MOV (8C,8E)).
+   *   - [3] p. A-1 to A-3
+   *
+   * When an instruction operates on a segment register, the reg field in the
+   * ModR/M byte is called the sreg field and is used to specify the segment
+   * register. Table B-6 shows the encoding of the sreg field. This field is
+   * sometimes a 2-bit field (sreg2) and other times a 3-bit field (sreg3).
+   *   - [3] p. B-4
+   *
+   * @param {number} segment NOT USED
+   * @param {(number|null)} [offset] NOT USED
+   * @param {(number|null)} [value] Value to write (word|doubleword)
+   * @return {(number|null)} In address mode returns null, in read mode returns
+   *   the value from the register, in write mode does not return a value
+   */
   Sw (segment, offset, value) {
-
+    // Calculate address
+    if (offset === undefined && value === undefined) {
+      // No address calculation for registers
+      return null;
+    }
+    else if (value === undefined) {
+      // Read value from calculated address
+      switch (this.cpu.opcode.reg) {
+        case 0b000:
+          return this.cpu.reg16[regES];
+        case 0b001:
+          return this.cpu.reg16[regCS];
+        case 0b010:
+          return this.cpu.reg16[regSS];
+        case 0b011:
+          return this.cpu.reg16[regDS];
+      }
+    }
+    else {
+      // Write value to address
+      switch (this.cpu.opcode.reg) {
+        case 0b000:
+          this.cpu.reg16[regES] = value;
+          break;
+        case 0b001:
+          this.cpu.reg16[regCS] = value;
+          break;
+        case 0b010:
+          this.cpu.reg16[regSS] = value;
+          break;
+        case 0b011:
+          this.cpu.reg16[regDS] = value;
+          break;
+      }
+    }
   }
 
   /**
@@ -1164,7 +1215,7 @@ export default class Addressing {
   readRMReg8 (segment, offset) {
     if (this.cpu.opcode.mod === 0b11) {
       // Two register instruction; use REG table
-      return this.readRegVal(true);
+      return this.readRegVal(true, b);
     }
     else {
       // Use R/M Table 1 or 2 for R/M operand
@@ -1183,7 +1234,7 @@ export default class Addressing {
   readRMReg16 (segment, offset) {
     if (this.cpu.opcode.mod === 0b11) {
       // Two register instruction; use REG table
-      return this.readRegVal(true);
+      return this.readRegVal(true, w);
     }
     else {
       // Use R/M Table 1 or 2 for R/M operand
@@ -1202,6 +1253,7 @@ export default class Addressing {
   readRMReg32 (segment, offset) {
     if (this.cpu.opcode.mod === 0b11) {
       // Two register instruction; use REG table
+      // TODO: Is this codepath ever hit? Becuase I don't think it'll work
       return this.readRegVal(true);
     }
     else {
@@ -1222,7 +1274,7 @@ export default class Addressing {
   writeRMReg8(segment, offset, value) {
     if (this.cpu.opcode.mod === 0b11) {
       // Two register instruction; use REG table
-      this.writeRegVal(value, true);
+      this.writeRegVal(value, true, b);
     }
     else {
       // Use R/M Table 1 or 2 for R/M operand
@@ -1242,7 +1294,7 @@ export default class Addressing {
   writeRMReg16(segment, offset, value) {
     if (this.cpu.opcode.mod === 0b11) {
       // Two register instruction; use REG table
-      this.writeRegVal(value, true);
+      this.writeRegVal(value, true, w);
     }
     else {
       // Use R/M Table 1 or 2 for R/M operand
@@ -1251,6 +1303,12 @@ export default class Addressing {
     }
   }
 
+  /**
+   * Calculate an offset address in RM addressing mode
+   *
+   * @param {number} segment Memory segment
+   * @return {number} Calculated address
+   */
   calcRMAddr (segment) {
     let offset;
     switch (this.cpu.opcode.mod) {
@@ -1268,7 +1326,7 @@ export default class Addressing {
   }
 
   /**
-   * Calculate an offset address in RM addressing mode
+   * Calculate an offset address in RM addressing mode with a displacement
    *
    * I don't think there's a difference between the functionality for a byte
    * or a word for calcRMAddr. If I'm wrong come back to this.
@@ -1294,11 +1352,11 @@ export default class Addressing {
         break;
       case 0b010 : // [BP + SI]
         addr = this.cpu.reg16[regBP] + this.cpu.reg16[regSI];
-        this.cpu.addrSeg = regSS;
+        if (this.cpu.prefixSegmentState === STATE_SEG_NONE) this.cpu.addrSeg = regSS;
         break;
       case 0b011 : // [BP + DI]
         addr = this.cpu.reg16[regBP] + this.cpu.reg16[regDI];
-        this.cpu.addrSeg = regSS;
+        if (this.cpu.prefixSegmentState === STATE_SEG_NONE) this.cpu.addrSeg = regSS;
         break;
       case 0b100 : // [SI]
         addr = this.cpu.reg16[regSI];
@@ -1357,9 +1415,11 @@ export default class Addressing {
         break;
       case 0b010 : // [BP + SI] + disp
         addr = this.cpu.reg16[regBP] + this.cpu.reg16[regSI] + disp;
+        if (this.cpu.prefixSegmentState === STATE_SEG_NONE) this.cpu.addrSeg = regSS;
         break;
       case 0b011 : // [BP + DI] + disp
         addr = this.cpu.reg16[regBP] + this.cpu.reg16[regDI] + disp;
+        if (this.cpu.prefixSegmentState === STATE_SEG_NONE) this.cpu.addrSeg = regSS;
         break;
       case 0b100 : // [SI] + disp
         addr = this.cpu.reg16[regSI] + disp;
@@ -1369,6 +1429,7 @@ export default class Addressing {
         break;
       case 0b110 : // [BP] + disp
         addr = this.cpu.reg16[regBP] + disp;
+        if (this.cpu.prefixSegmentState === STATE_SEG_NONE) this.cpu.addrSeg = regSS;
         break;
       case 0b111 : // [BX] + disp
         addr = this.cpu.reg16[regBX] + disp;

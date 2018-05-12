@@ -43,7 +43,10 @@ const DEFAULTS = {
     },
   },
 
+  debugAtCycle: null,
+  debugAtIP: null,
   debug: false,
+  debugOpString: false,
 };
 
 export default class SystemConfig {

@@ -1,5 +1,4 @@
 import hrtime from 'browser-process-hrtime';
-import sys from 'sys';
 
 import CPU8086 from "./cpu/8086";
 import {
@@ -9,7 +8,7 @@ import {
 import VideoMDA from "./video/VideoMDA";
 import { SystemConfigException } from "./utils/Exceptions";
 import SystemConfig from "./config/SystemConfig";
-import { seg2abs } from "./utils/Utils";
+import { debug } from "./utils/Debug";
 
 // We don't know the renderer until runtime. Webpack is a static compiler and
 // thus can't require dynamically. Also I was having issues with dynamic
@@ -19,7 +18,8 @@ import { seg2abs } from "./utils/Utils";
 import RendererBin from './video/renderers/RendererBin';
 import RendererCanvas from './video/renderers/RendererCanvas';
 import RendererPNG from './video/renderers/RendererPNG';
-import {loadBINAsync, segIP} from "./utils/Utils";
+import {loadBINAsync, seg2abs, segIP} from "./utils/Utils";
+import {hexString32} from "./utils/Debug";
 const RENDERERS = {
   "RendererBin": RendererBin,
   "RendererCanvas": RendererCanvas,
@@ -41,11 +41,11 @@ export default class System {
     this.newVideoSync = config.videoSync;
     this.runningHz = 0;
 
-    this.biosROMAddress = [0xF000, 0x0100]; //0xF0100;
-    this.videoROMAddress = 0xC0000;
+    this.biosJumpAddress = [0xF000, 0xFFF0]; // 0x000FFFF0
+    this.videoROMAddress = [0xC000, 0x0000]; // 0x000C0000
 
     // Create CPU
-    this.cpu = new CPU8086(config);
+    this.cpu = new CPU8086(config, this);
 
     // Create video and renderer
     if (config.isNode && config.renderer.class === 'RendererCanvas') {
@@ -69,10 +69,14 @@ export default class System {
     // Load BIOS
     console.log("Loading BIOS...");
     if (!this.config.programBlob) {
-      let addr = seg2abs(this.biosROMAddress[0], this.biosROMAddress[1]);
+      // Load BIOS file
       let biosPath = `${this.config.bios.biosPath}${this.config.bios.file}`;
       let bios = await loadBINAsync(biosPath);
-      this.loadMem(bios, addr);
+      // Calculate start address for the BIOS
+      let biosAddr = (1024 * 1024) - bios.length;
+
+      if (this.config.debug) console.info(`Loading BIOS at ${hexString32(biosAddr)}`);
+      this.loadMem(bios, biosAddr);
     }
 
     // Load video BIOS
@@ -84,8 +88,8 @@ export default class System {
     // Jump to BIOS
     console.log("Jump to BIOS...");
     if (!this.config.programBlob && !this.config.cpu.registers16) {
-      this.cpu.reg16[regCS] = this.biosROMAddress[0];
-      this.cpu.reg16[regIP] = this.biosROMAddress[1];
+      this.cpu.reg16[regCS] = this.biosJumpAddress[0];
+      this.cpu.reg16[regIP] = this.biosJumpAddress[1];
     }
 
     // Init state
@@ -115,9 +119,11 @@ export default class System {
     let totalScans = 0;
 
     while (cyclesToRun === null || cyclesToRun-- > 0) {
-      if (this.config.debug) {
-        console.log("-".repeat(80 - 7));
-        console.log(`8086.cycle()             : Running instruction cycle [${this.cycleCount}]\n`);
+
+      if (this.cycleCount === this.config.debugAtCycle ||
+          seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP]) === this.config.debugAtIP)
+      {
+        this.config.debug = true;
       }
 
       // if (this.cpu.state === STATE_PAUSED) {
@@ -139,11 +145,6 @@ export default class System {
         this.videoSync = this.newVideoSync;
         totalScans++;
         this.videoCard.scan();
-      }
-
-      if (this.cycleCount >= 0) {
-      // if (this.cpu.reg16[regIP] === 0xE8) {
-        let a = 1;
       }
 
       this.cycleCount++;

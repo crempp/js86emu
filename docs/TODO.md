@@ -58,8 +58,8 @@ general
 	√ POP
 	√ XCHG
 	  XLAT
-	  IN
-	  OUT
+	√ IN
+	√ OUT
 address object
 	√ LEA
 	√ LDS
@@ -87,7 +87,7 @@ subtraction
 	  AAS
 	  DAS
 multiplication
-	  MUL
+	√ MUL
 	  IMUL
 	  AAM
 division
@@ -125,7 +125,7 @@ String
 	√ LODS
 	√ STOS
 
-### Program Transfer 2-43
+### √ Program Transfer 2-43
 
 unconditional
 	√ CALL
@@ -138,10 +138,10 @@ iteration control
 	√ LOOPE/LOOPZ
 	√ LOOPNE/LOOPNZ
 	√ JCXZ
-interupt
-	  INT
-	  INTO
-	  IRET
+interrupt
+	√ INT
+	√ INTO
+	√ IRET
 
 ### Processor Control 2-47
 
@@ -200,4 +200,4 @@ no operation
   √ Mp
   √ Ob
   √ Ov
-    Sw
+  √ Sw

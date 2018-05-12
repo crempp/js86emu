@@ -1844,7 +1844,7 @@ describe('Addressing Modes', () => {
       expect(cpu.addrIPInc).toBe(4);
     });
     test('read', () => {
-      expect(addr.Ap(segment, 0x0001)).toEqual([0x1234, 0x5678]);
+      expect(addr.Ap(segment, 0x0001)).toEqual([0x5678, 0x1234]);
     });
     test('write throws', () => {
       expect(() => {
@@ -2381,8 +2381,69 @@ describe('Addressing Modes', () => {
     });
   });
 
-  describe.skip('Sw', () => {
+  describe('Sw', () => {
+    beforeEach(() => {
+      cpu.mem8[0xABCD0] = 0x8E; // inst (byte)
+      cpu.mem8[0xABCD1] = 0b00011000; // addr
+      cpu.reg16[regES] = 0x1234;
+      cpu.reg16[regCS] = 0xABCD;
+      cpu.reg16[regSS] = 0x3456;
+      cpu.reg16[regDS] = 0x4576;
+      cpu.decode();
+    });
 
+    test('address', () => {
+      expect(addr.Sw(segment)).toBe(null);
+    });
+    test('addr cycles', () => {
+      addr.Sw(segment);
+      expect(cpu.instIPInc).toBe(2);
+      expect(cpu.addrIPInc).toBe(0);
+    });
+    test('read ES', () => {
+      cpu.mem8[0xABCD1] = 0b00000000; // addr
+      cpu.decode();
+      expect(addr.Sw(segment, null)).toBe(0x1234);
+    });
+    test('read CS', () => {
+      cpu.mem8[0xABCD1] = 0b00001000; // addr
+      cpu.decode();
+      expect(addr.Sw(segment, null)).toBe(0xABCD);
+    });
+    test('read SS', () => {
+      cpu.mem8[0xABCD1] = 0b00010000; // addr
+      cpu.decode();
+      expect(addr.Sw(segment, null)).toBe(0x3456);
+    });
+    test('read DS', () => {
+      cpu.mem8[0xABCD1] = 0b00011000; // addr
+      cpu.decode();
+      expect(addr.Sw(segment, null)).toBe(0x4576);
+    });
+    test('write ES', () => {
+      cpu.mem8[0xABCD1] = 0b00000000; // addr
+      cpu.decode();
+      addr.Sw(segment, null, 0xFFFF);
+      expect(cpu.reg16[regES]).toBe(0xFFFF);
+    });
+    test('write CS', () => {
+      cpu.mem8[0xABCD1] = 0b00001000; // addr
+      cpu.decode();
+      addr.Sw(segment, null, 0xFFFF);
+      expect(cpu.reg16[regCS]).toBe(0xFFFF);
+    });
+    test('write SS', () => {
+      cpu.mem8[0xABCD1] = 0b00010000; // addr
+      cpu.decode();
+      addr.Sw(segment, null, 0xFFFF);
+      expect(cpu.reg16[regSS]).toBe(0xFFFF);
+    });
+    test('write DS', () => {
+      cpu.mem8[0xABCD1] = 0b00011000; // addr
+      cpu.decode();
+      addr.Sw(segment, null, 0xFFFF);
+      expect(cpu.reg16[regDS]).toBe(0xFFFF);
+    });
   });
 });
 

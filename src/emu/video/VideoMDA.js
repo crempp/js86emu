@@ -1,6 +1,3 @@
-// https://www.seasip.info/VintagePC/mda.html
-// http://www.oldskool.org/guides/oldonnew/resources/cgatech.txt
-import { FONT_PATH } from "../Constants";
 import { loadPNGAsync } from "../utils/Utils";
 
 export default class VideoMDA {

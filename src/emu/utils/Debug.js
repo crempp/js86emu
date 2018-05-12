@@ -5,9 +5,10 @@ import {
   regCS, regDS, regES, regSS,
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
-  b, w, v, u,
+  b, w, v, u, regFlags,
 } from '../Constants';
 import { ValueOverflowException, ValueUnderflowException } from "./Exceptions";
+import {segIP} from "./Utils";
 
 export function binString8 (value) {
   if (value > 0xFF) throw new ValueOverflowException("Value too large for binString8()");
@@ -162,4 +163,21 @@ export function formatFlags(flags, indentSize=0) {
   str += " OF: " + ((flags & FLAG_OF_MASK) >> 11);
 
   return str;
+}
+
+/**
+ * Print aggregate debug info
+ *
+ * @param {System} system System instance
+ */
+export function debug(system) {
+  console.log("-".repeat(80 - 7));
+  console.log(`Running instruction cycle [${system.cycleCount}]\n`);
+  console.log(`  INSTRUCTION: ${system.cpu.opcode.string}`);
+  console.log(`  CS:IP:       ${hexString16(system.cpu.reg16[regCS])}:${hexString16(system.cpu.reg16[regIP])}`);
+  console.log(`  OPCODE:      \n${formatOpcode(system.cpu.opcode, 11)}`);
+  console.log(`  MEMORY INST: \n${formatMemory(system.cpu.mem8, segIP(system.cpu), segIP(system.cpu) + 11, 11)}`);
+  // console.log(`  MEMORY STACK:\n${formatStack(this.mem8, this.reg16[regSP], 0x1000, 11)}`);
+  console.log(`  REGISTERS    \n${formatRegisters(system.cpu, 11)}`);
+  console.log(`  FLAGS:       \n${formatFlags(system.cpu.reg16[regFlags], 11)}`);
 }

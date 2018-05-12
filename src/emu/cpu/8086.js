@@ -13,20 +13,19 @@ import {
   STATE_REP_NONE, STATE_REP_Z, STATE_REP, STATE_REP_NZ,
   STATE_SEG_NONE, SEG_PREFIX_INSTS,
 } from '../Constants';
-import {
-  hexString16, formatOpcode, formatMemory, formatFlags, formatRegisters,
-  formatStack
-} from '../utils/Debug'
+import { debug } from '../utils/Debug'
 
 /**
  * @class
  * @extends CPU
  */
 export default class CPU8086 extends CPU {
-  constructor(config) {
+  constructor(config, system) {
     super();
 
     this.config = config;
+
+    this.system = system;
 
     this.PORT_COUNT = 0x10000;
 
@@ -132,7 +131,7 @@ export default class CPU8086 extends CPU {
         return `${this.opName()} ${this.dstName()}, ${this.srcName()}`;
       }
       opName () {
-        return typeof this.op === 'function' ? this.op.name.replace("bound ", "") : "[Unknown Op]";
+        return typeof this.op === 'function' ? this.op.name.replace("bound ", "").replace("_", "") : "[Unknown Op]";
       }
       dstName () {
         return typeof this.dst === 'function' ? this.dst.name.replace("bound ", "") : "";
@@ -183,8 +182,8 @@ export default class CPU8086 extends CPU {
     this.inst[0x21]    = new inst(oper.and,    2, v, addr.Ev, addr.Gv);
     this.inst[0x22]    = new inst(oper.and,    2, b, addr.Gb, addr.Eb);
     this.inst[0x23]    = new inst(oper.and,    2, v, addr.Gv, addr.Ev);
-    this.inst[0x24]    = new inst(oper.and,    2, b, addr.AL, addr.Ib);
-    this.inst[0x25]    = new inst(oper.and,    2, w, addr.AX, addr.Iv);
+    this.inst[0x24]    = new inst(oper.and,    1, b, addr.AL, addr.Ib);
+    this.inst[0x25]    = new inst(oper.and,    1, w, addr.AX, addr.Iv);
     this.inst[0x26]    = new inst(oper.es,     1, u,                 );
     this.inst[0x27]    = new inst(oper.daa,    1, u,                 );
     this.inst[0x28]    = new inst(oper.sub,    2, b, addr.Eb, addr.Gb);
@@ -478,13 +477,13 @@ export default class CPU8086 extends CPU {
     // Group 3b instructions
     this.inst[0xF7] = [];
     this.inst[0xF7][0] = new inst(oper.test,   2, v, addr.Ev, addr.Iv);
-    this.inst[0xF7][1] = new inst(oper.notimp, 0, u                 );
+    this.inst[0xF7][1] = new inst(oper.notimp, 0, u                  );
     this.inst[0xF7][2] = new inst(oper.not,    2, v, addr.Ev,        );
     this.inst[0xF7][3] = new inst(oper.neg,    2, v, addr.Ev,        );
     this.inst[0xF7][4] = new inst(oper.mul,    2, v, addr.Ev,        );
-    this.inst[0xF7][5] = new inst(oper.imul,   0, v, addr.Ev,        );
-    this.inst[0xF7][6] = new inst(oper.div,    0, v, addr.Ev,        );
-    this.inst[0xF7][7] = new inst(oper.idiv,   0, v, addr.Ev,        );
+    this.inst[0xF7][5] = new inst(oper.imul,   2, v, addr.Ev,        );
+    this.inst[0xF7][6] = new inst(oper.div,    2, v, addr.Ev,        );
+    this.inst[0xF7][7] = new inst(oper.idiv,   2, v, addr.Ev,        );
 
     this.inst[0xF8]    = new inst(oper.clc,    1, u                  );
     this.inst[0xF9]    = new inst(oper.stc,    1, u                  );
@@ -557,7 +556,9 @@ export default class CPU8086 extends CPU {
 
     this.opcode.addrSize = this.opcode.inst.addrSize;
 
-    if (this.config.debug) this.opcode.string = this.opcode.inst.toString();
+    if (this.config.debug || this.config.debugOpString) {
+      this.opcode.string = this.opcode.inst.toString();
+    }
   }
 
   /**
@@ -618,20 +619,22 @@ export default class CPU8086 extends CPU {
     // Decode the instruction
     this.decode();
 
-    if (this.config.debug) {
-      console.log(`  INSTRUCTION: ${this.opcode.string}`);
-      console.log(`  CS:IP:       ${hexString16(this.reg16[regCS])}:${hexString16(this.reg16[regIP])}`);
-      console.log(`  OPCODE:      \n${formatOpcode(this.opcode, 11)}`);
-      console.log(`  MEMORY INST: \n${formatMemory(this.mem8, segIP(this), segIP(this) + 11, 11)}`);
-      // console.log(`  MEMORY STACK:\n${formatStack(this.mem8, this.reg16[regSP], 0x1000, 11)}`);
-      console.log(`  REGISTERS    \n${formatRegisters(this, 11)}`);
-      console.log(`  FLAGS:       \n${formatFlags(this.reg16[regFlags], 11)}`);
-    }
+    // if (this.system.cycleCount > 6 && this.opcode.opcode_byte === 0xFA) this.config.debug = true;
 
     // Increase the instIPInc by the instruction base size
     if (this.prefixRepeatState === STATE_REP_NONE) {
       this.instIPInc += this.opcode.inst.baseSize;
     }
+
+    if (this.config.debug) {
+      debug(this.system);
+      debugger;
+    }
+
+    // if (this.system.cycleCount > 370137 && this.opcode.inst.opName() === "mov") {
+    //   debug(this.system);
+    //   debugger;
+    // }
 
     // Run the instruction
     this.opcode.inst.run();
