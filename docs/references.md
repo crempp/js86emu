@@ -16,7 +16,7 @@ These documents were used while researching the x86 platform.
 * http://www.tuner.tw/OMEGA%20CD/zsection/MEM__MAP.PDF
 * http://ece-research.unm.edu/jimp/310/slides/8086_IO1.html
 * https://en.wikipedia.org/wiki/Intel_8237
-
+https://www.tutorialspoint.com/microprocessor/microprocessor_intel_8255a_programmable_peripheral_interface.htm
 
 ## Video
 https://en.wikipedia.org/wiki/INT_10H

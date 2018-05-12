@@ -40,6 +40,7 @@ export default class System {
     this.videoSync = config.videoSync;
     this.newVideoSync = config.videoSync;
     this.runningHz = 0;
+    this.portCallbacks = [];
 
     this.biosJumpAddress = [0xF000, 0xFFF0]; // 0x000FFFF0
     this.videoROMAddress = [0xC000, 0x0000]; // 0x000C0000
@@ -56,6 +57,9 @@ export default class System {
     }
     let renderer = new RENDERERS[config.renderer.class](config.renderer.options);
     this.videoCard = new VideoMDA(this.cpu.mem8, renderer, config);
+
+    // Setup port callbacks
+    this.portCallbacks.push(this.videoCard.ports);
   }
 
   /**
@@ -133,7 +137,11 @@ export default class System {
         break;
       }
 
+      // Do a cycle
       this.cpu.cycle();
+
+      // Handle ports
+      this.ports();
 
       // Run timing check
       if (this.cycleCount % this.timeSyncCycles === 0) {
@@ -167,10 +175,12 @@ export default class System {
 
     // Update the number of cycles between video syncs
     this.newVideoSync = Math.max(Math.round(this.runningHz / this.videoCard.verticalSync), 50000);
+  }
 
-    // console.log(`Running at ${this.runningHz.toFixed(2)} HZ (${(this.runningHz / (1024**2)).toFixed(6)} MHZ)`);
-    // console.log(`  newVideoSync = ${this.newVideoSync}`);
-    // console.log(`  videoSync = ${this.videoSync}`);
+  ports () {
+    for (let cb in this.portCallbacks) {
+      cb();
+    }
   }
 
   /**

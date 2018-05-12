@@ -130,4 +130,8 @@ export default class VideoMDA {
     }
     this.renderer.render(screenData);
   }
+
+  ports () {
+
+  }
 }
