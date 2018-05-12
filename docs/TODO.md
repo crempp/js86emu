@@ -40,12 +40,22 @@
 * Review what flags each inst modifies
 * Debug tooling
   * Add memory break points
+* Full CLI with options
+* Config files
+
+## Beyond
+* Electron for for native (CLI) usage
 
 Tests
 * writeMem8 and readMem8 - should be the same
 * 8086: memory fill
 * 8086: All instructions exist
 * 8086: register array access is correct
+
+
+Docs
+* Cleanup external doc folder, put it in drive and share it.
+
 
 ## Instruction TODO List
 ------------------

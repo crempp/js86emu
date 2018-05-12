@@ -1,0 +1,13 @@
+<svg height="151" width="303" xmlns="http://www.w3.org/2000/svg">
+ <g>
+  <rect fill="#fff" id="canvas_background" height="153" width="303" y="0" x="0"/>
+  <g display="none" overflow="visible" y="0" x="0" height="100%" width="100%" id="canvasGrid">
+   <rect fill="url(#gridpattern)" stroke-width="0" y="0" x="0" height="100%" width="100%"/>
+  </g>
+ </g>
+ <g>
+  <text xml:space="preserve" text-anchor="start" font-family="Euphoria, sans-serif" font-size="52" id="svg_1" y="134.261905" x="11.380951" stroke-width="0" stroke="#000" fill="#444444">js</text>
+  <text font-weight="normal" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="134" id="svg_3" y="133.33333" x="49.047618" stroke-width="0" stroke="#000" fill="#444444">86</text>
+  <text xml:space="preserve" text-anchor="start" font-family="Euphoria, sans-serif" font-size="52" id="svg_4" y="134.261905" x="197.095238" stroke-width="0" stroke="#000" fill="#444444">emu</text>
+ </g>
+</svg>

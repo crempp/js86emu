@@ -1,11 +1,19 @@
 # js86emu
 
-js86emu is an x86 emulator written in Javascript. Currently it correctly
-emulates an 8086(88) processor along with auxiliary hardware such as hard disk
-controllers and graphics. I plan on adding support for newer processors and
+<img align="right" width="50%" height="50%"
+     title="Size Limit logo" src="./docs/images/logo.svg">
+
+js86emu is an x86 emulator written entirely in Javascript. The current goal is to correctly
+emulate an 8086(88) processor along with auxiliary hardware such as hard disk
+controllers and graphics. This will allow emulation of original PC XT and PC AT systems. I plan on adding support for newer processors and
 systems until it speed becomes a significant issue.
 
-Demo : http://js86emu.chadrempp.com
+<p align="center">
+  <img src="./docs/images/debug-screen.png" alt="js86emu debug"
+       width="85%" height="85%">
+</p>
+
+Demo : [http://js86emu.chadrempp.com](http://js86emu.chadrempp.com)
 
 Current Progress
 
@@ -16,10 +24,7 @@ Current Progress
 * Video renderer support for canvas, PNG and binary output
 * 80% or better test coverage
 
-## Documentation
-
-
-## Quickstart
+## Usage
 
 There are two ways to run js86emu: a command line client or as a web application.
 
@@ -31,19 +36,30 @@ $ npm run build
 
 ### Command Line Client
 
+The command line client is run as an NPM command and is very basic at the
+moment.
+
+Currently only the PNG renderer is supported with the command line client and
+screen renders will be stored in the `./screenOut` directory. This happens at
+the screen refresh rate (~50hz) and could easily generate thousands of images
+so be careful.
+
 ```
 $ npm run run:cli
 ```
 
 ### Web Application
 
+The web application uses a node webserver to serve the web build of the
+emulator and by default renders to canvas.
+
 ```
 $ npm run run:web
 ```
 
-Then access the application at http://localhost:8080
+Then access the application at [http://localhost:8080](http://localhost:8080)
 
-### Test
+### Testing
 
 js86emu has very good test coverage.
 
@@ -60,3 +76,17 @@ well.
 node --prof ./dist/runner.js
 node --prof-process isolate-0x102801e00-v8.log
 ```
+
+## Documentation
+
+### js86emu
+* [References](docs/references.md) - Throughout the code are references to
+documentation those are are located here. Also, any helpful references used
+during the development of js86emu are listed here.
+* [TODO](docs/TODO.md) - Roadmap and general TODO items.
+
+### x86 Architecture
+* [Addressing](docs/x86/addressing.md)
+* [Flags](docs/x86/flags.md)
+
+# License
