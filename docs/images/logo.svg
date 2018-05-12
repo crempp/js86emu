@@ -1,0 +1,17 @@
+<svg width="297" height="115" xmlns="http://www.w3.org/2000/svg">
+
+ <g>
+  <title>Layer 1</title>
+  <g id="svg_2">
+   <rect x="-1" y="-1" width="299" height="117" id="canvas_background" fill="#fff"/>
+   <g id="canvasGrid" display="none">
+    <rect id="svg_5" width="303" height="151" x="-4" y="-33" stroke-width="0" fill="url(#gridpattern)"/>
+   </g>
+  </g>
+  <g id="svg_6">
+   <text fill="#444444" stroke="#000" stroke-width="0" x="7.380951" y="101.261905" id="svg_1" font-size="52" font-family="Euphoria, sans-serif" text-anchor="start" xml:space="preserve">js</text>
+   <text fill="#444444" stroke="#000" stroke-width="0" x="45.047618" y="100.33333" id="svg_3" font-size="134" font-family="Helvetica, Arial, sans-serif" text-anchor="start" xml:space="preserve" font-weight="normal">86</text>
+   <text fill="#444444" stroke="#000" stroke-width="0" x="193.095238" y="101.261905" id="svg_4" font-size="52" font-family="Euphoria, sans-serif" text-anchor="start" xml:space="preserve">emu</text>
+  </g>
+ </g>
+</svg>

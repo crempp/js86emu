@@ -2,6 +2,7 @@
 *~
 .sass-cache
 node_modules
-
-Thumbs.db
+.DS_Store
 coverage
+.log
+screenOut
