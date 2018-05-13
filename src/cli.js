@@ -71,8 +71,8 @@ let sysConfig = new SystemConfig({
 });
 
 /*****************************************************************************/
-let config = sysConfig;
-// let config = codeGolfConfig;
+// let config = sysConfig;
+let config = codeGolfConfig;
 let system = new System(config);
 
 async function runEmulation () {

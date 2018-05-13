@@ -38,6 +38,9 @@ These documents were used while researching the x86 platform.
 * [IBM Compatible Computer Memory Map & Bus](http://bochs.sourceforge.net/techspec/PORTS.LST)
 * [Basic I/O Instructions](http://ece-research.unm.edu/jimp/310/slides/8086_IO1.html)
 * [Intel 8237 - Wikipedia](https://en.wikipedia.org/wiki/Intel_8237)
+* [The I/O Subsystem](http://www.phatcode.net/res/260/files/html/IO.html)
+* [Input-Output:  Buses and I/O Transfers](https://cs.nyu.edu/courses/fall10/V22.0436-001/lecture24.html)
+* [Interrupts and Polled I/O](http://www.plantation-productions.com/Webster/www.artofasm.com/Linux/HTML/IO4.html)
 
 ## Video
 

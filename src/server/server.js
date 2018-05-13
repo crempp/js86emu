@@ -6,6 +6,7 @@ import morgan from 'morgan';
 
 let STATIC_DIR = path.normalize(`${__dirname}/../../web`);
 let FILES_DIR  = path.normalize(`${__dirname}/../../files`);
+let HOST = "0.0.0.0";
 let PORT = 8080;
 
 let app = connect();
@@ -16,7 +17,7 @@ app.use(morgan('tiny'));
 app.use(serveStatic(STATIC_DIR));
 app.use('/files', serveStatic(FILES_DIR));
 
-app.listen(PORT);
+app.listen(PORT, HOST);
 
 process.stdout.write(`Server started:\n`);
 process.stdout.write(`   URL: http://localhost:${PORT}\n`);

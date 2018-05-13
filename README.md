@@ -3,6 +3,8 @@
 <img align="right" width="25%" height="25%"
      title="Size Limit logo" src="./docs/images/logo.svg">
 
+[![CircleCI](https://circleci.com/gh/crempp/js86emu.svg?style=svg)](https://circleci.com/gh/crempp/js86emu)
+
 js86emu is an x86 emulator written entirely in Javascript. The current goal is to correctly
 emulate an 8086(88) processor along with auxiliary hardware such as hard disk
 controllers and graphics. This will allow emulation of original PC XT and PC AT systems. I plan on adding support for newer processors and
@@ -58,6 +60,21 @@ $ npm run run:web
 ```
 
 Then access the application at [http://localhost:8080](http://localhost:8080)
+
+### Docker
+
+Docker is supported.
+
+```
+$ docker build -t "js86emu" .
+$ 
+```
+
+Or use a prebuilt image on Dockerhub
+
+```
+$ docker run -p 8080:8080 lapinlabs/js86emu
+```
 
 ### Testing
 
