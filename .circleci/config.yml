@@ -96,9 +96,12 @@ workflows:
   version: 2
   build-test-and-deploy:
     jobs:
-      - test
-      - build
+      - test:
+          context: deployment
+      - build:
+          context: deployment
       - deploy:
+          context: deployment
           requires:
             - build
             - test
