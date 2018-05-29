@@ -59,13 +59,92 @@
             "id"   : "codegolf",
             "name" : "SE Codegolf",
             "file" : "files/program-blobs/codegolf",
-            "selected" : true,
+            "selected" : false,
             "address" : 0,
+            "use-bios" : false,
             "cpu-init" : {
                 "type" : "8086",
                 "registers" : {
+                    "ah" : 0,
+                    "al" : 0,
+                    "bh" : 0,
+                    "bl" : 0,
+                    "ch" : 0,
+                    "cl" : 0,
+                    "dh" : 0,
+                    "dl" : 0,
+                    "si" : 0,
+                    "di" : 0,
+                    "bp" : 0,
                     "sp" : 256,
-                    "ip" : 0
+                    "ip" : 0,
+                    "cs" : 0,
+                    "ds" : 0,
+                    "es" : 0,
+                    "ss" : 0,
+                    "flags" : 0
+                }
+            }
+        },
+        {
+            "id"   : "branch",
+            "name" : "Branch Test",
+            "file" : "files/program-blobs/branch.BIN",
+            "selected" : false,
+            "address" : 256,
+            "use-bios" : false,
+            "cpu-init" : {
+                "type" : "8086",
+                "registers" : {
+                    "ah" : 0,
+                    "al" : 0,
+                    "bh" : 0,
+                    "bl" : 0,
+                    "ch" : 0,
+                    "cl" : 0,
+                    "dh" : 0,
+                    "dl" : 0,
+                    "si" : 0,
+                    "di" : 0,
+                    "bp" : 0,
+                    "sp" : 6000,
+                    "ip" : 256,
+                    "cs" : 0,
+                    "ds" : 0,
+                    "es" : 0,
+                    "ss" : 0,
+                    "flags" : 0
+                }
+            }
+        },
+        {
+            "id"   : "addressing",
+            "name" : "Addressing Test",
+            "file" : "files/program-blobs/testea.BIN",
+            "selected" : true,
+            "address" : 0,
+            "use-bios" : false,
+            "cpu-init" : {
+                "type" : "8086",
+                "registers" : {
+                    "ah": 0,
+                    "al": 0,
+                    "bh": 0,
+                    "bl": 0,
+                    "ch": 0,
+                    "cl": 0,
+                    "dh": 0,
+                    "dl": 0,
+                    "si": 0,
+                    "di": 0,
+                    "bp": 0,
+                    "sp": 65535,
+                    "ip": 0,
+                    "cs": 61440,
+                    "ds": 61440,
+                    "es": 61440,
+                    "ss": 61440,
+                    "flags" : 0
                 }
             }
         }

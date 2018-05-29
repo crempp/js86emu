@@ -1,3 +1,6 @@
+# x86 Flags
+
+```
 MASK   BIT  Flag   NAME
 0x0001 0    CF     Carry flag  S
 0x0002 1    1      Reserved
@@ -14,3 +17,4 @@ MASK   BIT  Flag   NAME
 0x1000 12,13 1,1   I/O privilege level (286+ only) always 1 on 8086 and 186
 0x2000 14  1       Nested task flag (286+ only) always 1 on 8086 and 186
 0x4000 15  1       on 8086 and 186, should be 0 above  Reserved
+```

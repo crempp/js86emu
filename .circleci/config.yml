@@ -1,0 +1,111 @@
+# Requires variables
+#   * DO_TOKEN
+#	* DOCKER_USER
+#	* DOCKER_PASS
+#	* DEPLOY_NODE
+
+defaults: &DEFAULT
+  working_directory: ~/app
+  docker:
+    - image: docker:17.09.0-ce-git
+
+version: 2
+jobs:
+  build:
+    <<: *DEFAULT
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Install dependencies
+          command: echo "No dependencies"
+      - restore_cache:
+          keys:
+            - v1-{{ .Branch }}
+          paths:
+            - /caches/app.tar
+      - run:
+          name: Load Docker image layer cache
+          command: |
+            set +o pipefail
+            docker load -i /caches/app.tar | true
+      - run:
+          name: Build application Docker image
+          command: |
+            docker build --cache-from=lapinlabs/js86emu -t lapinlabs/js86emu .
+      - run:
+          name: Save Docker image layer cache
+          command: |
+            mkdir -p /caches
+            docker save -o /caches/app.tar lapinlabs/js86emu:latest
+      - save_cache:
+          key: v1-{{ .Branch }}-{{ epoch }}
+          paths:
+            - /caches/app.tar
+      # Note: we don't push here, we wait for tests to pass and push in the deploy job
+
+  test:
+    <<: *DEFAULT
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build test container
+          command: |
+            docker build -t js86emu-test -f Dockerfile.test .
+            docker run --name test-app js86emu-test
+            docker cp test-app:/app/coverage /tmp/coverage
+      - store_artifacts:
+          path: /tmp/coverage
+      - store_test_results:
+          path: /tmp/coverage
+
+  deploy:
+    <<: *DEFAULT
+    steps:
+      - checkout
+      - setup_remote_docker
+      - restore_cache:
+          keys:
+            - v1-{{ .Branch }}
+          paths:
+            - /caches/app.tar
+      - run:
+          name: Load Docker image layer cache
+          command: |
+            set +o pipefail
+            docker load -i /caches/app.tar | true
+      - run:
+          name: Push application Docker image
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker tag lapinlabs/js86emu lapinlabs/js86emu:${CIRCLE_BRANCH//\//-}-${CIRCLE_BUILD_NUM}
+            docker push lapinlabs/js86emu:${CIRCLE_BRANCH//\//-}-${CIRCLE_BUILD_NUM}
+            docker push lapinlabs/js86emu:latest
+      - run:
+          name: Remotely deploy to droplet
+          command: |
+            apk add --update curl curl-dev jq
+            export IP=`curl -s -X GET -H "Content-Type: application/json" -H "Authorization: Bearer $DO_TOKEN" "https://api.digitalocean.com/v2/droplets/" | jq ".droplets[] | select(.name == \"$DEPLOY_NODE\") | .networks.v4[0].ip_address"`
+            export IP=`echo $IP | sed -e 's/^"//' -e 's/"$//'`
+            echo "Deploying to $DEPLOY_NODE [$IP]"
+            ssh -o StrictHostKeyChecking=no root@${IP} "service container-js86emu redeploy"
+
+workflows:
+  version: 2
+  build-test-and-deploy:
+    jobs:
+      - test:
+          context: deployment
+      - build:
+          context: deployment
+      - deploy:
+          context: deployment
+          requires:
+            - build
+            - test
+          filters:
+            branches:
+              only:
+                - master

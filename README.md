@@ -1,99 +1,111 @@
-js86emu
-=======
+# js86emu
 
-x86 emulator written in Javascript.
+<img align="right" width="25%" height="25%"
+     title="Size Limit logo" src="./docs/images/logo.svg">
 
-Demo : http://lapinlabs.com/js86emu/
+[![CircleCI](https://circleci.com/gh/crempp/js86emu.svg?style=svg)](https://circleci.com/gh/crempp/js86emu)
 
-The plan is to emulate multiple x86 chips along with auxilary hardware such as
-Harddisk controllers, BIOS and graphics.
+js86emu is an x86 emulator written entirely in Javascript. The current goal is to correctly
+emulate an 8086(88) processor along with auxiliary hardware such as hard disk
+controllers and graphics. This will allow emulation of original PC XT and PC AT systems. I plan on adding support for newer processors and
+systems until it speed becomes a significant issue.
 
-The 8086 processor has ~72 instruction represented by 252 numeric opcodes (this actually depends on how you count the group instructions).
+<p align="center">
+  <img src="./docs/images/debug-screen.png" alt="js86emu debug"
+       width="85%" height="85%">
+</p>
 
-Currently
+Demo : [http://js86emu.chadrempp.com](http://js86emu.chadrempp.com)
 
-*  ~98 instructions decoded and mostly working
-*  Functioning stack
-*  Basic (non-segmented) memory
-*  Pretty decent debugging (gotta have this)
-*  Code Page 437 font set loads dynamically from a bitmap representation
-*  Text mode (80x25) video (no interrupts yet)
+Current Progress
 
-We'll see how far I get :)
+* Support for all documented 8086 instructions and addressing modes
+* Functioning stack
+* Basic debugging logging
+* 80x25 MDA text mode graphics using code page 437 font set
+* Video renderer support for canvas, PNG and binary output
+* 80% or better test coverage
 
-Quickstart
-----
-* Install Nodejs
-* install Ruby
-*
+## Usage
 
-TODO
-----
-* Fix operations which set src to an RM value, they over count IP increment. The following is the fix but care needs to be taken to determine which ops need it
-  ```
-  // correct for direct addressing IP counting
-  if (0 === opcode.mod && 6 === opcode.rm)
-  {
-      _tempIP -= 2;
-  }
-  ```
-* Add memory break points
-* Update memory debug view to keep starting point of rows at a factor of 8 (currently the row begins at IP)
+There are two ways to run js86emu: a command line client or as a web application.
 
-
-References
-----------
-* [IBM PS/2 Files](http://www.walshcomptech.com/selectpccbbs/)
-* [Complete 8086 instruction set](http://www.gabrielececchetti.it/Teaching/CalcolatoriElettronici/Docs/i8086_instruction_set.pdf)
-* [X86 Opcode and Instruction Chart](http://ref.x86asm.net/geek32.html)
-* [Notes for 8086 emulation core instruction decoding](http://rubbermallet.org/8086%20notes.pdf)
-* [Wikipedia X86 instruction listings](http://en.wikipedia.org/wiki/X86_instruction_listings)
-* [Intel 80x86 Assembly Language OpCodes](http://www.mathemainzel.info/files/x86asmref.html)
-* [Online Disassembler](http://www.onlinedisassembler.com/odaweb/)
-* [Wikipedia article on the 8086](http://en.wikipedia.org/wiki/8086)
-* [8086 Opcode Map](http://www.mlsite.net/8086/)
-* [The Instruction Set of 8086](http://www.ing.unlp.edu.ar/electrotecnia/arcom1/UNDERSTANDING8085_8086_cap14_Instruccion_set.pdf)
-* [Modes of Memory Addressing on x86](http://www.c-jump.com/CIS77/ASM/Memory/lecture.html)
-* [Compile and Execute Assembly Online](http://www.compileonline.com/compile_assembly_online.php)
-
-Notes
------
-* http://forum.osdev.org/viewtopic.php?f=13&t=26986
-
-# v0.3 Notes
-
-## build
+First build the entire package
 
 ```
 $ npm run build
 ```
 
-or
+### Command Line Client
+
+The command line client is run as an NPM command and is very basic at the
+moment.
+
+Currently only the PNG renderer is supported with the command line client and
+screen renders will be stored in the `./screenOut` directory. This happens at
+the screen refresh rate (~50hz) and could easily generate thousands of images
+so be careful.
 
 ```
-$ npm run build:watch
+$ npm run run:cli
 ```
 
-## test
+### Web Application
+
+The web application uses a node webserver to serve the web build of the
+emulator and by default renders to canvas.
+
+```
+$ npm run run:web
+```
+
+Then access the application at [http://localhost:8080](http://localhost:8080)
+
+### Docker
+
+Docker is supported.
+
+```
+$ docker build -t "js86emu" .
+$ 
+```
+
+Or use a prebuilt image on Dockerhub
+
+```
+$ docker run -p 8080:8080 lapinlabs/js86emu
+```
+
+### Testing
+
+js86emu has very good test coverage.
+
 ```
 $ npm test
 ```
 
-## Notes
-npm install git+https://github.com/sweet-js/sweet.js.git
+### Profiling performance
 
-./node_modules/.bin/jest tests/8086.test.js
-node dist/runner.js
+To profile the performance of js86emu the built-in node profiler works quite
+well.
 
-
-## Graphics drivers
-```
-$ brew install pkg-config gd
-$ npm install node-gd
-```
-
-## Profiling
 ```
 node --prof ./dist/runner.js
 node --prof-process isolate-0x102801e00-v8.log
 ```
+
+## Documentation
+
+### js86emu
+* [References](docs/references.md) - Throughout the code are references to
+documentation those are are located here. Also, any helpful references used
+during the development of js86emu are listed here.
+* [Roadmap](docs/roadmap.md) - Roadmap and general TODO items.
+
+### x86 Architecture
+* [Addressing](docs/x86/addressing.md)
+* [Flags](docs/x86/flags.md)
+
+# License
+
+[MIT](LICENSE.md)
