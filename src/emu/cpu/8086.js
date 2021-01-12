@@ -27,7 +27,7 @@ export default class CPU8086 extends CPU {
 
     this.system = system;
 
-    this.PORT_COUNT = 0x10000;
+    // this.PORT_COUNT = 0x10000;
 
     /**
      * CPU frequency in hertz (cyles per second).
@@ -101,8 +101,8 @@ export default class CPU8086 extends CPU {
     this.reg16[regFlags] = config.cpu.flags;
 
     // Ports
-    this.ports8 = new Uint8Array(this.PORT_COUNT);
-    this.ports16 = new Uint16Array(this.ports8.buffer);
+    // this.ports8 = new Uint8Array(this.PORT_COUNT);
+    // this.ports16 = new Uint16Array(this.ports8.buffer);
 
     // Opcode
     this.opcode = {};

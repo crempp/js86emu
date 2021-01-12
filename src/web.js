@@ -62,7 +62,7 @@ let codeGolfConfig = new SystemConfig({
 
 let sysConfig = new SystemConfig({
   bios: {
-    file: "PCXTBIOS.BIN"
+    file: "8086-tiny-bios.bin"
   },
 
   video: {
@@ -81,8 +81,8 @@ let sysConfig = new SystemConfig({
 });
 
 /*****************************************************************************/
-// let config = sysConfig;
-let config = codeGolfConfig;
+let config = sysConfig;
+// let config = codeGolfConfig;
 
 async function runEmulation () {
   await BrowserFSAsync(FS_CONFIG);

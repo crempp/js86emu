@@ -1950,6 +1950,7 @@ export default class Operations {
     this.cpu.ports8[dstVal] = (srcVal & 0x00FF);
     if (size !== b) {
       this.cpu.ports8[dstVal + 1] = (srcVal >> 8 & 0x00FF);
+      this.cpu.portWrite8(dstVal, )
     }
   }
 

@@ -35,7 +35,7 @@ These documents were used while researching the x86 platform.
 
 ## IO
 * [XT, AT and PS/2	 I/O port addresses](http://bochs.sourceforge.net/techspec/PORTS.LST)
-* [IBM Compatible Computer Memory Map & Bus](http://bochs.sourceforge.net/techspec/PORTS.LST)
+* [IBM Compatible Computer Memory Map & Bus](http://www.tuner.tw/OMEGA%20CD/zsection/MEM__MAP.PDF)
 * [Basic I/O Instructions](http://ece-research.unm.edu/jimp/310/slides/8086_IO1.html)
 * [Intel 8237 - Wikipedia](https://en.wikipedia.org/wiki/Intel_8237)
 * [The I/O Subsystem](http://www.phatcode.net/res/260/files/html/IO.html)
@@ -75,3 +75,4 @@ The folowing emulators were inspiration for js86emu as well as a source for me w
 * [fake86](http://fake86.rubbermallet.org/)
 * [8086tiny](https://github.com/adriancable/8086tiny)
 * [v86](https://github.com/copy/v86)
+* [pcjs](https://github.com/jeffpar/pcjs)

@@ -8,7 +8,7 @@ module.exports = {
     path: path.resolve(__dirname, "dist/web"),
     filename: "web.bundle.js"
   },
-  devtool: "source-map",
+  devtool: "eval-source-map",
   module: {
     rules: [
       {
@@ -54,5 +54,10 @@ module.exports = {
   watchOptions: {
     aggregateTimeout: 300,
     ignored: /node_modules/
+  },
+  devServer: {
+    contentBase: path.join(__dirname, 'dist/web'),
+    compress: false,
+    port: 8080
   }
 };

@@ -19,6 +19,7 @@ const DEFAULTS = {
   programBlob: null,
 
   bios: {
+    path: "/files/bios-roms/",
     file: "8086-tiny-bios.bin"
   },
 
