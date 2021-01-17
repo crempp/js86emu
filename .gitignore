@@ -8,3 +8,5 @@ coverage
 screenOut
 npm-debug.log
 tmp/*
+.next
+junit.xml

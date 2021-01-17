@@ -1082,7 +1082,7 @@ describe('rm/reg access methods', () => {
 
       expect(addr.readRMReg8(segment, offset)).toBe(0x42);
     });
-    test('two register instruction; use R/M bits with REG table', () => {
+    test('two registerPort instruction; use R/M bits with REG table', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b11111110; // addr mode
       cpu.decode();
@@ -1150,7 +1150,7 @@ describe('rm/reg access methods', () => {
 
       expect(addr.readRMReg16(segment, offset)).toBe(0x2142);
     });
-    test('two register instruction; use R/M bits with REG table', () => {
+    test('two registerPort instruction; use R/M bits with REG table', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
       cpu.mem8[0xABCD1] = 0b11111110; // addr mode
       cpu.decode();
@@ -1212,7 +1212,7 @@ describe('rm/reg access methods', () => {
       //    0xABCD0    +         0x79BD      + 0x1256 = 0xB48E3
       expect(cpu.mem8[0xB48E3]).toBe(0x42);
     });
-    test('two register instruction; use R/M bits with REG table', () => {
+    test('two registerPort instruction; use R/M bits with REG table', () => {
       cpu.mem8[0xABCD0] = 0x00; // inst (byte)
       cpu.mem8[0xABCD1] = 0b11111110; // addr mode
       cpu.decode();
@@ -1278,7 +1278,7 @@ describe('rm/reg access methods', () => {
       expect(cpu.mem8[0xB48E3]).toBe(0x42);
       expect(cpu.mem8[0xB48E4]).toBe(0x21);
     });
-    test('two register instruction; use R/M bits with REG table', () => {
+    test('two registerPort instruction; use R/M bits with REG table', () => {
       cpu.mem8[0xABCD0] = 0x01; // inst (byte)
       cpu.mem8[0xABCD1] = 0b11111110; // addr mode
       cpu.decode();

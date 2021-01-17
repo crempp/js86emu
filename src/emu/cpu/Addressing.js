@@ -79,16 +79,16 @@ export default class Addressing {
   }
 
   /**
-   * Read or write a word value from/to the AX register.
+   * Read or write a word value from/to the AX registerPort.
    *
    * @param {number} segment Memory segment NOT USED
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   AX (segment, offset,  value) {
-    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for registerPort");
 
     if (offset === undefined && value === undefined) {
       // No address calculation for registers
@@ -99,22 +99,22 @@ export default class Addressing {
       return this.cpu.reg16[regAX];
     }
     else {
-      // Write value to register
+      // Write value to registerPort
       this.cpu.reg16[regAX] = value & 0xFFFF
     }
   }
 
   /**
-   * Read or write a byte value from/to the AH register.
+   * Read or write a byte value from/to the AH registerPort.
    *
    * @param {number} segment Memory segment NOT USED
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   AH (segment, offset, value) {
-    if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
+    if (value > 0xFF) throw new ValueOverflowException("Value too large for registerPort");
 
     if (offset === undefined && value === undefined) {
       // No address calculation for registers
@@ -125,22 +125,22 @@ export default class Addressing {
       return this.cpu.reg8[regAH];
     }
     else {
-      // Write value to register
+      // Write value to registerPort
       this.cpu.reg8[regAH] = value & 0xFF
     }
   }
 
   /**
-   * Read or write a byte value from/to the AL register.
+   * Read or write a byte value from/to the AL registerPort.
    *
    * @param {number} segment Memory segment NOT USED
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   AL (segment, offset, value) {
-    if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
+    if (value > 0xFF) throw new ValueOverflowException("Value too large for registerPort");
 
     if (offset === undefined && value === undefined) {
       // No address calculation for registers
@@ -151,22 +151,22 @@ export default class Addressing {
       return this.cpu.reg8[regAL];
     }
     else {
-      // Write value to register
+      // Write value to registerPort
       this.cpu.reg8[regAL] = value & 0xFF
     }
   }
 
   /**
-   * Read or write a word value from/to the BX register.
+   * Read or write a word value from/to the BX registerPort.
    *
    * @param {number} segment Memory segment NOT USED
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   BX (segment, offset, value) {
-    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for registerPort");
 
     if (offset === undefined && value === undefined) {
       // No address calculation for registers
@@ -177,22 +177,22 @@ export default class Addressing {
       return this.cpu.reg16[regBX];
     }
     else {
-      // Write value to register
+      // Write value to registerPort
       this.cpu.reg16[regBX] = value & 0xFFFF
     }
   }
 
   /**
-   * Read or write a byte value from/to the BH register.
+   * Read or write a byte value from/to the BH registerPort.
    *
    * @param {number} segment Memory segment NOT USED
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   BH (segment, offset, value) {
-    if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
+    if (value > 0xFF) throw new ValueOverflowException("Value too large for registerPort");
 
     if (offset === undefined && value === undefined) {
       // No address calculation for registers
@@ -203,22 +203,22 @@ export default class Addressing {
       return this.cpu.reg8[regBH];
     }
     else {
-      // Write value to register
+      // Write value to registerPort
       this.cpu.reg8[regBH] = value & 0xFF
     }
   }
 
   /**
-   * Read or write a byte value from/to the BL register.
+   * Read or write a byte value from/to the BL registerPort.
    *
    * @param {number} segment Memory segment NOT USED
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   BL (segment, offset, value) {
-    if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
+    if (value > 0xFF) throw new ValueOverflowException("Value too large for registerPort");
 
     if (offset === undefined && value === undefined) {
       // No address calculation for registers
@@ -229,22 +229,22 @@ export default class Addressing {
       return this.cpu.reg8[regBL];
     }
     else {
-      // Write value to register
+      // Write value to registerPort
       this.cpu.reg8[regBL] = value & 0xFF
     }
   }
 
   /**
-   * Read or write a word value from/to the CX register.
+   * Read or write a word value from/to the CX registerPort.
    *
    * @param {number} segment Memory segment NOT USED
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   CX (segment, offset, value) {
-    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for registerPort");
 
     if (offset === undefined && value === undefined) {
       // No address calculation for registers
@@ -255,22 +255,22 @@ export default class Addressing {
       return this.cpu.reg16[regCX];
     }
     else {
-      // Write value to register
+      // Write value to registerPort
       this.cpu.reg16[regCX] = value & 0xFFFF
     }
   }
 
   /**
-   * Read or write a byte value from/to the CH register.
+   * Read or write a byte value from/to the CH registerPort.
    *
    * @param {number} segment Memory segment NOT USED
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   CH (segment, offset, value) {
-    if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
+    if (value > 0xFF) throw new ValueOverflowException("Value too large for registerPort");
 
     if (offset === undefined && value === undefined) {
       // No address calculation for registers
@@ -281,22 +281,22 @@ export default class Addressing {
       return this.cpu.reg8[regCH];
     }
     else {
-      // Write value to register
+      // Write value to registerPort
       this.cpu.reg8[regCH] = value & 0xFF
     }
   }
 
   /**
-   * Read or write a byte value from/to the CL register.
+   * Read or write a byte value from/to the CL registerPort.
    *
    * @param {number} segment Memory segment NOT USED
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   CL (segment, offset, value) {
-    if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
+    if (value > 0xFF) throw new ValueOverflowException("Value too large for registerPort");
 
     if (offset === undefined && value === undefined) {
       // No address calculation for registers
@@ -307,22 +307,22 @@ export default class Addressing {
       return this.cpu.reg8[regCL];
     }
     else {
-      // Write value to register
+      // Write value to registerPort
       this.cpu.reg8[regCL] = value & 0xFF
     }
   }
 
   /**
-   * Read or write a word value from/to the DX register.
+   * Read or write a word value from/to the DX registerPort.
    *
    * @param {number} segment Memory segment NOT USED
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   DX (segment, offset, value) {
-    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for registerPort");
 
     if (offset === undefined && value === undefined) {
       // No address calculation for registers
@@ -333,22 +333,22 @@ export default class Addressing {
       return this.cpu.reg16[regDX];
     }
     else {
-      // Write value to register
+      // Write value to registerPort
       this.cpu.reg16[regDX] = value & 0xFFFF
     }
   }
 
   /**
-   * Read or write a byte value from/to the DH register.
+   * Read or write a byte value from/to the DH registerPort.
    *
    * @param {number} segment Memory segment NOT USED
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   DH (segment, offset, value) {
-    if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
+    if (value > 0xFF) throw new ValueOverflowException("Value too large for registerPort");
 
     if (offset === undefined && value === undefined) {
       // No address calculation for registers
@@ -359,22 +359,22 @@ export default class Addressing {
       return this.cpu.reg8[regDH];
     }
     else {
-      // Write value to register
+      // Write value to registerPort
       this.cpu.reg8[regDH] = value & 0xFF
     }
   }
 
   /**
-   * Read or write a byte value from/to the DL register.
+   * Read or write a byte value from/to the DL registerPort.
    *
    * @param {number} segment Memory segment NOT USED
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   DL (segment, offset, value) {
-    if (value > 0xFF) throw new ValueOverflowException("Value too large for register");
+    if (value > 0xFF) throw new ValueOverflowException("Value too large for registerPort");
 
     if (offset === undefined && value === undefined) {
       // No address calculation for registers
@@ -385,22 +385,22 @@ export default class Addressing {
       return this.cpu.reg8[regDL];
     }
     else {
-      // Write value to register
+      // Write value to registerPort
       this.cpu.reg8[regDL] = value & 0xFF
     }
   }
 
   /**
-   * Read or write a word value from/to the SI register.
+   * Read or write a word value from/to the SI registerPort.
    *
    * @param {number} segment Memory segment NOT USED
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   SI (segment, offset, value) {
-    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for registerPort");
 
     if (offset === undefined && value === undefined) {
       // No address calculation for registers
@@ -411,22 +411,22 @@ export default class Addressing {
       return this.cpu.reg16[regSI];
     }
     else {
-      // Write value to register
+      // Write value to registerPort
       this.cpu.reg16[regSI] = value & 0xFFFF
     }
   }
 
   /**
-   * Read or write a word value from/to the DI register.
+   * Read or write a word value from/to the DI registerPort.
    *
    * @param {number} segment Memory segment NOT USED
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   DI (segment, offset, value) {
-    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for registerPort");
 
     if (offset === undefined && value === undefined) {
       // No address calculation for registers
@@ -437,22 +437,22 @@ export default class Addressing {
       return this.cpu.reg16[regDI];
     }
     else {
-      // Write value to register
+      // Write value to registerPort
       this.cpu.reg16[regDI] = value & 0xFFFF
     }
   }
 
   /**
-   * Read or write a word value from/to the BP register.
+   * Read or write a word value from/to the BP registerPort.
    *
    * @param {number} segment Memory segment NOT USED
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   BP (segment, offset, value) {
-    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for registerPort");
 
     if (offset === undefined && value === undefined) {
       // No address calculation for registers
@@ -463,22 +463,22 @@ export default class Addressing {
       return this.cpu.reg16[regBP];
     }
     else {
-      // Write value to register
+      // Write value to registerPort
       this.cpu.reg16[regBP] = value & 0xFFFF
     }
   }
 
   /**
-   * Read or write a word value from/to the SP register.
+   * Read or write a word value from/to the SP registerPort.
    *
    * @param {number} segment Memory segment NOT USED
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   SP (segment, offset, value) {
-    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for registerPort");
 
     if (offset === undefined && value === undefined) {
       // No address calculation for registers
@@ -489,22 +489,22 @@ export default class Addressing {
       return this.cpu.reg16[regSP];
     }
     else {
-      // Write value to register
+      // Write value to registerPort
       this.cpu.reg16[regSP] = value & 0xFFFF
     }
   }
 
   /**
-   * Read or write a word value from/to the CS register.
+   * Read or write a word value from/to the CS registerPort.
    *
    * @param {number} segment Memory segment NOT USED
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   CS (segment, offset, value) {
-    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for registerPort");
 
     if (offset === undefined && value === undefined) {
       // No address calculation for registers
@@ -515,22 +515,22 @@ export default class Addressing {
       return this.cpu.reg16[regCS];
     }
     else {
-      // Write value to register
+      // Write value to registerPort
       this.cpu.reg16[regCS] = value & 0xFFFF
     }
   }
 
   /**
-   * Read or write a word value from/to the DS register.
+   * Read or write a word value from/to the DS registerPort.
    *
    * @param {number} segment Memory segment NOT USED
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   DS (segment, offset, value) {
-    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for registerPort");
 
     if (offset === undefined && value === undefined) {
       // No address calculation for registers
@@ -541,22 +541,22 @@ export default class Addressing {
       return this.cpu.reg16[regDS];
     }
     else {
-      // Write value to register
+      // Write value to registerPort
       this.cpu.reg16[regDS] = value & 0xFFFF
     }
   }
 
   /**
-   * Read or write a word value from/to the ES register.
+   * Read or write a word value from/to the ES registerPort.
    *
    * @param {number} segment Memory segment NOT USED
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   ES (segment, offset, value) {
-    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for registerPort");
 
     if (offset === undefined && value === undefined) {
       // No address calculation for registers
@@ -567,23 +567,23 @@ export default class Addressing {
       return this.cpu.reg16[regES];
     }
     else {
-      // Write value to register
+      // Write value to registerPort
       this.cpu.reg16[regES] = value & 0xFFFF
     }
   }
 
   /**
-   * Read or write a word value from/to the SS register.
+   * Read or write a word value from/to the SS registerPort.
    *   - [3] p. A-1 to A-3
    *
    * @param {number} segment Memory segment NOT USED
    * @param {(number|null)} [offset] Memory offset NOT USED
    * @param {(number|null)} [value] Value to write (word)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   SS (segment, offset, value) {
-    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for registerPort");
 
     if (offset === undefined && value === undefined) {
       // No address calculation for registers
@@ -594,15 +594,15 @@ export default class Addressing {
       return this.cpu.reg16[regSS];
     }
     else {
-      // Write value to register
+      // Write value to registerPort
       this.cpu.reg16[regSS] = value & 0xFFFF
     }
   }
 
   /**
    * Direct address. The instruction has no ModR/M byte; the address of the
-   * operand is encoded in the instruction; and no base register, index
-   * register, or scaling factor can be applied (for example, far JMP (EA))
+   * operand is encoded in the instruction; and no base registerPort, index
+   * registerPort, or scaling factor can be applied (for example, far JMP (EA))
    *
    * The operand is a 32-bit segment:offset pointer.
    *
@@ -645,9 +645,9 @@ export default class Addressing {
 
   /**
    * A ModR/M byte follows the opcode and specifies the operand. The operand
-   * is either a general-purpose register or a memory address. If it is a
-   * memory address, the address is computed from a segment register and any
-   * of the following values: a base register, an index register, a scaling
+   * is either a general-purpose registerPort or a memory address. If it is a
+   * memory address, the address is computed from a segment registerPort and any
+   * of the following values: a base registerPort, an index registerPort, a scaling
    * factor, a displacement.
    *
    * The operand is a byte, regardless of operand-size attribute.
@@ -679,9 +679,9 @@ export default class Addressing {
 
   /**
    * A ModR/M byte follows the opcode and specifies the operand. The operand
-   * is either a general-purpose register or a memory address. If it is a
-   * memory address, the address is computed from a segment register and any
-   * of the following values: a base register, an index register, a scaling
+   * is either a general-purpose registerPort or a memory address. If it is a
+   * memory address, the address is computed from a segment registerPort and any
+   * of the following values: a base registerPort, an index registerPort, a scaling
    * factor, a displacement.
    *
    * 32-bit or 48-bit pointer, depending on operand-size attribute.
@@ -714,9 +714,9 @@ export default class Addressing {
 
   /**
    * A ModR/M byte follows the opcode and specifies the operand. The operand
-   * is either a general-purpose register or a memory address. If it is a
-   * memory address, the address is computed from a segment register and any
-   * of the following values: a base register, an index register, a scaling
+   * is either a general-purpose registerPort or a memory address. If it is a
+   * memory address, the address is computed from a segment registerPort and any
+   * of the following values: a base registerPort, an index registerPort, a scaling
    * factor, a displacement.
    *
    * The operand is a word or doubleword, depending on operand-size attribute.
@@ -748,9 +748,9 @@ export default class Addressing {
 
   /**
    * A ModR/M byte follows the opcode and specifies the operand. The operand
-   * is either a general-purpose register or a memory address. If it is a
-   * memory address, the address is computed from a segment register and any
-   * of the following values: a base register, an index register, a scaling
+   * is either a general-purpose registerPort or a memory address. If it is a
+   * memory address, the address is computed from a segment registerPort and any
+   * of the following values: a base registerPort, an index registerPort, a scaling
    * factor, a displacement.
    *
    * The operand is a word, regardless of operand-size attribute.
@@ -781,7 +781,7 @@ export default class Addressing {
   }
 
   /**
-   * The reg field of the ModR/M byte selects a general register (for example,
+   * The reg field of the ModR/M byte selects a general registerPort (for example,
    * AX (000)).
    *
    * The operand is a byte, regardless of operand-size attribute.
@@ -791,7 +791,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] NOT USED
    * @param {(number|null)} [value] Value to write (byte)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   Gb (segment, offset, value) {
     if (value > 0xFF) throw new ValueOverflowException("Value too large for addressing mode");
@@ -812,7 +812,7 @@ export default class Addressing {
   }
 
   /**
-   * The reg field of the ModR/M byte selects a general register (for example,
+   * The reg field of the ModR/M byte selects a general registerPort (for example,
    * AX (000)).
    *
    * The operand is a word or doubleword, depending on operand-size attribute.
@@ -822,10 +822,10 @@ export default class Addressing {
    * @param {(number|null)} [offset] NOT USED
    * @param {(number|null)} [value] Value to write (word|doubleword)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   Gv (segment, offset,  value) {
-    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for register");
+    if (value > 0xFFFF) throw new ValueOverflowException("Value too large for registerPort");
 
     // Calculate address
     if (offset === undefined && value === undefined) {
@@ -940,7 +940,7 @@ export default class Addressing {
 
   /**
    * The instruction contains a relative offset to be added to the instruction
-   * pointer register (for example, JMP (0E9), LOOP).
+   * pointer registerPort (for example, JMP (0E9), LOOP).
    *
    * The operand is a word, regardless of operand-size attribute.
    *   - [3] p. A-1 to A-3
@@ -973,7 +973,7 @@ export default class Addressing {
 
   /**
    * The instruction contains a relative offset to be added to the instruction
-   * pointer register (for example, JMP (0E9), LOOP).
+   * pointer registerPort (for example, JMP (0E9), LOOP).
    *
    * The operand is a word or doubleword, depending on operand-size attribute.
    *   - [3] p. A-1 to A-3
@@ -1086,7 +1086,7 @@ export default class Addressing {
   /**
    * The instruction has no ModR/M byte; the offset of the operand is coded as
    * a word or double word (depending on address size attribute) in the
-   * instruction. No base register, index register, or scaling factor can be
+   * instruction. No base registerPort, index registerPort, or scaling factor can be
    * applied (for example, MOV (A0–A3)).
    *   - [3] p. A-1 to A-3
    *
@@ -1120,7 +1120,7 @@ export default class Addressing {
   /**
    * The instruction has no ModR/M byte; the offset of the operand is coded as
    * a word or double word (depending on address size attribute) in the
-   * instruction. No base register, index register, or scaling factor can be
+   * instruction. No base registerPort, index registerPort, or scaling factor can be
    * applied (for example, MOV (A0–A3)).
    *   - [3] p. A-1 to A-3
    *
@@ -1151,13 +1151,13 @@ export default class Addressing {
   }
 
   /**
-   * The reg field of the ModR/M byte selects a segment register (for example,
+   * The reg field of the ModR/M byte selects a segment registerPort (for example,
    * MOV (8C,8E)).
    *   - [3] p. A-1 to A-3
    *
-   * When an instruction operates on a segment register, the reg field in the
+   * When an instruction operates on a segment registerPort, the reg field in the
    * ModR/M byte is called the sreg field and is used to specify the segment
-   * register. Table B-6 shows the encoding of the sreg field. This field is
+   * registerPort. Table B-6 shows the encoding of the sreg field. This field is
    * sometimes a 2-bit field (sreg2) and other times a 3-bit field (sreg3).
    *   - [3] p. B-4
    *
@@ -1165,7 +1165,7 @@ export default class Addressing {
    * @param {(number|null)} [offset] NOT USED
    * @param {(number|null)} [value] Value to write (word|doubleword)
    * @return {(number|null)} In address mode returns null, in read mode returns
-   *   the value from the register, in write mode does not return a value
+   *   the value from the registerPort, in write mode does not return a value
    */
   Sw (segment, offset, value) {
     // Calculate address
@@ -1206,7 +1206,7 @@ export default class Addressing {
   }
 
   /**
-   * Read a byte from memory or a register as specified by the addressing
+   * Read a byte from memory or a registerPort as specified by the addressing
    * mode determined by the mod, reg and r/m values.
    *
    * @param {number} segment Memory segment
@@ -1214,7 +1214,7 @@ export default class Addressing {
    */
   readRMReg8 (segment, offset) {
     if (this.cpu.opcode.mod === 0b11) {
-      // Two register instruction; use REG table
+      // Two registerPort instruction; use REG table
       return this.readRegVal(true, b);
     }
     else {
@@ -1225,7 +1225,7 @@ export default class Addressing {
   }
 
   /**
-   * Read a word from memory or a register as specified by the addressing
+   * Read a word from memory or a registerPort as specified by the addressing
    * mode determined by the mod, reg and r/m values.
    *
    * @param {number} segment Memory segment
@@ -1233,7 +1233,7 @@ export default class Addressing {
    */
   readRMReg16 (segment, offset) {
     if (this.cpu.opcode.mod === 0b11) {
-      // Two register instruction; use REG table
+      // Two registerPort instruction; use REG table
       return this.readRegVal(true, w);
     }
     else {
@@ -1244,7 +1244,7 @@ export default class Addressing {
   }
 
   /**
-   * Read a double word from memory or a register as specified by the
+   * Read a double word from memory or a registerPort as specified by the
    * addressing mode determined by the mod, reg and r/m values.
    *
    * @param {number} segment Memory segment
@@ -1252,7 +1252,7 @@ export default class Addressing {
    */
   readRMReg32 (segment, offset) {
     if (this.cpu.opcode.mod === 0b11) {
-      // Two register instruction; use REG table
+      // Two registerPort instruction; use REG table
       // TODO: Is this codepath ever hit? Becuase I don't think it'll work
       return this.readRegVal(true);
     }
@@ -1264,7 +1264,7 @@ export default class Addressing {
   }
 
   /**
-   * Write a byte to memory or a register as specified by the addressing
+   * Write a byte to memory or a registerPort as specified by the addressing
    * mode determined by the mod, reg and r/m values.
    *
    * @param {number} segment Memory segment
@@ -1273,7 +1273,7 @@ export default class Addressing {
    */
   writeRMReg8(segment, offset, value) {
     if (this.cpu.opcode.mod === 0b11) {
-      // Two register instruction; use REG table
+      // Two registerPort instruction; use REG table
       this.writeRegVal(value, true, b);
     }
     else {
@@ -1284,7 +1284,7 @@ export default class Addressing {
   }
 
   /**
-   * Write a word to memory or a register as specified by the addressing
+   * Write a word to memory or a registerPort as specified by the addressing
    * mode determined by the mod, reg and r/m values.
    *
    * @param {number} segment Memory segment
@@ -1293,7 +1293,7 @@ export default class Addressing {
    */
   writeRMReg16(segment, offset, value) {
     if (this.cpu.opcode.mod === 0b11) {
-      // Two register instruction; use REG table
+      // Two registerPort instruction; use REG table
       this.writeRegVal(value, true, w);
     }
     else {
@@ -1439,12 +1439,12 @@ export default class Addressing {
   }
 
   /**
-   * Read a byte or a word from a register determined by the rm or reg value
+   * Read a byte or a word from a registerPort determined by the rm or reg value
    * and the reg lookup table.
    *
    * @param {boolean} useRM Use the RM value rather than the default REG value
    * @param {(number|null)} sizeOverride If given override the w bit for the operand size
-   * @returns {number} The value of the register
+   * @returns {number} The value of the registerPort
    */
   readRegVal (useRM = false, sizeOverride=null) {
     let rmReg = useRM ? this.cpu.opcode.rm : this.cpu.opcode.reg;
@@ -1501,10 +1501,10 @@ export default class Addressing {
   }
 
   /**
-   * Write a byte or a word to a register determined by the rm or reg value
+   * Write a byte or a word to a registerPort determined by the rm or reg value
    * and the reg lookup table.
    *
-   * @param {number} value Value to write to the register
+   * @param {number} value Value to write to the registerPort
    * @param {boolean} useRM Use the RM value rather than the default REG value
    * @param {(number|null)} sizeOverride If given override the w bit for the operand size
    */

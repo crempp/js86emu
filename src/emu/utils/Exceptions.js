@@ -57,3 +57,16 @@ export class InvalidAddressModeException extends Error {
     Error.captureStackTrace(this, FeatureNotImplementedException);
   }
 }
+
+export class InvalidDeviceException extends Error {
+  constructor(...params) {
+    super(...params);
+
+    // a workaround to make `instanceof` work in ES5
+    this.constructor = InvalidAddressModeException;
+    this.__proto__   = InvalidAddressModeException.prototype;
+
+    Error.captureStackTrace(this, FeatureNotImplementedException);
+  }
+}
+

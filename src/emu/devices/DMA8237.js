@@ -12,7 +12,7 @@
  * 0006	r/w	DMA channel 3  address	byte  0, then byte 1.
  * 0007	r/w	DMA channel 3 word count byte 0, then byte 1.
  *
- * 0008	r	DMA channel 0-3 status register
+ * 0008	r	DMA channel 0-3 status registerPort
  *     bit 7 = 1  channel 3 request
  *     bit 6 = 1  channel 2 request
  *     bit 5 = 1  channel 1 request
@@ -22,7 +22,7 @@
  *     bit 1 = 1  channel terminal count on channel 1
  *     bit 0 = 1  channel terminal count on channel 0
  *
- *0008	w	DMA channel 0-3 command register
+ *0008	w	DMA channel 0-3 command registerPort
  *     bit 7 = 1  DACK sense active high
  *           = 0  DACK sense active low
  *     bit 6 = 1  DREQ sense active high
@@ -36,9 +36,9 @@
  *     bit 2 = 1  enable controller
  *           = 0  enable memory-to-memory
  *
- * 0009	w DMA write request register
+ * 0009	w DMA write request registerPort
  *
- * 000A	r/w	DMA channel 0-3 mask register
+ * 000A	r/w	DMA channel 0-3 mask registerPort
  *     bit 7-3 = 0   reserved
  *     bit 2	 = 0   clear mask bit
  *       = 1   set mask bit
@@ -47,7 +47,7 @@
  *        = 10  channel 2 select
  *        = 11  channel 3 select
  *
- * 000B	w	DMA channel 0-3 mode register
+ * 000B	w	DMA channel 0-3 mode registerPort
  *      bit 7-6 = 00  demand mode
  *        = 01  single mode
  *        = 10  block mode
@@ -64,36 +64,52 @@
  *        = 11  channel 3 select
  *
  * 000C	w	DMA clear byte pointer flip-flop
- * 000D	r	DMA read temporary register
+ * 000D	r	DMA read temporary registerPort
  * 000D	w	DMA master clear
- * 000E	w	DMA clear mask register
- * 000F	w	DMA write mask register
+ * 000E	w	DMA clear mask registerPort
+ * 000F	w	DMA write mask registerPort
  */
 
-
-
 export default class DMA8237 {
-  constructor (system) {
-    this.system = system;
+  constructor (config) {
+    this.config = config;
 
-    this.io = this.system.io;
+    // this.io.registerPort(0x00, 'rw', this.temp);
+    // this.io.registerPort(0x01, 'rw', this.temp);
+    // this.io.registerPort(0x02, 'rw', this.temp);
+    // this.io.registerPort(0x03, 'rw', this.temp);
+    // this.io.registerPort(0x04, 'rw', this.temp);
+    // this.io.registerPort(0x05, 'rw', this.temp);
+    // this.io.registerPort(0x06, 'rw', this.temp);
+    // this.io.registerPort(0x07, 'rw', this.temp);
+    // this.io.registerPort(0x08, 'rw', this.statusCommandRegister);
+    // this.io.registerPort(0x09, 'w',  this.writeRequestRegister);
+    // this.io.registerPort(0x0A, 'rw', this.maskRegister);
+    // this.io.registerPort(0x0B, 'w',  this.modeRegister);
+    // this.io.registerPort(0x0C, 'w',  this.clearFlipFlop);
+    // this.io.registerPort(0x0D, 'rw', this.readTempClearMasterRegister);
+    // this.io.registerPort(0x0E, 'w',  this.clearMaskRegister);
+    // this.io.registerPort(0x0F, 'r',  this.writeMaskRegister);
+  }
 
-    this.io.register(0x00, 'rw', this.temp);
-    this.io.register(0x01, 'rw', this.temp);
-    this.io.register(0x02, 'rw', this.temp);
-    this.io.register(0x03, 'rw', this.temp);
-    this.io.register(0x04, 'rw', this.temp);
-    this.io.register(0x05, 'rw', this.temp);
-    this.io.register(0x06, 'rw', this.temp);
-    this.io.register(0x07, 'rw', this.temp);
-    this.io.register(0x08, 'rw', this.statusCommandRegister);
-    this.io.register(0x09, 'w',  this.writeRequestRegister);
-    this.io.register(0x0A, 'rw', this.maskRegister);
-    this.io.register(0x0B, 'w',  this.modeRegister);
-    this.io.register(0x0C, 'w',  this.clearFlipFlop);
-    this.io.register(0x0D, 'rw', this.readTempClearMasterRegister);
-    this.io.register(0x0E, 'w',  this.clearMaskRegister);
-    this.io.register(0x0F, 'r',  this.writeMaskRegister);
+  write(port, value, size) {
+    if (this.config.debug) {
+      console.log(`  WRITE device: ${this.constructor.name} port: ${port}, value:${value}, size${size}`);
+    }
+  }
+
+  read(port, size){
+    let value = 0xFF;
+    if (this.config.debug) {
+      console.log(`  READ device: ${this.constructor.name} port: ${port}, value:${value}, size${size}`);
+    }
+    return value;
+  }
+
+  deviceCycle(){
+    if (this.config.debug) {
+      console.log(`  CYCLE device: ${this.constructor.name}`);
+    }
   }
 
   temp () {

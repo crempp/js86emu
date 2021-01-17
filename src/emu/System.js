@@ -8,7 +8,6 @@ import {
 import VideoMDA from "./video/VideoMDA";
 import { SystemConfigException } from "./utils/Exceptions";
 import SystemConfig from "./config/SystemConfig";
-import { debug } from "./utils/Debug";
 
 // We don't know the renderer until runtime. Webpack is a static compiler and
 // thus can't require dynamically. Also I was having issues with dynamic
@@ -20,10 +19,9 @@ import RendererCanvas from './video/renderers/RendererCanvas';
 import RendererPNG from './video/renderers/RendererPNG';
 import {loadBINAsync, seg2abs, segIP} from "./utils/Utils";
 import {hexString32} from "./utils/Debug";
-import DMA8237 from "./chips/DMA8237";
 import IO from "./IO";
 import RendererNoop from "./video/renderers/RendererNoop";
-import PIC8259 from "./chips/PIC8259";
+
 const RENDERERS = {
   "RendererNoop": RendererNoop,
   "RendererBin": RendererBin,
@@ -45,42 +43,11 @@ export default class System {
     this.videoSync = config.videoSync;
     this.newVideoSync = config.videoSync;
     this.runningHz = 0;
-    this.portCallbacks = [];
 
-    this.biosJumpAddress = [0xF000, 0xFFF0]; // 0x000FFFF0
     this.videoROMAddress = [0xC000, 0x0000]; // 0x000C0000
 
     // Create CPU
     this.cpu = new CPU8086(config, this);
-
-    /*
-    PC XT Ports
-    0x000 - 0x00F   DMA controller
-    0x020 - 0x021F  Interrupt controller
-    0x040 - 0x043F  Counter timer
-    0x060 - 0x063F  PPI
-    0x080 - 0x083F  DMA page register
-    0x0A0         NMI mask register
-    0x200 - 0x20F   Game port
-    0x210 - 0x217   Expansion Unit
-    0x2F8 - 0x2FF   Serial port 2
-    0x300 - 0x31F   Prototype card
-    0x320 - 0x32F   Fixed disk
-    0x378 - 0x37F   Parallel port 1
-    0x380 - 0x38F   SDLC bisynchronous 2
-    0x3B0 - 0x3BF   Monochrome adaptor/printer
-    0x3D0 - 0x3D7   CGA
-    0x3F0 - 0x3F7   Floppy disk
-    0x3F8 - 0x3FF   Serial port
-    */
-    // Create port IO
-    this.io = new IO(this);
-
-    // Create Chips
-    // this.dma = new DMA8237(this);
-    // this.io.register()
-    this.pic = new PIC8259(this);
-    // this.io.register()
 
     // Create video and renderer
     if (config.isNode && config.renderer.class === 'RendererCanvas') {
@@ -90,10 +57,11 @@ export default class System {
       throw new SystemConfigException(`${config.renderer.class} is not a valid renderer`);
     }
     let renderer = new RENDERERS[config.renderer.class](config.renderer.options);
-    this.videoCard = new VideoMDA(this.cpu.mem8, renderer, config);
+    this.videoCard = new VideoMDA(this, renderer, config);
 
-    // Setup port callbacks
-    this.portCallbacks.push(this.videoCard.ports);
+    // Create IO port interface
+    // This needs to be done after initializing all other devices
+    this.io = new IO(this.config);
   }
 
   /**
@@ -104,14 +72,20 @@ export default class System {
   async boot () {
     // Clear memory
 
-    // Load BIOS
-    console.log("Loading BIOS...");
-    if (!this.config.programBlob) {
+    // Load system BIOS or blob
+    if (this.config.programBlob) {
+      console.log(`Loading program blob ${this.config.programBlob.file}...`);
+      let bin = await loadBINAsync(this.config.programBlob.file);
+      this.loadMem(bin, this.config.programBlob.addr);
+    }
+    else {
+      console.log("Loading BIOS...");
       // Load BIOS file
       let biosPath = `${this.config.bios.biosPath}${this.config.bios.file}`;
       let bios = await loadBINAsync(biosPath);
       // Calculate start address for the BIOS
-      let biosAddr = (1024 * 1024) - bios.length;
+      // Currently hard-coded for 8086
+      let biosAddr = 0x100000 - bios.length;
 
       if (this.config.debug) console.info(`Loading BIOS at ${hexString32(biosAddr)}`);
       this.loadMem(bios, biosAddr);
@@ -123,24 +97,8 @@ export default class System {
 
     // Self test
 
-    // Jump to BIOS
-    console.log("Jump to BIOS...");
-    if (!this.config.programBlob && !this.config.cpu.registers16) {
-      this.cpu.reg16[regCS] = this.biosJumpAddress[0];
-      this.cpu.reg16[regIP] = this.biosJumpAddress[1];
-    }
-
     // Init state
-
-
     await this.videoCard.init();
-
-    // If there's a program blob specified load it
-    if (this.config.programBlob) {
-      console.log(`Loading program blob ${this.config.programBlob.file}...`);
-      let bin = await loadBINAsync(this.config.programBlob.file);
-      this.loadMem(bin, this.config.programBlob.addr);
-    }
   }
 
   /**
@@ -174,8 +132,8 @@ export default class System {
       // Do a cycle
       this.cpu.cycle();
 
-      // Handle ports
-      this.ports();
+      // Cycle Devices
+      this.cycleDevices();
 
       // Run timing check
       if (this.cycleCount % this.timeSyncCycles === 0) {
@@ -200,6 +158,13 @@ export default class System {
   }
 
   /**
+   * Run a cycle on each device
+   */
+  cycleDevices() {
+
+  }
+
+  /**
    * Check the timing and update the measured cycles per second in MHZ.
    */
   timingCheck() {
@@ -209,12 +174,6 @@ export default class System {
 
     // Update the number of cycles between video syncs
     this.newVideoSync = Math.max(Math.round(this.runningHz / this.videoCard.verticalSync), 50000);
-  }
-
-  ports () {
-    // for (let cb in this.portCallbacks) {
-    //   cb();
-    // }
   }
 
   /**

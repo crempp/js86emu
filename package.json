@@ -38,6 +38,7 @@
   },
   "jest": {
     "verbose": false,
+    "testEnvironment": "node",
     "testResultsProcessor": "jest-junit"
   },
   "jest-junit": {

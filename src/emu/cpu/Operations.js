@@ -21,7 +21,7 @@ export default class Operations {
   }
 
   /**
-   * AAA (ASCII Adjust for Addition) changes the contents of register AL to a
+   * AAA (ASCII Adjust for Addition) changes the contents of registerPort AL to a
    * valid unpacked decimal number; the high-order half-byte is zeroed. AAA
    * updates AF and CF; the content of OF, PF, SF and ZF is undefined following
    * execution of AAA.
@@ -77,7 +77,7 @@ export default class Operations {
   /**
    * AAS (ASCII Adjust for Subtraction) corrects the result of a previous
    * subtraction of two valid unpacked decimal operands (the destination
-   * operand must have been specified as register AL). AAS changes the content
+   * operand must have been specified as registerPort AL). AAS changes the content
    * of AL to a valid unpacked decimal number; the high-order halfbyte is
    * zeroed. AAS updates AF and CF; the content of OF, PF, SF and ZF is
    * undefined following execution of AAS.
@@ -186,7 +186,7 @@ export default class Operations {
    * procedure and the CALL are contained in separately assembled programs.)
    * Different forms of the CALL instruction allow the address of the target
    * procedure to be obtained from the instruction itself (direct CALL) or from
-   * a memory location or register referenced by the instruction (indirect
+   * a memory location or registerPort referenced by the instruction (indirect
    * CALL). In the following descriptions, bear in mind that the processor
    * automatically adjusts IP to point to the next instruction to be executed,
    * before saving it on the stack.
@@ -200,9 +200,9 @@ export default class Operations {
    * segment and are moved together.
    *
    * An intrasegment indirect CALL may be made through memory or through a
-   * register. SP is decremented by two and IP is pushed onto the stack. The
+   * registerPort. SP is decremented by two and IP is pushed onto the stack. The
    * offset of the target procedure is obtained from the memory word or 16-bit
-   * general register referenced in the instruction and replaces IP.
+   * general registerPort referenced in the instruction and replaces IP.
    *
    * For an intersegment direct CALL, SP is decremented by two, and CS is
    * pushed onto the stack. CS is replaced by the segment word contained in the
@@ -257,8 +257,8 @@ export default class Operations {
   }
 
   /**
-   * CBW (Convert Byte to Word) extends the sign of the byte in register AL
-   * throughout register AH. CBW does not affect any flags. CBW can be used to
+   * CBW (Convert Byte to Word) extends the sign of the byte in registerPort AL
+   * throughout registerPort AH. CBW does not affect any flags. CBW can be used to
    * produce a double-length (word) dividend from a byte prior to performing
    * byte division.
    *   - [1] p.2-38
@@ -483,8 +483,8 @@ export default class Operations {
   }
 
   /**
-   * CWD (Convert Word to Doubleword) extends the sign of the word in register
-   * AX throughout register DX. CWD does not affect any flags. CWD can be used
+   * CWD (Convert Word to Doubleword) extends the sign of the word in registerPort
+   * AX throughout registerPort DX. CWD does not affect any flags. CWD can be used
    * to produce a double-length (doubleword) dividend from a word prior to
    * performing word division.
    *  - [1] p.2-38
@@ -501,7 +501,7 @@ export default class Operations {
   /**
    * DAA (Decimal Adjust for Addition) corrects the result of previously adding
    * two valid packed decimal operands (the destination operand must have been
-   * register AL). DAA changes the content of AL to a pair of valid packed
+   * registerPort AL). DAA changes the content of AL to a pair of valid packed
    * decimal digits. It updates AF, CF, PF, SF and ZF; the content of OF is
    * undefined following execution of DAA.
    *  - [1] p.2-36
@@ -518,7 +518,7 @@ export default class Operations {
   /**
    * DAS (Decimal Adjust for Subtraction) corrects the result of a previous
    * subtraction of two valid packed decimal operands (the destination operand
-   * must have been specified as register AL). DAS changes the content of AL
+   * must have been specified as registerPort AL). DAS changes the content of AL
    * to a pair of valid packed decimal digits. DAS updates AF, CF, PF, SF and
    * ZF; the content of OF is undefined following execution of DAS.
    *  - [1] p.2-36
@@ -564,7 +564,7 @@ export default class Operations {
    * divided into the doublelength dividend in registers AX and DX. The
    * single-length quotient is returned in AX, and the single-length remainder
    * is returned in DX. If the quotient exceeds the capacity of its destination
-   * register (FFH for byte source, FFFFFH for word source), as when division
+   * registerPort (FFH for byte source, FFFFFH for word source), as when division
    * by zero is attempted, a type 0 interrupt is generated, and the quotient
    * and remainder are undefined. Nonintegral quotients are truncated to
    * integers. The content of AF, CF, OF, PF, SF and ZF is undefined following
@@ -656,8 +656,8 @@ export default class Operations {
   /**
    * IMUL (Integer Multiply) performs a signed multiplication of the source
    * operand and the accumulator. If the source is a byte, then it is
-   * multiplied by register AL, and the double-length result is returned in AH
-   * and AL. If the source is a word, then it is multiplied by register AX, and
+   * multiplied by registerPort AL, and the double-length result is returned in AH
+   * and AL. If the source is a word, then it is multiplied by registerPort AX, and
    * the double-length result is returned in registers DX and AX. If the upper
    * half of the result (AH for byte source, DX for word source) is not the
    * sign extension of the lower half of the result, CF and OF are set;
@@ -676,10 +676,10 @@ export default class Operations {
   }
 
   /**
-   * IN transfers a byte or a word from an input port to the AL register or the
-   * AX register, respectively. The port number may be specified either with an
+   * IN transfers a byte or a word from an input port to the AL registerPort or the
+   * AX registerPort, respectively. The port number may be specified either with an
    * immediate byte constant, allowing access to ports numbered 0 through 255,
-   * or with a number previously placed in the DX register, allowing variable
+   * or with a number previously placed in the DX registerPort, allowing variable
    * access (by changing the value in DX) to ports numbered from 0 through
    * 65,535.
    *   - [1] p.2-32
@@ -690,18 +690,14 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   in (dst, src) {
-    let segment = 0x0000;
+    let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
+    let srcAddr = src(this.cpu.reg16[this.cpu.addrSeg]);
+    let srcVal = src(this.cpu.reg16[this.cpu.addrSeg], srcAddr);
+
     let size = this.cpu.opcode.addrSize;
-    let dstAddr = dst(segment);
-    let srcAddr = src(segment);
-    let srcVal  = src(segment, srcAddr);
 
-    let portVal = this.cpu.ports8[srcVal];
-    if (size !== b) {
-      portVal = (this.cpu.ports8[srcVal + 1] << 8) | portVal;
-    }
-
-    dst(segment, dstAddr, portVal);
+    let value = this.cpu.io.read(srcVal, size);
+    dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr, value);
   }
 
   /**
@@ -735,7 +731,7 @@ export default class Operations {
    * the flags onto the stack, and clears the trap (TF) and interrupt-enable
    * (IF) flags to disable single-step and maskable interrupts. The flags are
    * stored in the format used by the PUSHF instruction. SP is decremented
-   * again by two, and the es register is pushed onto the stack. The address of
+   * again by two, and the es registerPort is pushed onto the stack. The address of
    * the inter- rupt pointer is calculated by multiplying interrupt-type by
    * four; the second word of the in- terrupt pointer replaces CS. SP again is
    * decremented by two, and IP is pushed onto the stack and is replaced by the
@@ -759,7 +755,7 @@ export default class Operations {
     let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
     let dstVal  = dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
 
-    // 1. Flag register value is pushed on to the stack.
+    // 1. Flag registerPort value is pushed on to the stack.
     this.push16(this.cpu.reg16[regFlags]);
     // 2. CS value of the Return address and IP value of the Return address
     //    are push edon to the stack.
@@ -800,7 +796,7 @@ export default class Operations {
     if ((this.cpu.reg16[regFlags] & FLAG_OF_MASK) > 0) {
       let dstVal = 4;
 
-      // 1. Flag register value is pushed on to the stack.
+      // 1. Flag registerPort value is pushed on to the stack.
       this.push16(this.cpu.reg16[regFlags]);
       // 2. CS value of the Return address and IP value of the Return address
       //    are push edon to the stack.
@@ -1106,7 +1102,7 @@ export default class Operations {
    * instruction, JMP does not save any information on the stack, and no return to
    * the instruction following the JMP is expected. Like CALL, the address of the
    * target operand may be obtained from the instruction itself (direct JMP) or
-   * from memory or a register referenced by the instruction (indirect JMP).
+   * from memory or a registerPort referenced by the instruction (indirect JMP).
    *
    * An intrasegment direct JMP changes the instruction pointer by adding the
    * relative displacement of the target from the JMP instruction. If the assembler
@@ -1118,9 +1114,9 @@ export default class Operations {
    * same segment and are moved together.
    *
    * An intrasegment indirect JMP may be made either through memory or through a
-   * 16-bit general register. In the first case, the content of the word referenced
+   * 16-bit general registerPort. In the first case, the content of the word referenced
    * by the instruction replaces the instruction pointer. In the second case, the
-   * new IP value is taken from the register named in the instruction.
+   * new IP value is taken from the registerPort named in the instruction.
    *
    * An intersegment direct JMP replaces IP and CS with values contained in the
    * instruction.
@@ -1452,8 +1448,8 @@ export default class Operations {
   }
 
   /**
-   * LAHF (load register AH from flags) copies SF, ZF, AF, PF and CF (the
-   * 8080/8085 flags) into bits 7, 6, 4, 2 and 0, respectively, of register
+   * LAHF (load registerPort AH from flags) copies SF, ZF, AF, PF and CF (the
+   * 8080/8085 flags) into bits 7, 6, 4, 2 and 0, respectively, of registerPort
    * AH (see figure 2-32). The content of bits 5, 3 and 1 is undefined; the
    * flags themselves are not affected. LAHF is provided primarily for
    * converting 8080/8085 assembly language programs to run on an 8086 or 8088.
@@ -1474,9 +1470,9 @@ export default class Operations {
   /**
    * LDS (load pointer using DS) transfers a 32-bit pointer variable from the
    * source operand, which must be a memory operand, to the destination operand
-   * and register DS. The offset word of the pointer is transferred to the
-   * destination operand, which may be any 16-bit general register. The segment
-   * word of the pointer is transferred to register DS. Specifying SI as the
+   * and registerPort DS. The offset word of the pointer is transferred to the
+   * destination operand, which may be any 16-bit general registerPort. The segment
+   * word of the pointer is transferred to registerPort DS. Specifying SI as the
    * destination operand is a convenient way to prepare to process a source
    * string that is not in the current data segment (string instructions assume
    * that the source string is located in the current data segment and that SI
@@ -1501,7 +1497,7 @@ export default class Operations {
    * LEA (load effective address) transfers the offset of the source operand
    * (rather than its value) to the destination operand. The source operand
    * must be a memory operand, and the destination operand must be a 16-bit
-   * general register. LEA does not affect any flags. The XLA T and string
+   * general registerPort. LEA does not affect any flags. The XLA T and string
    * instructions assume that certain registers point to operands; LEA can
    * be used to load these registers (e.g., 10'lding BX with the address of
    * the translate table used by the XLA T instruction).
@@ -1523,9 +1519,9 @@ export default class Operations {
   /**
    * LES (load pointer using ES) transfers a 32-bit pointer variable from the
    * source operand, which must be a memory operand, to the destination operand
-   * and register ES. The offset word of the pointer is transferred to the
-   * destination operand, which may be any 16-bit general register. The segment
-   * word of the pointer is transferred to register ES. Specifying DI as the
+   * and registerPort ES. The offset word of the pointer is transferred to the
+   * destination operand, which may be any 16-bit general registerPort. The segment
+   * word of the pointer is transferred to registerPort ES. Specifying DI as the
    * destination operand is a convenient way to prepare to process a
    * destination string that is not in the current extra segment. (The
    * destination string must be located in the extra segment, and DI must
@@ -1552,7 +1548,7 @@ export default class Operations {
 
   /**
    * LODS (Load String) transfers the byte or word string element addressed by
-   * SI to register AL or AX, and updates SI to point to the next element in
+   * SI to registerPort AL or AX, and updates SI to point to the next element in
    * the string. This instruction is not ordinarily repeated since the
    * accumulator would be over- written by each repetition, and only the last
    * element would be retained. However, LODS is very useful in software loops
@@ -1586,7 +1582,7 @@ export default class Operations {
 
   /**
    * LODS (Load String) transfers the byte or word string element addressed by
-   * SI to register AL or AX, and updates SI to point to the next element in
+   * SI to registerPort AL or AX, and updates SI to point to the next element in
    * the string. This instruction is not ordinarily repeated since the
    * accumulator would be over- written by each repetition, and only the last
    * element would be retained. However, LODS is very useful in software loops
@@ -1775,8 +1771,8 @@ export default class Operations {
   /**
    * MUL (Multiply) performs an unsigned multiplication of the source operand
    * and the accumulator. If the source is a byte, then it is multiplied by
-   * register AL, and the double-length result is returned in AH and AL. If the
-   * source operand is a word, then it is multiplied by register AX, and the
+   * registerPort AL, and the double-length result is returned in AH and AL. If the
+   * source operand is a word, then it is multiplied by registerPort AX, and the
    * double-length result is returned in registers DX and AX. The operands are
    * treated as unsigned binary numbers (see AAM). If the upper half of the
    * result (AH for byte source, DX for word source) is nonzero, CF and OF are
@@ -1927,10 +1923,10 @@ export default class Operations {
   }
 
   /**
-   * OUT transfers a byte or a word from the AL register or the AX register,
+   * OUT transfers a byte or a word from the AL registerPort or the AX registerPort,
    * respectively, to an output port. The port number may be specified either
    * with an immediate byte constant; allowing access to ports numbered 0
-   * through 255, or with a number previously placed in register DX, allowing
+   * through 255, or with a number previously placed in registerPort DX, allowing
    * variable access (by changing the value in DX) to ports numbered from 0
    * through 65,535.
    *   - [1] p.2-32
@@ -1941,17 +1937,14 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   out (dst, src) {
-    let dstAddr = dst(0x0000);
-    let srcAddr = src(0x0000);
-    let dstVal = dst(0x0000, dstAddr);
-    let srcVal = src(0x0000, srcAddr);
+    let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
+    let srcAddr = src(this.cpu.reg16[this.cpu.addrSeg]);
+    let dstVal = dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
+    let srcVal = src(this.cpu.reg16[this.cpu.addrSeg], srcAddr);
+
     let size = this.cpu.opcode.addrSize;
 
-    this.cpu.ports8[dstVal] = (srcVal & 0x00FF);
-    if (size !== b) {
-      this.cpu.ports8[dstVal + 1] = (srcVal >> 8 & 0x00FF);
-      this.cpu.portWrite8(dstVal, )
-    }
+    this.cpu.io.write(dstVal, srcVal, size);
   }
 
   /**
@@ -1974,7 +1967,7 @@ export default class Operations {
 
   /**
    * POPF transfers specific bits from the word at the current top of stack
-   * (pointed to by register SP) into the 8086/8088 flags, replacing whatever
+   * (pointed to by registerPort SP) into the 8086/8088 flags, replacing whatever
    * values the flags previously contained (see figure 2-32). SP is then
    * incremented by two to point to the new top of stack. PUSHF and POPF allow
    * a procedure to save and restore a calling program's flags. They also
@@ -2244,7 +2237,7 @@ export default class Operations {
   /**
    * RET (Return) transfers control from a procedure back to the instruction
    * following the CALL that activated the procedure. RET pops the word at the
-   * top of the stack (pointed to by register SP) into the instruction pointer
+   * top of the stack (pointed to by registerPort SP) into the instruction pointer
    * and increments SP by two. If an optional pop value has been specified, RET
    * adds that value to SP. This feature may be used to discard parameters
    * pushed onto the stack before the execution of the CALL instruction.
@@ -2277,9 +2270,9 @@ export default class Operations {
   /**
    * RET (Return) transfers control from a procedure back to the instruction
    * following the CALL that activated the procedure. RETF pops the word at the
-   * top of the stack (pointed to by register SP) into the instruction pointer
+   * top of the stack (pointed to by registerPort SP) into the instruction pointer
    * and increments SP by two. Then the word at the new top of stack is popped
-   * into the CS register, and SP is again incremented by two. If an optional
+   * into the CS registerPort, and SP is again incremented by two. If an optional
    * pop value has been specified, RET adds that value to SP. This feature may
    * be used to discard parameters pushed onto the stack before the execution
    * of the CALL instruction.
@@ -2419,8 +2412,8 @@ export default class Operations {
   }
 
   /**
-   * SAHF (store register AH into flags) transfers bits 7,6,4,2 and 0 from
-   * register AH into SF, ZF, AF, PF and CF, respectively, replacing whatever
+   * SAHF (store registerPort AH into flags) transfers bits 7,6,4,2 and 0 from
+   * registerPort AH into SF, ZF, AF, PF and CF, respectively, replacing whatever
    * values these flags previously had. OF, DF, IF and TF are not affected.
    * This instruction is provided for 8080/8085 compatibility.
    *   - [1] p.2-33
@@ -2754,7 +2747,7 @@ export default class Operations {
   }
 
   /**
-   * STOS (Store String) transfers a byte or word from register AL or AX to the
+   * STOS (Store String) transfers a byte or word from registerPort AL or AX to the
    * string element addressed by DI and updates DI to point to the next
    * location in the string. As a repeated operation, STOS provides a
    * convenient way to initialize a string to a constant value (e.g., to blank
@@ -2786,7 +2779,7 @@ export default class Operations {
   }
 
   /**
-   * STOS (Store String) transfers a byte or word from register AL or AX to the
+   * STOS (Store String) transfers a byte or word from registerPort AL or AX to the
    * string element addressed by DI and updates DI to point to the next
    * location in the string. As a repeated operation, STOS provides a
    * convenient way to initialize a string to a constant value (e.g., to blank
@@ -2896,7 +2889,7 @@ export default class Operations {
   }
 
   /**
-   * XLAT (translate) replaces a byte in the AL register with a byte from a
+   * XLAT (translate) replaces a byte in the AL registerPort with a byte from a
    * 256-byte, user-coded translation table. Register BX is assumed to point to
    * the beginning of the table. The byte in AL is used as an index into the
    * table and is replaced by the byte at the offset in the table corresponding
