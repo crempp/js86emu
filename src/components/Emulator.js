@@ -52,6 +52,8 @@ export default class extends Component {
     this.state.config.renderer.options.canvas = this.canvasRef.current;
 
     let system = new System(this.state.config);
+    // make global for debugging
+    window.system = system
 
     console.log("booting...");
     await system.boot();

@@ -240,3 +240,12 @@ Investigate using Electron for running natively
   * √ Ob
   * √ Ov
   * √ Sw
+
+
+## Feature TODO List
+* Auto generated documentation from code
+* Render markdown docs and serve from site
+* Reactify debug view
+* Build library of systems (5150, 5160, etc)
+* Build library of disk images/software/games
+* Build interface for debug, docs, library, etc.

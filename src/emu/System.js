@@ -85,7 +85,7 @@ export default class System {
       let bios = await loadBINAsync(biosPath);
       // Calculate start address for the BIOS
       // Currently hard-coded for 8086
-      let biosAddr = 0x100000 - bios.length;
+      let biosAddr = this.config.memorySize - bios.length;
 
       if (this.config.debug) console.info(`Loading BIOS at ${hexString32(biosAddr)}`);
       this.loadMem(bios, biosAddr);

@@ -558,6 +558,9 @@ export default class CPU8086 extends CPU {
     if (this.config.debug || this.config.debugOpString) {
       this.opcode.string = this.opcode.inst.toString();
     }
+    else {
+      this.opcode.string = "DISABLED";
+    }
   }
 
   /**
@@ -628,11 +631,6 @@ export default class CPU8086 extends CPU {
       debug(this.system);
       if (this.config.cycleBreak) debugger;
     }
-
-    // if (this.system.cycleCount > 370137 && this.opcode.inst.opName() === "mov") {
-    //   debug(this.system);
-    //   debugger;
-    // }
 
     // Run the instruction
     this.opcode.inst.run();

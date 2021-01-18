@@ -1,7 +1,7 @@
 import SystemConfig from "./SystemConfig";
 
 let config = new SystemConfig({
-  memorySize: 1024 * 1024,
+  memorySize: 0x100000,
   memory: null,
 
   /** The number of cycles between timing syncs */

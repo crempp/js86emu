@@ -7,7 +7,7 @@
 import { SystemConfigException } from '../utils/Exceptions';
 
 const DEFAULTS = {
-  memorySize: 1024 * 1024,
+  memorySize: 0x100000,
   memory: null,
 
   /** The number of cycles between timing syncs */
