@@ -24,13 +24,8 @@
     "react-dom": "^17.0.1"
   },
   "scripts": {
-    "build": "npm run build:files && npm run build:cli && npm run build:web",
     "build:web": "next build",
     "build:cli": "babel src -d dist/cli --ignore src/site,src/web.js --source-maps --presets env -r babel-polyfill",
-    "build:files": "cp -r ./files ./dist",
-    "build:cli:watch": "npm run build:cli -- -w",
-    "build:web:watch": "webpack --mode=production --watch --progress",
-    "build:web:watch:dev": "webpack --mode=development --watch --progress",
     "test": "jest",
     "start:cli": "node ./dist/cli/cli.js",
     "start:web": "next start",
