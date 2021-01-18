@@ -1,8 +1,9 @@
 import { loadPNGAsync } from "../utils/Utils";
 
 export default class VideoMDA {
-  constructor (mem8, renderer, config) {
-    this.mem8            = mem8;
+  constructor (system, renderer, config) {
+    this.system          = system;
+    this.mem8            = system.cpu.mem8;
     this.renderer        = renderer;
     this.config          = config;
     this.verticalSync    = config.video.verticalSync;
@@ -129,5 +130,24 @@ export default class VideoMDA {
       }
     }
     this.renderer.render(screenData);
+  }
+
+  write(port, value, size) {
+    if (this.system.config.debug) {
+      console.log(`  WRITE device: ${this.constructor.name} port: ${port}, value:${value}, size${size}`);
+    }
+  }
+
+  read(){
+    if (this.system.config.debug) {
+      console.log(`  READ device: ${this.constructor.name} port: ${port}, value:${value}, size${size}`);
+    }
+    return 0x00;
+  }
+
+  deviceCycle(){
+    if (this.system.config.debug) {
+      console.log(`  CYCLE device: ${this.constructor.name}`);
+    }
   }
 }

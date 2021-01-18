@@ -1,0 +1,30 @@
+{
+  "bios-roms": {
+    "8086-tiny-bios.bin": null,
+    "asciicga.dat": null,
+    "asciivga.dat": null,
+    "et4000.bin": null,
+    "PCXTBIOS.BIN": null,
+    "xtbios.bin": null
+  },
+  "boot-disks": {
+    "IBM_PS2_25": {
+      "25start.img": null,
+      "adv25dia.img": null
+    }
+  },
+  "data": {
+    "data.json": null
+  },
+  "fonts": {
+    "cga_cp_437.png": null,
+    "hercplus_14p.png": null,
+    "hercplus_8p.png": null,
+    "mda_cp_437.png": null
+  },
+  "program-blobs": {
+    "branch.bin": null,
+    "codegolf": null,
+    "testea.bin": null
+  }
+}

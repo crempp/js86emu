@@ -2,6 +2,8 @@ import CPU8086 from '../../../src/emu/cpu/8086';
 import Addressing from '../../../src/emu/cpu/Addressing';
 import SystemConfig from '../../../src/emu/config/SystemConfig';
 import Operations from "../../../src/emu/cpu/Operations";
+import IO from "../../../src/emu/IO";
+import { FeatureNotImplementedException } from "../../../src/emu/utils/Exceptions";
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
   regAX, regBX, regCX, regDX,
@@ -12,12 +14,6 @@ import {
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
   STATE_HALT, STATE_REP_Z, STATE_REP, STATE_REP_NZ, STATE_SEG_CS, STATE_SEG_DS, STATE_SEG_ES, STATE_SEG_SS,
 } from '../../../src/emu/Constants';
-import {FeatureNotImplementedException, InvalidAddressModeException, ValueOverflowException} from "../../../src/emu/utils/Exceptions";
-import {
-  formatOpcode, hexString8, hexString16, hexString32, formatFlags,
-  formatMemory, formatRegisters
-} from "../../../src/emu/utils/Debug";
-import {seg2abs, segIP} from "../../../src/emu/utils/Utils";
 
 let IVT = [
   /* INT   |   Offset   | Segment  */
@@ -72,13 +68,6 @@ function loadIVT (cpu) {
   }
 }
 
-
-function clearMemory(cpu) {
-  for (let i = 0; i < cpu.mem8.length; i++) {
-    cpu.mem8[i] = 0;
-  }
-}
-
 function setMemory(cpu, value) {
   for (let i = 0; i < cpu.mem8.length; i++) {
     cpu.mem8[i] = value;
@@ -86,13 +75,23 @@ function setMemory(cpu, value) {
 }
 
 describe('Operation methods', () => {
-  let cpu, addr, oper;
+  let cpu, addr, oper, io;
 
   beforeEach(() => {
-    cpu = new CPU8086(new SystemConfig({
+    let config = new SystemConfig({
       memorySize: 2 ** 20,
-      debug: false,
-    }));
+      ports: {
+        memoryMapped: true,
+        size: 0xFFFF,
+        devices: [
+          {"range": [0x0000, 0xFFFF], "dir": "rw", "device": "TestDevice"}
+        ]
+      },
+      debug: false
+    });
+    cpu = new CPU8086(config);
+    io = new IO(config);
+    cpu.io = io;
     oper = new Operations(cpu);
     addr = new Addressing(cpu);
     cpu.reg16[regIP] = 0x00FF;
@@ -884,8 +883,7 @@ describe('Operation methods', () => {
 
   describe('in', () => {
     test('IN AL, 0xF8', () => {
-      cpu.ports8[0xF8] = 0xCC;
-      cpu.ports8[0xF9] = 0xBB;
+      io.devices[0].buffer8[0xF8] = 0xCC;
       cpu.mem8[0x00FF] = 0xE4;
       cpu.mem8[0x0100] = 0xF8;
       cpu.instIPInc = 1;
@@ -894,11 +892,10 @@ describe('Operation methods', () => {
 
       expect(cpu.reg8[regAL]).toBe(0xCC);
     });
-    test('IN AX, 0xF8', () => {
-      cpu.ports8[0xF8] = 0xCC;
-      cpu.ports8[0xF9] = 0xBB;
+    test('IN AX, 0x4D', () => {
+      io.devices[0].buffer16[0x4D] = 0xBBCC;
       cpu.mem8[0x00FF] = 0xE5;
-      cpu.mem8[0x0100] = 0xF8;
+      cpu.mem8[0x0100] = 0x4D;
       cpu.instIPInc = 1;
       cpu.decode();
       oper.in(addr.AX.bind(addr), addr.Ib.bind(addr));
@@ -906,19 +903,17 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regAX]).toBe(0xBBCC);
     });
     test('IN AL, DX', () => {
-      cpu.ports8[0xF84E] = 0xCC;
-      cpu.ports8[0xF84F] = 0xBB;
+      io.devices[0].buffer8[0xF84E] = 0xFF;
       cpu.reg16[regDX] = 0xF84E;
       cpu.mem8[0x00FF] = 0xEC;
       cpu.instIPInc = 1;
       cpu.decode();
       oper.in(addr.AL.bind(addr), addr.DX.bind(addr));
 
-      expect(cpu.reg8[regAL]).toBe(0xCC);
+      expect(cpu.reg8[regAL]).toBe(0xFF);
     });
     test('IN AX, DX', () => {
-      cpu.ports8[0xF84E] = 0xCC;
-      cpu.ports8[0xF84F] = 0xBB;
+      io.devices[0].buffer16[0xF84E] = 0xBBCC;
       cpu.reg16[regDX] = 0xF84E;
       cpu.mem8[0x00FF] = 0xED;
       cpu.instIPInc = 1;
@@ -2448,7 +2443,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.out(addr.Ib.bind(addr), addr.AL.bind(addr));
 
-      expect(cpu.ports8[0xF8]).toBe(0xBB);
+      expect(io.devices[0].buffer8[0xF8]).toBe(0xBB);
     });
     test('OUT 0xF8, AX', () => {
       cpu.reg16[regAX] = 0xBBCC;
@@ -2458,8 +2453,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.out(addr.Ib.bind(addr), addr.AX.bind(addr));
 
-      expect(cpu.ports8[0xF8]).toBe(0xCC);
-      expect(cpu.ports8[0xF9]).toBe(0xBB);
+      expect(io.devices[0].buffer16[0xF8]).toBe(0xBBCC);
     });
     test('OUT DX, AL', () => {
       cpu.reg8[regAL] = 0xBB;
@@ -2469,7 +2463,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.out(addr.DX.bind(addr), addr.AL.bind(addr));
 
-      expect(cpu.ports8[0xF84E]).toBe(0xBB);
+      expect(io.devices[0].buffer8[0xF84E]).toBe(0xBB);
     });
     test('OUT DX, AX', () => {
       cpu.reg16[regAX] = 0xBBCC;
@@ -2479,8 +2473,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.out(addr.DX.bind(addr), addr.AX.bind(addr));
 
-      expect(cpu.ports8[0xF84E]).toBe(0xCC);
-      expect(cpu.ports8[0xF84F]).toBe(0xBB);
+      expect(io.devices[0].buffer16[0xF84E]).toBe(0xBBCC);
     });
   });
 

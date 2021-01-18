@@ -7,7 +7,7 @@
 import { SystemConfigException } from '../utils/Exceptions';
 
 const DEFAULTS = {
-  memorySize: 1024 * 1024,
+  memorySize: 0x100000,
   memory: null,
 
   /** The number of cycles between timing syncs */
@@ -17,35 +17,37 @@ const DEFAULTS = {
   videoSync: 10000,
 
   programBlob: null,
-
   bios: {
-    file: "8086-tiny-bios.bin"
+    path: "/files/bios-roms/",
+    file: null
   },
-
   cpu : {
     class:       '8086',
     registers16: null, //[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     frequency:   10 * 1024**2, // 10 Mhz
     flags:       0x0000,
   },
-
   video: {
     class:        'VideoMDA',
     memorySize:   4 * 1024,
     memoryStart:  0xB8000,
     verticalSync: 50,       // Hertz
   },
-
   renderer: {
     class:   'RendererCanvas',
     options: {
       canvas: null,
     },
   },
-
+  ports: {
+    memoryMapped: false,
+    size: 0xFFFF,
+    devices: []
+  },
+  debug: false,
+  cycleBreak: false,
   debugAtCycle: null,
   debugAtIP: null,
-  debug: false,
   debugOpString: false,
 };
 

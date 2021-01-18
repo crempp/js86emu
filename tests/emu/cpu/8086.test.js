@@ -620,6 +620,37 @@ describe('Segment prefix', () => {
 });
 
 
+describe('Port IO', () => {
+  let cpu;
+  beforeEach(() => {
+    cpu = new CPU8086(new SystemConfig({
+      memorySize: 1048576,
+      cpu: {
+        registers16: [
+          /* IP */ 0x00FF,
+          /* CS */ 0x0000,
+          /* DS */ 0x0300,
+          /* ES */ 0x0400,
+          /* SS */ 0x0500,
+        ],
+      },
+      debug: false,
+    }));
+  });
+
+  test('PIC - disable IRQ 6 (floppy controller) from firing', () => {
+    let instructions = [
+      0x66, 0xe5, 0x21,        // in   ax,   0x21
+      0x66, 0x83, 0xc8, 0x40,  // or   ax,   0x40
+      0x66, 0xe7, 0x21,        // out  0x21, ax
+
+    ];
+    loadMem(instructions, 0x00FF, cpu);
+  });
+
+
+});
+
 describe('Regressions', () => {
   let cpu;
   beforeEach(() => {

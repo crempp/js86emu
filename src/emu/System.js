@@ -8,7 +8,6 @@ import {
 import VideoMDA from "./video/VideoMDA";
 import { SystemConfigException } from "./utils/Exceptions";
 import SystemConfig from "./config/SystemConfig";
-import { debug } from "./utils/Debug";
 
 // We don't know the renderer until runtime. Webpack is a static compiler and
 // thus can't require dynamically. Also I was having issues with dynamic
@@ -20,7 +19,11 @@ import RendererCanvas from './video/renderers/RendererCanvas';
 import RendererPNG from './video/renderers/RendererPNG';
 import {loadBINAsync, seg2abs, segIP} from "./utils/Utils";
 import {hexString32} from "./utils/Debug";
+import IO from "./IO";
+import RendererNoop from "./video/renderers/RendererNoop";
+
 const RENDERERS = {
+  "RendererNoop": RendererNoop,
   "RendererBin": RendererBin,
   "RendererCanvas": RendererCanvas,
   "RendererPNG": RendererPNG,
@@ -41,7 +44,6 @@ export default class System {
     this.newVideoSync = config.videoSync;
     this.runningHz = 0;
 
-    this.biosJumpAddress = [0xF000, 0xFFF0]; // 0x000FFFF0
     this.videoROMAddress = [0xC000, 0x0000]; // 0x000C0000
 
     // Create CPU
@@ -55,7 +57,11 @@ export default class System {
       throw new SystemConfigException(`${config.renderer.class} is not a valid renderer`);
     }
     let renderer = new RENDERERS[config.renderer.class](config.renderer.options);
-    this.videoCard = new VideoMDA(this.cpu.mem8, renderer, config);
+    this.videoCard = new VideoMDA(this, renderer, config);
+
+    // Create IO port interface
+    // This needs to be done after initializing all other devices
+    this.io = new IO(this.config);
   }
 
   /**
@@ -66,14 +72,20 @@ export default class System {
   async boot () {
     // Clear memory
 
-    // Load BIOS
-    console.log("Loading BIOS...");
-    if (!this.config.programBlob) {
+    // Load system BIOS or blob
+    if (this.config.programBlob) {
+      console.log(`Loading program blob ${this.config.programBlob.file}...`);
+      let bin = await loadBINAsync(this.config.programBlob.file);
+      this.loadMem(bin, this.config.programBlob.addr);
+    }
+    else {
+      console.log("Loading BIOS...");
       // Load BIOS file
       let biosPath = `${this.config.bios.biosPath}${this.config.bios.file}`;
       let bios = await loadBINAsync(biosPath);
       // Calculate start address for the BIOS
-      let biosAddr = (1024 * 1024) - bios.length;
+      // Currently hard-coded for 8086
+      let biosAddr = this.config.memorySize - bios.length;
 
       if (this.config.debug) console.info(`Loading BIOS at ${hexString32(biosAddr)}`);
       this.loadMem(bios, biosAddr);
@@ -85,24 +97,8 @@ export default class System {
 
     // Self test
 
-    // Jump to BIOS
-    console.log("Jump to BIOS...");
-    if (!this.config.programBlob && !this.config.cpu.registers16) {
-      this.cpu.reg16[regCS] = this.biosJumpAddress[0];
-      this.cpu.reg16[regIP] = this.biosJumpAddress[1];
-    }
-
     // Init state
-
-
     await this.videoCard.init();
-
-    // If there's a program blob specified load it
-    if (this.config.programBlob) {
-      console.log(`Loading program blob ${this.config.programBlob.file}...`);
-      let bin = await loadBINAsync(this.config.programBlob.file);
-      this.loadMem(bin, this.config.programBlob.addr);
-    }
   }
 
   /**
@@ -133,7 +129,11 @@ export default class System {
         break;
       }
 
+      // Do a cycle
       this.cpu.cycle();
+
+      // Cycle Devices
+      this.cycleDevices();
 
       // Run timing check
       if (this.cycleCount % this.timeSyncCycles === 0) {
@@ -158,6 +158,13 @@ export default class System {
   }
 
   /**
+   * Run a cycle on each device
+   */
+  cycleDevices() {
+
+  }
+
+  /**
    * Check the timing and update the measured cycles per second in MHZ.
    */
   timingCheck() {
@@ -167,10 +174,6 @@ export default class System {
 
     // Update the number of cycles between video syncs
     this.newVideoSync = Math.max(Math.round(this.runningHz / this.videoCard.verticalSync), 50000);
-
-    // console.log(`Running at ${this.runningHz.toFixed(2)} HZ (${(this.runningHz / (1024**2)).toFixed(6)} MHZ)`);
-    // console.log(`  newVideoSync = ${this.newVideoSync}`);
-    // console.log(`  videoSync = ${this.videoSync}`);
   }
 
   /**

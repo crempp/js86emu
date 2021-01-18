@@ -29,7 +29,7 @@ export const regDS = 10;
 export const regES = 11;
 export const regSS = 12;
 
-// Flag register
+// Flag registerPort
 export const regFlags = 13;
 
 export const FLAG_CF_MASK = 0x0001; // 0

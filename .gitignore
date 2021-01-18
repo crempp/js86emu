@@ -6,3 +6,7 @@ node_modules
 coverage
 .log
 screenOut
+npm-debug.log
+tmp/*
+.next
+junit.xml

@@ -27,7 +27,10 @@ export default class CPU8086 extends CPU {
 
     this.system = system;
 
-    this.PORT_COUNT = 0x10000;
+    this.io = null;
+    if (this.system) {
+      this.io = this.system.io;
+    }
 
     /**
      * CPU frequency in hertz (cyles per second).
@@ -35,8 +38,8 @@ export default class CPU8086 extends CPU {
     this.frequency = config.cpu.frequency;
 
     /**
-     * Segment register to use for addressing. Typically it is assumed to be
-     * DS, unless the base register is SP or BP; in which case the address is
+     * Segment registerPort to use for addressing. Typically it is assumed to be
+     * DS, unless the base registerPort is SP or BP; in which case the address is
      * assumed to be relative to SS
      */
     this.addrSeg = regDS;
@@ -99,10 +102,6 @@ export default class CPU8086 extends CPU {
 
     // Flags
     this.reg16[regFlags] = config.cpu.flags;
-
-    // Ports
-    this.ports8 = new Uint8Array(this.PORT_COUNT);
-    this.ports16 = new Uint16Array(this.ports8.buffer);
 
     // Opcode
     this.opcode = {};
@@ -516,7 +515,7 @@ export default class CPU8086 extends CPU {
   }
 
   /**
-   * Decode the current instruction pointed to by the IP register.
+   * Decode the current instruction pointed to by the IP registerPort.
    */
   decode () {
     let opcode_byte = this.mem8[segIP(this)];
@@ -548,7 +547,7 @@ export default class CPU8086 extends CPU {
     }
 
     // If the instruction is an array it's a group instruction and we need
-    // to extract further based on the register component of the addressing
+    // to extract further based on the registerPort component of the addressing
     // byte
     if (this.opcode.isGroup) {
       this.opcode.inst = this.opcode.inst[this.opcode.reg];
@@ -558,6 +557,9 @@ export default class CPU8086 extends CPU {
 
     if (this.config.debug || this.config.debugOpString) {
       this.opcode.string = this.opcode.inst.toString();
+    }
+    else {
+      this.opcode.string = "DISABLED";
     }
   }
 
@@ -578,7 +580,6 @@ export default class CPU8086 extends CPU {
    *   a segment prefix leave the prefix state.
    */
   prefixTermination () {
-
     if (
       // Don't check if we just ran a REP(Z)(NZ)
       (this.opcode.opcode_byte !== 0xF2 && this.opcode.opcode_byte !== 0xF3) &&
@@ -628,13 +629,8 @@ export default class CPU8086 extends CPU {
 
     if (this.config.debug) {
       debug(this.system);
-      debugger;
+      if (this.config.cycleBreak) debugger;
     }
-
-    // if (this.system.cycleCount > 370137 && this.opcode.inst.opName() === "mov") {
-    //   debug(this.system);
-    //   debugger;
-    // }
 
     // Run the instruction
     this.opcode.inst.run();

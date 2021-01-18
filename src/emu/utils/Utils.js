@@ -10,7 +10,7 @@ import {
  *
  * https://en.wikibooks.org/wiki/X86_Assembly/16_32_and_64_Bits#Example
  *
- * @param {number} segment Segment register
+ * @param {number} segment Segment registerPort
  * @param {number} offset Offset amount from segment
  * @return {number} Absolute memory address
  */
@@ -21,7 +21,7 @@ export function seg2abs (segment, offset) {
 /**
  * Calculate the absolute memory address of the instruction pointer.
  *
- * Note: The IP always uses the CS register for the segment (verify and
+ * Note: The IP always uses the CS registerPort for the segment (verify and
  * source this).
  *
  * @param {Cpu} cpu Cpu instance to perform conversion for
