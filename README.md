@@ -1,7 +1,7 @@
 # js86emu
 
 <img align="right" width="25%" height="25%"
-     title="Size Limit logo" src="./docs/images/logo.svg">
+     title="Size Limit logo" src="./docs/images/logo.png">
 
 [![CircleCI](https://circleci.com/gh/crempp/js86emu.svg?style=svg)](https://circleci.com/gh/crempp/js86emu)
 

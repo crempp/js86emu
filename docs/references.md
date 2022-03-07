@@ -76,3 +76,10 @@ The folowing emulators were inspiration for js86emu as well as a source for me w
 * [8086tiny](https://github.com/adriancable/8086tiny)
 * [v86](https://github.com/copy/v86)
 * [pcjs](https://github.com/jeffpar/pcjs)
+
+
+
+* https://github.com/adriancable/8086tiny
+* https://jaybertsoftware.weebly.com/8086-tiny-plus.html
+* http://www.xtideuniversalbios.org/
+* https://sites.google.com/site/pcdosretro/ibmpcbios

@@ -1,9 +1,6 @@
 import { PNG } from 'pngjs';
 import fs from 'fs';
-
-import {
-  regIP, regCS, regDS, regES, regSS,
-} from '../Constants';
+import { regIP, regCS } from '../Constants';
 
 /**
  * Convert a segmented (seg:offset) memory address into an absolute address.

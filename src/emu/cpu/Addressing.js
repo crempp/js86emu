@@ -4,14 +4,10 @@ import {
   regAX, regBX, regCX, regDX,
   regSI, regDI, regBP, regSP, regIP,
   regCS, regDS, regES, regSS,
-  regFlags,
-  FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
-  FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK, b, w, v, STATE_SEG_NONE
+  b, w, v, STATE_SEG_NONE
 } from '../Constants';
-import { formatOpcode, hexString16, hexString32 } from "../utils/Debug";
 import {
-  ValueOverflowException, FeatureNotImplementedException,
-  InvalidAddressModeException
+  ValueOverflowException, InvalidAddressModeException
 } from "../utils/Exceptions";
 
 /**
@@ -61,7 +57,7 @@ export default class Addressing {
    * @param {number} segment Memory segment NOT USED
    * @param {(number|null)} [offset] NOT USED
    * @param {(number|null)} [value] NOT USED
-   * @return {number} In read mode returns 0x01, else returns null
+   * @return {number|null} In read mode returns 0x01, else returns null
    */
   _3 (segment, offset, value) {
     if (offset === undefined && value === undefined) {
@@ -1253,7 +1249,7 @@ export default class Addressing {
   readRMReg32 (segment, offset) {
     if (this.cpu.opcode.mod === 0b11) {
       // Two registerPort instruction; use REG table
-      // TODO: Is this codepath ever hit? Becuase I don't think it'll work
+      // TODO: Is this codepath ever hit? Because I don't think it'll work
       return this.readRegVal(true);
     }
     else {
@@ -1306,8 +1302,8 @@ export default class Addressing {
   /**
    * Calculate an offset address in RM addressing mode
    *
-   * @param {number} segment Memory segment
-   * @return {number} Calculated address
+   * @param {number} [segment] Memory segment
+   * @return {number|null} Calculated address
    */
   calcRMAddr (segment) {
     let offset;

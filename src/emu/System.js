@@ -1,33 +1,29 @@
 import hrtime from 'browser-process-hrtime';
-
 import CPU8086 from "./cpu/8086";
+import VideoMDA from "./video/VideoMDA";
+import IO from "./IO";
+import SystemConfig from "./config/SystemConfig";
 import {
   regCS, regIP,
   NS_PER_SEC, STATE_RUNNING, STATE_HALT,
 } from './Constants';
-import VideoMDA from "./video/VideoMDA";
 import { SystemConfigException } from "./utils/Exceptions";
-import SystemConfig from "./config/SystemConfig";
+import {loadBINAsync, seg2abs} from "./utils/Utils";
+import {hexString32} from "./utils/Debug";
 
-// We don't know the renderer until runtime. Webpack is a static compiler and
-// thus can't require dynamically. Also I was having issues with dynamic
-// imports in node though it should work.
-// So import all renderers and look them up in the object at runtime.
+// We don't know the renderer or devices until runtime. Webpack is a static
+// compiler and thus can't require dynamically. Also I was having issues with
+// dynamic imports in node though it should work.
+// ...so import all renderers/device and look them up in the object at runtime.
 // Someday I will do more research to see if I can optimize this.
 import RendererBin from './video/renderers/RendererBin';
 import RendererCanvas from './video/renderers/RendererCanvas';
 import RendererPNG from './video/renderers/RendererPNG';
-import {loadBINAsync, seg2abs, segIP} from "./utils/Utils";
-import {hexString32} from "./utils/Debug";
-import IO from "./IO";
 import RendererNoop from "./video/renderers/RendererNoop";
-
-const RENDERERS = {
-  "RendererNoop": RendererNoop,
-  "RendererBin": RendererBin,
-  "RendererCanvas": RendererCanvas,
-  "RendererPNG": RendererPNG,
-};
+import NullDevice from "./devices/NullDevice";
+import DMA8237 from "./devices/DMA8237";
+import PIC8259 from "./devices/PIC8259";
+import TestDevice from "./devices/TestDevice";
 
 export default class System {
   constructor (config) {
@@ -44,6 +40,21 @@ export default class System {
     this.newVideoSync = config.videoSync;
     this.runningHz = 0;
 
+    this.RENDERERS = {
+      "RendererNoop": RendererNoop,
+      "RendererBin": RendererBin,
+      "RendererCanvas": RendererCanvas,
+      "RendererPNG": RendererPNG,
+    };
+
+    this.DEVICES = {
+      null:      new NullDevice(config),
+      "DMA8237": new DMA8237(config),
+      "PIC8259": new PIC8259(config),
+      "VideoMDA": null, // Set this during setup
+      "TestDevice": new TestDevice(config)
+    };
+
     this.videoROMAddress = [0xC000, 0x0000]; // 0x000C0000
 
     // Create CPU
@@ -53,15 +64,17 @@ export default class System {
     if (config.isNode && config.renderer.class === 'RendererCanvas') {
       throw new SystemConfigException(`RendererCanvas is not a valid renderer when running in nodejs`);
     }
-    if (!(config.renderer.class in RENDERERS)) {
+    if (!(config.renderer.class in this.RENDERERS)) {
       throw new SystemConfigException(`${config.renderer.class} is not a valid renderer`);
     }
-    let renderer = new RENDERERS[config.renderer.class](config.renderer.options);
+    let renderer = new this.RENDERERS[config.renderer.class](config.renderer.options);
     this.videoCard = new VideoMDA(this, renderer, config);
+    this.DEVICES["VideoMDA"] = this.videoCard;
 
     // Create IO port interface
     // This needs to be done after initializing all other devices
-    this.io = new IO(this.config);
+    this.io = new IO(this.config, this.DEVICES);
+    this.cpu.connectIO(this.io);
   }
 
   /**
@@ -102,7 +115,7 @@ export default class System {
   }
 
   /**
-   * Run the CPU continously or if cyclesToRun is given only run the given
+   * Run the CPU continuously or if cyclesToRun is given only run the given
    * number of cycles.
    *
    * @param {(number|null)} cyclesToRun The number of cycles to run
@@ -140,7 +153,7 @@ export default class System {
         this.timingCheck();
       }
 
-      // Run videocard scan
+      // Run video card scan
       if (this.videoSync !== 0 && this.cycleCount % this.videoSync === 0){
         this.videoSync = this.newVideoSync;
         totalScans++;

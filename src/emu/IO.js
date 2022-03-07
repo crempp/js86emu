@@ -1,28 +1,16 @@
-import DMA8237 from "./devices/DMA8237";
-import PIC8259 from "./devices/PIC8259";
-import NullDevice from "./devices/NullDevice";
-import TestDevice from "./devices/TestDevice";
 import {InvalidDeviceException} from "./utils/Exceptions";
 
 export default class IO {
-  constructor (config) {
-    // TODO: Move this to the system and pass devices in.
-    const DEVICES = {
-      null:      new NullDevice(config),
-      "DMA8237": new DMA8237(config),
-      "PIC8259": new PIC8259(config),
-      // "VideoMDA": system.videoCard
-      "TestDevice": new TestDevice(config)
-    };
-
+  constructor (config, availableDevices) {
     this.config = config;
+    this.availableDevices = availableDevices;
 
     this.devices = [];
     this.ports = new Array(this.config.ports.size);
 
     // Initialize ports with null (nothing attached)
     for (let i = 0; i < this.ports.length; i++) {
-      this.registerPort(i, 'rw', DEVICES[null]);
+      this.registerPort(i, 'rw', this.availableDevices[null]);
     }
 
     // Register the defined ports from the ranges defined in the config
@@ -30,10 +18,10 @@ export default class IO {
     for (let i = 0; i < this.config.ports.devices.length; i++) {
       let rangeConfig = this.config.ports.devices[i];
 
-      let device = DEVICES[null];
+      let device = this.availableDevices[null];
       if (rangeConfig.device !== null) {
-        if (rangeConfig.device in DEVICES) {
-          device = DEVICES[rangeConfig.device];
+        if (rangeConfig.device in this.availableDevices) {
+          device = this.availableDevices[rangeConfig.device];
         }
         else {
           throw new InvalidDeviceException(`Unknown device - ${rangeConfig.device}`);
@@ -57,7 +45,7 @@ export default class IO {
   }
 
   unRegisterPort(port) {
-    this.ports[port] = new DEVICES["NULL"](this.config);
+    this.ports[port] = new this.availableDevices["NULL"](this.config);
   }
 
   registerDevice(device) {

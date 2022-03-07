@@ -92,7 +92,22 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   aas (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
+    let srcAddr = src(this.cpu.reg16[this.cpu.addrSeg]);
+    let dstVal  = dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
+    let srcVal  = src(this.cpu.reg16[this.cpu.addrSeg], srcAddr);
+
+    // if((AL & 0xF) > 9 || AF == 1) {
+    //   AL = AL - 6;
+    //   AH = AH - 1;
+    //   AF = 1;
+    //   CF = 1;
+    // }
+    // else {
+    //   CF = 0;
+    //   AF = 0;
+    // }
+    // AL = AL & 0xF;
   }
 
   /**
@@ -561,12 +576,12 @@ export default class Operations {
    * divided into the double-length dividend assumed to be in registers AL and
    * AH. The single-length quotient is returned in AL, and the single-length
    * remainder is returned in AH. If the source operand is a word, it is
-   * divided into the doublelength dividend in registers AX and DX. The
+   * divided into the double length dividend in registers AX and DX. The
    * single-length quotient is returned in AX, and the single-length remainder
    * is returned in DX. If the quotient exceeds the capacity of its destination
    * registerPort (FFH for byte source, FFFFFH for word source), as when division
    * by zero is attempted, a type 0 interrupt is generated, and the quotient
-   * and remainder are undefined. Nonintegral quotients are truncated to
+   * and remainder are undefined. Non-integral quotients are truncated to
    * integers. The content of AF, CF, OF, PF, SF and ZF is undefined following
    * execution of DIV.
    *   - [1] p.2-37
@@ -628,7 +643,7 @@ export default class Operations {
    * IDIV (Integer Divide) performs a signed division of the accumulator (and
    * its extension) by the source operand. If the source operand is a byte, it
    * is divided into the double-length dividend assumed to be in registers AL
-   * and AH; the singlelength quotient is returned in AL, and the singlelength
+   * and AH; the single length quotient is returned in AL, and the single length
    * remainder is returned in AH. For byte integer division, the maximum
    * positive quotient is +127 (7FH) and the minimum negative quotient is -127
    * (SIH). If the source operand is a word, it is divided into the
@@ -639,7 +654,7 @@ export default class Operations {
    * positive and exceeds the maximum, or is negative and is less than the
    * minimum, the quotient and remainder are undefined, and a type 0 interrupt
    * is generated. In particular, this occurs if division by 0 is attempted.
-   * Nonintegral quotients are truncated (toward 0) to integers, and the
+   * Non-integral quotients are truncated (toward 0) to integers, and the
    * remainder has the same sign as the dividend. The content of AF, CF, OF,
    * PF, SF and ZF is undefined following IDIV.
    *   - [1] p.2-37
@@ -732,10 +747,10 @@ export default class Operations {
    * (IF) flags to disable single-step and maskable interrupts. The flags are
    * stored in the format used by the PUSHF instruction. SP is decremented
    * again by two, and the es registerPort is pushed onto the stack. The address of
-   * the inter- rupt pointer is calculated by multiplying interrupt-type by
-   * four; the second word of the in- terrupt pointer replaces CS. SP again is
+   * the interrupt pointer is calculated by multiplying interrupt-type by
+   * four; the second word of the interrupt pointer replaces CS. SP again is
    * decremented by two, and IP is pushed onto the stack and is replaced by the
-   * first word of the inter- rupt pointer. If interrupt-type = 3, the
+   * first word of the interrupt pointer. If interrupt-type = 3, the
    * assembler generates a short (1 byte) form of the instruction, known as the
    * breakpoint interrupt.
    *
@@ -758,7 +773,7 @@ export default class Operations {
     // 1. Flag registerPort value is pushed on to the stack.
     this.push16(this.cpu.reg16[regFlags]);
     // 2. CS value of the Return address and IP value of the Return address
-    //    are push edon to the stack.
+    //    are pushed on to the stack.
     this.push16(this.cpu.reg16[regCS]);
     this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
     // 3. IP is loaded from the contents of the word location N x 4.
@@ -780,8 +795,8 @@ export default class Operations {
   /**
    * INTO (Interrupt on Overflow) generates a soft- ware interrupt if the
    * overflow flag (OF) is set; otherwise control proceeds to the following
-   * instruction without activating an interrupt pro- cedure. INTO addresses
-   * the target interrupt pro- cedure (its type is 4) through the interrupt
+   * instruction without activating an interrupt procedure. INTO addresses
+   * the target interrupt procedure (its type is 4) through the interrupt
    * pointer at location IOH; it clears the TF and IF flags and otherwise
    * operates like INT. INTO may be writ- ten following an arithmetic or
    * logical operation to activate an interrupt procedure if overflow occurs.
@@ -799,7 +814,7 @@ export default class Operations {
       // 1. Flag registerPort value is pushed on to the stack.
       this.push16(this.cpu.reg16[regFlags]);
       // 2. CS value of the Return address and IP value of the Return address
-      //    are push edon to the stack.
+      //    are pushed on to the stack.
       this.push16(this.cpu.reg16[regCS]);
       this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
       // 3. IP is loaded from the contents of the word location N x 4.
@@ -1139,6 +1154,8 @@ export default class Operations {
       case 0xE9:
         // JMP Jv (near)
         this.cpu.reg16[regIP] = oper;
+        // E9 is relative, need to do this?
+        // this.cpu.reg16[regIP] = oper + this.cpu.instIPInc + this.cpu.addrIPInc;
         break;
       case 0xEA:
         // JMP Ap (far)
@@ -1146,8 +1163,8 @@ export default class Operations {
         this.cpu.reg16[regIP] = oper[1];
         break;
       case 0xEB:
-        // JMP Jb (short)
-        this.cpu.reg16[regIP] = oper;
+        // JMP Jb (short, relative)
+        this.cpu.reg16[regIP] = oper + this.cpu.instIPInc + this.cpu.addrIPInc;
         break;
       case 0xFF:
         if (this.cpu.opcode.reg === 4) {
@@ -1464,7 +1481,7 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   lahf (dst, src) {
-    this.cpu.reg8[regAH] = this.cpu.reg16[regFlags] & 0b11010111;
+    this.cpu.reg8[regAH] = this.cpu.reg16[regFlags] & 0b0000000011010101;
   }
 
   /**
@@ -1789,11 +1806,11 @@ export default class Operations {
   mul (dst, src) {
     let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
     let dstVal  = dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
-    let multipler, result;
+    let multiplier, result;
 
     if (this.cpu.opcode.addrSize === b) {
-      multipler = this.cpu.reg8[regAL];
-      result = multipler * dstVal;
+      multiplier = this.cpu.reg8[regAL];
+      result = multiplier * dstVal;
       this.cpu.reg16[regAX] = result;
 
       if ((result >> 8 & 0xFF) === 0) {
@@ -1808,8 +1825,8 @@ export default class Operations {
       }
     }
     else {
-      multipler = this.cpu.reg16[regAX];
-      result = multipler * dstVal;
+      multiplier = this.cpu.reg16[regAX];
+      result = multiplier * dstVal;
       this.cpu.reg16[regDX] = (result >> 16 & 0xFFFF);
       this.cpu.reg16[regAX] = (result & 0xFFFF);
 
@@ -2155,7 +2172,7 @@ export default class Operations {
    * instruction.
    *
    * Repeated string sequences are interruptable; the processor will recognize
-   * the interrupt before pro- cessing the next string element. System
+   * the interrupt before processing the next string element. System
    * interrupt processing is not affected in any way. Upon return from the
    * interrupt, the repeated operation is resumed from the point of
    * interruption. Note, however, that execution does not resume properly if a
@@ -2201,7 +2218,7 @@ export default class Operations {
    * instruction.
    *
    * Repeated string sequences are interruptable; the processor will recognize
-   * the interrupt before pro- cessing the next string element. System
+   * the interrupt before processing the next string element. System
    * interrupt processing is not affected in any way. Upon return from the
    * interrupt, the repeated operation is resumed from the point of
    * interruption. Note, however, that execution does not resume properly if a
@@ -2424,7 +2441,8 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   sahf (dst, src) {
-    this.cpu.reg16[regFlags] |= (this.cpu.reg8[regAH] & 0b11010111);
+    // NOTE: This will overwrite the reserved bits
+    this.cpu.reg16[regFlags] = (this.cpu.reg16[regFlags] & 0xFF00) + this.cpu.reg8[regAH];
   }
 
   /**
@@ -2973,7 +2991,7 @@ export default class Operations {
 
   /**
    * Correct for non-binary subtraction. To make things simple we subtract
-   * regular integers using the built-in javascript "-" opererator. This does
+   * regular integers using the built-in javascript "-" operator. This does
    * not result in a twos-complement result. This method converts a negative
    * number to twos-complement and clamps any over/underflow.
    *

@@ -24,16 +24,11 @@ export default class CPU8086 extends CPU {
     super();
 
     this.config = config;
-
     this.system = system;
-
     this.io = null;
-    if (this.system) {
-      this.io = this.system.io;
-    }
 
     /**
-     * CPU frequency in hertz (cyles per second).
+     * CPU frequency in hertz (cycles per second).
      */
     this.frequency = config.cpu.frequency;
 
@@ -518,6 +513,7 @@ export default class CPU8086 extends CPU {
    * Decode the current instruction pointed to by the IP registerPort.
    */
   decode () {
+    // noinspection JSCheckFunctionSignatures
     let opcode_byte = this.mem8[segIP(this)];
 
     // Retrieve the operation from the opcode table
@@ -540,6 +536,7 @@ export default class CPU8086 extends CPU {
 
     // If this instruction has an addressing mode byte decode it
     if (this.opcode.isGroup || this.opcode.inst.baseSize > 1) {
+      // noinspection JSCheckFunctionSignatures
       this.opcode.addressing_byte = this.mem8[segIP(this) + 1];
       this.opcode.mod = (this.opcode.addressing_byte & 0xC0) >>> 6;
       this.opcode.reg = (this.opcode.addressing_byte & 0x38) >>> 3;
@@ -632,12 +629,24 @@ export default class CPU8086 extends CPU {
       if (this.config.cycleBreak) debugger;
     }
 
+    // if (this.system.cycleCount === 612) {
+    //   let a = 0;
+    // }
     // Run the instruction
-    this.opcode.inst.run();
+    this. opcode.inst.run();
 
     this.prefixTermination();
 
     // Move the IP
     this.reg16[regIP] += this.instIPInc + this.addrIPInc;
+  }
+
+  /**
+   * Assign the IO system to the CPU
+   *
+   * @param io IO system for CPU
+   */
+  connectIO(io) {
+    this.io = io;
   }
 }

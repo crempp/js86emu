@@ -14,7 +14,8 @@ let config = new SystemConfig({
 
   bios: {
     path: "/files/bios-roms/",
-    file: "8086-tiny-bios.bin"
+    // file: "8086-tiny-bios.bin"
+    file: "BIOS_IBM5150_24APR81_5700051_U33.BIN"
   },
 
   cpu : {
