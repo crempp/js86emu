@@ -85,6 +85,7 @@ Investigate using Electron for running natively
 
 
 # Functionality
+
 ----
 
 ## Instruction TODO List

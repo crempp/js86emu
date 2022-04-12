@@ -45,6 +45,10 @@ export const FLAG_IF_MASK = 0x0200; // 9
 export const FLAG_DF_MASK = 0x0400; // 10
 export const FLAG_OF_MASK = 0x0800; // 11
 
+// Not all bits in the flag register are used
+// OF, DF, IF, TF, SF, ZF, --, AF, --, PF, --, CF
+export const USED_FLAG_MASK = 0b0000111111010101;
+
 // Sizes
 export const b = 0; // Byte
 export const w = 1; // Word

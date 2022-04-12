@@ -11,7 +11,7 @@ import {
   PARITY, REP_INSTS,
   STATE_HALT,
   STATE_REP_Z, STATE_REP_NZ, STATE_REP_NONE, STATE_REP,
-  STATE_SEG_CS, STATE_SEG_DS, STATE_SEG_ES, STATE_SEG_SS,
+  STATE_SEG_CS, STATE_SEG_DS, STATE_SEG_ES, STATE_SEG_SS, USED_FLAG_MASK,
 } from '../Constants';
 import { FeatureNotImplementedException } from "../utils/Exceptions";
 
@@ -622,6 +622,13 @@ export default class Operations {
   }
 
   /**
+   * ESC
+   */
+  esc (dst, src) {
+    throw new FeatureNotImplementedException("Operation not implemented");
+  }
+
+  /**
    * HLT (Halt) causes the 8086/8088 to enter the halt state. The processor
    * leaves the halt state upon activation of the RESET line, upon receipt of a
    * non-maskable interrupt request on NMI, or, if interrupts are enabled, upon
@@ -1153,9 +1160,8 @@ export default class Operations {
     switch (this.cpu.opcode.opcode_byte) {
       case 0xE9:
         // JMP Jv (near)
-        this.cpu.reg16[regIP] = oper;
-        // E9 is relative, need to do this?
-        // this.cpu.reg16[regIP] = oper + this.cpu.instIPInc + this.cpu.addrIPInc;
+        // Near and short jumps reference IP after the jump instruction
+        this.cpu.reg16[regIP] = oper + this.cpu.instIPInc + this.cpu.addrIPInc;
         break;
       case 0xEA:
         // JMP Ap (far)
@@ -1164,6 +1170,7 @@ export default class Operations {
         break;
       case 0xEB:
         // JMP Jb (short, relative)
+        // Near and short jumps reference IP after the jump instruction
         this.cpu.reg16[regIP] = oper + this.cpu.instIPInc + this.cpu.addrIPInc;
         break;
       case 0xFF:
@@ -1481,7 +1488,7 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   lahf (dst, src) {
-    this.cpu.reg8[regAH] = this.cpu.reg16[regFlags] & 0b0000000011010101;
+    this.cpu.reg8[regAH] = this.cpu.reg16[regFlags] & USED_FLAG_MASK;
   }
 
   /**
@@ -2441,8 +2448,7 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   sahf (dst, src) {
-    // NOTE: This will overwrite the reserved bits
-    this.cpu.reg16[regFlags] = (this.cpu.reg16[regFlags] & 0xFF00) + this.cpu.reg8[regAH];
+    this.cpu.reg16[regFlags] = (this.cpu.reg16[regFlags] | this.cpu.reg8[regAH]) & USED_FLAG_MASK;
   }
 
   /**

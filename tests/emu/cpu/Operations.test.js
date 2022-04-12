@@ -14,6 +14,7 @@ import {
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
   STATE_HALT, STATE_REP_Z, STATE_REP, STATE_REP_NZ, STATE_SEG_CS, STATE_SEG_DS, STATE_SEG_ES, STATE_SEG_SS,
 } from '../../../src/emu/Constants';
+import TestDevice from "../../../src/emu/devices/TestDevice";
 
 let IVT = [
   /* INT   |   Offset   | Segment  */
@@ -90,7 +91,7 @@ describe('Operation methods', () => {
       debug: false
     });
     cpu = new CPU8086(config);
-    io = new IO(config);
+    io = new IO(config, {"TestDevice": new TestDevice(config)});
     cpu.io = io;
     oper = new Operations(cpu);
     addr = new Addressing(cpu);
@@ -858,6 +859,14 @@ describe('Operation methods', () => {
     })
   });
 
+  describe('esc', () => {
+    test('NOT IMPLEMENTED', () => {
+      expect(() => {
+        oper.esc();
+      }).toThrowError(FeatureNotImplementedException);
+    });
+  });
+
   describe('hlt', () => {
     test('sets halt state', () => {
       oper.hlt();
@@ -1483,7 +1492,9 @@ describe('Operation methods', () => {
       oper.jmp(addr.Jv.bind(addr), null);
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
-      expect(cpu.reg16[regIP]).toBe(0xFF + 0x1234);
+      // Near and short jumps reference IP after the jump instruction so
+      // we add 3 (size of the instruction) to the expected result
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x1234 + 3);
       expect(cpu.instIPInc).toBe(0);
       expect(cpu.addrIPInc).toBe(0);
     });
@@ -1496,7 +1507,9 @@ describe('Operation methods', () => {
       oper.jmp(addr.Jv.bind(addr), null);
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
-      expect(cpu.reg16[regIP]).toBe(0xFF - 0x0A);
+      // Near and short jumps reference IP after the jump instruction so
+      // we add 3 (size of the instruction) to the expected result
+      expect(cpu.reg16[regIP]).toBe(0xFF - 0x0A + 3);
       expect(cpu.instIPInc).toBe(0);
       expect(cpu.addrIPInc).toBe(0);
     });
@@ -1523,7 +1536,9 @@ describe('Operation methods', () => {
       oper.jmp(addr.Jb.bind(addr), null);
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
-      expect(cpu.reg16[regIP]).toBe(0xFF + 0x56);
+      // Near and short jumps reference IP after the jump instruction so
+      // we add 2 (size of the instruction) to the expected result
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x56 + 2);
       expect(cpu.instIPInc).toBe(0);
       expect(cpu.addrIPInc).toBe(0);
     });
@@ -1535,7 +1550,9 @@ describe('Operation methods', () => {
       oper.jmp(addr.Jb.bind(addr), null);
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
-      expect(cpu.reg16[regIP]).toBe(0xFF - 0x0A);
+      // Near and short jumps reference IP after the jump instruction so
+      // we add 2 (size of the instruction) to the expected result
+      expect(cpu.reg16[regIP]).toBe(0xFF - 0x0A + 2);
       expect(cpu.instIPInc).toBe(0);
       expect(cpu.addrIPInc).toBe(0);
     });
@@ -1822,10 +1839,17 @@ describe('Operation methods', () => {
     });
 
     test('load flags', () => {
-      cpu.reg16[regFlags] = 0b0101010101111111;
+      cpu.reg16[regFlags] = 0b0000000010010100;
       oper.lahf(null, null);
 
-      expect(cpu.reg8[regAH]).toBe(0b01010111)
+      expect(cpu.reg8[regAH]).toBe(0b10010100);
+    });
+
+    test('load flags with unused bits set', () => {
+      cpu.reg16[regFlags] = 0b0000000010111110;
+      oper.lahf(null, null);
+
+      expect(cpu.reg8[regAH]).toBe(0b10010100);
     });
   });
 
@@ -2762,11 +2786,11 @@ describe('Operation methods', () => {
     });
 
     test('set flags', () => {
-      cpu.reg16[regFlags] = 0b0000000000000010;
-      cpu.reg8[regAH] = 0b01111101;
+      cpu.reg16[regFlags] = 0b0000000010010100; // 148 (0x94)
+      cpu.reg8[regAH] = 0b00111101;             // 61 (0x3D)
       oper.sahf(null, null);
 
-      expect(cpu.reg16[regFlags]).toBe(0b01010111)
+      expect(cpu.reg16[regFlags]).toBe(0b10010101);  // 149 (0x95)
     });
   });
 

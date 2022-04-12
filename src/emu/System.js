@@ -41,17 +41,17 @@ export default class System {
     this.runningHz = 0;
 
     this.RENDERERS = {
-      "RendererNoop": RendererNoop,
-      "RendererBin": RendererBin,
+      "RendererNoop":   RendererNoop,
+      "RendererBin":    RendererBin,
       "RendererCanvas": RendererCanvas,
-      "RendererPNG": RendererPNG,
+      "RendererPNG":    RendererPNG,
     };
 
     this.DEVICES = {
-      null:      new NullDevice(config),
-      "DMA8237": new DMA8237(config),
-      "PIC8259": new PIC8259(config),
-      "VideoMDA": null, // Set this during setup
+      null:         new NullDevice(config),
+      "DMA8237":    new DMA8237(config),
+      "PIC8259":    new PIC8259(config),
+      "VideoMDA":   null, // Set this during setup
       "TestDevice": new TestDevice(config)
     };
 
