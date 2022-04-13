@@ -106,7 +106,7 @@ describe('Operation methods', () => {
   describe('aaa', () => {
     test('least significant >9', () => {
       cpu.reg16[regAX] = 0x006D;
-      cpu.mem8[0x00FF] = 0x15;  // inst
+      cpu.mem8[0x00FF] = 0x37;  // inst
       cpu.instIPInc = 1;
       cpu.decode();
       oper.aaa(null, null);
@@ -117,7 +117,7 @@ describe('Operation methods', () => {
     });
     test('least significant <9', () => {
       cpu.reg16[regAX] = 0x0068;
-      cpu.mem8[0x00FF] = 0x15;  // inst
+      cpu.mem8[0x00FF] = 0x37;  // inst
       cpu.instIPInc = 1;
       cpu.decode();
       oper.aaa(null, null);
@@ -128,7 +128,7 @@ describe('Operation methods', () => {
     });
     test('least significant =9', () => {
       cpu.reg16[regAX] = 0x0069;
-      cpu.mem8[0x00FF] = 0x15;  // inst
+      cpu.mem8[0x00FF] = 0x37;  // inst
       cpu.instIPInc = 1;
       cpu.decode();
       oper.aaa(null, null);
@@ -137,11 +137,10 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
     });
-
     test('least significant <9 and AF set', () => {
       cpu.reg16[regFlags] = 0x0010; // AF Set
       cpu.reg16[regAX] = 0x0068;    // AL is < 9
-      cpu.mem8[0x00FF] = 0x15;      // inst
+      cpu.mem8[0x00FF] = 0x37;      // inst
       cpu.instIPInc = 1;
       cpu.decode();
       oper.aaa(null, null);
@@ -149,6 +148,17 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regAX]).toBe(0x010E);
       expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+    });
+    test('least significant <9 clears flags', () => {
+      cpu.reg16[regAX] = 0x0068;
+      cpu.mem8[0x00FF] = 0x37;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aaa(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0008);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
     });
   });
 
@@ -167,11 +177,107 @@ describe('Operation methods', () => {
     });
   });
 
-  describe.skip('aas', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.aas();
-      }).toThrowError(FeatureNotImplementedException);
+  describe('aas', () => {
+    test('positive result, least significant >9', () => {
+      cpu.reg16[regAX] = 0x006D;
+      cpu.mem8[0x00FF] = 0x3F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aas(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0xFF07);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+    });
+    test('positive result, least significant <9', () => {
+      cpu.reg16[regAX] = 0x0068;
+      cpu.mem8[0x00FF] = 0x3F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aas(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0008);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test('positive result, least significant =9', () => {
+      cpu.reg16[regAX] = 0x0069;
+      cpu.mem8[0x00FF] = 0x3F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aas(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0009);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test('positive result, least significant <9 and AF set', () => {
+      cpu.reg16[regFlags] = 0x0010; // AF Set
+      cpu.reg16[regAX] = 0x0068;    // AL is < 9
+      cpu.mem8[0x00FF] = 0x3F;      // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aas(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0xFF02);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+    });
+    test('negative result, least significant >9', () => {
+      cpu.reg16[regAX] = 0x00FA;
+      cpu.mem8[0x00FF] = 0x3F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aas(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0xFF04);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+    });
+    test('negative result, least significant <9', () => {
+      cpu.reg16[regAX] = 0x00F8;
+      cpu.mem8[0x00FF] = 0x3F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aas(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0008);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test('negative result, least significant =9', () => {
+      cpu.reg16[regAX] = 0x00F9;
+      cpu.mem8[0x00FF] = 0x3F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aas(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0009);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test('negative result, least significant <9 and AF set', () => {
+      cpu.reg16[regFlags] = 0x00F8; // AF Set
+      cpu.reg16[regAX] = 0x0068;    // AL is < 9
+      cpu.mem8[0x00FF] = 0x3F;      // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aas(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0xFF02);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+    });
+    test('least significant <9 clears flags', () => {
+      cpu.reg16[regAX] = 0x0068;
+      cpu.mem8[0x00FF] = 0x3F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aas(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0008);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
     });
   });
 

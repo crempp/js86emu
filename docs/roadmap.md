@@ -116,7 +116,7 @@ Investigate using Electron for running natively
 	* √ ADD
 	* √ ADC
 	* √ INC
-	*   AAA
+	* √ AAA
 	*   DAA
 * subtraction
 	* √ SUB
@@ -124,7 +124,7 @@ Investigate using Electron for running natively
 	* √ DEC
 	* √ NEG
 	* √ CMP
-	*   AAS
+	* √ AAS
 	*   DAS
 * multiplication
 	* √ MUL

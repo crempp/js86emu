@@ -27,7 +27,7 @@ export default class Operations {
    * execution of AAA.
    *   - [1] p.2-35
    *
-   * Modifies flags: ?
+   * Modifies flags: AF, CF
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
@@ -39,6 +39,10 @@ export default class Operations {
       this.cpu.reg8[regAH] += 1;
       this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
       this.cpu.reg16[regFlags] |= FLAG_AF_MASK;
+    }
+    else {
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
+      this.cpu.reg16[regFlags] &= ~FLAG_AF_MASK;
     }
     this.cpu.reg8[regAL] &= 0x0F;
   }
@@ -90,7 +94,7 @@ export default class Operations {
    * undefined following execution of AAS.
    *   - [1] p.2-36
    *
-   * Modifies flags: ?
+   * Modifies flags: AF, CF
    *
    * http://service.scs.carleton.ca/sivarama/asm_book_web/Instructor_copies/ch11_bcd.pdf
    * https://stackoverflow.com/a/24093050/1436323
@@ -99,22 +103,18 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   aas (dst, src) {
-    let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
-    let srcAddr = src(this.cpu.reg16[this.cpu.addrSeg]);
-    let dstVal  = dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
-    let srcVal  = src(this.cpu.reg16[this.cpu.addrSeg], srcAddr);
-
-    // if((AL & 0xF) > 9 || AF == 1) {
-    //   AL = AL - 6;
-    //   AH = AH - 1;
-    //   AF = 1;
-    //   CF = 1;
-    // }
-    // else {
-    //   CF = 0;
-    //   AF = 0;
-    // }
-    // AL = AL & 0xF;
+    let lsb = this.cpu.reg8[regAL] & 0x0F;
+    if (lsb > 9 || (this.cpu.reg16[regFlags] & FLAG_AF_MASK)) {
+      this.cpu.reg8[regAL] -= 6;
+      this.cpu.reg8[regAH] -= 1;
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
+      this.cpu.reg16[regFlags] |= FLAG_AF_MASK;
+    }
+    else {
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
+      this.cpu.reg16[regFlags] &= ~FLAG_AF_MASK;
+    }
+    this.cpu.reg8[regAL] &= 0x0F;
   }
 
   /**
