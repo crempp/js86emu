@@ -914,18 +914,144 @@ describe('Operation methods', () => {
   });
 
   describe('daa', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.daa();
-      }).toThrowError(FeatureNotImplementedException);
+    test('msb >9, lsb >9', () => {
+      cpu.reg16[regAX] = 0x00AD;
+      cpu.mem8[0x00FF] = 0x27;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.daa(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0013);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+    });
+    test('msb <=9, lsb >9', () => {
+      cpu.reg16[regAX] = 0x004B;
+      cpu.mem8[0x00FF] = 0x27;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.daa(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0051);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test('msb >9, lsb <=9', () => {
+      cpu.reg16[regAX] = 0x00B4;
+      cpu.mem8[0x00FF] = 0x27;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.daa(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0014);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+    });
+    test('msb <=9, lsb <=9', () => {
+      cpu.reg16[regAX] = 0x0044;
+      cpu.mem8[0x00FF] = 0x27;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.daa(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0044);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test('msb <=9, lsb <=9, AF set', () => {
+      cpu.reg16[regFlags] = 0x0010; // AF Set
+      cpu.reg16[regAX] = 0x0044;
+      cpu.mem8[0x00FF] = 0x27;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.daa(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x004A);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test('msb <=9, lsb <=9, CF set', () => {
+      cpu.reg16[regFlags] = 0x0001; // CF Set
+      cpu.reg16[regAX] = 0x0044;
+      cpu.mem8[0x00FF] = 0x27;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.daa(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x00A4);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
     });
   });
 
   describe('das', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.das();
-      }).toThrowError(FeatureNotImplementedException);
+    test('msb >9, lsb >9', () => {
+      cpu.reg16[regAX] = 0x00AD;
+      cpu.mem8[0x00FF] = 0x2F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.das(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0047);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+    });
+    test('msb <=9, lsb >9', () => {
+      cpu.reg16[regAX] = 0x004B;
+      cpu.mem8[0x00FF] = 0x2F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.das(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0045);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test('msb >9, lsb <=9', () => {
+      cpu.reg16[regAX] = 0x00B4;
+      cpu.mem8[0x00FF] = 0x2F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.das(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0054);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+    });
+    test('msb <=9, lsb <=9', () => {
+      cpu.reg16[regAX] = 0x0044;
+      cpu.mem8[0x00FF] = 0x2F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.das(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0044);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test('msb <=9, lsb <=9, AF set', () => {
+      cpu.reg16[regFlags] = 0x0010; // AF Set
+      cpu.reg16[regAX] = 0x0044;
+      cpu.mem8[0x00FF] = 0x2F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.das(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x003E);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test('msb <=9, lsb <=9, CF set', () => {
+      cpu.reg16[regFlags] = 0x0001; // CF Set
+      cpu.reg16[regAX] = 0x0088;
+      cpu.mem8[0x00FF] = 0x2F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.das(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0028);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
     });
   });
 

@@ -531,13 +531,31 @@ export default class Operations {
    * undefined following execution of DAA.
    *  - [1] p.2-36
    *
-   * Modifies flags: ?
+   * Modifies flags: AF, CF
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
    */
   daa (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let lsb = this.cpu.reg8[regAL] & 0x0F;
+    let msb = this.cpu.reg8[regAL] >> 4;
+    if (lsb > 9 || (this.cpu.reg16[regFlags] & FLAG_AF_MASK)) {
+      this.cpu.reg8[regAL] += 0x06;
+      this.cpu.reg16[regFlags] |= FLAG_AF_MASK;
+    }
+    else {
+      this.cpu.reg16[regFlags] &= ~FLAG_AF_MASK;
+    }
+
+    if (msb > 9 || (this.cpu.reg16[regFlags] & FLAG_CF_MASK)) {
+      this.cpu.reg8[regAL] += 0x60;
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
+    }
+    else {
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
+    }
+
+    this.cpu.reg8[regAL] &= 0xFF;
   }
 
   /**
@@ -554,7 +572,25 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   das (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let lsb = this.cpu.reg8[regAL] & 0x0F;
+    let msb = this.cpu.reg8[regAL] >> 4;
+    if (lsb > 9 || (this.cpu.reg16[regFlags] & FLAG_AF_MASK)) {
+      this.cpu.reg8[regAL] -= 0x06;
+      this.cpu.reg16[regFlags] |= FLAG_AF_MASK;
+    }
+    else {
+      this.cpu.reg16[regFlags] &= ~FLAG_AF_MASK;
+    }
+
+    if (msb > 9 || (this.cpu.reg16[regFlags] & FLAG_CF_MASK)) {
+      this.cpu.reg8[regAL] -= 0x60;
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
+    }
+    else {
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
+    }
+
+    this.cpu.reg8[regAL] &= 0xFF;
   }
 
   /**

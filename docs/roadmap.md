@@ -100,11 +100,11 @@ Investigate using Electron for running natively
 	*   XLAT
 	* √ IN
 	* √ OUT
-* address object
+* √ address object
 	* √ LEA
 	* √ LDS
 	* √ LES
-* flag
+* √ flag
 	* √ LAHF
 	* √ SAHF
 	* √ PUSHF
@@ -112,20 +112,20 @@ Investigate using Electron for running natively
 
 ### Arithmetic [2-33]
 
-* addition
+* √ addition
 	* √ ADD
 	* √ ADC
 	* √ INC
 	* √ AAA
-	*   DAA
-* subtraction
+	* √ DAA
+* √ subtraction
 	* √ SUB
 	* √ SBB
 	* √ DEC
 	* √ NEG
 	* √ CMP
 	* √ AAS
-	*   DAS
+	* √ DAS
 * multiplication
 	* √ MUL
 	*   IMUL
@@ -138,17 +138,17 @@ Investigate using Electron for running natively
 	*   CWD
 
 ### √ Bit Manipulation [2-38]
-* logical
+* √ logical
 	* √ NOT
 	* √ AND
 	* √ OR
 	* √ XOR
 	* √ TEST
-* shifts
+* √ shifts
 	* √ SHL/SAL
 	* √ SHR
 	* √ SAR
-* rotates
+* √ rotates
 	* √ ROL
 	* √ ROR
 	* √ RCL
@@ -156,7 +156,7 @@ Investigate using Electron for running natively
 
 ### √ String [2-40]
 
-* String
+* √ String
 	* √ REP/REPE/REPZ/REPNE/REPNZ
 	* √ MOVS
 	* √ MOVSB/MOVSW
@@ -167,25 +167,25 @@ Investigate using Electron for running natively
 
 ### √ Program Transfer [2-43]
 
-* unconditional
+* √ unconditional
 	* √ CALL
 	* √ RET
 	* √ JMP
-* conditional
+* √ conditional
 	* √ J*
-* iteration control
+* √ iteration control
 	* √ LOOP
 	* √ LOOPE/LOOPZ
 	* √ LOOPNE/LOOPNZ
 	* √ JCXZ
-* interrupt
+* √ interrupt
 	* √ INT
 	* √ INTO
 	* √ IRET
 
 ### Processor Control [2-47]
 
-* √flag
+* √ flag
 	* √ CLC
 	* √ CMC
 	* √ STC
