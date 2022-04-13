@@ -63,7 +63,9 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   aad (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    // Multiplies AH by 10 and adds it to AL and sets AH to 0
+    this.cpu.reg8[regAL] += this.cpu.reg8[regAH] * 10;
+    this.cpu.reg8[regAH] = 0x00;
   }
 
   /**
@@ -82,7 +84,8 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   aam (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.reg8[regAH] = ~~(this.cpu.reg8[regAL] / 10);
+    this.cpu.reg8[regAL] = this.cpu.reg8[regAL] % 10;
   }
 
   /**

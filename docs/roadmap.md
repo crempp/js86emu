@@ -129,11 +129,11 @@ Investigate using Electron for running natively
 * multiplication
 	* √ MUL
 	*   IMUL
-	*   AAM
+	* √ AAM
 * division
 	*   DIV
 	*   IDIV
-	*   AAD
+	* √ AAD
 	*   CBW
 	*   CWD
 
@@ -250,3 +250,5 @@ Investigate using Electron for running natively
 * Build library of systems (5150, 5160, etc)
 * Build library of disk images/software/games
 * Build interface for debug, docs, library, etc.
+* Check all instruction tests and ensure that the instruction byte is set correctly
+* Check that all opcode variations (inst opcodes) are tested.

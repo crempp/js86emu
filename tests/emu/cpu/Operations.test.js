@@ -163,17 +163,26 @@ describe('Operation methods', () => {
   });
 
   describe('aad', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.aad();
-      }).toThrowError(FeatureNotImplementedException);
+    test('AX=0x0207', () => {
+      cpu.reg16[regAX] = 0x0207;
+      cpu.mem8[0x00FF] = 0xD5;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aad(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x001B);
     });
   });
+
   describe('aam', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.aam();
-      }).toThrowError(FeatureNotImplementedException);
+    test('AX=0x001B', () => {
+      cpu.reg16[regAX] = 0x001B;
+      cpu.mem8[0x00FF] = 0xD4;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aam(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0207);
     });
   });
 
