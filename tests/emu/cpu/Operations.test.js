@@ -104,10 +104,51 @@ describe('Operation methods', () => {
   });
 
   describe('aaa', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.aaa();
-      }).toThrowError(FeatureNotImplementedException);
+    test('least significant >9', () => {
+      cpu.reg16[regAX] = 0x006D;
+      cpu.mem8[0x00FF] = 0x15;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aaa(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0103);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+    });
+    test('least significant <9', () => {
+      cpu.reg16[regAX] = 0x0068;
+      cpu.mem8[0x00FF] = 0x15;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aaa(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0008);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test('least significant =9', () => {
+      cpu.reg16[regAX] = 0x0069;
+      cpu.mem8[0x00FF] = 0x15;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aaa(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0009);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+
+    test('least significant <9 and AF set', () => {
+      cpu.reg16[regFlags] = 0x0010; // AF Set
+      cpu.reg16[regAX] = 0x0068;    // AL is < 9
+      cpu.mem8[0x00FF] = 0x15;      // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aaa(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x010E);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
     });
   });
 

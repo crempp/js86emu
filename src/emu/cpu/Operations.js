@@ -33,7 +33,14 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   aaa (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let lsb = this.cpu.reg8[regAL] & 0x0F;
+    if (lsb > 9 || (this.cpu.reg16[regFlags] & FLAG_AF_MASK)) {
+      this.cpu.reg8[regAL] += 6;
+      this.cpu.reg8[regAH] += 1;
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
+      this.cpu.reg16[regFlags] |= FLAG_AF_MASK;
+    }
+    this.cpu.reg8[regAL] &= 0x0F;
   }
 
   /**
