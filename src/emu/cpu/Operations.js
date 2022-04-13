@@ -294,7 +294,8 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   cbw (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let se = signExtend(this.cpu.reg8[regAL])
+    this.cpu.reg16[regAX] = se;
   }
 
   /**
@@ -520,7 +521,12 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   cwd (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    if (this.cpu.reg16[regAX] >> 15 === 1) {
+      this.cpu.reg16[regDX] = 0xFFFF;
+    }
+    else {
+      this.cpu.reg16[regDX] = 0x0000;
+    }
   }
 
   /**

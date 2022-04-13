@@ -651,10 +651,27 @@ describe('Operation methods', () => {
   });
 
   describe('cbw', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.cbw();
-      }).toThrowError(FeatureNotImplementedException);
+    test('has sign bit', () => {
+      cpu.reg16[regAL] = 0xB7;
+      cpu.mem8[0x00FF] = 0x98;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.cbw(null, null);
+
+      expect(cpu.reg8[regAL]).toBe(0xB7);
+      expect(cpu.reg8[regAH]).toBe(0xFF);
+      expect(cpu.reg16[regFlags]).toBe(0);
+    });
+    test('has no sign bit', () => {
+      cpu.reg16[regAX] = 0x37;
+      cpu.mem8[0x00FF] = 0x98;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.cbw(null, null);
+
+      expect(cpu.reg8[regAL]).toBe(0x37);
+      expect(cpu.reg8[regAH]).toBe(0x00);
+      expect(cpu.reg16[regFlags]).toBe(0);
     });
   });
 
@@ -906,10 +923,27 @@ describe('Operation methods', () => {
   });
 
   describe('cwd', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.cwd();
-      }).toThrowError(FeatureNotImplementedException);
+    test('has sign bit', () => {
+      cpu.reg16[regAX] = 0xB723;
+      cpu.mem8[0x00FF] = 0x99;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.cwd(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0xB723);
+      expect(cpu.reg16[regDX]).toBe(0xFFFF);
+      expect(cpu.reg16[regFlags]).toBe(0);
+    });
+    test('has no sign bit', () => {
+      cpu.reg16[regAX] = 0x3723;
+      cpu.mem8[0x00FF] = 0x99;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.cwd(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x3723);
+      expect(cpu.reg16[regDX]).toBe(0x0000);
+      expect(cpu.reg16[regFlags]).toBe(0);
     });
   });
 

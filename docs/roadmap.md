@@ -134,8 +134,8 @@ Investigate using Electron for running natively
 	*   DIV
 	*   IDIV
 	* √ AAD
-	*   CBW
-	*   CWD
+	* √ CBW
+	* √ CWD
 
 ### √ Bit Manipulation [2-38]
 * √ logical
