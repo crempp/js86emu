@@ -1,4 +1,12 @@
-import {seg2abs, segIP, signExtend} from "../utils/Utils";
+import {
+  isByteSigned,
+  seg2abs,
+  segIP,
+  signExtend16,
+  signExtend32,
+  twosComplement2IntWord,
+  twosComplement2IntByte, intByte2TwosComplement, intWord2TwosComplement, intDouble2TwosComplement
+} from "../utils/Utils";
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
   regAX, regBX, regCX, regDX,
@@ -294,8 +302,7 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   cbw (dst, src) {
-    let se = signExtend(this.cpu.reg8[regAL])
-    this.cpu.reg16[regAX] = se;
+    this.cpu.reg16[regAX] = signExtend16(this.cpu.reg8[regAL]);
   }
 
   /**
@@ -387,7 +394,7 @@ export default class Operations {
     let dstVal  = dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
     let srcVal  = src(this.cpu.reg16[this.cpu.addrSeg], srcAddr);
     if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
-      srcVal = signExtend(srcVal);
+      srcVal = signExtend16(srcVal);
     }
     let result = dstVal - srcVal;
     result = this.correctSubtraction(result);
@@ -740,13 +747,50 @@ export default class Operations {
    * and ZF is undefined following execution of IMUL.
    *   - [1] p.2-37
    *
-   * Modifies flags: ?
+   * Modifies flags: CF, OF
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
    */
   imul (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
+    let dstVal  = dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
+    let result;
+
+    // Determine if byte or word operation when size is 'v'
+    let addrSize = this.cpu.opcode.addrSize;
+    if (addrSize === v) addrSize = (this.cpu.opcode.w === 0) ? b : w;
+
+    if (addrSize === b) {
+      result = twosComplement2IntByte(this.cpu.reg8[regAL]) * dstVal;
+      this.cpu.reg16[regAX] = intWord2TwosComplement(result);
+      if (this.cpu.reg8[regAL] === this.cpu.reg16[regAX]) {
+        // Clear
+        this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
+        this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
+      }
+      else {
+        // Set
+        this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
+        this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
+      }
+    }
+    else if (addrSize === w) {
+      result = twosComplement2IntWord(this.cpu.reg16[regAX]) * twosComplement2IntWord(dstVal);
+      result = intDouble2TwosComplement(result);
+      this.cpu.reg16[regAX] = result & 0x0000FFFF;
+      this.cpu.reg16[regDX] = result >> 16;
+      if (signExtend32(this.cpu.reg16[regAX]) === result) {
+        // Clear
+        this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
+        this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
+      }
+      else {
+        // Set
+        this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
+        this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
+      }
+    }
   }
 
   /**

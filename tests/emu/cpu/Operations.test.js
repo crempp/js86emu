@@ -1199,10 +1199,82 @@ describe('Operation methods', () => {
   });
 
   describe('imul', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.imul();
-      }).toThrowError(FeatureNotImplementedException);
+    test('8 bit multiply BL by accumulator (AL)', () => {
+      // IMUL BL
+      cpu.mem8[0x00FF] = 0xF6; // Inst
+      cpu.mem8[0x0100] = 0xEB; // Addr byte
+      cpu.reg8[regAL] = 0x30;  // 48
+      cpu.reg8[regBL] = 0x04;  // 4
+
+      cpu.decode();
+      oper.imul(addr.Eb.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x00C0); // 192
+      expect(cpu.reg16[regDX]).toBe(0x0000);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+    test('8 bit negative multiply BL by accumulator (AL)', () => {
+      // IMUL BL
+      cpu.mem8[0x00FF] = 0xF6; // Inst
+      cpu.mem8[0x0100] = 0xEB; // Addr byte
+      cpu.reg8[regAL] = 0xFC;  // -4
+      cpu.reg8[regBL] = 0x04;  // 4
+
+      cpu.decode();
+      oper.imul(addr.Eb.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0xFFF0); // -16
+      expect(cpu.reg16[regDX]).toBe(0x0000);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
+    });
+    test('16 bit multiply BX by accumulator (AX)', () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xEB;   // Addr byte
+      cpu.reg16[regAX] = 0x0030; // 48
+      cpu.reg16[regBX] = 0x0004; // 4
+
+      cpu.decode();
+      oper.imul(addr.Ev.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x00C0); // 192
+      expect(cpu.reg16[regDX]).toBe(0x0000);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+    test('16 bit multiply CX by accumulator (AX) = 32 bit value', () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xE9;   // Addr byte
+      cpu.reg16[regAX] = 0x1234; // 4660
+      cpu.reg16[regCX] = 0x1234; // 4660
+
+      cpu.decode();
+      oper.imul(addr.Ev.bind(addr));
+
+      // Result = 21715600
+      expect(cpu.reg16[regAX]).toBe(0x5A90);
+      expect(cpu.reg16[regDX]).toBe(0x014B);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
+    });
+    test('16 bit negative multiply CX by accumulator (AX) = 32 bit value', () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xE9;   // Addr byte
+      cpu.reg16[regAX] = 0x1234; // 4660
+      cpu.reg16[regCX] = 0xEDCC; // -4660
+
+      cpu.decode();
+      oper.imul(addr.Ev.bind(addr));
+
+      // Result = -21715600 (2's complement)
+      expect(cpu.reg16[regAX]).toBe(0xA570);
+      expect(cpu.reg16[regDX]).toBe(0xFEB4);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
     });
   });
 

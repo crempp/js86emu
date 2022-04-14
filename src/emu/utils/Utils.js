@@ -29,6 +29,27 @@ export function segIP(cpu) {
 }
 
 /**
+ * Check if the byte value provided is a signed value.
+ *
+ * @param value Byte to check for sign bit
+ * @returns {boolean} True if value is signed, else false
+ */
+export function isByteSigned(value) {
+  return (value >> 7 === 1);
+}
+
+/**
+ * Check if the word value provided is a signed value.
+ *
+ * @param value Word to check for sign bit
+ * @returns {boolean} True if value is signed, else false
+ */
+export function isWordSigned(value) {
+  return (value >> 15 === 1);
+}
+
+
+/**
  * Convert a one-byte twos complement number to a signed integer.
  *
  * Note: It seems Javascript does not do ~ (bitwise not) correctly so we have
@@ -37,7 +58,7 @@ export function segIP(cpu) {
  * @param {number} value 8bit twos complement number to convert signed integer
  * @return {number} Signed integer conversion
  */
-export function twosComplement2Int8 (value) {
+export function twosComplement2IntByte (value) {
   let negative = ((value >> 7) === 1);
   return negative ? (-1 * (value >> 7)) * ((value ^ 0xFF) + 1) : value;
 }
@@ -51,20 +72,71 @@ export function twosComplement2Int8 (value) {
  * @param {number} value 16bit twos complement number to convert signed integer
  * @return {number} Signed integer conversion
  */
-export function twosComplement2Int16 (value) {
+export function twosComplement2IntWord (value) {
   let negative = ((value >> 15) === 1);
   return negative ? (-1 * (value >> 15)) * ((value ^ 0xFFFF) + 1) : value;
 }
 
 /**
- * Extends a twos complement byte value to a twos complement word value
+ * Convert an 8-bit byte negative value into it's two's complement representation.
+ * Positive numbers are returned unchanged (but will be clamped to 0xFF).
+ *
+ * @param {number} value 8-bit value to convert to two's compliment
+ * @returns {number} The two's complement representation of the negative value.
+ */
+export function intByte2TwosComplement (value) {
+  if (value < 0) value = value + 1 + 0xFF;
+  return value & 0xFF;
+}
+
+/**
+ * Convert an 16-bit word negative value into it's two's complement representation.
+ * Positive numbers are returned unchanged (but will be clamped to 0xFFFF).
+ *
+ * @param {number} value 16-bit value to convert to two's compliment
+ * @returns {number} The two's complement representation of the negative value.
+ */
+export function intWord2TwosComplement (value) {
+  if (value < 0) value = value + 1 + 0xFFFF;
+  return value & 0xFFFF;
+}
+
+/**
+ * Convert an 32-bit double word negative value into it's two's complement representation.
+ * Positive numbers are returned unchanged (but will be clamped to 0xFFFFFFFF).
+ *
+ * @param {number} value 32-bit value to convert to two's compliment
+ * @returns {number} The two's complement representation of the negative value.
+ */
+export function intDouble2TwosComplement (value) {
+  if (value < 0) value = value + 1 + 0xFFFFFFFF;
+  return value & 0xFFFFFFFF;
+}
+
+/**
+ * Extends a twos complement byte value to a 16 bit twos complement word value
  *
  * @param {number} value The twos complement byte value to sign extend
  * @return {number} Extended twos complement word value
  */
-export function signExtend(value) {
+export function signExtend16(value) {
   if ( value <= 0xFF && 1 === ((value & 0x80) >> 7)) {
     return 0xFF00 | value;
+  }
+  else {
+    return value;
+  }
+}
+
+/**
+ * Extends a twos complement word value to a 32 bit twos complement double word value
+ *
+ * @param {number} value The twos complement byte value to sign extend
+ * @return {number} Extended twos complement word value
+ */
+export function signExtend32(value) {
+  if ( value <= 0xFFFF && 1 === ((value & 0x8000) >> 15)) {
+    return 0xFFFF0000 | value;
   }
   else {
     return value;

@@ -88,11 +88,11 @@ describe('seg2abs() Segment to absolute memory address conversion', () => {
 
 describe.skip('segIP()', () => {});
 
-describe.skip('twosComplement2Int8()', () => {});
+describe.skip('twosComplement2IntByte()', () => {});
 
-describe.skip('twosComplement2Int16()', () => {});
+describe.skip('twosComplement2IntWord()', () => {});
 
-describe('signExtend()', () => {
+describe('signExtend16()', () => {
   test('[regression] sign extend 0x90', () => {
 
   });

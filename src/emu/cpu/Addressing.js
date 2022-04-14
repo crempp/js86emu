@@ -1,4 +1,4 @@
-import {seg2abs, twosComplement2Int16, twosComplement2Int8} from "../utils/Utils";
+import {seg2abs, twosComplement2IntWord, twosComplement2IntByte} from "../utils/Utils";
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
   regAX, regBX, regCX, regDX,
@@ -959,7 +959,7 @@ export default class Addressing {
     else if (value === undefined) {
       // Read value from calculated address
       let result = this.readMem8(segment, offset);
-      return this.cpu.reg16[regIP] + twosComplement2Int8(result);
+      return this.cpu.reg16[regIP] + twosComplement2IntByte(result);
     }
     else {
       // Write value to address
@@ -992,7 +992,7 @@ export default class Addressing {
     else if (value === undefined) {
       // Read value from calculated address
       let result = this.readMem16(segment, offset);
-      return this.cpu.reg16[regIP] + twosComplement2Int16(result);
+      return this.cpu.reg16[regIP] + twosComplement2IntWord(result);
     }
     else {
       // Write value to address
@@ -1446,8 +1446,8 @@ export default class Addressing {
     let rmReg = useRM ? this.cpu.opcode.rm : this.cpu.opcode.reg;
     let size;
     if (sizeOverride !== null) {
-      if (sizeOverride === b) size = 0;
-      else size = 1;
+      if (sizeOverride === b) size = b;
+      else size = w;
     }
     else {
       size = this.cpu.opcode.w;

@@ -126,9 +126,9 @@ Investigate using Electron for running natively
 	* √ CMP
 	* √ AAS
 	* √ DAS
-* multiplication
+* √ multiplication
 	* √ MUL
-	*   IMUL
+	* √ IMUL
 	* √ AAM
 * division
 	*   DIV
@@ -252,3 +252,8 @@ Investigate using Electron for running natively
 * Build interface for debug, docs, library, etc.
 * Check all instruction tests and ensure that the instruction byte is set correctly
 * Check that all opcode variations (inst opcodes) are tested.
+* Does the MUL operation actually work with negative values? I don't think so.
+* Create flag set/clear helper functions. It's really confusing now. Optimize later.
+* Replace sign bit checks with isByteSigned/isWordSigned
+* Flesh out documentation and possibly use Hugo
+* Use github project
