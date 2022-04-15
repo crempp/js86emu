@@ -55,7 +55,7 @@ export function isWordSigned(value) {
  * Note: It seems Javascript does not do ~ (bitwise not) correctly so we have
  * to hack it together.
  *
- * @param {number} value 8bit twos complement number to convert signed integer
+ * @param {number} value 8-bit twos complement number to convert signed integer
  * @return {number} Signed integer conversion
  */
 export function twosComplement2IntByte (value) {
@@ -69,12 +69,26 @@ export function twosComplement2IntByte (value) {
  * Note: It seems Javascript does not do ~ (bitwise not) correctly so we have
  * to hack it together.
  *
- * @param {number} value 16bit twos complement number to convert signed integer
+ * @param {number} value 16-bit twos complement number to convert signed integer
  * @return {number} Signed integer conversion
  */
 export function twosComplement2IntWord (value) {
   let negative = ((value >> 15) === 1);
   return negative ? (-1 * (value >> 15)) * ((value ^ 0xFFFF) + 1) : value;
+}
+
+/**
+ * Convert a four-byte twos complement number to a signed integer.
+ *
+ * Note: It seems Javascript does not do ~ (bitwise not) correctly so we have
+ * to hack it together.
+ *
+ * @param {number} value 32-bit twos complement number to convert signed integer
+ * @return {number} Signed integer conversion
+ */
+export function twosComplement2IntDouble (value) {
+  let negative = ((value >> 31) === 1);
+  return negative ? (-1 * (value >> 31)) * ((value ^ 0xFFFFFFFF) + 1) : value;
 }
 
 /**

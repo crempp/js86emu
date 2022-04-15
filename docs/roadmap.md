@@ -132,7 +132,7 @@ Investigate using Electron for running natively
 	* √ AAM
 * division
 	*   DIV
-	*   IDIV
+	* √ IDIV
 	* √ AAD
 	* √ CBW
 	* √ CWD
@@ -246,7 +246,7 @@ Investigate using Electron for running natively
 ## Feature TODO List
 * Auto generated documentation from code
 * Render markdown docs and serve from site
-* Reactify debug view
+* Reactify debug view (Switch to something other than React?)
 * Build library of systems (5150, 5160, etc)
 * Build library of disk images/software/games
 * Build interface for debug, docs, library, etc.
@@ -257,3 +257,4 @@ Investigate using Electron for running natively
 * Replace sign bit checks with isByteSigned/isWordSigned
 * Flesh out documentation and possibly use Hugo
 * Use github project
+* When interupts are done update IDIV and tests

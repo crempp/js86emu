@@ -1,27 +1,29 @@
 import {
-  isByteSigned,
   seg2abs,
   segIP,
   signExtend16,
   signExtend32,
   twosComplement2IntWord,
-  twosComplement2IntByte, intByte2TwosComplement, intWord2TwosComplement, intDouble2TwosComplement
+  twosComplement2IntByte,
+  intWord2TwosComplement,
+  intDouble2TwosComplement,
+  twosComplement2IntDouble
 } from "../utils/Utils";
 import {
-  regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
-  regAX, regBX, regCX, regDX,
-  regSI, regDI, regBP, regSP, regIP,
+  regAH, regAL,
+  regAX, regCX, regDX,
+  regSI, regDI, regSP, regIP,
   regCS, regDS, regES, regSS,
   regFlags,
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
-  b, w, v, u,
+  b, w, v,
   PARITY, REP_INSTS,
   STATE_HALT,
   STATE_REP_Z, STATE_REP_NZ, STATE_REP_NONE, STATE_REP,
   STATE_SEG_CS, STATE_SEG_DS, STATE_SEG_ES, STATE_SEG_SS, USED_FLAG_MASK,
 } from '../Constants';
-import { FeatureNotImplementedException } from "../utils/Exceptions";
+import {FeatureNotImplementedException, TemporaryInterruptException} from "../utils/Exceptions";
 
 export default class Operations {
   constructor(cpu) {
@@ -712,7 +714,7 @@ export default class Operations {
    * and AH; the single length quotient is returned in AL, and the single length
    * remainder is returned in AH. For byte integer division, the maximum
    * positive quotient is +127 (7FH) and the minimum negative quotient is -127
-   * (SIH). If the source operand is a word, it is divided into the
+   * (80H). If the source operand is a word, it is divided into the
    * double-length dividend in registers AX and DX; the single-length quotient
    * is returned in AX, and the single-length remainder is returned in DX. For
    * word integer division, the maximum positive quotient is +32,767 (7FFFH)
@@ -725,13 +727,67 @@ export default class Operations {
    * PF, SF and ZF is undefined following IDIV.
    *   - [1] p.2-37
    *
-   * Modifies flags: ?
+   * Modifies flags: None
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
    */
   idiv (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
+    let dstVal  = dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
+    let quotient, dividend, divisor;
+
+    // TODO: Replace with actual interrupt call
+    if (dstVal === 0) throw new TemporaryInterruptException("Divide by zero");
+
+    // Determine if byte or word operation when size is 'v'
+    let addrSize = this.cpu.opcode.addrSize;
+    if (addrSize === v) addrSize = (this.cpu.opcode.w === 0) ? b : w;
+
+    if (addrSize === b) {
+      dividend = twosComplement2IntWord(this.cpu.reg16[regAX]);
+      divisor = twosComplement2IntByte(dstVal);
+      quotient = Math.trunc(dividend / divisor);
+      // TODO: Replace with actual interrupt call
+      if (quotient > 127 || quotient < -128) {
+        throw new TemporaryInterruptException("Quotient out of range");
+      }
+      else {
+        this.cpu.reg8[regAL] = intWord2TwosComplement(quotient);
+        this.cpu.reg8[regAH] = intWord2TwosComplement(dividend % divisor);
+      }
+    }
+    else if (addrSize === w) {
+      dividend = twosComplement2IntDouble(this.cpu.reg16[regDX] << 16 | this.cpu.reg16[regAX]);
+      divisor = twosComplement2IntWord(dstVal);
+      quotient = Math.trunc(dividend / divisor);
+      // TODO: Replace with actual interrupt call
+      if (quotient > 32767 || quotient < -32767) {
+        throw new TemporaryInterruptException("Quotient out of range");
+      }
+      else {
+        this.cpu.reg16[regAX] = intWord2TwosComplement(quotient);
+        this.cpu.reg16[regDX] = intWord2TwosComplement(dividend % divisor);
+      }
+    }
+    // if(Source == 0) Exception(DE); //divide error
+    //
+    // if(OperandSize == 8) { //word/byte operation
+    // 	Temporary = AX / Source; //signed division
+    // 	if(Temporary > 0x7F || Temporary < 0x80) Exception(DE); //f a positive result is greater than 7FH or a negative result is less than 80H
+    // 	else {
+    // 		AL = Temporary;
+    // 		AH = AX % Source; //signed modulus
+    // 	}
+    // }
+    // else if(OperandSize == 16) { //doubleword/word operation
+    // 	Temporary = DX:AX / Source; //signed division
+    // 	if(Temporary > 0x7FFF || Temporary < 0x8000) Exception(DE); //f a positive result is greater than 7FFFH or a negative result is less than 8000H
+    // 	else {
+    // 		AX = Temporary;
+    // 		DX = DX:AX % Source; //signed modulus
+    // 	}
+    // }
   }
 
   /**
@@ -762,7 +818,7 @@ export default class Operations {
     if (addrSize === v) addrSize = (this.cpu.opcode.w === 0) ? b : w;
 
     if (addrSize === b) {
-      result = twosComplement2IntByte(this.cpu.reg8[regAL]) * dstVal;
+      result = twosComplement2IntByte(this.cpu.reg8[regAL]) * twosComplement2IntByte(dstVal);
       this.cpu.reg16[regAX] = intWord2TwosComplement(result);
       if (this.cpu.reg8[regAL] === this.cpu.reg16[regAX]) {
         // Clear
