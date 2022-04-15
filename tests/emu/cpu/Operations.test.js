@@ -3996,12 +3996,47 @@ describe('Operation methods', () => {
   });
 
   describe('xlat', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.xlat();
-      }).toThrowError(FeatureNotImplementedException);
+    beforeEach(() => {
+      // DS: 0x0300; 0x0300:0x0200 = 0x3200
+      cpu.mem8[0x3200] = 0x01;
+      cpu.mem8[0x3201] = 0x02;
+      cpu.mem8[0x3202] = 0x03;
+      cpu.mem8[0x3203] = 0x04;
+      cpu.mem8[0x3204] = 0x05;
+      cpu.mem8[0x3205] = 0x06;
+      cpu.mem8[0x3206] = 0x07;
+      cpu.mem8[0x3207] = 0x08;
+      cpu.mem8[0x3208] = 0x09;
+      cpu.mem8[0x3209] = 0x0A;
+      cpu.mem8[0x320A] = 0x0B;
+      cpu.mem8[0x320B] = 0x0C;
+      cpu.mem8[0x320C] = 0x0D;
+      cpu.mem8[0x320D] = 0x0E;
+      cpu.mem8[0x320E] = 0x0F;
+    })
+
+    test('lookup first item', () => {
+      cpu.reg8[regAL]   = 0x00;   // table index
+      cpu.reg16[regBX]  = 0x0200; // beginning of table
+      cpu.mem8[0x000FF] = 0xD7;   // inst (byte)
+
+      cpu.decode();
+      oper.xlat(null, null);
+
+      expect(cpu.reg8[regAL]).toBe(0x01);
+    });
+    test('lookup last item', () => {
+      cpu.reg8[regAL]   = 0x0E;   // table index
+      cpu.reg16[regBX]  = 0x0200; // beginning of table
+      cpu.mem8[0x000FF] = 0xD7;   // inst (byte)
+
+      cpu.decode();
+      oper.xlat(null, null);
+
+      expect(cpu.reg8[regAL]).toBe(0x0F);
     });
   });
+
   describe('xor', () => {
     test('XOR AX Iv', () => {
       cpu.reg16[regAX] = 0x1234;

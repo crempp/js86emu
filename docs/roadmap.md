@@ -90,14 +90,14 @@ Investigate using Electron for running natively
 
 ## Instruction TODO List
 
-## Data Transfer [2-31]
+## √ Data Transfer [2-31]
 
-* general
+* √ general
 	* √ MOV
 	* √ PUSH
 	* √ POP
 	* √ XCHG
-	*   XLAT
+	* √ XLAT
 	* √ IN
 	* √ OUT
 * √ address object
@@ -110,7 +110,7 @@ Investigate using Electron for running natively
 	* √ PUSHF
 	* √ POPF
 
-### Arithmetic [2-33]
+### √ Arithmetic [2-33]
 
 * √ addition
 	* √ ADD
@@ -130,7 +130,7 @@ Investigate using Electron for running natively
 	* √ MUL
 	* √ IMUL
 	* √ AAM
-* division
+* √ division
 	* √ DIV
 	* √ IDIV
 	* √ AAD

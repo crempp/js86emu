@@ -617,6 +617,7 @@ export default class CPU8086 extends CPU {
     // Decode the instruction
     this.decode();
 
+    // TODO: Remove this test code
     // if (this.system.cycleCount > 6 && this.opcode.opcode_byte === 0xFA) this.config.debug = true;
 
     // Increase the instIPInc by the instruction base size
@@ -629,6 +630,7 @@ export default class CPU8086 extends CPU {
       if (this.config.cycleBreak) debugger;
     }
 
+    // TODO: Remove this test code
     // if (this.system.cycleCount === 612) {
     //   let a = 0;
     // }

@@ -11,7 +11,7 @@ import {
 } from "../utils/Utils";
 import {
   regAH, regAL,
-  regAX, regCX, regDX,
+  regAX, regBX, regCX, regDX,
   regSI, regDI, regSP, regIP,
   regCS, regDS, regES, regSS,
   regFlags,
@@ -3092,13 +3092,15 @@ export default class Operations {
    * example being ASCII to EBCDIC or the reverse.
    *   - [1] p.2-32
    *
-   * Modifies flags: ?
+   * Modifies flags: None
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
    */
   xlat (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let tableAddr = seg2abs(this.cpu.reg16[regDS], this.cpu.reg16[regBX]);
+    let tableIndex = this.cpu.reg8[regAL];
+    this.cpu.reg8[regAL] = this.cpu.mem8[tableAddr + tableIndex];
   }
 
   /**
