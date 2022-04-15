@@ -653,7 +653,41 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   div (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
+    let dstVal  = dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
+    let quotient, dividend, divisor;
+
+    // TODO: Replace with actual interrupt call
+    if (dstVal === 0) throw new TemporaryInterruptException("Divide by zero");
+
+    // Determine if byte or word operation when size is 'v'
+    let addrSize = this.cpu.opcode.addrSize;
+    if (addrSize === v) addrSize = (this.cpu.opcode.w === 0) ? b : w;
+
+    if (addrSize === b) {
+      dividend = this.cpu.reg16[regAX];
+      quotient = Math.trunc(dividend / dstVal);
+      // TODO: Replace with actual interrupt call
+      if (quotient > 0xFF) {
+        throw new TemporaryInterruptException("Quotient out of range");
+      }
+      else {
+        this.cpu.reg8[regAL] = quotient;
+        this.cpu.reg8[regAH] = dividend % dstVal;
+      }
+    }
+    else if (addrSize === w) {
+      dividend = (this.cpu.reg16[regDX] << 16 | this.cpu.reg16[regAX]) >>> 0;
+      quotient = Math.trunc(dividend / dstVal);
+      // TODO: Replace with actual interrupt call
+      if (quotient > 0xFFFF) {
+        throw new TemporaryInterruptException("Quotient out of range");
+      }
+      else {
+        this.cpu.reg16[regAX] = quotient;
+        this.cpu.reg16[regDX] = dividend % dstVal;
+      }
+    }
   }
 
   /**
@@ -770,24 +804,6 @@ export default class Operations {
         this.cpu.reg16[regDX] = intWord2TwosComplement(dividend % divisor);
       }
     }
-    // if(Source == 0) Exception(DE); //divide error
-    //
-    // if(OperandSize == 8) { //word/byte operation
-    // 	Temporary = AX / Source; //signed division
-    // 	if(Temporary > 0x7F || Temporary < 0x80) Exception(DE); //f a positive result is greater than 7FH or a negative result is less than 80H
-    // 	else {
-    // 		AL = Temporary;
-    // 		AH = AX % Source; //signed modulus
-    // 	}
-    // }
-    // else if(OperandSize == 16) { //doubleword/word operation
-    // 	Temporary = DX:AX / Source; //signed division
-    // 	if(Temporary > 0x7FFF || Temporary < 0x8000) Exception(DE); //f a positive result is greater than 7FFFH or a negative result is less than 8000H
-    // 	else {
-    // 		AX = Temporary;
-    // 		DX = DX:AX % Source; //signed modulus
-    // 	}
-    // }
   }
 
   /**

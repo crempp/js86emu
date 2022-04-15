@@ -131,7 +131,7 @@ Investigate using Electron for running natively
 	* √ IMUL
 	* √ AAM
 * division
-	*   DIV
+	* √ DIV
 	* √ IDIV
 	* √ AAD
 	* √ CBW

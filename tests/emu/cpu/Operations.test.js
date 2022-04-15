@@ -1150,10 +1150,148 @@ describe('Operation methods', () => {
   });
 
   describe('div', () => {
-    test('NOT IMPLEMENTED', () => {
+    test('8 bit divide accumulator (AL) by BL', () => {
+      // IMUL BL
+      cpu.mem8[0x00FF] = 0xF6;   // Inst
+      cpu.mem8[0x0100] = 0xF3;   // Addr byte
+      cpu.reg16[regAX] = 0x0030; // 48
+      cpu.reg8[regBL]  = 0x04;   // 4
+
+      cpu.decode();
+      oper.div(addr.Eb.bind(addr));
+
+      expect(cpu.reg8[regAL]).toBe(0x0C);     // 12 (quotient)
+      expect(cpu.reg8[regAH]).toBe(0x00);     // 0  (remainder)
+      expect(cpu.reg16[regDX]).toBe(0x0000);
+    });
+    test('8 bit divide accumulator (AL) by BL with remainder', () => {
+      // IMUL BL
+      cpu.mem8[0x00FF] = 0xF6;   // Inst
+      cpu.mem8[0x0100] = 0xF3;   // Addr byte
+      cpu.reg16[regAX] = 0x0030; // 48
+      cpu.reg8[regBL]  = 0x05;   // 5
+
+      cpu.decode();
+      oper.div(addr.Eb.bind(addr));
+
+      expect(cpu.reg8[regAL]).toBe(0x09);    // 9 (quotient)
+      expect(cpu.reg8[regAH]).toBe(0x03);    // 3  (remainder)
+      expect(cpu.reg16[regDX]).toBe(0x0000); // (DX not used in 8-bit division)
+    });
+    test('8 bit divide accumulator (AL, with sign bit) by CL with remainder', () => {
+      // IMUL BL
+      cpu.mem8[0x00FF] = 0xF6;   // Inst
+      cpu.mem8[0x0100] = 0xF1;   // Addr byte
+      cpu.reg16[regAX] = 0xCE08; // 52744
+      cpu.reg8[regCL]  = 0xFF;   // 255
+
+      cpu.decode();
+      oper.div(addr.Eb.bind(addr));
+
+      expect(cpu.reg8[regAL]).toBe(0xCE);    // 206 (quotient)
+      expect(cpu.reg8[regAH]).toBe(0xD6);    // 214 (remainder)
+      expect(cpu.reg16[regDX]).toBe(0x0000); // 0  (DX not used in 8-bit division)
+    });
+    test('8 bit divide by 0 should cause interrupt', () => {
+      // IMUL BL
+      cpu.mem8[0x00FF] = 0xF6;   // Inst
+      cpu.mem8[0x0100] = 0xF3;   // Addr byte
+      cpu.reg16[regAX] = 0x00D0; // -48
+      cpu.reg8[regBL]  = 0x00;   // 0
+
+      cpu.decode();
+
+      // TODO: Implement interrupt testing
       expect(() => {
-        oper.div();
-      }).toThrowError(FeatureNotImplementedException);
+        oper.div(addr.Eb.bind(addr));
+      }).toThrowError(TemporaryInterruptException);
+    });
+    test('8 bit quotient overflow', () => {
+      // IMUL BL
+      cpu.mem8[0x00FF] = 0xF6;   // Inst
+      cpu.mem8[0x0100] = 0xF3;   // Addr byte
+      cpu.reg16[regAX] = 0x7D00; // 32000
+      cpu.reg8[regBL]  = 0x02;   // 2
+
+      cpu.decode();
+
+      // TODO: Implement interrupt testing
+      expect(() => {
+        oper.div(addr.Eb.bind(addr));
+      }).toThrowError(TemporaryInterruptException);
+    });
+
+    test('16 bit divide accumulator (DX:AX) by BX', () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xF3;   // Addr byte
+      cpu.reg16[regDX] = 0x32E3; //
+      cpu.reg16[regAX] = 0x5800; // 853,760,000
+      cpu.reg16[regBX] = 0x7D00; // 32,000
+
+      cpu.decode();
+      oper.div(addr.Ev.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x6838); // 26,680 (quotient)
+      expect(cpu.reg16[regDX]).toBe(0x0000); // 0      (remainder)
+    });
+    test('16 bit divide accumulator (DX:AX) by BX with remainder', () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xF3;   // Addr byte
+      cpu.reg16[regDX] = 0x32E3; //
+      cpu.reg16[regAX] = 0x5800; // 853,760,000
+      cpu.reg16[regBX] = 0x7D01; // 32,001
+
+      cpu.decode();
+      oper.div(addr.Ev.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x6837); // 26,679 (quotient)
+      expect(cpu.reg16[regDX]).toBe(0x14C9); // 5,321    (remainder)
+    });
+    test('16 bit divide accumulator (DX:AX with sign bit) by BX', () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xF3;   // Addr byte
+      cpu.reg16[regDX] = 0x800C; //
+      cpu.reg16[regAX] = 0xA800; // 2,148,313,088
+      cpu.reg16[regBX] = 0xF230; // 62,000
+
+      cpu.decode();
+      oper.div(addr.Ev.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x875A); // 34650 (quotient)
+      expect(cpu.reg16[regDX]).toBe(0x3320); // 13088  (remainder)
+    });
+    test('16 bit divide by 0 should cause interrupt', () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xF3;   // Addr byte
+      cpu.reg16[regAX] = 0x12F0; // 4848
+      cpu.reg16[regDX] = 0x0000; // (sign extended into DX)
+      cpu.reg16[regBX] = 0x0000; // 0
+
+      cpu.decode();
+
+      // TODO: Implement interrupt testing
+      expect(() => {
+        oper.div(addr.Ev.bind(addr));
+      }).toThrowError(TemporaryInterruptException);
+    });
+    test('16 bit quotient overflow', () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xF3;   // Addr byte
+      cpu.reg16[regDX] = 0x32E3; //
+      cpu.reg16[regAX] = 0x5800; // 853,760,000
+      cpu.reg16[regBX] = 0x0002; // 2
+
+      cpu.decode();
+
+      // TODO: Implement interrupt testing
+      expect(() => {
+        oper.div(addr.Ev.bind(addr));
+      }).toThrowError(TemporaryInterruptException);
     });
   });
 
@@ -1261,7 +1399,7 @@ describe('Operation methods', () => {
         oper.idiv(addr.Eb.bind(addr));
       }).toThrowError(TemporaryInterruptException);
     });
-    test('8 bit quotient above max', () => {
+    test('8 bit quotient overflow', () => {
       // IMUL BL
       cpu.mem8[0x00FF] = 0xF6;   // Inst
       cpu.mem8[0x0100] = 0xFB;   // Addr byte
@@ -1275,7 +1413,7 @@ describe('Operation methods', () => {
         oper.idiv(addr.Eb.bind(addr));
       }).toThrowError(TemporaryInterruptException);
     });
-    test('8 bit quotient below min', () => {
+    test('8 bit quotient underflow', () => {
       // IMUL BL
       cpu.mem8[0x00FF] = 0xF6;   // Inst
       cpu.mem8[0x0100] = 0xFB;   // Addr byte
@@ -1289,7 +1427,6 @@ describe('Operation methods', () => {
         oper.idiv(addr.Eb.bind(addr));
       }).toThrowError(TemporaryInterruptException);
     });
-
     test('16 bit divide accumulator (DX:AX) by BX', () => {
       // IMUL BX
       cpu.mem8[0x00FF] = 0xF7;   // Inst
@@ -1361,7 +1498,7 @@ describe('Operation methods', () => {
         oper.idiv(addr.Ev.bind(addr));
       }).toThrowError(TemporaryInterruptException);
     });
-    test('16 bit quotient above max', () => {
+    test('16 bit quotient overflow', () => {
       // IMUL BX
       cpu.mem8[0x00FF] = 0xF7;   // Inst
       cpu.mem8[0x0100] = 0xFB;   // Addr byte
@@ -1376,7 +1513,7 @@ describe('Operation methods', () => {
         oper.idiv(addr.Ev.bind(addr));
       }).toThrowError(TemporaryInterruptException);
     });
-    test('16 bit quotient below min', () => {
+    test('16 bit quotient underflow', () => {
       // IMUL BX
       cpu.mem8[0x00FF] = 0xF7;   // Inst
       cpu.mem8[0x0100] = 0xFB;   // Addr byte
