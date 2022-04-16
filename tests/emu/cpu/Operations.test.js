@@ -12,7 +12,7 @@ import {
   regFlags,
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
-  STATE_HALT, STATE_REP_Z, STATE_REP, STATE_REP_NZ, STATE_SEG_CS, STATE_SEG_DS, STATE_SEG_ES, STATE_SEG_SS,
+  STATE_HALT, STATE_REP_Z, STATE_REP, STATE_REP_NZ, STATE_SEG_CS, STATE_SEG_DS, STATE_SEG_ES, STATE_SEG_SS, STATE_WAIT,
 } from '../../../src/emu/Constants';
 import TestDevice from "../../../src/emu/devices/TestDevice";
 
@@ -3971,10 +3971,9 @@ describe('Operation methods', () => {
   });
 
   describe('wait', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.wait();
-      }).toThrowError(FeatureNotImplementedException);
+    test('sets halt state', () => {
+      oper.wait();
+      expect(cpu.state).toBe(STATE_WAIT);
     });
   });
 
@@ -4118,21 +4117,21 @@ describe('Utility methods', () => {
 
 });
 
-describe('Regressions', () => {
+describe.skip('Regressions', () => {
   let cpu, addr, oper;
 
-  beforeEach(() => {
-    cpu = new CPU8086(new SystemConfig({
-      memorySize: 2 ** 20,
-      debug: false,
-    }));
-    oper = new Operations(cpu);
-    addr = new Addressing(cpu);
-    cpu.reg16[regIP] = 0x00FF;
-    cpu.reg16[regCS] = 0x0000;
-    cpu.reg16[regDS] = 0x0300;
-    cpu.reg16[regSS] = 0x0400;
-    cpu.reg16[regSP] = 0x0020;
-    cpu.reg16[regFlags] = 0x0000;
-  });
+  // beforeEach(() => {
+  //   cpu = new CPU8086(new SystemConfig({
+  //     memorySize: 2 ** 20,
+  //     debug: false,
+  //   }));
+  //   oper = new Operations(cpu);
+  //   addr = new Addressing(cpu);
+  //   cpu.reg16[regIP] = 0x00FF;
+  //   cpu.reg16[regCS] = 0x0000;
+  //   cpu.reg16[regDS] = 0x0300;
+  //   cpu.reg16[regSS] = 0x0400;
+  //   cpu.reg16[regSP] = 0x0020;
+  //   cpu.reg16[regFlags] = 0x0000;
+  // });
 });

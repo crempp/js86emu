@@ -21,7 +21,7 @@ import {
   PARITY, REP_INSTS,
   STATE_HALT,
   STATE_REP_Z, STATE_REP_NZ, STATE_REP_NONE, STATE_REP,
-  STATE_SEG_CS, STATE_SEG_DS, STATE_SEG_ES, STATE_SEG_SS, USED_FLAG_MASK,
+  STATE_SEG_CS, STATE_SEG_DS, STATE_SEG_ES, STATE_SEG_SS, USED_FLAG_MASK, STATE_WAIT,
 } from '../Constants';
 import {FeatureNotImplementedException, TemporaryInterruptException} from "../utils/Exceptions";
 
@@ -3054,8 +3054,28 @@ export default class Operations {
     this.setZF_FLAG(result);
   }
 
+  /**
+   * WAIT causes the CPU to enter the wait state while its TEST line is not
+   * active. WAIT does not affect any flags. This instruction is described
+   * more completely in section 2.5.
+   *   - [1] p.2-36
+   *
+   * The 8086 and 8088 (in either maximum or minimum mode) can be synchronized
+   * to an external event with the WAIT (wait for TEST) instruction and the
+   * TEST input signal. When the EU executes WAIT instruction, the result
+   * depends on the state of the TEST input line. If TEST is inactive, the
+   * processor enters an idle state and repeatedly retests the TEST line at
+   * five-clock intervals. If TEST is active, execution continues with the
+   * instruction following the WAIT
+   *   - [1] p.2-18
+   *
+   * Modifies flags: None
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   wait (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.state = STATE_WAIT;
   }
 
   /**

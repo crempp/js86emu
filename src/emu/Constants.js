@@ -59,6 +59,7 @@ export const u = 4; // Unknown
 // System States
 export const STATE_RUNNING = 0;
 export const STATE_HALT    = 1;
+export const STATE_WAIT    = 2;
 
 // Repeat Prefix States
 export const STATE_REP_NONE = 0;
@@ -100,3 +101,52 @@ export const PARITY = [
   /* 0xE0 */ 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
   /* 0xF0 */ 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1
 ];
+
+export const PIN_8080_AD0   = 16;
+export const PIN_8080_AD1   = 15;
+export const PIN_8080_AD2   = 14;
+export const PIN_8080_AD3   = 13;
+export const PIN_8080_AD4   = 12;
+export const PIN_8080_AD5   = 11;
+export const PIN_8080_AD6   = 10;
+export const PIN_8080_AD7   = 9;
+export const PIN_8080_A8    = 8;
+export const PIN_8080_A9    = 7;
+export const PIN_8080_A10   = 6;
+export const PIN_8080_A11   = 5;
+export const PIN_8080_A12   = 4;
+export const PIN_8080_A13   = 3;
+export const PIN_8080_A14   = 2;
+export const PIN_8080_A15   = 39;
+export const PIN_8080_A16   = 38;
+export const PIN_8080_A17   = 37;
+export const PIN_8080_A18   = 36;
+export const PIN_8080_A19   = 35;
+export const PIN_8080_S3    = 38;
+export const PIN_8080_S4    = 37;
+export const PIN_8080_S5    = 36;
+export const PIN_8080_S6    = 35;
+export const PIN_8080_SSO   = 34;
+export const PIN_8080_MNMX  = 33;
+export const PIN_8080_RD    = 32;
+export const PIN_8080_HOLD  = 31;
+export const PIN_8080_HLDA  = 30;
+export const PIN_8080_WR    = 29;
+export const PIN_8080_IOM   = 28;
+export const PIN_8080_DTR   = 27;
+export const PIN_8080_DEN   = 26;
+export const PIN_8080_ALE   = 25;
+export const PIN_8080_INTA  = 24;
+export const PIN_8080_TEST  = 23;
+export const PIN_8080_READY = 22;
+export const PIN_8080_RESET = 21;
+export const PIN_8080_CLK   = 19;
+export const PIN_8080_INTR  = 18;
+export const PIN_8080_NMI   = 17;
+
+export const PIN_LOW  = 0;
+export const PIN_HIGH = 1;
+
+
+
+

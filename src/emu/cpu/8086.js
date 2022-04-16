@@ -12,6 +12,15 @@ import {
   STATE_HALT,
   STATE_REP_NONE, STATE_REP_Z, STATE_REP, STATE_REP_NZ,
   STATE_SEG_NONE, SEG_PREFIX_INSTS,
+  PIN_8080_AD0, PIN_8080_AD1, PIN_8080_AD2, PIN_8080_AD3, PIN_8080_AD4,
+  PIN_8080_AD5, PIN_8080_AD6, PIN_8080_AD7, PIN_8080_A8, PIN_8080_A9,
+  PIN_8080_A10, PIN_8080_A11, PIN_8080_A12, PIN_8080_A13, PIN_8080_A14,
+  PIN_8080_A15, PIN_8080_A16, PIN_8080_A17, PIN_8080_A18, PIN_8080_A19,
+  PIN_8080_S3, PIN_8080_S4, PIN_8080_S5, PIN_8080_S6, PIN_8080_SSO,
+  PIN_8080_MNMX, PIN_8080_RD, PIN_8080_HOLD, PIN_8080_HLDA, PIN_8080_WR,
+  PIN_8080_IOM, PIN_8080_DTR, PIN_8080_DEN, PIN_8080_ALE, PIN_8080_INTA,
+  PIN_8080_TEST, PIN_8080_READY, PIN_8080_RESET, PIN_8080_CLK, PIN_8080_INTR,
+  PIN_8080_NMI, PIN_LOW, PIN_HIGH, STATE_WAIT, STATE_RUNNING
 } from '../Constants';
 import { debug } from '../utils/Debug'
 
@@ -23,6 +32,7 @@ export default class CPU8086 extends CPU {
   constructor(config, system) {
     super();
 
+    this.cycleCount = 0;
     this.config = config;
     this.system = system;
     this.io = null;
@@ -67,7 +77,52 @@ export default class CPU8086 extends CPU {
      */
     this.state = STATE_HALT;
 
+    // Pins
+    this.pins = new Uint8Array(40);
+    this.pins[PIN_8080_AD0]   = PIN_LOW;
+    this.pins[PIN_8080_AD1]   = PIN_LOW;
+    this.pins[PIN_8080_AD2]   = PIN_LOW;
+    this.pins[PIN_8080_AD3]   = PIN_LOW;
+    this.pins[PIN_8080_AD4]   = PIN_LOW;
+    this.pins[PIN_8080_AD5]   = PIN_LOW;
+    this.pins[PIN_8080_AD6]   = PIN_LOW;
+    this.pins[PIN_8080_AD7]   = PIN_LOW;
+    this.pins[PIN_8080_A8 ]   = PIN_LOW;
+    this.pins[PIN_8080_A9 ]   = PIN_LOW;
+    this.pins[PIN_8080_A10]   = PIN_LOW;
+    this.pins[PIN_8080_A11]   = PIN_LOW;
+    this.pins[PIN_8080_A12]   = PIN_LOW;
+    this.pins[PIN_8080_A13]   = PIN_LOW;
+    this.pins[PIN_8080_A14]   = PIN_LOW;
+    this.pins[PIN_8080_A15]   = PIN_LOW;
+    this.pins[PIN_8080_A16]   = PIN_LOW;
+    this.pins[PIN_8080_A17]   = PIN_LOW;
+    this.pins[PIN_8080_A18]   = PIN_LOW;
+    this.pins[PIN_8080_A19]   = PIN_LOW;
+    this.pins[PIN_8080_S3 ]   = PIN_LOW;
+    this.pins[PIN_8080_S4 ]   = PIN_LOW;
+    this.pins[PIN_8080_S5 ]   = PIN_LOW;
+    this.pins[PIN_8080_S6 ]   = PIN_LOW;
+    this.pins[PIN_8080_SSO]   = PIN_HIGH;
+    this.pins[PIN_8080_MNMX]  = PIN_LOW;
+    this.pins[PIN_8080_RD ]   = PIN_HIGH;
+    this.pins[PIN_8080_HOLD]  = PIN_LOW;
+    this.pins[PIN_8080_HLDA]  = PIN_LOW;
+    this.pins[PIN_8080_WR ]   = PIN_HIGH;
+    this.pins[PIN_8080_IOM]   = PIN_LOW;
+    this.pins[PIN_8080_DTR]   = PIN_LOW;
+    this.pins[PIN_8080_DEN]   = PIN_HIGH;
+    this.pins[PIN_8080_ALE]   = PIN_LOW;
+    this.pins[PIN_8080_INTA]  = PIN_HIGH;
+    this.pins[PIN_8080_TEST]  = PIN_HIGH;
+    this.pins[PIN_8080_READY] = PIN_LOW;
+    this.pins[PIN_8080_RESET] = PIN_LOW;
+    this.pins[PIN_8080_CLK]   = PIN_LOW;
+    this.pins[PIN_8080_INTR]  = PIN_LOW;
+    this.pins[PIN_8080_NMI]   = PIN_LOW;
+
     // Memory
+    // TODO: move memory to system???
     this.mem8 = new Uint8Array(config.memorySize);
     this.mem16 = new Uint16Array(this.mem8.buffer);
 
@@ -610,15 +665,29 @@ export default class CPU8086 extends CPU {
    * Run a single CPU cycle
    */
   cycle () {
+    // If the CPU is in the HALT state return
+    if (this.state === STATE_HALT) {
+      return null;
+    }
+
+    // If the CPU is in the WAIT state check the TEST line (active low) and if
+    // active reset the state to running.
+    // NOTE: the documentation says the TEST line check only happens every 5
+    //       cycles. That's a pain, and I don't think it will matter, so I'm
+    //       not doing that.
+    if (this.state === STATE_WAIT) {
+      if (this.pins[PIN_8080_TEST] === PIN_LOW) {
+        this.state = STATE_RUNNING;
+      }
+      else return null;
+    }
+
     // Reset per-cycle values
     this.instIPInc = 0;
     this.addrIPInc = 0;
 
     // Decode the instruction
     this.decode();
-
-    // TODO: Remove this test code
-    // if (this.system.cycleCount > 6 && this.opcode.opcode_byte === 0xFA) this.config.debug = true;
 
     // Increase the instIPInc by the instruction base size
     if (this.prefixRepeatState === STATE_REP_NONE) {
@@ -630,11 +699,6 @@ export default class CPU8086 extends CPU {
       if (this.config.cycleBreak) debugger;
     }
 
-    // TODO: Remove this test code
-    // if (this.system.cycleCount === 612) {
-    //   let a = 0;
-    // }
-    // Run the instruction
     this. opcode.inst.run();
 
     this.prefixTermination();

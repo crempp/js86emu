@@ -5,14 +5,15 @@ import IO from "./IO";
 import SystemConfig from "./config/SystemConfig";
 import {
   regCS, regIP,
-  NS_PER_SEC, STATE_RUNNING, STATE_HALT,
+  STATE_RUNNING, STATE_HALT, STATE_WAIT,
+  NS_PER_SEC, PIN_8080_TEST, PIN_LOW,
 } from './Constants';
 import { SystemConfigException } from "./utils/Exceptions";
 import {loadBINAsync, seg2abs} from "./utils/Utils";
 import {hexString32} from "./utils/Debug";
 
 // We don't know the renderer or devices until runtime. Webpack is a static
-// compiler and thus can't require dynamically. Also I was having issues with
+// compiler and thus can't require dynamically. Also, I was having issues with
 // dynamic imports in node though it should work.
 // ...so import all renderers/device and look them up in the object at runtime.
 // Someday I will do more research to see if I can optimize this.
@@ -125,21 +126,12 @@ export default class System {
 
     this.prevTiming = hrtime();
 
-    let totalScans = 0;
-
     while (cyclesToRun === null || cyclesToRun-- > 0) {
 
       if (this.cycleCount === this.config.debugAtCycle ||
           seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP]) === this.config.debugAtIP)
       {
         this.config.debug = true;
-      }
-
-      // if (this.cpu.state === STATE_PAUSED) {
-      //   break;
-      // }
-      if (this.cpu.state === STATE_HALT) {
-        break;
       }
 
       // Do a cycle
@@ -156,7 +148,6 @@ export default class System {
       // Run video card scan
       if (this.videoSync !== 0 && this.cycleCount % this.videoSync === 0){
         this.videoSync = this.newVideoSync;
-        totalScans++;
         this.videoCard.scan();
       }
 

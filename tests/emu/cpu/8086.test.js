@@ -3,7 +3,7 @@ import SystemConfig from "../../../src/emu/config/SystemConfig";
 import {
   regAX, regAL, regBX, regCS, regCX, regDI, regDS, regES,
   regBP, regSI, regSS, regIP, regFlags,
-  FLAG_ZF_MASK, STATE_REP_NONE
+  FLAG_ZF_MASK, STATE_REP_NONE, STATE_WAIT, STATE_RUNNING, PIN_8080_TEST, PIN_LOW
 } from "../../../src/emu/Constants";
 
 function loadMem (data, from, cpu) {
@@ -44,8 +44,35 @@ test('memory respects maximum value (1,048,576 bytes)', () => {
   expect(cpu.mem16.length).toEqual(1048576/2);
 });
 
-test('instruction decodes', () => {
+test.skip('instruction decodes', () => {
 
+});
+
+describe('CPU States', () => {
+  let cpu;
+  beforeEach(() => {
+    cpu = new CPU8086(new SystemConfig({
+      memorySize: 1048576,
+      debug: false,
+    }));
+    cpu.reg16[regIP] = 0x00FF;
+    cpu.reg16[regCS] = 0x0000;
+    cpu.reg16[regDS] = 0x0300;
+    cpu.reg16[regES] = 0x0400;
+    cpu.reg16[regSS] = 0x0500;
+    cpu.reg16[regFlags] = 0x0000;
+  });
+
+  test('can leave wait state with test signal', () => {
+    cpu.instIPInc = 2;
+    cpu.state = STATE_WAIT;
+    cpu.mem8[0x00FF] = 0x90; // NOP
+
+    cpu.pins[PIN_8080_TEST] = PIN_LOW;
+    cpu.cycle();
+
+    expect(cpu.state).toBe(STATE_RUNNING);
+  });
 });
 
 describe('Repeat prefix', () => {
@@ -69,6 +96,7 @@ describe('Repeat prefix', () => {
         memorySize: 1048576,
         debug: false,
       }));
+      cpu.state = STATE_RUNNING;
 
       // dst 0x1020
       cpu.reg16[regES] = 0x0100;
@@ -210,6 +238,7 @@ describe('Repeat prefix', () => {
         memorySize: 1048576,
         debug: false,
       }));
+      cpu.state = STATE_RUNNING;
 
       // dst 0x1020
       cpu.reg16[regES] = 0x0100;
@@ -378,6 +407,7 @@ describe('Repeat prefix', () => {
         memorySize: 1048576,
         debug: false,
       }));
+      cpu.state = STATE_RUNNING;
 
       // dst 0x1020
       cpu.reg16[regES] = 0x0100;
@@ -533,6 +563,7 @@ describe('Segment prefix', () => {
       memorySize: 1048576,
       debug: false,
     }));
+    cpu.state = STATE_RUNNING;
     cpu.reg16[regIP] = 0x00FF;
     cpu.reg16[regCS] = 0x0000;
     cpu.reg16[regDS] = 0x0300;
@@ -619,7 +650,6 @@ describe('Segment prefix', () => {
   });
 });
 
-
 describe('Port IO', () => {
   let cpu;
   beforeEach(() => {
@@ -658,6 +688,7 @@ describe('Regressions', () => {
       memorySize: 1048576,
       debug: false,
     }));
+    cpu.state = STATE_RUNNING;
     cpu.reg16[regIP] = 0x00FF;
     cpu.reg16[regCS] = 0x0000;
     cpu.reg16[regDS] = 0x0300;

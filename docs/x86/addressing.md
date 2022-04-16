@@ -1,6 +1,7 @@
 # x86 Addressing
 
 ## Overview
+TODO: Switch overview to this or something similar http://www.cs.loyola.edu/~binkley/371/Encoding_Real_x86_Instructions.html
 
 The following is taken from X86-64 Instruction Encoding on [OSDev.org](https://wiki.osdev.org/X86-64_Instruction_Encoding#ModR.2FM)
 

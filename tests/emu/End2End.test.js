@@ -3,7 +3,7 @@ import path from 'path';
 import each from 'jest-each';
 import CPU8086 from '../../src/emu/cpu/8086';
 import SystemConfig from '../../src/emu/config/SystemConfig';
-import {regCS, regIP, regSP} from "../../src/emu/Constants";
+import {regCS, regIP, regSP, STATE_RUNNING} from "../../src/emu/Constants";
 
 describe('Code Golf', () => {
   let cpu, codeData;
@@ -23,6 +23,7 @@ describe('Code Golf', () => {
     cpu.reg16[regIP] = 0;
     cpu.reg16[regSP] = 0x100;
     cpu.reg16[regCS] = 0x0000;
+    cpu.state = STATE_RUNNING;
 
     for (let i = 0; i < codeData.length; i++) {
       cpu.mem8[i] = codeData[i];

@@ -258,3 +258,7 @@ Investigate using Electron for running natively
 * Flesh out documentation and possibly use Hugo
 * Use github project
 * When interupts are done update IDIV and tests
+* Move memory to system (currently in CPU)
+* TODO: Switch addressing documentation overview to this or something similar http://www.cs.loyola.edu/~binkley/371/Encoding_Real_x86_Instructions.html
+
+
