@@ -194,10 +194,10 @@ Investigate using Electron for running natively
 	* √ CLI
 	* √ STI
 * external sync
-	* o HLT
-	*   WAIT
-	*   ESC
-	*   LOCK
+	* √ HLT
+	* √ WAIT
+	*   ESC (won't implement now)
+	*   LOCK (won't implement now)
 * no operation
 	* √ NOP
 
@@ -260,5 +260,4 @@ Investigate using Electron for running natively
 * When interupts are done update IDIV and tests
 * Move memory to system (currently in CPU)
 * TODO: Switch addressing documentation overview to this or something similar http://www.cs.loyola.edu/~binkley/371/Encoding_Real_x86_Instructions.html
-
-
+* Deep copy/override of SystemConfig, currently must define entire subtree of options or errors will occur

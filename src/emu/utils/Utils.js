@@ -1,5 +1,6 @@
 import { PNG } from 'pngjs';
 import fs from 'fs';
+import promises from 'fs'
 import { regIP, regCS } from '../Constants';
 
 /**
@@ -59,8 +60,8 @@ export function isWordSigned(value) {
  * @return {number} Signed integer conversion
  */
 export function twosComplement2IntByte (value) {
-  let negative = ((value >> 7) === 1);
-  return negative ? (-1 * (value >> 7)) * ((value ^ 0xFF) + 1) : value;
+  let negative = ((value >>> 7) === 1);
+  return negative ? (-1 * (value >>> 7)) * ((value ^ 0xFF) + 1) : value;
 }
 
 /**
@@ -73,8 +74,8 @@ export function twosComplement2IntByte (value) {
  * @return {number} Signed integer conversion
  */
 export function twosComplement2IntWord (value) {
-  let negative = ((value >> 15) === 1);
-  return negative ? (-1 * (value >> 15)) * ((value ^ 0xFFFF) + 1) : value;
+  let negative = ((value >>> 15) === 1);
+  return negative ? (-1 * (value >>> 15)) * ((value ^ 0xFFFF) + 1) : value;
 }
 
 /**
@@ -87,8 +88,8 @@ export function twosComplement2IntWord (value) {
  * @return {number} Signed integer conversion
  */
 export function twosComplement2IntDouble (value) {
-  let negative = ((value >> 31) === 1);
-  return negative ? (-1 * (value >> 31)) * ((value ^ 0xFFFFFFFF) + 1) : value;
+  // Since this is a 32-bit number we can use a trick.
+  return (value & 0xFFFFFFFF) >> 0;
 }
 
 /**
@@ -123,8 +124,8 @@ export function intWord2TwosComplement (value) {
  * @returns {number} The two's complement representation of the negative value.
  */
 export function intDouble2TwosComplement (value) {
-  if (value < 0) value = value + 1 + 0xFFFFFFFF;
-  return value & 0xFFFFFFFF;
+  // Since this is a 32-bit number we can use a trick
+  return value >>> 0;
 }
 
 /**
@@ -149,8 +150,8 @@ export function signExtend16(value) {
  * @return {number} Extended twos complement word value
  */
 export function signExtend32(value) {
-  if ( value <= 0xFFFF && 1 === ((value & 0x8000) >> 15)) {
-    return 0xFFFF0000 | value;
+  if ( value <= 0xFFFF && 1 === ((value & 0x8000) >>> 15)) {
+    return (0xFFFF0000 | value) >>> 0;
   }
   else {
     return value;
@@ -166,7 +167,9 @@ export function signExtend32(value) {
 export function loadPNGAsync (path) {
   return new Promise(resolve => {
     fs.readFile(path, (fileError, data) => {
-      if (fileError) throw fileError;
+      if (fileError) {
+        throw fileError;
+      }
       new PNG({ filterType: -1 }).parse( data, (pngError, png) => {
         if (pngError) throw pngError;
         resolve(png);
@@ -184,8 +187,10 @@ export function loadPNGAsync (path) {
  */
 export function loadBINAsync (path) {
   return new Promise(resolve => {
-    fs.readFile(path, (e, data) => {
-      if (e) throw e;
+    fs.readFile(path, (fileError, data) => {
+      if (fileError){
+        throw fileError;
+      }
       resolve(new Uint8Array(data));
     });
   });
@@ -204,4 +209,27 @@ export function BrowserFSAsync (config) {
       resolve();
     });
   });
+}
+
+
+/**
+ * Assign any defined elements of sources to the target, overriding existing
+ * values and adding missing values. The sources are processed in the order
+ * provided.
+ *
+ * @param target
+ * @param sources
+ * @returns {*}
+ */
+export function assign (target, ...sources) {
+  sources.forEach(source => {
+    Object.keys(source).forEach(key => {
+      const s_val = source[key]
+      const t_val = target[key]
+      target[key] = t_val && s_val && typeof t_val === 'object' && typeof s_val === 'object'
+          ? assign(t_val, s_val)
+          : s_val
+    })
+  })
+  return target
 }

@@ -84,18 +84,16 @@ export default class System {
    * @return {Promise<void>}
    */
   async boot () {
-    // Clear memory
-
     // Load system BIOS or blob
     if (this.config.programBlob) {
       console.log(`Loading program blob ${this.config.programBlob.file}...`);
       let bin = await loadBINAsync(this.config.programBlob.file);
       this.loadMem(bin, this.config.programBlob.addr);
     }
-    else {
+    else if (typeof this.config.bios.file === 'string') {
       console.log("Loading BIOS...");
       // Load BIOS file
-      let biosPath = `${this.config.bios.biosPath}${this.config.bios.file}`;
+      let biosPath = `${this.config.bios.path}${this.config.bios.file}`;
       let bios = await loadBINAsync(biosPath);
       // Calculate start address for the BIOS
       // Currently hard-coded for 8086

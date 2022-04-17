@@ -19,8 +19,9 @@ Demo : [http://js86emu.chadrempp.com](http://js86emu.chadrempp.com)
 
 Current Progress
 
-* Support for all documented 8086 instructions and addressing modes
+* Support for all documented 8086/88 instructions and addressing modes (except LOCK and ESC)
 * Functioning stack
+* Software Interupts
 * Basic debugging logging
 * 80x25 MDA text mode graphics using code page 437 font set
 * Video renderer support for canvas, PNG and binary output

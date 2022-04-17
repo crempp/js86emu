@@ -39,8 +39,8 @@ export default class Operations {
    *
    * Modifies flags: AF, CF
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   aaa (dst, src) {
     let lsb = this.cpu.reg8[regAL] & 0x0F;
@@ -67,10 +67,10 @@ export default class Operations {
    * and OF is undefined following execution of AAD.
    *   - [1] p.2-37
    *
-   * Modifies flags: ?
+   * Modifies flags: None
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   aad (dst, src) {
     // Multiplies AH by 10 and adds it to AL and sets AH to 0
@@ -88,10 +88,10 @@ export default class Operations {
    * execution of AAM.
    *   - [1] p.2-37
    *
-   * Modifies flags: ?
+   * Modifies flags: None
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   aam (dst, src) {
     this.cpu.reg8[regAH] = ~~(this.cpu.reg8[regAL] / 10);
@@ -112,8 +112,8 @@ export default class Operations {
    * http://service.scs.carleton.ca/sivarama/asm_book_web/Instructor_copies/ch11_bcd.pdf
    * https://stackoverflow.com/a/24093050/1436323
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   aas (dst, src) {
     let lsb = this.cpu.reg8[regAL] & 0x0F;
@@ -298,10 +298,10 @@ export default class Operations {
    * byte division.
    *   - [1] p.2-38
    *
-   * Modifies flags: ?
+   * Modifies flags: None
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   cbw (dst, src) {
     this.cpu.reg16[regAX] = signExtend16(this.cpu.reg8[regAL]);
@@ -524,10 +524,10 @@ export default class Operations {
    * performing word division.
    *  - [1] p.2-38
    *
-   * Modifies flags: ?
+   * Modifies flags: None
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   cwd (dst, src) {
     if (this.cpu.reg16[regAX] >> 15 === 1) {
@@ -581,10 +581,10 @@ export default class Operations {
    * ZF; the content of OF is undefined following execution of DAS.
    *  - [1] p.2-36
    *
-   * Modifies flags: ?
+   * Modifies flags: AF, CF
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   das (dst, src) {
     let lsb = this.cpu.reg8[regAL] & 0x0F;
@@ -717,7 +717,17 @@ export default class Operations {
   }
 
   /**
-   * ESC
+   * NOT IMPLEMENTED, part of multiprocessing.
+   *
+   * The ESC (escape) instruction provides a way for another processor to
+   * obtain an instruction and/or a memory operand from an 8086/8088 program.
+   * When used in conjunction with WAIT and TEST, ESC can initiate a
+   * "subroutine" that executes concurrently in another processor
+   *
+   * Modifies flags: NONE
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   esc (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
@@ -764,7 +774,7 @@ export default class Operations {
    * Modifies flags: None
    *
    * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} src NOT USED
    */
   idiv (dst, src) {
     let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
@@ -822,7 +832,7 @@ export default class Operations {
    * Modifies flags: CF, OF
    *
    * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} src NOT USED
    */
   imul (dst, src) {
     let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
@@ -896,7 +906,7 @@ export default class Operations {
    * DAA). INC updates AF, OF, PF, SF and ZF; it does not affect CF.
    *   - [1] p.2-35
    *
-   * Modifies flags: ?
+   * Modifies flags: None
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
@@ -1734,6 +1744,23 @@ export default class Operations {
     this.cpu.reg16[regES] = srcVal[0];
   }
 
+  /**
+   * NOT IMPLEMENTED, part of multiprocessing.
+   *
+   * When configured in maximum mode, the 8086 and 8088 provide the LOCK (bus
+   * lock) signal. The BIU activates LOCK when the EU executes the one-byte
+   * LOCK prefix instruction. The LOCK signal remains active throughout
+   * execution of the instruction that follows the LOCK prefix. Interrupts are
+   * not affected by the LOCK prefix. If another processor requests use of the
+   * bus (via the request! grant lines, which are discussed shortly), the CPU
+   * records the request, but does not honor it until execution of the locked
+   * instruction has been completed.
+   *
+   * Modifies flags: NONE
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   lock (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -3114,8 +3141,8 @@ export default class Operations {
    *
    * Modifies flags: None
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   xlat (dst, src) {
     let tableAddr = seg2abs(this.cpu.reg16[regDS], this.cpu.reg16[regBX]);

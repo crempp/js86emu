@@ -1,7 +1,16 @@
 import CPU8086 from '../../src/emu/cpu/8086';
 import Addressing from '../../src/emu/cpu/Addressing';
 import SystemConfig from '../../src/emu/config/SystemConfig';
-import { seg2abs } from "../../src/emu/utils/Utils";
+import {
+  assign,
+  intByte2TwosComplement, intDouble2TwosComplement, intWord2TwosComplement,
+  isByteSigned,
+  isWordSigned,
+  seg2abs,
+  segIP, signExtend16, signExtend32,
+  twosComplement2IntByte, twosComplement2IntDouble,
+  twosComplement2IntWord
+} from "../../src/emu/utils/Utils";
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
   regAX, regBX, regCX, regDX,
@@ -86,14 +95,144 @@ describe('seg2abs() Segment to absolute memory address conversion', () => {
   });
 });
 
-describe.skip('segIP()', () => {});
+describe('segIP()', () => {
+  let addr, cpu;
 
-describe.skip('twosComplement2IntByte()', () => {});
+  beforeEach(() => {
+    cpu = new CPU8086(new SystemConfig({
+      memory: 1024
+    }));
+    addr = new Addressing(cpu);
+    cpu.reg16[regCS] = 0x0000;
+    cpu.reg16[regDS] = 0x0000;
+    cpu.reg16[regES] = 0x0000;
+    cpu.reg16[regSS] = 0x0000;
+  });
 
-describe.skip('twosComplement2IntWord()', () => {});
+  test('segment calculation is correct', () => {
+    cpu.reg16[regCS] = 0x1234;
+    cpu.reg16[regIP] = 0x5678;
 
-describe('signExtend16()', () => {
-  test('[regression] sign extend 0x90', () => {
+    let result = segIP(cpu);
 
+    expect(result).toBe(0x179B8);
+  });
+  test('segment calculation zero', () => {
+    cpu.reg16[regCS] = 0x0000;
+    cpu.reg16[regIP] = 0x0000;
+
+    let result = segIP(cpu);
+
+    expect(result).toBe(0x00000);
+  });
+  test('segment calculation top of range', () => {
+    cpu.reg16[regCS] = 0xFFFF;
+    cpu.reg16[regIP] = 0xFFFF;
+
+    let result = segIP(cpu);
+
+    expect(result).toBe(0x10FFEF);
+  });
+
+});
+
+describe('is signed functions', () => {
+  test('signed byte is is signed', () => {
+    expect(isByteSigned(0xFF)).toBe(true);
+  });
+  test('unsigned byte is is not signed', () => {
+    expect(isByteSigned(0x01)).toBe(false);
+  });
+  test('signed word is is signed', () => {
+    expect(isWordSigned(0xFFFF)).toBe(true);
+  });
+  test('unsigned word is is not signed', () => {
+    expect(isWordSigned(0x0001)).toBe(false);
+  });
+});
+
+describe('twosComplement2Int', () => {
+  test('positive byte converts (twosComplement2IntByte)', () => {
+    expect(twosComplement2IntByte(0x79)).toBe(121);
+  });
+  test('negative byte converts (twosComplement2IntByte)', () => {
+    expect(twosComplement2IntByte(0xF9)).toBe(-7);
+  });
+  test('positive word converts (twosComplement2IntWord)', () => {
+    expect(twosComplement2IntWord(0x7979)).toBe(31097);
+  });
+  test('negative word converts (twosComplement2IntWord)', () => {
+    expect(twosComplement2IntWord(0xF979)).toBe(-1671);
+  });
+  test('positive double converts (twosComplement2IntDouble)', () => {
+    expect(twosComplement2IntDouble(0x79797979)).toBe(2038004089);
+  });
+  test('negative double converts (twosComplement2IntDouble)', () => {
+    expect(twosComplement2IntDouble(0xF9797979)).toBe(-109479559);
+  });
+});
+
+describe('int2TwosComplement', () => {
+  test('positive 2s compliment byte converts', () => {
+    expect(intByte2TwosComplement(121)).toBe(0x79);
+  });
+  test('negative 2s compliment byte converts', () => {
+    expect(intByte2TwosComplement(-7)).toBe(0xF9);
+  });
+  test('positive 2s compliment word converts', () => {
+    expect(intWord2TwosComplement(31097)).toBe(0x7979);
+  });
+  test('negative 2s compliment word converts', () => {
+    expect(intWord2TwosComplement(-1671)).toBe(0xF979);
+  });
+  test('positive 2s compliment double converts', () => {
+    expect(intDouble2TwosComplement(2038004089)).toBe(0x79797979);
+  });
+  test('negative 2s compliment double converts', () => {
+    expect(intDouble2TwosComplement(-109479559)).toBe(0xF9797979);
+  });
+});
+
+describe('signExtend', () => {
+  test('extends a negative byte to a word', () => {
+    expect(signExtend16(0x90)).toBe(0xFF90);
+  });
+  test('extends a positive byte to a word', () => {
+    expect(signExtend16(0x50)).toBe(0x0050);
+  });
+  test('extends a negative word to a double', () => {
+    expect(signExtend32(0x9000)).toBe(0xFFFF9000);
+  });
+  test('extends a positive word to a double', () => {
+    expect(signExtend32(0x5000)).toBe(0x00005000);
+  });
+});
+
+describe('assign', () => {
+  test('object assignment deeply overrides and creates keys from multiple sources', () => {
+    const target = {
+      a: { x: 0 },
+      b: { y: { m: 0, n: 1      } },
+      c: { z: { i: 0, j: 1      } },
+      d: null,
+    }
+    const source1 = {
+      a: {},
+      b: { y: {       n: 0      } },
+      e: null,
+    }
+    const source2 = {
+      c: { z: {            k: 2 } },
+      d: {},
+    }
+    const expected = {
+      a: { x: 0 },
+      b: { y: { m: 0, n: 0      } },
+      c: { z: { i: 0, j: 1, k: 2 } },
+      d: {},
+      e: null,
+    }
+
+    expect(assign(Object.create(target), source1, source2)).toStrictEqual(expected);
   });
 });

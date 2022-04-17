@@ -5,6 +5,7 @@
  *
  */
 import { SystemConfigException } from '../utils/Exceptions';
+import {assign} from "../utils/Utils";
 
 const DEFAULTS = {
   memorySize: 0x100000,
@@ -32,6 +33,7 @@ const DEFAULTS = {
     memorySize:   4 * 1024,
     memoryStart:  0xB8000,
     verticalSync: 50,       // Hertz
+    fontPath:     "files/fonts/",
   },
   renderer: {
     class:   'RendererCanvas',
@@ -54,14 +56,7 @@ const DEFAULTS = {
 export default class SystemConfig {
 
   constructor(initial) {
-    // If an initial set of config values are given then use them
-    if (typeof initial === 'object') {
-      for (let key in initial) {
-        if (key in DEFAULTS) {
-          this[key] = initial[key];
-        }
-      }
-    }
+    assign(DEFAULTS, initial);
 
     // Use any default values not already sey by initial values provided
     for (let key in DEFAULTS) {
@@ -69,9 +64,6 @@ export default class SystemConfig {
     }
 
     this.isNode = (typeof window === 'undefined');
-
-    this.video.fontPath = "files/fonts/";
-    this.bios.biosPath = "files/bios-roms/";
   }
 
   validate() {

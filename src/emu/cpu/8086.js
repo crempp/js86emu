@@ -164,6 +164,8 @@ export default class CPU8086 extends CPU {
      * Wrapper class for instructions. I don't think I can move this to a
      * module because I need to close over oper and addr for binding and I
      * don't want to make the signature messy by passing them in.
+     *
+     * But this makes testing really hard
      */
     class inst {
       constructor(op, baseSize, addrSize, dst, src) {
@@ -585,7 +587,7 @@ export default class CPU8086 extends CPU {
     this.opcode["reg"]             = null;
     this.opcode["rm"]              = null;
     this.opcode["inst"]            = instruction;
-    this.opcode["string"]          = "";
+    this.opcode["string"]          = ""
     this.opcode["addrSize"]        = null;
     this.opcode["isGroup"]         = (instruction instanceof Array);
 

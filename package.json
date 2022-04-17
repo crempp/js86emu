@@ -13,6 +13,7 @@
     "browserfs": "^2.0.0",
     "bson": "^4.2.2",
     "compression": "^1.7.4",
+    "core-js-pure": "^3.22.0",
     "next": "^12.1.0",
     "pngjs": "^6.0.0",
     "react": "^17.0.1",
