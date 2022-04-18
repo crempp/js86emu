@@ -60,10 +60,7 @@ async function runEmulation () {
   system.loadMem(instructions, 0xFFFF0);
 
   console.log("running...");
-  system.run(4000000);
-
-  // force a video scan at the end of the run
-  system.videoCard.scan();
+  await system.run(4000000);
 }
 
 // This forces console.log to write, without this the process will usually exit

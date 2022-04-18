@@ -28,7 +28,6 @@ export default class IO {
     }
     else {
       this.availableDevices = {
-        null: new NullDevice(config, this.system),
         "DMA8237": new DMA8237(config, this.system),
         "PIC8259": new PIC8259(config, this.system),
         "VideoMDA": new VideoMDA(config, this.system),
@@ -36,6 +35,8 @@ export default class IO {
         "TestDevice": new TestDevice(config, this.system),
       };
     }
+    // always have the null device available
+    this.availableDevices[null] = new NullDevice(config, this.system);
 
     this.devices = [];
     this.ports = new Array(this.config.ports.size);
@@ -59,7 +60,7 @@ export default class IO {
           throw new InvalidDeviceException(`Unknown device - ${rangeConfig.device}`);
         }
       }
-      this.registerDevice(device);
+      this.registerDevice(rangeConfig.device, device);
 
       if (rangeConfig.range.length === 1) {
         this.registerPort(rangeConfig.range[0], rangeConfig.dir, device);
@@ -79,31 +80,30 @@ export default class IO {
   }
 
   registerPort (port, rw, device) {
-    this.ports[port] = device
+    this.ports[port] = device;
   }
 
   unRegisterPort(port) {
-    this.ports[port] = new this.availableDevices["NULL"](this.config);
+    this.ports[port] = this.availableDevices[null];
   }
 
-  registerDevice(device) {
-    if (!(device in this.devices)){
-      this.devices.push(device);
+  registerDevice(name, device) {
+    if (!(name in this.devices)){
+      this.devices[name] = device;
     }
   }
 
   unRegisterDevice(device) {
-    let index = this.devices.indexOf(device);
-    if (index !== -1) {
-      this.devices.splice(index, 1);
-    }
+    delete this.devices[name];
   }
 
   write(port, value, size) {
+    // TODO: Check for undefined or null on port and throw (or interrupt)
     this.ports[port].write(port, value, size);
   }
 
   read(port, size) {
+    // TODO: Check for undefined or null on port and throw (or interrupt)
     return this.ports[port].read(port, size);
   }
 

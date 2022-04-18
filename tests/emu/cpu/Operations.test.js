@@ -1621,7 +1621,7 @@ describe('Operation methods', () => {
 
   describe('in', () => {
     test('IN AL, 0xF8', () => {
-      io.devices[0].buffer8[0xF8] = 0xCC;
+      io.devices["TestDevice"].buffer8[0xF8] = 0xCC;
       cpu.mem8[0x00FF] = 0xE4;
       cpu.mem8[0x0100] = 0xF8;
       cpu.instIPInc = 1;
@@ -1631,7 +1631,7 @@ describe('Operation methods', () => {
       expect(cpu.reg8[regAL]).toBe(0xCC);
     });
     test('IN AX, 0x4D', () => {
-      io.devices[0].buffer16[0x4D] = 0xBBCC;
+      io.devices["TestDevice"].buffer16[0x4D] = 0xBBCC;
       cpu.mem8[0x00FF] = 0xE5;
       cpu.mem8[0x0100] = 0x4D;
       cpu.instIPInc = 1;
@@ -1641,7 +1641,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regAX]).toBe(0xBBCC);
     });
     test('IN AL, DX', () => {
-      io.devices[0].buffer8[0xF84E] = 0xFF;
+      io.devices["TestDevice"].buffer8[0xF84E] = 0xFF;
       cpu.reg16[regDX] = 0xF84E;
       cpu.mem8[0x00FF] = 0xEC;
       cpu.instIPInc = 1;
@@ -1651,7 +1651,7 @@ describe('Operation methods', () => {
       expect(cpu.reg8[regAL]).toBe(0xFF);
     });
     test('IN AX, DX', () => {
-      io.devices[0].buffer16[0xF84E] = 0xBBCC;
+      io.devices["TestDevice"].buffer16[0xF84E] = 0xBBCC;
       cpu.reg16[regDX] = 0xF84E;
       cpu.mem8[0x00FF] = 0xED;
       cpu.instIPInc = 1;
@@ -3196,7 +3196,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.out(addr.Ib.bind(addr), addr.AL.bind(addr));
 
-      expect(io.devices[0].buffer8[0xF8]).toBe(0xBB);
+      expect(io.devices["TestDevice"].buffer8[0xF8]).toBe(0xBB);
     });
     test('OUT 0xF8, AX', () => {
       cpu.reg16[regAX] = 0xBBCC;
@@ -3206,7 +3206,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.out(addr.Ib.bind(addr), addr.AX.bind(addr));
 
-      expect(io.devices[0].buffer16[0xF8]).toBe(0xBBCC);
+      expect(io.devices["TestDevice"].buffer16[0xF8]).toBe(0xBBCC);
     });
     test('OUT DX, AL', () => {
       cpu.reg8[regAL] = 0xBB;
@@ -3216,7 +3216,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.out(addr.DX.bind(addr), addr.AL.bind(addr));
 
-      expect(io.devices[0].buffer8[0xF84E]).toBe(0xBB);
+      expect(io.devices["TestDevice"].buffer8[0xF84E]).toBe(0xBB);
     });
     test('OUT DX, AX', () => {
       cpu.reg16[regAX] = 0xBBCC;
@@ -3226,7 +3226,7 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.out(addr.DX.bind(addr), addr.AX.bind(addr));
 
-      expect(io.devices[0].buffer16[0xF84E]).toBe(0xBBCC);
+      expect(io.devices["TestDevice"].buffer16[0xF84E]).toBe(0xBBCC);
     });
   });
 

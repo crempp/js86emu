@@ -29,8 +29,10 @@ export default class System {
     this.immediateHandle = null;
     this.cyclesToRun = null;
     this.io = null;
-
+    
+    // TODO: Figure out what to do with these
     this.videoROMAddress = [0xC000, 0x0000]; // 0x000C0000
+    this.NMIMasked = false; // update this with this.io.devices["NMIMaskRegister"].isMasked();
 
     // Create CPU
     this.cpu = new CPU8086(config, this);

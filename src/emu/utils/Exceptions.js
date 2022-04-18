@@ -71,6 +71,19 @@ export class InvalidDeviceException extends Error {
 }
 
 // This stands in for an error interrupt until interrupts are implemented
+export class PortAccessException extends Error {
+  constructor(...params) {
+    super(...params);
+
+    // a workaround to make `instanceof` work in ES5
+    this.constructor = PortAccessException;
+    this.__proto__   = PortAccessException.prototype;
+
+    Error.captureStackTrace(this, PortAccessException);
+  }
+}
+
+// This stands in for an error interrupt until interrupts are implemented
 export class TemporaryInterruptException extends Error {
   constructor(...params) {
     super(...params);
