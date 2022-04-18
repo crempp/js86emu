@@ -69,10 +69,11 @@
  * 000E	w	DMA clear mask registerPort
  * 000F	w	DMA write mask registerPort
  */
+import Device from "./Device";
 
-export default class DMA8237 {
-  constructor (config) {
-    this.config = config;
+export default class DMA8237 extends Device{
+  constructor (config, system) {
+    super(config, system);
 
     // this.io.registerPort(0x00, 'rw', this.temp);
     // this.io.registerPort(0x01, 'rw', this.temp);
@@ -90,6 +91,10 @@ export default class DMA8237 {
     // this.io.registerPort(0x0D, 'rw', this.readTempClearMasterRegister);
     // this.io.registerPort(0x0E, 'w',  this.clearMaskRegister);
     // this.io.registerPort(0x0F, 'r',  this.writeMaskRegister);
+  }
+
+  boot() {
+    console.log(`  BOOT device: ${this.constructor.name}`);
   }
 
   write(port, value, size) {

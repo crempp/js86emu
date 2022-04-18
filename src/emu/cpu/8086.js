@@ -708,13 +708,4 @@ export default class CPU8086 extends CPU {
     // Move the IP
     this.reg16[regIP] += this.instIPInc + this.addrIPInc;
   }
-
-  /**
-   * Assign the IO system to the CPU
-   *
-   * @param io IO system for CPU
-   */
-  connectIO(io) {
-    this.io = io;
-  }
 }

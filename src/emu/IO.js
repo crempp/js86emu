@@ -1,9 +1,41 @@
 import {InvalidDeviceException} from "./utils/Exceptions";
 
+// We don't know the renderer or devices until runtime. Webpack is a static
+// compiler and thus can't require dynamically. Also, I was having issues with
+// dynamic imports in node though it should work.
+// ...so import all renderers/device and look them up in the object at runtime.
+// Someday I will do more research to see if I can optimize this.
+import NullDevice from "./devices/NullDevice";
+import DMA8237 from "./devices/DMA8237";
+import PIC8259 from "./devices/PIC8259";
+import VideoMDA from "./devices/VideoMDA";
+import NMIMaskRegister from "./devices/NMIMaskRegister";
+import TestDevice from "./devices/TestDevice";
+
+
+// https://bochs.sourceforge.io/techspec/PORTS.LST
+/**
+ * The IO system creates an array mapping port numbers with device in
+ */
 export default class IO {
-  constructor (config, availableDevices) {
+  constructor (config, system, availableDevices = null) {
     this.config = config;
-    this.availableDevices = availableDevices;
+    this.system = system;
+
+    // I think this must happen after creating the CPU
+    if (availableDevices !== null) {
+      this.availableDevices = availableDevices
+    }
+    else {
+      this.availableDevices = {
+        null: new NullDevice(config, this.system),
+        "DMA8237": new DMA8237(config, this.system),
+        "PIC8259": new PIC8259(config, this.system),
+        "VideoMDA": new VideoMDA(config, this.system),
+        "NMIMaskRegister": new NMIMaskRegister(config, this.system),
+        "TestDevice": new TestDevice(config, this.system),
+      };
+    }
 
     this.devices = [];
     this.ports = new Array(this.config.ports.size);
@@ -37,6 +69,12 @@ export default class IO {
           this.registerPort(j, rangeConfig.dir, device);
         }
       }
+    }
+  }
+
+  boot() {
+    for(let i = 0; i < this.devices.length; i++) {
+      this.devices[i].boot();
     }
   }
 

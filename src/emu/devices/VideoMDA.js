@@ -1,10 +1,17 @@
 import { loadPNGAsync } from "../utils/Utils";
+import Card from "./Card";
+import RendererNoop from "../renderers/RendererNoop";
+import RendererBin from "../renderers/RendererBin";
+import RendererCanvas from "../renderers/RendererCanvas";
+import RendererPNG from "../renderers/RendererPNG";
+import {SystemConfigException} from "../utils/Exceptions";
 
-export default class VideoMDA {
-  constructor (system, renderer, config) {
-    this.system          = system;
+export default class VideoMDA extends Card{
+  constructor(config, system) {
+    super(config, system);
+
     this.mem8            = system.cpu.mem8;
-    this.renderer        = renderer;
+    this.renderer        = null;
     this.config          = config;
     this.verticalSync    = config.video.verticalSync;
     this.memStart        = config.video.memoryStart;
@@ -17,6 +24,14 @@ export default class VideoMDA {
     this.textModeRows    = 25;
     this.use_attribute_bit = false;
 
+    this.AVAILABLE_RENDERERS = {
+      "RendererNoop":   RendererNoop,
+      "RendererBin":    RendererBin,
+      "RendererCanvas": RendererCanvas,
+      "RendererPNG":    RendererPNG,
+    };
+
+    // TODO: Move this to a config/definition file
     this.fontFiles = [
       {
         "file"       : "mda_cp_437",
@@ -30,7 +45,19 @@ export default class VideoMDA {
     ];
     this.selectedFont = this.fontFiles[0];
 
-    renderer.setSize(this.screenWidth, this.screenHeight);
+    // Create video and renderer
+    if (this.config.isNode && this.config.renderer.class === 'RendererCanvas') {
+      throw new SystemConfigException(`RendererCanvas is not a valid renderer when running in nodejs`);
+    }
+    if (!(this.config.renderer.class in this.AVAILABLE_RENDERERS)) {
+      throw new SystemConfigException(`${config.renderer.class} is not a valid renderer`);
+    }
+    this.renderer = new this.AVAILABLE_RENDERERS[config.renderer.class](config.renderer.options);
+    this.renderer.setSize(this.screenWidth, this.screenHeight);
+  }
+
+  boot() {
+    console.log(`  BOOT device: ${this.constructor.name}`);
   }
 
   /**

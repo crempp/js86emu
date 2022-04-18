@@ -59,7 +59,7 @@ export default class extends Component {
     await system.boot();
 
     console.log("running...");
-    system.run();
+    system.run(100000); // Temporarily put a max cycle in
 
     // force a video scan at the end of the run
     system.videoCard.scan();

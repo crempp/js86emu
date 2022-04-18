@@ -1,7 +1,7 @@
 import Device from "./Device";
 
-export default class NullDevice extends Device{
-  constructor (config, system) {
+export default class NMIMaskRegister extends Device {
+  constructor(config, system) {
     super(config, system);
   }
 
@@ -15,7 +15,7 @@ export default class NullDevice extends Device{
     }
   }
 
-  read(port, size){
+  read(port, size) {
     let value = 0xFF;
     if (this.config.debug) {
       console.log(`  READ device: ${this.constructor.name} port: ${port}, value:${value}, size${size}`);
@@ -23,9 +23,11 @@ export default class NullDevice extends Device{
     return value;
   }
 
-  deviceCycle(){
+  deviceCycle() {
     if (this.config.debug) {
       console.log(`  CYCLE device: ${this.constructor.name}`);
     }
   }
 }
+
+

@@ -896,7 +896,7 @@ export default class Operations {
 
     let size = this.cpu.opcode.addrSize;
 
-    let value = this.cpu.io.read(srcVal, size);
+    let value = this.cpu.system.io.read(srcVal, size);
     dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr, value);
   }
 
@@ -2163,7 +2163,7 @@ export default class Operations {
 
     let size = this.cpu.opcode.addrSize;
 
-    this.cpu.io.write(dstVal, srcVal, size);
+    this.cpu.system.io.write(dstVal, srcVal, size);
   }
 
   /**
@@ -2643,7 +2643,7 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   sahf (dst, src) {
-    this.cpu.reg16[regFlags] = (this.cpu.reg16[regFlags] | this.cpu.reg8[regAH]) & USED_FLAG_MASK;
+    this.cpu.reg16[regFlags] = (this.cpu.reg16[regFlags] & 0xFF00) | ((this.cpu.reg8[regAH] & USED_FLAG_MASK) & 0xFF);
   }
 
   /**

@@ -11,13 +11,11 @@ function HomePage() {
         <title>js86emu</title>
       </Head>
       <div>
-        {/*<Emulator config={IBM5150} />*/}
-        <Emulator config={CodeGolf} />
+        <Emulator config={IBM5150} />
+        {/*<Emulator config={CodeGolf} />*/}
       </div>
     </Layout>
   )
 }
-
-
 
 export default HomePage

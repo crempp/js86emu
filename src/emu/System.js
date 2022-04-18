@@ -1,7 +1,6 @@
 import hrtime from 'browser-process-hrtime';
 import 'setimmediate';
 import CPU8086 from "./cpu/8086";
-import VideoMDA from "./video/VideoMDA";
 import IO from "./IO";
 import SystemConfig from "./config/SystemConfig";
 import {
@@ -12,20 +11,6 @@ import {
 import { SystemConfigException } from "./utils/Exceptions";
 import {loadBINAsync, seg2abs} from "./utils/Utils";
 import {hexString32} from "./utils/Debug";
-
-// We don't know the renderer or devices until runtime. Webpack is a static
-// compiler and thus can't require dynamically. Also, I was having issues with
-// dynamic imports in node though it should work.
-// ...so import all renderers/device and look them up in the object at runtime.
-// Someday I will do more research to see if I can optimize this.
-import RendererBin from './video/renderers/RendererBin';
-import RendererCanvas from './video/renderers/RendererCanvas';
-import RendererPNG from './video/renderers/RendererPNG';
-import RendererNoop from "./video/renderers/RendererNoop";
-import NullDevice from "./devices/NullDevice";
-import DMA8237 from "./devices/DMA8237";
-import PIC8259 from "./devices/PIC8259";
-import TestDevice from "./devices/TestDevice";
 
 export default class System {
   constructor (config) {
@@ -41,46 +26,21 @@ export default class System {
     this.videoSyncCycles = config.video.syncCycles;
     this.newVideoSyncCycles = config.video.syncCycles;
     this.runningHz = 0;
-    // this.intervalID = null;
     this.immediateHandle = null;
     this.cyclesToRun = null;
-
-    this.RENDERERS = {
-      "RendererNoop":   RendererNoop,
-      "RendererBin":    RendererBin,
-      "RendererCanvas": RendererCanvas,
-      "RendererPNG":    RendererPNG,
-    };
-
-    this.DEVICES = {
-      null:         new NullDevice(config),
-      "DMA8237":    new DMA8237(config),
-      "PIC8259":    new PIC8259(config),
-      "VideoMDA":   null, // Set this during setup
-      "TestDevice": new TestDevice(config)
-    };
+    this.io = null;
 
     this.videoROMAddress = [0xC000, 0x0000]; // 0x000C0000
 
     // Create CPU
     this.cpu = new CPU8086(config, this);
 
-    // Create video and renderer
-    // TODO: Make this a device, move setup code to Video class, move to devices and IO system
-    if (config.isNode && config.renderer.class === 'RendererCanvas') {
-      throw new SystemConfigException(`RendererCanvas is not a valid renderer when running in nodejs`);
-    }
-    if (!(config.renderer.class in this.RENDERERS)) {
-      throw new SystemConfigException(`${config.renderer.class} is not a valid renderer`);
-    }
-    let renderer = new this.RENDERERS[config.renderer.class](config.renderer.options);
-    this.videoCard = new VideoMDA(this, renderer, config);
-    this.DEVICES["VideoMDA"] = this.videoCard;
-
     // Create IO port interface
-    // This needs to be done after initializing all the other devices
-    this.io = new IO(this.config, this.DEVICES);
-    this.cpu.connectIO(this.io);
+    // This needs to be done after initializing CPU
+    this.io = new IO(this.config, this);
+
+    // Temporary handle on video card until I find a better way to access it
+    this.videoCard = this.io.availableDevices["VideoMDA"];
   }
 
   /**
@@ -109,6 +69,9 @@ export default class System {
     }
 
     // Load video BIOS
+
+    // TODO: Boot I/O devices. This is where the videoCard.init() should go
+    this.io.boot();
 
     // Clear cache
 
@@ -179,7 +142,7 @@ export default class System {
 
     this.cycleCount++;
 
-    if (this.config.debug && (this.cyclesToRun !== null && this.cyclesToRun-- > 0)) this.cpu.state = STATE_HALT;
+    if (this.config.debug && (this.cyclesToRun !== null && this.cyclesToRun-- <= 0)) this.cpu.state = STATE_HALT;
 
     if (this.cpu.state === STATE_RUNNING) {
       this.immediateHandle = setImmediate(this.cycle.bind(this),  finishedCB);

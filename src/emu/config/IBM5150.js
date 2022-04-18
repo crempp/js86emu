@@ -56,7 +56,7 @@ let config = new SystemConfig({
 
   ports: {
     memoryMapped: false,
-    size: 0xFFFF,
+    size: 0xFFFF,        // IBM 5150 has 64k I/O address space
     devices: [
       {"range": [0x0000, 0x000F], "dir": "rw", "device": "DMA8237"}, // DMA
       {"range": [0x0010, 0x001F], "dir": "rw", "device": null},
@@ -68,7 +68,7 @@ let config = new SystemConfig({
       {"range": [0x0064, 0x007F], "dir": "rw", "device": null},
       {"range": [0x0080, 0x0083], "dir": "rw", "device": null},      // DMA page registerPort
       {"range": [0x0084, 0x009F], "dir": "rw", "device": null},
-      {"range": [0x00A0],         "dir": "rw", "device": null},      // NMI mask registerPort
+      {"range": [0x00A0],         "dir": "w",  "device": "NMIMaskRegister"},  // NMI mask registerPort
       {"range": [0x00A1, 0x01FF], "dir": "rw", "device": null},
       {"range": [0x0200, 0x020F], "dir": "rw", "device": null},      // Game port
       {"range": [0x0210, 0x0217], "dir": "rw", "device": null},      // Expansion Unit
@@ -78,9 +78,9 @@ let config = new SystemConfig({
       {"range": [0x0320, 0x032F], "dir": "rw", "device": null},      // Fixed disk
       {"range": [0x0330, 0x0377], "dir": "rw", "device": null},
       {"range": [0x0378, 0x037F], "dir": "rw", "device": null},      // Parallel port 1
-      {"range": [0x0380, 0x038F], "dir": "rw", "device": null},      // SDLC bisynchronous 2
+      {"range": [0x0380, 0x038F], "dir": "rw", "device": null},      // SDLC bi-synchronous 2
       {"range": [0x0390, 0x03AF], "dir": "rw", "device": null},
-      {"range": [0x03B0, 0x03BF], "dir": "rw", "device": "VideoMDA"},      // Monochrome adaptor/printer
+      {"range": [0x03B0, 0x03BF], "dir": "rw", "device": "VideoMDA"}, // Monochrome adaptor/printer
       {"range": [0x03C0, 0x03CF], "dir": "rw", "device": null},
       {"range": [0x03D0, 0x03D7], "dir": "rw", "device": null},      // CGA
       {"range": [0x03D8, 0x03EF], "dir": "rw", "device": null},

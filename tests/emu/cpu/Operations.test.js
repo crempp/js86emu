@@ -75,8 +75,16 @@ function setMemory(cpu, value) {
   }
 }
 
+class MockSystem {
+  constructor (config) {
+    this.config = config;
+    this.cpu = new CPU8086(config, this);
+    this.io = new IO(this.config, this,{"TestDevice": new TestDevice(config)});
+  }
+}
+
 describe('Operation methods', () => {
-  let cpu, addr, oper, io;
+  let system, cpu, addr, oper, io;
 
   beforeEach(() => {
     let config = new SystemConfig({
@@ -90,9 +98,10 @@ describe('Operation methods', () => {
       },
       debug: false
     });
-    cpu = new CPU8086(config);
-    io = new IO(config, {"TestDevice": new TestDevice(config)});
-    cpu.io = io;
+    system = new MockSystem(config)
+    cpu = system.cpu;
+    io = system.io;
+
     oper = new Operations(cpu);
     addr = new Addressing(cpu);
     cpu.reg16[regIP] = 0x00FF;
@@ -3510,7 +3519,15 @@ describe('Operation methods', () => {
       cpu.reg8[regAH] = 0b00111101;             // 61 (0x3D)
       oper.sahf(null, null);
 
-      expect(cpu.reg16[regFlags]).toBe(0b10010101);  // 149 (0x95)
+      expect(cpu.reg16[regFlags]).toBe(0b00010101);  // 149 (0x95)
+    });
+
+    test('set flags to zero', () => {
+      cpu.reg16[regFlags] = 0b0000100001010100;
+      cpu.reg8[regAH] = 0b00000000;
+      oper.sahf(null, null);
+
+      expect(cpu.reg16[regFlags]).toBe(0b0000100000000000);  // 149 (0x95)
     });
   });
 

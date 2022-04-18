@@ -1,9 +1,4 @@
-/**
- * CPUConfig
- *
- * The CPU configuration class which serves as a container for CPU parameters.
- *
- */
+import structuredClone from 'core-js-pure/actual/structured-clone';
 import { SystemConfigException } from '../utils/Exceptions';
 import {assign} from "../utils/Utils";
 
@@ -52,14 +47,21 @@ const DEFAULTS = {
   debugOpString: false,
 };
 
+/**
+ * SystemConfig
+ *
+ * The system configuration class which serves as a container for system parameters.
+ *
+ */
 export default class SystemConfig {
 
   constructor(initial) {
-    assign(DEFAULTS, initial);
+    let config = structuredClone(DEFAULTS);
+    assign(config, initial);
 
     // Use any default values not already sey by initial values provided
-    for (let key in DEFAULTS) {
-      if (!(key in this)) this[key] = DEFAULTS[key];
+    for (let key in config) {
+      if (!(key in this)) this[key] = config[key];
     }
 
     this.isNode = (typeof window === 'undefined');

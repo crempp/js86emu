@@ -1,6 +1,5 @@
 import { PNG } from 'pngjs';
 import fs from 'fs';
-import promises from 'fs'
 import { regIP, regCS } from '../Constants';
 
 /**
