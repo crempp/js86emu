@@ -5,7 +5,6 @@ version: 2.1
 #	* DOCKER_PASS
 #	* DEPLOY_NODE
 
-
 defaults: &DEFAULT
   working_directory: ~/app
   docker:
@@ -86,7 +85,13 @@ workflows:
                 - main
   build-test-and-deploy:
     jobs:
-      - test
+      - test:
+          filters:
+            branches:
+              only:
+                - dev
+                - master
+                - main
       - build:
           filters:
             branches:

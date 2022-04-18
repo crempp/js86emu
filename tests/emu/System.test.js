@@ -9,6 +9,18 @@ const FILE_PATH_BASE = path.normalize(`${__dirname}../../../public/`);
 describe('basic system functionality', () => {
   let system;
 
+  beforeAll(done => {
+    done();
+  })
+
+  afterAll(done => {
+    done();
+  });
+
+  // afterEach(done => {
+  //   done();
+  // });
+
   beforeEach(() => {
     // Make console logs be quiet.
     jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -32,7 +44,7 @@ describe('basic system functionality', () => {
       },
       debug: false,
     }));
-  })
+  });
 
   test('system instantiates', () => {
     expect(system).toBeInstanceOf(System);
@@ -57,12 +69,10 @@ describe('basic system functionality', () => {
   });
 
   test('system runs', async () => {
-    function done() {
-      expect(system.cycleCount).toBe(10);
-    }
-
     await system.boot();
-    system.run(10, done);
+    await system.run(10);
+
+    expect(system.cycleCount).toBe(10);
   })
 
   test('system can load memory', () => {

@@ -92,21 +92,28 @@ export default class System {
    * @param {(number|null)} cyclesToRun The number of cycles to run
    * @param {function} finishedCB Callback to call when the run is completed
    */
-  run (cyclesToRun = null, finishedCB = null) {
-    this.cyclesToRun = cyclesToRun;
-    this.cycle(() => {
-      // Do a final video scan to flush video memory to screen
-      this.videoCard.scan();
+  async run (cyclesToRun = null, finishedCB = null) {
+    return new Promise(resolve => {
+      this.cyclesToRun = cyclesToRun;
+      this.cycle((sys) => {
+        // Do a final video scan to flush video memory to screen
+        this.videoCard.scan();
 
-      // Call any call-back provided
-      if (typeof finishedCB === 'function') finishedCB();
+        // Clear the next immediate
+        clearImmediate(this.immediateHandle);
 
-      // Print debug info
-      console.log(`Done running - ${this.cycleCount} cycles`);
-      let diff       = hrtime(this.prevTiming);
-      let totalTime  = diff[0] * NS_PER_SEC + diff[1];
-      let hz         = 1 / ((totalTime / this.cycleCount) / NS_PER_SEC);
-      console.log(`  ran at ${(hz / (1000**2)).toFixed(6)} MHZ`);
+        // Call any call-back provided
+        if (typeof finishedCB === 'function') finishedCB(sys);
+
+        // Print debug info
+        console.log(`Done running - ${this.cycleCount} cycles`);
+        let diff = hrtime(this.prevTiming);
+        let totalTime = diff[0] * NS_PER_SEC + diff[1];
+        let hz = 1 / ((totalTime / this.cycleCount) / NS_PER_SEC);
+        console.log(`  ran at ${(hz / (1000 ** 2)).toFixed(6)} MHZ`);
+
+        resolve(this);
+      });
     });
   }
 
@@ -142,13 +149,13 @@ export default class System {
 
     this.cycleCount++;
 
-    if (this.config.debug && (this.cyclesToRun !== null && this.cyclesToRun-- <= 0)) this.cpu.state = STATE_HALT;
+    if (this.cyclesToRun !== null && --this.cyclesToRun <= 0) this.cpu.state = STATE_HALT;
 
     if (this.cpu.state === STATE_RUNNING) {
       this.immediateHandle = setImmediate(this.cycle.bind(this),  finishedCB);
     }
     else {
-      if (typeof finishedCB === 'function') finishedCB();
+      if (typeof finishedCB === 'function') finishedCB(this);
     }
   }
 
