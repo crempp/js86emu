@@ -75,13 +75,12 @@ jobs:
 
 workflows:
   version: 2
+  run-ci:
+    jobs:
+      - test
   build-test-and-deploy:
     jobs:
-      - test:
-          filters:
-            branches:
-              only:
-                - *
+      - test
       - build:
           filters:
             branches:
