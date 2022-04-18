@@ -2,6 +2,7 @@ import {SystemConfigException} from "../../src/emu/utils/Exceptions";
 import System from "../../src/emu/System";
 import SystemConfig from "../../src/emu/config/SystemConfig";
 import path from "path";
+import {STATE_RUNNING} from "../../src/emu/Constants";
 
 const FILE_PATH_BASE = path.normalize(`${__dirname}../../../public/`);
 
@@ -51,13 +52,17 @@ describe('basic system functionality', () => {
     // The last byte of the IBM BIOS is EB
     expect(system.cpu.mem8[system.cpu.mem8.length - 1]).toBe(0xEB);
     expect(system.videoCard.font.length).toBeGreaterThan(0);
+    expect(system.cpu.state).toBe(STATE_RUNNING);
+    expect(system.prevTiming).not.toBe(null);
   });
 
   test('system runs', async () => {
-    await system.boot();
-    system.run(10);
+    function done() {
+      expect(system.cycleCount).toBe(10);
+    }
 
-    expect(system.cycleCount).toBe(10);
+    await system.boot();
+    system.run(10, done);
   })
 
   test('system can load memory', () => {

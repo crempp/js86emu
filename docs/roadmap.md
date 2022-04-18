@@ -261,3 +261,5 @@ Investigate using Electron for running natively
 * Move memory to system (currently in CPU)
 * TODO: Switch addressing documentation overview to this or something similar http://www.cs.loyola.edu/~binkley/371/Encoding_Real_x86_Instructions.html
 * Deep copy/override of SystemConfig, currently must define entire subtree of options or errors will occur
+* Switch video renderer to use requestAnimationFrame rather than cycle counts
+* Make IO classes - Devices do I/O (not mem-mapped) like chips, Cards do I/O (including mem-mapped) but more and are attached to the card bus

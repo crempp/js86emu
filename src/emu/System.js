@@ -1,4 +1,5 @@
 import hrtime from 'browser-process-hrtime';
+import 'setimmediate';
 import CPU8086 from "./cpu/8086";
 import VideoMDA from "./video/VideoMDA";
 import IO from "./IO";
@@ -37,9 +38,12 @@ export default class System {
     this.cycleCount = 0;
     this.timeSyncCycles = config.timeSyncCycles;
     this.prevTiming = null;
-    this.videoSync = config.videoSync;
-    this.newVideoSync = config.videoSync;
+    this.videoSyncCycles = config.video.syncCycles;
+    this.newVideoSyncCycles = config.video.syncCycles;
     this.runningHz = 0;
+    // this.intervalID = null;
+    this.immediateHandle = null;
+    this.cyclesToRun = null;
 
     this.RENDERERS = {
       "RendererNoop":   RendererNoop,
@@ -62,6 +66,7 @@ export default class System {
     this.cpu = new CPU8086(config, this);
 
     // Create video and renderer
+    // TODO: Make this a device, move setup code to Video class, move to devices and IO system
     if (config.isNode && config.renderer.class === 'RendererCanvas') {
       throw new SystemConfigException(`RendererCanvas is not a valid renderer when running in nodejs`);
     }
@@ -73,7 +78,7 @@ export default class System {
     this.DEVICES["VideoMDA"] = this.videoCard;
 
     // Create IO port interface
-    // This needs to be done after initializing all other devices
+    // This needs to be done after initializing all the other devices
     this.io = new IO(this.config, this.DEVICES);
     this.cpu.connectIO(this.io);
   }
@@ -111,6 +116,10 @@ export default class System {
 
     // Init state
     await this.videoCard.init();
+
+    this.cpu.state = STATE_RUNNING;
+
+    this.prevTiming = hrtime();
   }
 
   /**
@@ -118,45 +127,66 @@ export default class System {
    * number of cycles.
    *
    * @param {(number|null)} cyclesToRun The number of cycles to run
+   * @param {function} finishedCB Callback to call when the run is completed
    */
-  run (cyclesToRun = null) {
-    this.cpu.state = STATE_RUNNING;
+  run (cyclesToRun = null, finishedCB = null) {
+    this.cyclesToRun = cyclesToRun;
+    this.cycle(() => {
+      // Do a final video scan to flush video memory to screen
+      this.videoCard.scan();
 
-    this.prevTiming = hrtime();
+      // Call any call-back provided
+      if (typeof finishedCB === 'function') finishedCB();
 
-    while (cyclesToRun === null || cyclesToRun-- > 0) {
+      // Print debug info
+      console.log(`Done running - ${this.cycleCount} cycles`);
+      let diff       = hrtime(this.prevTiming);
+      let totalTime  = diff[0] * NS_PER_SEC + diff[1];
+      let hz         = 1 / ((totalTime / this.cycleCount) / NS_PER_SEC);
+      console.log(`  ran at ${(hz / (1000**2)).toFixed(6)} MHZ`);
+    });
+  }
 
-      if (this.cycleCount === this.config.debugAtCycle ||
-          seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP]) === this.config.debugAtIP)
-      {
-        this.config.debug = true;
-      }
-
-      // Do a cycle
-      this.cpu.cycle();
-
-      // Cycle Devices
-      this.cycleDevices();
-
-      // Run timing check
-      if (this.cycleCount % this.timeSyncCycles === 0) {
-        this.timingCheck();
-      }
-
-      // Run video card scan
-      if (this.videoSync !== 0 && this.cycleCount % this.videoSync === 0){
-        this.videoSync = this.newVideoSync;
-        this.videoCard.scan();
-      }
-
-      this.cycleCount++;
+  /**
+   * Perform once cycle of the system.
+   *
+   * This method is designed to be used with setInterval and will clear its
+   * intervalID when the system is done running.
+   */
+  cycle(finishedCB) {
+    if (this.cycleCount === this.config.debugAtCycle ||
+        seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP]) === this.config.debugAtIP)
+    {
+      this.config.debug = true;
     }
 
-    console.log(`Done running - ${this.cycleCount} cycles`);
-    let diff       = hrtime(this.prevTiming);
-    let totalTime  = diff[0] * NS_PER_SEC + diff[1];
-    let hz         = 1 / ((totalTime / this.cycleCount) / NS_PER_SEC);
-    console.log(`  ran at ${(hz / (1000**2)).toFixed(6)} MHZ`);
+    // Do a cycle
+    this.cpu.cycle();
+
+    // Cycle Devices
+    this.cycleDevices();
+
+    // Run timing check
+    if (this.cycleCount % this.timeSyncCycles === 0) {
+      this.timingCheck();
+    }
+
+    // Run video card scan
+    if (this.videoSyncCycles !== 0 && this.cycleCount % this.videoSyncCycles === 0){
+      this.videoSyncCycles = this.newVideoSyncCycles;
+      this.videoCard.scan();
+    }
+
+    this.cycleCount++;
+
+    if (this.config.debug && (this.cyclesToRun !== null && this.cyclesToRun-- > 0)) this.cpu.state = STATE_HALT;
+
+    if (this.cpu.state === STATE_RUNNING) {
+      this.immediateHandle = setImmediate(this.cycle.bind(this),  finishedCB);
+    }
+    else {
+      if (typeof finishedCB === 'function') finishedCB();
+    }
   }
 
   /**
@@ -175,7 +205,7 @@ export default class System {
     this.runningHz = 1 / ((totalTime / this.cycleCount) / NS_PER_SEC);
 
     // Update the number of cycles between video syncs
-    this.newVideoSync = Math.max(Math.round(this.runningHz / this.videoCard.verticalSync), 50000);
+    this.newVideoSyncCycles = Math.max(Math.round(this.runningHz / this.videoCard.verticalSync), 50000);
   }
 
   /**

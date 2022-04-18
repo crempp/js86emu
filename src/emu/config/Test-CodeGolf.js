@@ -28,7 +28,7 @@ let config = new SystemConfig({
     addr: 0x00
   },
   video: { memoryStart:  0x8000 },
-  debug: false,
+  debug: true,
 });
 
 export default config;

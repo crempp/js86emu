@@ -14,9 +14,6 @@ const DEFAULTS = {
   /** The number of cycles between timing syncs */
   timeSyncCycles: 4 * 1000000 / 100, // About 100 times per sec
 
-  /** Number of cycles per video sync. This is updated every timeSyncCycles */
-  videoSync: 10000,
-
   programBlob: null,
   bios: {
     path: "/files/bios-roms/",
@@ -34,6 +31,8 @@ const DEFAULTS = {
     memoryStart:  0xB8000,
     verticalSync: 50,       // Hertz
     fontPath:     "files/fonts/",
+    /** Number of cycles per video sync. This is updated every timeSyncCycles */
+    syncCycles: 10000,
   },
   renderer: {
     class:   'RendererCanvas',
@@ -42,9 +41,9 @@ const DEFAULTS = {
     },
   },
   ports: {
-    memoryMapped: false,
-    size: 0xFFFF,
-    devices: []
+    memoryMapped: false, // TODO: is this needed? I think memory mapped I/O just works in normal address space
+    size: 0xFFFF,        // IBM 5150 has 64k I/O address space
+    devices: []          // Each system must define its I/O devices
   },
   debug: false,
   cycleBreak: false,
