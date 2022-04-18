@@ -77,12 +77,14 @@ workflows:
   version: 2
   build-test-and-deploy:
     jobs:
-      - test:
-          context: deployment
+      - test
       - build:
-          context: deployment
+          filters:
+            branches:
+              only:
+                - master
+                - main
       - deploy:
-          context: deployment
           requires:
             - build
             - test
@@ -90,3 +92,4 @@ workflows:
             branches:
               only:
                 - master
+                - main
