@@ -11,7 +11,7 @@ class MockSystem {
   constructor (config) {
     this.config = config;
     this.cpu = new CPU8086(config, this);
-    this.io = new IO(this.config, this,{"PPI8255": new PPI8255(this)});
+    this.io = new IO(this.config, this,{"PPI8255": new PPI8255(this.config, this)});
   }
 }
 
@@ -26,7 +26,11 @@ describe('PPI Mode 0', () => {
         size: 0xFFFF,
         devices: [
           {"range": [0x0060, 0x0063], "dir": "w", "device": "PPI8255"},
-        ]
+        ],
+      },
+      jumpers: {
+        sw1: 0xFF,
+        sw2: 0xAA,
       },
       debug: false
     });
@@ -147,13 +151,15 @@ describe('PPI Mode 0', () => {
     io.devices["PPI8255"].grpBModeSelection = 0;
     io.devices["PPI8255"].portCUpperInOut = 1;
     io.devices["PPI8255"].portCLowerInOut = 1;
-    // Set port value to 0xFF
-    io.devices["PPI8255"].portCUpper = 0xF;
-    io.devices["PPI8255"].portCLower = 0xF;
+    // Set control lines that feed port C
+    io.devices["PPI8255"].CassDataIn = 1;
+    io.devices["PPI8255"].TC2Out = 0;
+    io.devices["PPI8255"].IOChk = 1;
+    io.devices["PPI8255"].pck = 0;
 
     let value = io.read(0x0062, b);
 
-    expect(value).toBe(0xFF);
+    expect(value).toBe(0x5A);
   });
   test('read from port C (upper INPUT, lower OUTPUT)', () => {
     // Configure control flags
@@ -161,13 +167,15 @@ describe('PPI Mode 0', () => {
     io.devices["PPI8255"].grpBModeSelection = 0;
     io.devices["PPI8255"].portCUpperInOut = 1;
     io.devices["PPI8255"].portCLowerInOut = 0;
-    // Set port value to 0xFF
-    io.devices["PPI8255"].portCUpper = 0xF;
-    io.devices["PPI8255"].portCLower = 0xF;
+    // Set control lines that feed port C
+    io.devices["PPI8255"].CassDataIn = 1;
+    io.devices["PPI8255"].TC2Out = 0;
+    io.devices["PPI8255"].IOChk = 1;
+    io.devices["PPI8255"].pck = 0;
 
     let value = io.read(0x0062, b);
 
-    expect(value).toBe(0xF0);
+    expect(value).toBe(0x50);
   });
   test.skip('write to port C when set to input', () => {});
   test.skip('read from port C when set to output', () => {});

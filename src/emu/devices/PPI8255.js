@@ -9,6 +9,13 @@ const MODE2  = 2;
 const MODE_SET_INACTIVE = 0;
 const MODE_SET_ACTIVE = 1;
 
+const KEYBOARD = 0;
+const DIP      = 1;
+
+const SW5    = 0;
+const SW1SW4 = 1;
+
+
 /**
  * Programmable Peripheral Interface (8255)
  *
@@ -26,7 +33,7 @@ const MODE_SET_ACTIVE = 1;
  * The PPI on the 5150 listens to four I/O ports
  *     * 0x60: Port A input/output (keyboard, DIP Switch 1)
  *     * 0x61: Port B output (PC speaker, floppy motor, other mysteries)
- *     * 0x62: Port C lower (DIP Switch 2)
+ *     * 0x62: Port C input (DIP Switch 2)
  *     * 0x63: Command/Mode control register
  *
  * Port C upper is not used
@@ -48,6 +55,11 @@ export default class PPI8255 extends Device{
   constructor (config, system) {
     super(config, system);
     this.PPIControlWordRegister = 0x00;
+    // Port Buffers
+    this.portA      = 0x00;
+    this.portB      = 0x00;
+    this.portCLower = 0x00;
+    this.portCUpper = 0x00;
 
     // Broken out control flags
     this.grpAModeSelection = MODE0;
@@ -59,11 +71,14 @@ export default class PPI8255 extends Device{
     this.portCUpperInOut   = INPUT;
     this.modeSetFlag       = MODE_SET_INACTIVE;
 
-    // Port Buffers
-    this.portA      = 0x00;
-    this.portB      = 0x00;
-    this.portCLower = 0x00;
-    this.portCUpper = 0x00;
+    // Interfacing lines
+    this.portAKeyboardOrDIP = KEYBOARD;
+    this.holdKbbClkLow      = true;
+    this.readSW1SW4OrSW5    = SW5;
+    this.CassDataIn         = 0x00;
+    this.TC2Out             = 0x00;
+    this.IOChk              = 0x00;
+    this.pck                = 0x00;
   }
 
   boot() {
@@ -80,6 +95,7 @@ export default class PPI8255 extends Device{
       case 0x61: // Port B
         if (this.grpBmodeSelection === MODE0 && this.portBInOut === OUTPUT) {
           this.portB = value;
+          this.decodeAndApplyPortB();
         }
         break;
       case 0x62: // Port C
@@ -110,26 +126,53 @@ export default class PPI8255 extends Device{
     switch (port) {
       case 0x60: // Port A
         if (this.grpAModeSelection === MODE0 && this.portAInOut === INPUT) {
-          value = this.portA;
+          //
+          if (this.portAKeyboardOrDIP === DIP) {
+            value = this.config.jumpers.sw1
+          } else {
+            // TODO: Add keyboard logic here
+            value = this.portA;
+          }
         }
         break;
       case 0x61: // Port B
         if (this.grpBmodeSelection === MODE0 && this.portBInOut === INPUT) {
+          // TODO: Should not read port B in XT machines. Should we throw an error?
           value = this.portB;
         }
         break;
       case 0x62: // Port C
         if (this.grpAModeSelection === MODE0 && this.portCUpperInOut === INPUT) {
-          value |= this.portCUpper << 4;
+          let nibble = 0x0;
+          nibble |= this.CassDataIn;
+          nibble |= this.TC2Out << 1;
+          nibble |= this.IOChk  << 2;
+          nibble |= this.pck    << 3;
+          value |= nibble << 4;
         }
         if (this.grpBmodeSelection === MODE0 && this.portCLowerInOut === INPUT) {
-          value |= this.portCLower;
+          // NOTE: The switch lower and upper nibbles are cross-connected.
+          //       switch 5 however is connected to readSW1SW4OrSW5 through
+          //       circuitry and looks like it could conflict with switch 1.
+          //       not sure how to handle this.
+          value |= (this.config.jumpers.sw2 & 0xF);
         }
         break;
       case 0x63:
         throw new PortAccessException("Read from write-only port");
     }
     return value;
+  }
+
+  decodeAndApplyPortB() {
+    this.tim2GateSpk        = this.portB & 0x01;
+    this.spkrData           = (this.portB >> 1) & 0x01;
+    this.readSW1SW4OrSW5    = (this.portB >> 2) & 0x01;
+    this.motorOff           = (this.portB >> 3) & 0x01;
+    this.enableRamPckAL     = (this.portB >> 4) & 0x01;
+    this.enableIOCk         = (this.portB >> 5) & 0x01;
+    this.holdKbbClkLow      = (this.portB >> 6) & 0x01;
+    this.portAKeyboardOrDIP = (this.portB >> 7) & 0x01;
   }
 
   deviceCycle(){

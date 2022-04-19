@@ -1,7 +1,7 @@
 import SystemConfig from "./SystemConfig";
 
 let config = new SystemConfig({
-  memorySize: 0x100000,
+  memorySize: 0xFFFF,
   memory: null,
 
   /** The number of cycles between timing syncs */
@@ -62,7 +62,7 @@ let config = new SystemConfig({
       {"range": [0x0010, 0x001F], "dir": "rw", "device": null},
       {"range": [0x0020, 0x0021], "dir": "rw", "device": "PIC8259"},         // Interrupt controller
       {"range": [0x0022, 0x003F], "dir": "rw", "device": null},
-      {"range": [0x0040, 0x0043], "dir": "rw", "device": null},      // Counter timer
+      {"range": [0x0040, 0x0043], "dir": "rw", "device": "PIT8253"},         // Counter timer
       {"range": [0x0044, 0x005F], "dir": "rw", "device": null},
       {"range": [0x0060, 0x0063], "dir": "rw", "device": "PPI8255"},         // PPI
       {"range": [0x0064, 0x007F], "dir": "rw", "device": null},
@@ -89,6 +89,64 @@ let config = new SystemConfig({
       {"range": [0x03F8, 0x03FF], "dir": "rw", "device": null},      // Serial port
       {"range": [0x0400, 0xFFFF], "dir": "rw", "device": null}
     ]
+  },
+  jumpers: {
+    // Switch 1
+    // 1-7-8: Number of 5 1/4" drives
+    // 2:     Co-processor installed
+    // 3-4:   Installed memory on system board
+    // 5-6:   Monitor Type
+    //
+    // Switch 2 [7] p.2-28
+    // 1-2-3-4: Installed memory options
+    // 5-6-7-8: Unused, must be off
+    //
+    // Drive settings
+    //              --SW1--
+    //              1  7  8
+    //     0 drives 1  1  1
+    //     1 drives 0  1  1
+    //     2 drives 0  0  1
+    //     3 drives 0  1  0
+    //     4 drives 0  0  0
+    //
+    // Co-processor settings
+    //               -SW1-
+    //                 2
+    //  installed      0
+    //  not installed  1
+    //
+    // Monitor settings
+    //                    -SW1-
+    //                    5  6
+    //     Card w/ BIOS   1  1
+    //     CGA (40 x 25)  0  1
+    //     CGA (80 x 25)  1  0
+    //     MDA (80 x 25)  0  0
+    //
+    // Memory settings
+    // These settings vary depending on BIOS version and have different meaning
+    // when an expansion card is installed. See references for details. The
+    // listed settings is for the 64KB-256KB main board
+    //                -SW1-  ----SW2---
+    //                3  4   1  2  3  4
+    //       /  16kb  1  1   1  1  1  1
+    //  System  32kb  0  1   1  1  1  1
+    //   Board  48kb  1  0   1  1  1  1
+    //       \  64kb  0  0   1  1  1  1
+    //
+    //       /  96kb  0  0   0  1  1  1
+    //       | 128kb  0  0   1  0  1  1
+    //  Option 160kb  0  0   0  0  1  1
+    //   Board 192kb  0  0   1  1  0  1
+    //       | 224kb  0  0   0  1  0  1
+    //       \ 256kb  0  0   1  0  0  1
+    // References:
+    //    * [7] p.2-28
+    //    * http://www.minuszerodegrees.net/5150/misc/5150_motherboard_switch_settings.htm
+    //    * http://www.minuszerodegrees.net/5150/ram/5150_ram_64_256_SW2.jpg
+    sw1: 0b11000011,
+    sw2: 0b11110000,
   },
   debug: true,
   cycleBreak: false,
