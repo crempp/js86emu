@@ -103,10 +103,6 @@ export default class DMA8237 extends Device{
   }
 
   write(port, value, size) {
-    if (this.config.debug) {
-      console.log(`  WRITE device: ${this.constructor.name} port: ${port}, value:${value}, size${size}`);
-    }
-
     // 8237 Registers
     switch (port) {
       case 0x00:
@@ -179,10 +175,6 @@ export default class DMA8237 extends Device{
   }
 
   read(port, size){
-    if (this.config.debug) {
-      console.log(`  READ device: ${this.constructor.name} port: ${port}, value:${value}, size${size}`);
-    }
-
     switch (port) {
       case 0x00:
         return this.DMAChannel0_AddressReg;

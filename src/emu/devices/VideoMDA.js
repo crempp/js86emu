@@ -160,15 +160,11 @@ export default class VideoMDA extends Card{
   }
 
   write(port, value, size) {
-    if (this.system.config.debug) {
-      console.log(`  WRITE device: ${this.constructor.name} port: ${port}, value:${value}, size${size}`);
-    }
+
   }
 
   read(){
-    if (this.system.config.debug) {
-      console.log(`  READ device: ${this.constructor.name} port: ${port}, value:${value}, size${size}`);
-    }
+
     return 0x00;
   }
 

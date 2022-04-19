@@ -21,9 +21,6 @@ export default class NMIMaskRegister extends Device {
 
   write(port, value, size) {
     this.NMIMaskRegister = value & 0x80;
-    if (this.config.debug) {
-      console.log(`  WRITE device: ${this.constructor.name} port: ${port}, value:${value}, size${size}`);
-    }
   }
 
   read(port, size) {

@@ -2,6 +2,14 @@
 ### April 18th 2022
 * Created Device, Card base classes and refactored a bunch of the the System, CPU and IO classes to move
   code to more appropriate classes (pushed down)
+* DMA is hard. I got the register read/write working but not the actual functionality. These are some good docs
+  * https://www.lo-tech.co.uk/wiki/8237_DMA_Controller
+  * https://www.lo-tech.co.uk/8237-dma-transfers-across-page-boundaries/
+* PPI Mode 0 should be mostly working. I think that's all the XT uses. I would like to implement the other modes. 
+  Here's references.
+  * http://map.grauw.nl/resources/ppi/chipsi8255.pdf
+  * https://en.wikipedia.org/wiki/Intel_8255
+  * http://www.minuszerodegrees.net/5160/diff/5160_to_5150_8255.htm
 
 ### April 17th 2022
 * Started working on the I/O system. Read a lot. Got an idea of how to proceed but went on a major detour just 

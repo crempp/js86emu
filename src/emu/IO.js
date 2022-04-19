@@ -1,4 +1,4 @@
-import {InvalidDeviceException} from "./utils/Exceptions";
+import {InvalidDeviceException, PortAccessException} from "./utils/Exceptions";
 
 // We don't know the renderer or devices until runtime. Webpack is a static
 // compiler and thus can't require dynamically. Also, I was having issues with
@@ -12,6 +12,8 @@ import VideoMDA from "./devices/VideoMDA";
 import NMIMaskRegister from "./devices/NMIMaskRegister";
 import TestDevice from "./devices/TestDevice";
 import PPI8255 from "./devices/PPI8255";
+import {hexString16} from "./utils/Debug";
+import {b} from "./Constants";
 
 
 // https://bochs.sourceforge.io/techspec/PORTS.LST
@@ -100,13 +102,29 @@ export default class IO {
   }
 
   write(port, value, size) {
-    // TODO: Check for undefined or null on port and throw (or interrupt)
+    if (this.ports[port] === undefined) {
+      throw new PortAccessException("I/O port undefined. Check your SystemConfiguration");
+    }
+
     this.ports[port].write(port, value, size);
+
+    if (this.config.debug) {
+      console.log(`  WRITE device: ${this.ports[port].constructor.name} port: ${hexString16(port)}, value:${hexString16(value)}, size: ${(size === b)? 'b': 'w'}`);
+    }
   }
 
   read(port, size) {
-    // TODO: Check for undefined or null on port and throw (or interrupt)
-    return this.ports[port].read(port, size);
+    if (this.ports[port] === undefined) {
+      throw new PortAccessException("I/O port undefined. Check your SystemConfiguration");
+    }
+
+    let value = this.ports[port].read(port, size);
+
+    if (this.config.debug) {
+      console.log(`  READ device: ${this.ports[port].constructor.name} port: ${hexString16(port)}, value:${hexString16(value)}, size: ${(size === b)? 'b': 'w'}`);
+    }
+
+    return value;
   }
 
   cycle() {

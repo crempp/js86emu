@@ -9,19 +9,9 @@ export default class NullDevice extends Device{
     console.log(`  BOOT device: ${this.constructor.name}`);
   }
 
-  write(port, value, size) {
-    if (this.config.debug) {
-      console.log(`  WRITE device: ${this.constructor.name} port: ${port}, value:${value}, size${size}`);
-    }
-  }
+  write(port, value, size) {}
 
-  read(port, size){
-    let value = 0xFF;
-    if (this.config.debug) {
-      console.log(`  READ device: ${this.constructor.name} port: ${port}, value:${value}, size${size}`);
-    }
-    return value;
-  }
+  read(port, size){}
 
   deviceCycle(){
     if (this.config.debug) {
