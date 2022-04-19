@@ -11,6 +11,7 @@ import PIC8259 from "./devices/PIC8259";
 import VideoMDA from "./devices/VideoMDA";
 import NMIMaskRegister from "./devices/NMIMaskRegister";
 import TestDevice from "./devices/TestDevice";
+import PPI8255 from "./devices/PPI8255";
 
 
 // https://bochs.sourceforge.io/techspec/PORTS.LST
@@ -30,6 +31,7 @@ export default class IO {
       this.availableDevices = {
         "DMA8237": new DMA8237(config, this.system),
         "PIC8259": new PIC8259(config, this.system),
+        "PPI8255": new PPI8255(config, this.system),
         "VideoMDA": new VideoMDA(config, this.system),
         "NMIMaskRegister": new NMIMaskRegister(config, this.system),
         "TestDevice": new TestDevice(config, this.system),

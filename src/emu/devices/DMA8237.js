@@ -70,27 +70,32 @@
  * 000F	w	DMA write mask registerPort
  */
 import Device from "./Device";
+import {PortAccessException} from "../utils/Exceptions";
 
 export default class DMA8237 extends Device{
   constructor (config, system) {
     super(config, system);
 
-    // this.io.registerPort(0x00, 'rw', this.temp);
-    // this.io.registerPort(0x01, 'rw', this.temp);
-    // this.io.registerPort(0x02, 'rw', this.temp);
-    // this.io.registerPort(0x03, 'rw', this.temp);
-    // this.io.registerPort(0x04, 'rw', this.temp);
-    // this.io.registerPort(0x05, 'rw', this.temp);
-    // this.io.registerPort(0x06, 'rw', this.temp);
-    // this.io.registerPort(0x07, 'rw', this.temp);
-    // this.io.registerPort(0x08, 'rw', this.statusCommandRegister);
-    // this.io.registerPort(0x09, 'w',  this.writeRequestRegister);
-    // this.io.registerPort(0x0A, 'rw', this.maskRegister);
-    // this.io.registerPort(0x0B, 'w',  this.modeRegister);
-    // this.io.registerPort(0x0C, 'w',  this.clearFlipFlop);
-    // this.io.registerPort(0x0D, 'rw', this.readTempClearMasterRegister);
-    // this.io.registerPort(0x0E, 'w',  this.clearMaskRegister);
-    // this.io.registerPort(0x0F, 'r',  this.writeMaskRegister);
+    this.DMAChannel0_AddressReg = 0x00; // 0x00
+    this.DMAChannel0_WordCntReg = 0x00; // 0x01
+    this.DMAChannel1_AddressReg = 0x00; // 0x02
+    this.DMAChannel1_WordCntReg = 0x00; // 0x03
+    this.DMAChannel2_AddressReg = 0x00; // 0x04
+    this.DMAChannel2_WordCntReg = 0x00; // 0x05
+    this.DMAChannel2_AddressReg = 0x00; // 0x06
+    this.DMAChannel3_WordCntReg = 0x00; // 0x07
+    this.DMAStatCmdReg = 0x00;          // 0x08
+    this.DMARequestReg = 0x00;          // 0x09
+    this.DMAMaskReg = 0x00;             // 0x0A
+    this.DMAModeReg = 0x00;             // 0x0B
+    this.DMAClearFlipFlopReg = 0x00;    // 0x0C
+    this.DMAMasterClearTempReg = 0x00;  // 0x0D
+    this.DMAClearMaskReg = 0x00;        // 0x0E
+    this.DMAMultipleMaskReg = 0x00;     // 0x0F
+
+    this.DMAChannel2_PageReg = 0x00;    // 0x81
+    this.DMAChannel3_PageReg = 0x00;    // 0x82
+    this.DMAChannel1_PageReg = 0x00;    // 0x83
   }
 
   boot() {
@@ -101,118 +106,134 @@ export default class DMA8237 extends Device{
     if (this.config.debug) {
       console.log(`  WRITE device: ${this.constructor.name} port: ${port}, value:${value}, size${size}`);
     }
+
+    // 8237 Registers
+    switch (port) {
+      case 0x00:
+        this.DMAChannel0_AddressReg = value & 0xFF;
+        break;
+      case 0x01:
+        this.DMAChannel0_WordCntReg = value & 0xFF;
+        break;
+      case 0x02:
+        this.DMAChannel1_AddressReg = value & 0xFF;
+        break;
+      case 0x03:
+        this.DMAChannel1_WordCntReg = value & 0xFF;
+        break;
+      case 0x04:
+        this.DMAChannel2_AddressReg = value & 0xFF;
+        break;
+      case 0x05:
+        this.DMAChannel2_WordCntReg = value & 0xFF;
+        break;
+      case 0x06:
+        this.DMAChannel2_AddressReg = value & 0xFF;
+        break;
+      case 0x07:
+        this.DMAChannel3_WordCntReg = value & 0xFF;
+        break;
+      case 0x08:
+        this.DMAStatCmdReg = value & 0xFF;
+        break;
+      case 0x09:
+        this.DMARequestReg = value & 0xFF;
+        break;
+      case 0x0A:
+        this.DMAMaskReg = value & 0xFF;
+        break;
+      case 0x0B:
+        this.DMAModeReg = value & 0xFF;
+        break;
+      case 0x0C:
+        this.DMAClearFlipFlopReg = value & 0xFF;
+        break;
+      case 0x0D:
+        this.DMAMasterClearTempReg = value & 0xFF;
+        break;
+      case 0x0E:
+        this.DMAClearMaskReg = value & 0xFF;
+        break;
+      case 0x0F:
+        this.DMAMultipleMaskReg = value & 0xFF;
+        break;
+
+      // DMA Page Registers
+      //     The Page Registers are write-only registers used to generate
+      //     address bits 16 - 19 during a DMA transfer.
+      //     Data Bit: 0   1   2   3
+      //     Addr Bit: 16  17  18  19
+      case 0x81:
+        this.DMAChannel2_PageReg = value & 0xF;
+        break;
+      case 0x82:
+        this.DMAChannel3_PageReg = value & 0xF;
+        break;
+      case 0x83:
+        this.DMAChannel1_PageReg = value & 0xF;
+        break;
+
+      default:
+        throw new PortAccessException("Unhandled port write");
+    }
   }
 
   read(port, size){
-    let value = 0xFF;
     if (this.config.debug) {
       console.log(`  READ device: ${this.constructor.name} port: ${port}, value:${value}, size${size}`);
     }
-    return value;
+
+    switch (port) {
+      case 0x00:
+        return this.DMAChannel0_AddressReg;
+      case 0x01:
+        return this.DMAChannel0_WordCntReg;
+      case 0x02:
+        return this.DMAChannel1_AddressReg;
+      case 0x03:
+        return this.DMAChannel1_WordCntReg;
+      case 0x04:
+        return this.DMAChannel2_AddressReg;
+      case 0x05:
+        return this.DMAChannel2_WordCntReg;
+      case 0x06:
+        return this.DMAChannel2_AddressReg;
+      case 0x07:
+        return this.DMAChannel3_WordCntReg;
+      case 0x08:
+        return this.DMAStatCmdReg;
+      case 0x09:
+        throw new PortAccessException("Read from write-only port");
+      case 0x0A:
+        throw new PortAccessException("Read from write-only port");
+      case 0x0B:
+        throw new PortAccessException("Read from write-only port");
+      case 0x0C:
+        throw new PortAccessException("Read from write-only port");
+      case 0x0D:
+        throw new PortAccessException("Read from write-only port");
+      case 0x0E:
+        throw new PortAccessException("Read from write-only port");
+      case 0x0F:
+        throw new PortAccessException("Read from write-only port");
+
+      // DMA Page Registers
+      //     Write only
+      case 0x81:
+        throw new PortAccessException("Read from write-only port");
+      case 0x82:
+        throw new PortAccessException("Read from write-only port");
+      case 0x83:
+        throw new PortAccessException("Read from write-only port");
+
+      default:
+        throw new PortAccessException("Unhandled port read");
+    }
   }
 
   deviceCycle(){
     if (this.config.debug) {
       console.log(`  CYCLE device: ${this.constructor.name}`);
-    }
-  }
-
-  temp () {
-    return {
-      read: () => {
-
-      },
-      write: () => {
-
-      }
-    }
-  }
-
-  statusCommandRegister () {
-    return {
-      read: () => {
-
-      },
-      write: () => {
-
-      }
-    }
-  }
-
-  writeRequestRegister () {
-    return {
-      read: () => {
-
-      },
-      write: () => {
-
-      }
-    }
-  }
-
-  maskRegister () {
-    return {
-      read: () => {
-
-      },
-      write: () => {
-
-      }
-    }
-  }
-
-  modeRegister () {
-    return {
-      read: () => {
-
-      },
-      write: () => {
-
-      }
-    }
-  }
-
-  clearFlipFlop () {
-    return {
-      read: () => {
-
-      },
-      write: () => {
-
-      }
-    }
-  }
-
-  readTempClearMasterRegister () {
-    return {
-      read: () => {
-
-      },
-      write: () => {
-
-      }
-    }
-  }
-
-  clearMaskRegister () {
-    return {
-      read: () => {
-
-      },
-      write: () => {
-
-      }
-    }
-  }
-
-  writeMaskRegister () {
-    return {
-      read: () => {
-
-      },
-      write: () => {
-
-      }
     }
   }
 }

@@ -58,17 +58,18 @@ let config = new SystemConfig({
     memoryMapped: false,
     size: 0xFFFF,        // IBM 5150 has 64k I/O address space
     devices: [
-      {"range": [0x0000, 0x000F], "dir": "rw", "device": "DMA8237"}, // DMA
+      {"range": [0x0000, 0x000F], "dir": "rw", "device": "DMA8237"},         // DMA
       {"range": [0x0010, 0x001F], "dir": "rw", "device": null},
-      {"range": [0x0020, 0x0021], "dir": "rw", "device": "PIC8259"}, // Interrupt controller
+      {"range": [0x0020, 0x0021], "dir": "rw", "device": "PIC8259"},         // Interrupt controller
       {"range": [0x0022, 0x003F], "dir": "rw", "device": null},
       {"range": [0x0040, 0x0043], "dir": "rw", "device": null},      // Counter timer
       {"range": [0x0044, 0x005F], "dir": "rw", "device": null},
-      {"range": [0x0060, 0x0063], "dir": "rw", "device": null},      // PPI
+      {"range": [0x0060, 0x0063], "dir": "rw", "device": "PPI8255"},         // PPI
       {"range": [0x0064, 0x007F], "dir": "rw", "device": null},
-      {"range": [0x0080, 0x0083], "dir": "rw", "device": null},      // DMA page registerPort
+      {"range": [0x008         ], "dir": "rw", "device": null},              // Manufacturer systems checkpoint port (used during POST)
+      {"range": [0x0081, 0x0083], "dir": "rw", "device": "DMA8237"},         // DMA page registerPort
       {"range": [0x0084, 0x009F], "dir": "rw", "device": null},
-      {"range": [0x00A0],         "dir": "w",  "device": "NMIMaskRegister"},  // NMI mask registerPort
+      {"range": [0x00A0],         "dir": "w",  "device": "NMIMaskRegister"}, // NMI mask registerPort
       {"range": [0x00A1, 0x01FF], "dir": "rw", "device": null},
       {"range": [0x0200, 0x020F], "dir": "rw", "device": null},      // Game port
       {"range": [0x0210, 0x0217], "dir": "rw", "device": null},      // Expansion Unit
