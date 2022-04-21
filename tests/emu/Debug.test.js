@@ -208,42 +208,34 @@ describe('Debug formatters', () => {
   describe('formatOpcode()', () => {
     test('formatOpcode() should return correctly formatted string', () => {
       expect(formatOpcode(cpu.opcode)).toBe(
-        "opcode:  10000001[0x81]    address: 10101010[0xAA]\n" +
-        "prefix:  00000000[0x00]    opcode:  00100000[0x20]\n" +
-        "d:              0[0x00]    w:              1[0x01]\n" +
-        "mod:           10[0x02]    reg:          101[0x05]\n" +
-        "rm:           010[0x02]    size:           v");
+        "opcode:  10000001[0x81]    address: 10101010[0xAA]prefix:  00000000[0x00]    \n" +
+        "d:              0[0x00]    w:              1[0x01]           size:           v\n" +
+        "mod:           10[0x02]    reg:          101[0x05]rm:           010[0x02]    ");
     });
 
     test('formatOpcode() should indent formatted string', () => {
       expect(formatOpcode(cpu.opcode, 4)).toBe(
-        "    opcode:  10000001[0x81]    address: 10101010[0xAA]\n" +
-        "    prefix:  00000000[0x00]    opcode:  00100000[0x20]\n" +
-        "    d:              0[0x00]    w:              1[0x01]\n" +
-        "    mod:           10[0x02]    reg:          101[0x05]\n" +
-        "    rm:           010[0x02]    size:           v");
+        "opcode:  10000001[0x81]    address: 10101010[0xAA]    prefix:  00000000[0x00]    \n" +
+        "    d:              0[0x00]    w:              1[0x01]           size:           v\n" +
+        "    mod:           10[0x02]    reg:          101[0x05]    rm:           010[0x02]    ");
     });
 
     test('formatOpcode() should return correctly formatted string for byte', () => {
       cpu.mem8[0xABCD0] = 0x88;       // inst (byte)
       cpu.decode();
       expect(formatOpcode(cpu.opcode)).toBe(
-        "opcode:  10001000[0x88]    address: 10101010[0xAA]\n" +
-        "prefix:  00000000[0x00]    opcode:  00100010[0x22]\n" +
-        "d:              0[0x00]    w:              0[0x00]\n" +
-        "mod:           10[0x02]    reg:          101[0x05]\n" +
-        "rm:           010[0x02]    size:           b");
+        "opcode:  10001000[0x88]    address: 10101010[0xAA]prefix:  00000000[0x00]    \n" +
+        "d:              0[0x00]    w:              0[0x00]           size:           b\n" +
+        "mod:           10[0x02]    reg:          101[0x05]rm:           010[0x02]    ");
     });
 
     test('formatOpcode() should return correctly formatted string for word', () => {
       cpu.mem8[0xABCD0] = 0x8C;       // inst (byte)
       cpu.decode();
       expect(formatOpcode(cpu.opcode)).toBe(
-        "opcode:  10001100[0x8C]    address: 10101010[0xAA]\n" +
-        "prefix:  00000000[0x00]    opcode:  00100011[0x23]\n" +
-        "d:              0[0x00]    w:              0[0x00]\n" +
-        "mod:           10[0x02]    reg:          101[0x05]\n" +
-        "rm:           010[0x02]    size:           w");
+        "opcode:  10001100[0x8C]    address: 10101010[0xAA]prefix:  00000000[0x00]    \n" +
+        "d:              0[0x00]    w:              0[0x00]           size:           w\n" +
+        "mod:           10[0x02]    reg:          101[0x05]rm:           010[0x02]    ");
     });
 
     test('formatOpcode() should handle null addressing byte', () => {
@@ -251,11 +243,9 @@ describe('Debug formatters', () => {
       cpu.mem8[0xABCD1] = 0x00;       // addr mode
       cpu.decode();
       expect(formatOpcode(cpu.opcode)).toBe(
-        "opcode:  00001110[0x0E]    address:         [NULL]\n" +
-        "prefix:  00000000[0x00]    opcode:  00000011[0x03]\n" +
-        "d:              1[0x01]    w:              0[0x00]\n" +
-        "mod:             [NULL]    reg:             [NULL]\n" +
-        "rm:              [NULL]    size:           w");
+        "opcode:  00001110[0x0E]    address:         [NULL]prefix:  00000000[0x00]    \n" +
+        "d:              1[0x01]    w:              0[0x00]           size:           w\n" +
+        "mod:             [NULL]    reg:             [NULL]rm:              [NULL]    ");
     })
   });
 
@@ -278,39 +268,29 @@ describe('Debug formatters', () => {
     test('formatRegisters() should return correctly formatted string', () => {
       cpu.reg16[regIP] = 0xF123;
       expect(formatRegisters(cpu)).toBe(
-        "AX: 0x1234 AL: 0x34 AH: 0x12\n" +
-        "BX: 0x2345 BL: 0x45 BH: 0x23\n" +
-        "CX: 0x3456 CL: 0x56 CH: 0x34\n" +
-        "DX: 0x4567 DL: 0x67 DH: 0x45\n" +
-        "SI: 0x5678 DI: 0x6789 BP: 0x789A SP: 0x89AB\n" +
-        "CS: 0xABCD DS: 0xBCD0 ES: 0xCD01 SS: 0xD012\n" +
-        "IP: 0xF123");
+          "IP: 0xF123\n" +
+          "AX: 0x1234 | AL: 0x34 AH: 0x12 || CS: 0xABCD || SI: 0x5678 ||\n" +
+          "BX: 0x2345 | BL: 0x45 BH: 0x23 || DS: 0xBCD0 || DI: 0x6789 ||\n" +
+          "CX: 0x3456 | CL: 0x56 CH: 0x34 || ES: 0xCD01 || BP: 0x789A ||\n" +
+          "DX: 0x4567 | DL: 0x67 DH: 0x45 || SS: 0xD012 || SP: 0x89AB ||");
     });
     test('formatRegisters() should indent formatted string', () => {
       cpu.reg16[regIP] = 0xF123;
       expect(formatRegisters(cpu, 4)).toBe(
-        "    AX: 0x1234 AL: 0x34 AH: 0x12\n" +
-        "    BX: 0x2345 BL: 0x45 BH: 0x23\n" +
-        "    CX: 0x3456 CL: 0x56 CH: 0x34\n" +
-        "    DX: 0x4567 DL: 0x67 DH: 0x45\n" +
-        "    SI: 0x5678 DI: 0x6789 BP: 0x789A SP: 0x89AB\n" +
-        "    CS: 0xABCD DS: 0xBCD0 ES: 0xCD01 SS: 0xD012\n" +
-        "    IP: 0xF123");
+          "    IP: 0xF123\n" +
+          "    AX: 0x1234 | AL: 0x34 AH: 0x12 || CS: 0xABCD || SI: 0x5678 ||\n" +
+          "    BX: 0x2345 | BL: 0x45 BH: 0x23 || DS: 0xBCD0 || DI: 0x6789 ||\n" +
+          "    CX: 0x3456 | CL: 0x56 CH: 0x34 || ES: 0xCD01 || BP: 0x789A ||\n" +
+          "    DX: 0x4567 | DL: 0x67 DH: 0x45 || SS: 0xD012 || SP: 0x89AB ||");
     });
   });
 
   describe('formatFlags()', () => {
     test('formatFlags() should return correctly formatted string', () => {
-      expect(formatFlags(cpu.reg16[regFlags])).toBe(
-        "CF: 0 PF: 0 AF: 0\n" +
-        "ZF: 0 SF: 0 TF: 0\n" +
-        "IF: 0 DF: 0 OF: 0");
+      expect(formatFlags(cpu.reg16[regFlags])).toBe("OF: 0 DF: 0 IF: 0 TF: 0 SF: 0 ZF: 0 AF: 0 PF: 0 CF: 0");
     });
     test('formatFlags() should indent formatted string', () => {
-      expect(formatFlags(cpu.reg16[regFlags], 4)).toBe(
-        "    CF: 0 PF: 0 AF: 0\n" +
-        "    ZF: 0 SF: 0 TF: 0\n" +
-        "    IF: 0 DF: 0 OF: 0");
+      expect(formatFlags(cpu.reg16[regFlags], 4)).toBe("    OF: 0 DF: 0 IF: 0 TF: 0 SF: 0 ZF: 0 AF: 0 PF: 0 CF: 0");
     });
   });
 });

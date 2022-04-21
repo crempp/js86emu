@@ -1,6 +1,6 @@
 import System from "./emu/System";
 import SystemConfig from "./emu/config/SystemConfig";
-import { debug } from "./emu/utils/Debug";
+import { logState } from "./emu/utils/Debug";
 
 function loadMem (data, from, cpu) {
   for (let i = 0; i < data.length; i++) {
@@ -72,7 +72,7 @@ if (config.debug) {
 runEmulation().then(() => {
   waitAndExit();
 }).catch((e) => {
-  debug(system);
+  logState(system);
   console.error(e);
   waitAndExit();
 });

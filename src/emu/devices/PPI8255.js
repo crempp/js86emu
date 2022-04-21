@@ -71,14 +71,21 @@ export default class PPI8255 extends Device{
     this.portCUpperInOut   = INPUT;
     this.modeSetFlag       = MODE_SET_INACTIVE;
 
-    // Interfacing lines
-    this.portAKeyboardOrDIP = KEYBOARD;
-    this.holdKbbClkLow      = true;
-    this.readSW1SW4OrSW5    = SW5;
-    this.CassDataIn         = 0x00;
-    this.TC2Out             = 0x00;
-    this.IOChk              = 0x00;
-    this.pck                = 0x00;
+    // Port B Interfacing lines         bit
+    this.tim2GateSpk        = 0;        // 0
+    this.spkrData           = 0;        // 1
+    this.readSW1SW4OrSW5    = SW5;      // 2
+    this.motorOff           = 0;        // 3
+    this.enableRamParityChk = 0;        // 4 (Active Low)
+    this.enableIOCk         = 0;        // 5 (Active Low)
+    this.holdKbbClkLow      = true;     // 6 (Active Low)
+    this.portAKeyboardOrDIP = KEYBOARD; // 7
+
+    // Port C Interfacing lines  bit
+    this.CassDataIn    = 0;      // 4
+    this.TC2Out        = 0;      // 5
+    this.IOChk         = 0;      // 6
+    this.parityChk     = 0;      // 7
   }
 
   boot() {
@@ -145,9 +152,9 @@ export default class PPI8255 extends Device{
         if (this.grpAModeSelection === MODE0 && this.portCUpperInOut === INPUT) {
           let nibble = 0x0;
           nibble |= this.CassDataIn;
-          nibble |= this.TC2Out << 1;
-          nibble |= this.IOChk  << 2;
-          nibble |= this.pck    << 3;
+          nibble |= this.TC2Out    << 1;
+          nibble |= this.IOChk     << 2;
+          nibble |= this.parityChk << 3;
           value |= nibble << 4;
         }
         if (this.grpBmodeSelection === MODE0 && this.portCLowerInOut === INPUT) {
@@ -169,7 +176,7 @@ export default class PPI8255 extends Device{
     this.spkrData           = (this.portB >> 1) & 0x01;
     this.readSW1SW4OrSW5    = (this.portB >> 2) & 0x01;
     this.motorOff           = (this.portB >> 3) & 0x01;
-    this.enableRamPckAL     = (this.portB >> 4) & 0x01;
+    this.enableRamParityChk = (this.portB >> 4) & 0x01;
     this.enableIOCk         = (this.portB >> 5) & 0x01;
     this.holdKbbClkLow      = (this.portB >> 6) & 0x01;
     this.portAKeyboardOrDIP = (this.portB >> 7) & 0x01;

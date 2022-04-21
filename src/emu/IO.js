@@ -1,42 +1,48 @@
 import {InvalidDeviceException, PortAccessException} from "./utils/Exceptions";
+import {hexString16} from "./utils/Debug";
+import {b} from "./Constants";
 
 // We don't know the renderer or devices until runtime. Webpack is a static
 // compiler and thus can't require dynamically. Also, I was having issues with
 // dynamic imports in node though it should work.
-// ...so import all renderers/device and look them up in the object at runtime.
+// ...so import all drivers/device and look them up in the object at runtime.
 // Someday I will do more research to see if I can optimize this.
-import NullDevice from "./devices/NullDevice";
 import DMA8237 from "./devices/DMA8237";
-import PIC8259 from "./devices/PIC8259";
-import VideoMDA from "./devices/VideoMDA";
 import NMIMaskRegister from "./devices/NMIMaskRegister";
-import TestDevice from "./devices/TestDevice";
+import NullDevice from "./devices/NullDevice";
+import PIC8259 from "./devices/PIC8259";
+import PIT8253 from "./devices/PIT8253";
 import PPI8255 from "./devices/PPI8255";
-import {hexString16} from "./utils/Debug";
-import {b} from "./Constants";
+import TestDevice from "./devices/TestDevice";
+import VideoMDA from "./devices/VideoMDA";
+import ParallelCard from "./devices/ParallelCard";
 
-
-// https://bochs.sourceforge.io/techspec/PORTS.LST
 /**
  * The IO system creates an array mapping port numbers with device in
+ *
+ * References
+ *   * https://bochs.sourceforge.io/techspec/PORTS.LST
  */
 export default class IO {
   constructor (config, system, availableDevices = null) {
     this.config = config;
     this.system = system;
 
-    // I think this must happen after creating the CPU
+    // I think this must happen after creating the CPU because devices need
+    // access to the instantiated CPU
     if (availableDevices !== null) {
       this.availableDevices = availableDevices
     }
     else {
       this.availableDevices = {
-        "DMA8237": new DMA8237(config, this.system),
-        "PIC8259": new PIC8259(config, this.system),
-        "PPI8255": new PPI8255(config, this.system),
-        "VideoMDA": new VideoMDA(config, this.system),
+        "DMA8237":         new DMA8237(config, this.system),
+        "PIC8259":         new PIC8259(config, this.system),
+        "PIT8253":         new PIT8253(config, this.system),
+        "PPI8255":         new PPI8255(config, this.system),
         "NMIMaskRegister": new NMIMaskRegister(config, this.system),
-        "TestDevice": new TestDevice(config, this.system),
+        "VideoMDA":        new VideoMDA(config, this.system),
+        "ParallelCard":    new ParallelCard(config, this.system),
+        "TestDevice":      new TestDevice(config, this.system),
       };
     }
     // always have the null device available
@@ -109,7 +115,7 @@ export default class IO {
     this.ports[port].write(port, value, size);
 
     if (this.config.debug) {
-      console.log(`  WRITE device: ${this.ports[port].constructor.name} port: ${hexString16(port)}, value:${hexString16(value)}, size: ${(size === b)? 'b': 'w'}`);
+      console.log(`  I/O WRITE device: ${this.ports[port].constructor.name} port: ${hexString16(port)}, value:${hexString16(value)}, size: ${(size === b)? 'b': 'w'}`);
     }
   }
 
@@ -121,7 +127,7 @@ export default class IO {
     let value = this.ports[port].read(port, size);
 
     if (this.config.debug) {
-      console.log(`  READ device: ${this.ports[port].constructor.name} port: ${hexString16(port)}, value:${hexString16(value)}, size: ${(size === b)? 'b': 'w'}`);
+      console.log(`  I/O READ device: ${this.ports[port].constructor.name} port: ${hexString16(port)}, value:${hexString16(value)}, size: ${(size === b)? 'b': 'w'}`);
     }
 
     return value;

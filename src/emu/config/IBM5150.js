@@ -1,7 +1,9 @@
 import SystemConfig from "./SystemConfig";
 
 let config = new SystemConfig({
-  memorySize: 0xFFFF,
+  // Memory size must remain at 1Mb despite what the jumpers are set to because
+  // the BIOS loads at the top of that and we don't support memory holes yet.
+  memorySize: 0x100000,
   memory: null,
 
   /** The number of cycles between timing syncs */
@@ -81,7 +83,8 @@ let config = new SystemConfig({
       {"range": [0x0378, 0x037F], "dir": "rw", "device": null},      // Parallel port 1
       {"range": [0x0380, 0x038F], "dir": "rw", "device": null},      // SDLC bi-synchronous 2
       {"range": [0x0390, 0x03AF], "dir": "rw", "device": null},
-      {"range": [0x03B0, 0x03BF], "dir": "rw", "device": "VideoMDA"}, // Monochrome adaptor/printer
+      {"range": [0x03B0, 0x03BB], "dir": "rw", "device": "VideoMDA"},        // Monochrome adaptor/printer
+      {"range": [0x03BC, 0x03BF], "dir": "rw", "device": "ParallelCard"},    // Monochrome adaptor/printer
       {"range": [0x03C0, 0x03CF], "dir": "rw", "device": null},
       {"range": [0x03D0, 0x03D7], "dir": "rw", "device": null},      // CGA
       {"range": [0x03D8, 0x03EF], "dir": "rw", "device": null},

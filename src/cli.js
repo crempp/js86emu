@@ -1,6 +1,6 @@
 import System from "./emu/System";
 import SystemConfig from "./emu/config/SystemConfig";
-import { debug } from "./emu/utils/Debug";
+import { logState } from "./emu/utils/Debug";
 
 function waitAndExit(wait=1000) {
   // If we're using RendererPNG or RendererBin we can't exit right away or the
@@ -92,7 +92,7 @@ if (config.debug) {
 runEmulation().then(() => {
   waitAndExit();
 }).catch((e) => {
-  debug(system);
+  logState(system);
   console.error(e);
   waitAndExit();
 });

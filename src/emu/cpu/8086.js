@@ -22,7 +22,7 @@ import {
   PIN_8080_TEST, PIN_8080_READY, PIN_8080_RESET, PIN_8080_CLK, PIN_8080_INTR,
   PIN_8080_NMI, PIN_LOW, PIN_HIGH, STATE_WAIT, STATE_RUNNING
 } from '../Constants';
-import { debug } from '../utils/Debug'
+import { logState } from '../utils/Debug'
 
 /**
  * @class
@@ -36,6 +36,16 @@ export default class CPU8086 extends CPU {
     this.config = config;
     this.system = system;
     this.io = null;
+
+    // Tests may not have a system
+    if (this.system) {
+      this.debug = this.system.debug;
+      this.steppingMode = this.system.steppingMode;
+    }
+    else {
+      this.steppingMode = false;
+    }
+
 
     /**
      * CPU frequency in hertz (cycles per second).
@@ -576,7 +586,6 @@ export default class CPU8086 extends CPU {
     // Retrieve the operation from the opcode table
     let instruction = this.inst[opcode_byte];
 
-    // this.opcode = {
     this.opcode["opcode_byte"]     = opcode_byte;
     this.opcode["addressing_byte"] = null;
     this.opcode["prefix"]          = 0x00;  // Not supporting prefix opcodes yet
@@ -696,9 +705,23 @@ export default class CPU8086 extends CPU {
       this.instIPInc += this.opcode.inst.baseSize;
     }
 
+    // We break in logState after the instruction has been decoded but before we
+    // execute it. So it must be here. Also print the logState info before
+    // pausing execution.
+    // Check for breakpoint
     if (this.config.debug) {
-      debug(this.system);
-      if (this.config.cycleBreak) debugger;
+      this.debug.logState(this.system);
+    }
+    if (this.config.debug &&
+        this.reg16[regCS] in this.system.breakpoints &&
+        this.reg16[regIP] in this.system.breakpoints[this.reg16[regCS]] &&
+        this.system.breakpoints[this.reg16[regCS]][this.reg16[regIP]].enabled) {
+      this.system.steppingMode = true;
+    }
+
+    if (this.steppingMode) {
+      this.debug.flush();
+      debugger;
     }
 
     this. opcode.inst.run();

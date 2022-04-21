@@ -1,10 +1,27 @@
 import { loadPNGAsync } from "../utils/Utils";
 import Card from "./Card";
-import RendererNoop from "../renderers/RendererNoop";
-import RendererBin from "../renderers/RendererBin";
-import RendererCanvas from "../renderers/RendererCanvas";
-import RendererPNG from "../renderers/RendererPNG";
+import RendererNoop from "../drivers/RendererNoop";
+import RendererBin from "../drivers/RendererBin";
+import RendererCanvas from "../drivers/RendererCanvas";
+import RendererPNG from "../drivers/RendererPNG";
 import {SystemConfigException} from "../utils/Exceptions";
+
+export const HORIZONTAL_TOTAL      = 0;
+export const HORIZONTAL_DISPLAYED  = 1
+export const HSYNC_POSITION        = 2;
+export const HSYNC_WIDTH           = 3;
+export const VERTICAL_TOTAL        = 4;
+export const VERTICAL_ADJUST       = 5;
+export const VERTICAL_DISPLAYED    = 6;
+export const VSYNC_POSITION        = 7;
+export const INTERLACE_MODE        = 7;
+export const MAX_SCAN_LINE_ADDRESS = 8;
+export const CURSOR_START          = 10;
+export const CURSOR_END            = 11;
+export const START_ADDRESS_H       = 12;
+export const START_ADDRESS_L       = 13;
+export const CURSOR_H              = 14;
+export const CURSOR_L              = 15;
 
 export default class VideoMDA extends Card{
   constructor(config, system) {
@@ -23,6 +40,45 @@ export default class VideoMDA extends Card{
     this.textModeColumns = 80;
     this.textModeRows    = 25;
     this.use_attribute_bit = false;
+
+    // 6845 index/data registers
+    this.CRTCIndexRegister = 0x00;
+    this.CRTCDataRegister = 0x00;
+
+    // Registers internal to the 6845 and accessed through the index/data
+    // registers. Most of these are not needed for emulation but let's
+    // keep them around for fun.
+    this.CRTCInternalRegisters = [];
+    this.CRTCInternalRegisters[HORIZONTAL_TOTAL]      = 0x00;
+    this.CRTCInternalRegisters[HORIZONTAL_DISPLAYED]  = 0x00;
+    this.CRTCInternalRegisters[HSYNC_POSITION]        = 0x00;
+    this.CRTCInternalRegisters[HSYNC_WIDTH]           = 0x00;
+    this.CRTCInternalRegisters[VERTICAL_TOTAL]        = 0x00;
+    this.CRTCInternalRegisters[VERTICAL_ADJUST]       = 0x00;
+    this.CRTCInternalRegisters[VERTICAL_DISPLAYED]    = 0x00;
+    this.CRTCInternalRegisters[VSYNC_POSITION]        = 0x00;
+    this.CRTCInternalRegisters[INTERLACE_MODE]        = 0x00;
+    this.CRTCInternalRegisters[MAX_SCAN_LINE_ADDRESS] = 0x00;
+    this.CRTCInternalRegisters[CURSOR_START]          = 0x00;
+    this.CRTCInternalRegisters[CURSOR_END]            = 0x00;
+    this.CRTCInternalRegisters[START_ADDRESS_H]       = 0x00;
+    this.CRTCInternalRegisters[START_ADDRESS_L]       = 0x00;
+    this.CRTCInternalRegisters[CURSOR_H]              = 0x00;
+    this.CRTCInternalRegisters[CURSOR_L]              = 0x00;
+
+    // These registers are separate LS chips on the card
+    this.modeControlRegister   = 0x00; // U58
+    this.statusRegister        = 0x00; // I think U29
+
+    // Control lines
+    this.highResolutionMode = false;
+    this.videoEnabled = false;
+    this.blinkEnabled = false;
+
+    // Status lines
+    this.horizontalDrive = 0;
+    this.BWVideo         = 0;
+
 
     this.AVAILABLE_RENDERERS = {
       "RendererNoop":   RendererNoop,
@@ -160,12 +216,65 @@ export default class VideoMDA extends Card{
   }
 
   write(port, value, size) {
-
+    switch (port) {
+      // All the following ports decode to 0x3B4
+      case 0x3B0:
+      case 0x3B2:
+      case 0x3B6:
+      case 0x3B4: // Index (Address) Register
+          this.CRTCIndexRegister = value & 0xFF;
+        break;
+      // All the following ports decode to 0x3B5
+      case 0x3B1:
+      case 0x3B3:
+      case 0x3B7:
+      case 0x3B5: // Data Register
+        this.CRTCDataRegister = value & 0xFF;
+        this.CRTCInternalRegisters[this.CRTCIndexRegister] = value;
+        break;
+      case 0x3B8: // 6845 Mode Control Register
+        this.highResolutionMode = value & 0x01;        // bit 0
+        this.videoEnabled       = (value >> 3) & 0x01; // bit 3
+        this.blinkEnabled       = (value >> 3) & 0x01; // bit 5
+        break;
+      case 0x3B9: // reserved for color select register on color adapter
+        break;
+      case 0x3BA: // Status Register (read only)
+        break;
+      case 0x3BB: // reserved for light pen strobe reset
+        break;
+    }
   }
 
-  read(){
-
-    return 0x00;
+  read(port, size){
+    switch (port) {
+      // All the following ports decode to 0x3B4
+      case 0x3B0:
+      case 0x3B2:
+      case 0x3B6:
+      case 0x3B4: // Index (Address) Register (write only)
+        break
+      // All the following ports decode to 0x3B5
+      case 0x3B1:
+      case 0x3B3:
+      case 0x3B7:
+      case 0x3B5: // Data Register
+        // Only registers 14, 15, 16 and 17 are readable
+        if (this.CRTCIndexRegister >= 14 && this.CRTCIndexRegister <= 17 ) {
+          return this.CRTCInternalRegisters[this.CRTCIndexRegister];
+        }
+        break;
+      case 0x3B8: // 6845 Mode Control Register
+        return this.modeControlRegister;
+        break;
+      case 0x3B9: // reserved for color select register on color adapter
+        break;
+      case 0x3BA: // Status Register (read only)
+        return this.statusRegister;
+        break;
+      case 0x3BB: // reserved for light pen strobe reset
+        break;
+    }
   }
 
   deviceCycle(){

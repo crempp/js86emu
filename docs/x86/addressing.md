@@ -47,7 +47,7 @@ The reg field of the ModR/M byte selects a control register (for example,
 MOV (0F20, 0F22)).
 
 ### D
-The reg field of the ModR/M byte selects a debug register (for example,
+The reg field of the ModR/M byte selects a logState register (for example,
 MOV (0F21,0F23)).
 
 ### E

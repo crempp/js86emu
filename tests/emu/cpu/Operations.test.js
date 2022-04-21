@@ -4140,7 +4140,7 @@ describe.skip('Regressions', () => {
   // beforeEach(() => {
   //   cpu = new CPU8086(new SystemConfig({
   //     memorySize: 2 ** 20,
-  //     debug: false,
+  //     logState: false,
   //   }));
   //   oper = new Operations(cpu);
   //   addr = new Addressing(cpu);

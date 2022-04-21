@@ -244,22 +244,3 @@ Investigate using Electron for running natively
 
 
 ## Feature TODO List
-* Auto generated documentation from code
-* Render markdown docs and serve from site
-* Reactify debug view (Switch to something other than React?)
-* Build library of systems (5150, 5160, etc)
-* Build library of disk images/software/games
-* Build interface for debug, docs, library, etc.
-* Check all instruction tests and ensure that the instruction byte is set correctly
-* Check that all opcode variations (inst opcodes) are tested.
-* Does the MUL operation actually work with negative values? I don't think so.
-* Create flag set/clear helper functions. It's really confusing now. Optimize later.
-* Replace sign bit checks with isByteSigned/isWordSigned
-* Flesh out documentation and possibly use Hugo
-* Use github project
-* When interupts are done update IDIV and tests
-* Move memory to system (currently in CPU)
-* TODO: Switch addressing documentation overview to this or something similar http://www.cs.loyola.edu/~binkley/371/Encoding_Real_x86_Instructions.html
-* Deep copy/override of SystemConfig, currently must define entire subtree of options or errors will occur
-* Switch video renderer to use requestAnimationFrame rather than cycle counts
-* Make IO classes - Devices do I/O (not mem-mapped) like chips, Cards do I/O (including mem-mapped) but more and are attached to the card bus

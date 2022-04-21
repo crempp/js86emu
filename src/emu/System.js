@@ -10,7 +10,7 @@ import {
 } from './Constants';
 import { SystemConfigException } from "./utils/Exceptions";
 import {loadBINAsync, seg2abs} from "./utils/Utils";
-import {hexString32} from "./utils/Debug";
+import Debug, {hexString32} from "./utils/Debug";
 
 export default class System {
   constructor (config) {
@@ -30,6 +30,9 @@ export default class System {
     this.cyclesToRun = null;
     this.io = null;
 
+    this.steppingMode = false;
+    this.debug = new Debug(this);
+
     // TODO: Figure out what to do with these
     this.videoROMAddress = [0xC000, 0x0000]; // 0x000C0000
     this.NMIMasked = false; // update this with this.io.devices["NMIMaskRegister"].isMasked();
@@ -43,6 +46,48 @@ export default class System {
 
     // Temporary handle on video card until I find a better way to access it
     this.videoCard = this.io.availableDevices["VideoMDA"];
+
+    // Breakpoints are structured in the following way for rapid lookup
+    // {
+    //   CS_ADDR: {
+    //     IP_ADDR: {
+    //       name: "",
+    //       enabled: true
+    //     }
+    //   }
+    // }
+    this.breakpoints = {
+      0xF000: {
+        0xE05B: {
+          name: "START",
+          enabled: false,
+        },
+        0xE08E: {
+          name: "C8",
+          enabled: false,
+        },
+        0xE0AB: {
+          name: "C9",
+          enabled: false,
+        },
+        0xE0B0: {
+          name: "C10",
+          enabled: false,
+        },
+        0xE20B: {
+          name: "ROS_CHECKSUM",
+          enabled: false,
+        },
+        0xE0D8: {
+          name: "C11",
+          enabled: true,
+        },
+        // 0xE0DC: {
+        //   name: "WIP",
+        //   enabled: true,
+        // },
+      }
+    }
   }
 
   /**

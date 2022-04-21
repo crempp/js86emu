@@ -11,7 +11,7 @@ controllers and graphics. This will allow emulation of original PC XT and PC AT 
 systems until it speed becomes a significant issue.
 
 <p align="center">
-  <img src="./docs/images/debug-screen.png" alt="js86emu debug"
+  <img src="./docs/images/debug-screen.png" alt="js86emu logState"
        width="85%" height="85%">
 </p>
 
