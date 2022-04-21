@@ -40,12 +40,7 @@ export default class CPU8086 extends CPU {
     // Tests may not have a system
     if (this.system) {
       this.debug = this.system.debug;
-      this.steppingMode = this.system.steppingMode;
     }
-    else {
-      this.steppingMode = false;
-    }
-
 
     /**
      * CPU frequency in hertz (cycles per second).
@@ -719,7 +714,9 @@ export default class CPU8086 extends CPU {
       this.system.steppingMode = true;
     }
 
-    if (this.steppingMode) {
+    // Temporarily guarding against no system (for tests)
+    // TODO: Move steppingMode somewhere where it can be mocked easily
+    if (this.system && this.system.steppingMode) {
       this.debug.flush();
       debugger;
     }

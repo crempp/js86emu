@@ -80,12 +80,12 @@ export default class System {
         },
         0xE0D8: {
           name: "C11",
+          enabled: false,
+        },
+        0xE0DC: {
+          name: "WIP",
           enabled: true,
         },
-        // 0xE0DC: {
-        //   name: "WIP",
-        //   enabled: true,
-        // },
       }
     }
   }
