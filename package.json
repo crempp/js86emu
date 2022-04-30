@@ -37,7 +37,8 @@
   "jest": {
     "verbose": false,
     "testEnvironment": "node",
-    "testResultsProcessor": "jest-junit"
+    "testResultsProcessor": "jest-junit",
+    "setupFilesAfterEnv": [ "./tests/jest-setup.js" ]
   },
   "jest-junit": {
     "suiteName": "js86emu tests",
