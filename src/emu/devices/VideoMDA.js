@@ -30,7 +30,7 @@ export default class VideoMDA extends Card{
     this.mem8            = system.cpu.mem8;
     this.renderer        = null;
     this.config          = config;
-    this.verticalSync    = config.video.verticalSync;
+    // this.verticalSync    = config.video.verticalSync;
     this.memStart        = config.video.memoryStart;
     this.memSize         = config.video.memorySize;
     this.font            = [];
@@ -112,9 +112,7 @@ export default class VideoMDA extends Card{
     this.renderer.setSize(this.screenWidth, this.screenHeight);
   }
 
-  boot() {
-    console.log(`  BOOT device: ${this.constructor.name}`);
-  }
+  boot() {}
 
   /**
    * Initialize the video card asynchronously.
@@ -278,8 +276,11 @@ export default class VideoMDA extends Card{
   }
 
   deviceCycle(){
-    if (this.system.config.debug) {
-      console.log(`  CYCLE device: ${this.constructor.name}`);
+    let videoSyncCycles = this.system.clock.videoSyncCycles;
+
+    // todo: convert to timer
+    if (videoSyncCycles !== 0 && this.system.clock.cycles % videoSyncCycles === 0) {
+      this.scan();
     }
   }
 }

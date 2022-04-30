@@ -70,7 +70,7 @@ export default class Debug {
     // let dataStyle = "font-weight: normal; background-color: #262626; color:#cccccc";
     // let defaultStyle = "font-weight: normal; background-color: inherit; color:inherit";
 
-    this.group(`Running instruction cycle [${this.system.cycleCount}]`);
+    this.group(`Running instruction cycle [${this.system.clock.cycles}]`);
     this.log(`  CS:IP:   ${hexString16(this.system.cpu.reg16[regCS])}:${hexString16(this.system.cpu.reg16[regIP])}`);
     this.log(`  INSTR:   ${this.system.cpu.opcode.string}\n${formatMemory(this.system.cpu.mem8, segIP(this.system.cpu), segIP(this.system.cpu) + 3, 11)}`);
     this.log(`  OPCODE:  ${formatOpcode(this.system.cpu.opcode, 11)}`);

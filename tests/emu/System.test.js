@@ -60,7 +60,7 @@ describe('basic system functionality', () => {
     await system.boot();
 
     expect(system).toBeInstanceOf(System);
-    expect(system.cycleCount).toBe(0);
+    expect(system.clock.cycles).toBe(0);
     // The last byte of the IBM BIOS is EB
     expect(system.cpu.mem8[system.cpu.mem8.length - 1]).toBe(0xEB);
     expect(system.videoCard.font.length).toBeGreaterThan(0);
@@ -72,7 +72,7 @@ describe('basic system functionality', () => {
     await system.boot();
     await system.run(10);
 
-    expect(system.cycleCount).toBe(10);
+    expect(system.clock.cycles).toBe(10);
   })
 
   test('system can load memory', () => {

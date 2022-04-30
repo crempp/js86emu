@@ -20,13 +20,28 @@ let config = new SystemConfig({
       /* FL */ 0,
     ],
   },
+
+  timeSyncCycles: 10000,
+
   renderer: {
     class: 'RendererCanvas'
   },
+
+  ports: {
+    memoryMapped: false,
+    size: 0xFFFF,        // IBM 5150 has 64k I/O address space
+    devices: [
+      {"range": [0x0000, 0x03AF], "dir": "rw", "device": null},
+      {"range": [0x03B0, 0x03BB], "dir": "rw", "device": "VideoMDA"},
+      {"range": [0x03BC, 0xFFFF], "dir": "rw", "device": null}
+    ]
+  },
+
   programBlob: {
     file: "files/program-blobs/codegolf",
     addr: 0x00
   },
+
   video: { memoryStart:  0x8000 },
   debug: true,
 });

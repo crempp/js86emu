@@ -35,7 +35,6 @@ export default class CPU8086 extends CPU {
     this.cycleCount = 0;
     this.config = config;
     this.system = system;
-    this.io = null;
 
     // Tests may not have a system
     if (this.system) {
@@ -708,16 +707,18 @@ export default class CPU8086 extends CPU {
       this.debug.logState(this.system);
     }
     if (this.config.debug &&
-        this.reg16[regCS] in this.system.breakpoints &&
-        this.reg16[regIP] in this.system.breakpoints[this.reg16[regCS]] &&
-        this.system.breakpoints[this.reg16[regCS]][this.reg16[regIP]].enabled) {
+        this.config.breakpoints?.[this.reg16[regCS]]?.[this.reg16[regIP]]?.enabled
+    ) {
       this.system.steppingMode = true;
+
     }
 
     // Temporarily guarding against no system (for tests)
     // TODO: Move steppingMode somewhere where it can be mocked easily
     if (this.system && this.system.steppingMode) {
+      this.system.clock.sync();
       this.debug.flush();
+      console.log(`  ran at ${(this.system.clock.hz / (1000 ** 2)).toFixed(6)} MHZ`);
       debugger;
     }
 

@@ -9,9 +9,6 @@ let config = new SystemConfig({
   /** The number of cycles between timing syncs */
   timeSyncCycles: 4 * 1000000 / 100, // About 100 times per sec
 
-  /** Number of cycles per video sync. This is updated every timeSyncCycles */
-  videoSync: 10000,
-
   programBlob: null,
 
   bios: {
@@ -38,7 +35,7 @@ let config = new SystemConfig({
       /* SS */ 0,
       /* FL */ 0,
     ],
-    frequency:   10 * 1024**2, // 10 Mhz
+    frequency:   4 * 1024**2, // 4 Mhz
     flags:       0x0000,
   },
 
@@ -47,6 +44,8 @@ let config = new SystemConfig({
     memorySize:   4 * 1024,
     memoryStart:  0xB8000,
     verticalSync: 50,       // Hertz
+    /** Number of cycles per video sync. This is updated every timeSyncCycles */
+    defaultCycleSync: 10000,
   },
 
   renderer: {
@@ -65,10 +64,12 @@ let config = new SystemConfig({
       {"range": [0x0020, 0x0021], "dir": "rw", "device": "PIC8259"},         // Interrupt controller
       {"range": [0x0022, 0x003F], "dir": "rw", "device": null},
       {"range": [0x0040, 0x0043], "dir": "rw", "device": "PIT8253"},         // Counter timer
-      {"range": [0x0044, 0x005F], "dir": "rw", "device": null},
+      {"range": [0x0045, 0x0046], "dir": "rw", "device": null},
+      {"range": [0x0047        ], "dir": "rw", "device": "PIT8253"},         // Counter timer
+      {"range": [0x0048, 0x005F], "dir": "rw", "device": null},
       {"range": [0x0060, 0x0063], "dir": "rw", "device": "PPI8255"},         // PPI
       {"range": [0x0064, 0x007F], "dir": "rw", "device": null},
-      {"range": [0x008         ], "dir": "rw", "device": null},              // Manufacturer systems checkpoint port (used during POST)
+      {"range": [0x0080        ], "dir": "rw", "device": null},              // Manufacturer systems checkpoint port (used during POST)
       {"range": [0x0081, 0x0083], "dir": "rw", "device": "DMA8237"},         // DMA page registerPort
       {"range": [0x0084, 0x009F], "dir": "rw", "device": null},
       {"range": [0x00A0],         "dir": "w",  "device": "NMIMaskRegister"}, // NMI mask registerPort
@@ -151,11 +152,54 @@ let config = new SystemConfig({
     sw1: 0b11000011,
     sw2: 0b11110000,
   },
+
   debug: true,
   cycleBreak: false,
   debugAtCycle: null,
   debugAtIP: null,
   debugOpString: false,
+
+  // Breakpoints are structured in the following way for rapid lookup
+  // {
+  //   CS_ADDR: {
+  //     IP_ADDR: {
+  //       name: "",
+  //       enabled: true
+  //     }
+  //   }
+  // }
+  breakpoints: {
+    0xF000: {
+      0xE05B: {
+        name: "START",
+        enabled: false,
+      },
+      0xE08E: {
+        name: "C8",
+        enabled: false,
+      },
+      0xE0AB: {
+        name: "C9",
+        enabled: false,
+      },
+      0xE0B0: {
+        name: "C10",
+        enabled: false,
+      },
+      0xE20B: {
+        name: "ROS_CHECKSUM",
+        enabled: false,
+      },
+      0xE0D8: {
+        name: "C11",
+        enabled: false,
+      },
+      0xE0EE: {
+        name: "WIP",
+        enabled: true,
+      },
+    }
+  }
 });
 
 export default config;

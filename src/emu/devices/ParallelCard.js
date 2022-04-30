@@ -1,4 +1,3 @@
-import Device from "./Device";
 import Card from "./Card";
 
 export default class ParallelCard extends Card{
@@ -6,9 +5,7 @@ export default class ParallelCard extends Card{
     super(config, system);
   }
 
-  boot() {
-    console.log(`  BOOT device: ${this.constructor.name}`);
-  }
+  boot() {}
 
   write(port, value, size) {
     // 3BC Parallel Data Port
@@ -19,9 +16,5 @@ export default class ParallelCard extends Card{
 
   read(port, size){}
 
-  deviceCycle(){
-    if (this.config.debug) {
-      console.log(`  CYCLE device: ${this.constructor.name}`);
-    }
-  }
+  deviceCycle(){}
 }

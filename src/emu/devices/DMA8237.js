@@ -96,11 +96,19 @@ export default class DMA8237 extends Device{
     this.DMAChannel2_PageReg = 0x00;    // 0x81
     this.DMAChannel3_PageReg = 0x00;    // 0x82
     this.DMAChannel1_PageReg = 0x00;    // 0x83
+
+    // Control values
+    this.mem2Mem              = 0; // (0=disable, 1=enable)
+    this.channel0AddressHold  = 0; // (0=disable, 1=enable, X if bit 0=0)
+    this.controllerEnable     = 0; // (0=enable, 1=disable)
+    this.timingType           = 0; // (0=normal, 1=compressed, X if bit 0=1)
+    this.priority             = 0; // (0=fixed, 1=rotating)
+    this.writeSelection       = 0; // (0=late, 1=extended, X if bit 3=1)
+    this.DREQSenseActiveLevel = 0; // (0=high, 1=low)
+    this.DACKSenseActiveLevel = 0; // (0=low, 1=high)
   }
 
-  boot() {
-    console.log(`  BOOT device: ${this.constructor.name}`);
-  }
+  boot() {}
 
   write(port, value, size) {
     // 8237 Registers
@@ -130,7 +138,16 @@ export default class DMA8237 extends Device{
         this.DMAChannel3_WordCntReg = value & 0xFF;
         break;
       case 0x08:
-        this.DMAStatCmdReg = value & 0xFF;
+        // Can test with a breakpoint at 0xF000:0xE0DC
+        this.DMAStatCmdReg        = value & 0xFF;
+        this.mem2Mem              = value & 0x1;
+        this.channel0AddressHold  = (value >> 1) & 0x1;
+        this.controllerEnable     = (value >> 2) & 0x1;
+        this.timingType           = (value >> 3) & 0x1;
+        this.priority             = (value >> 4) & 0x1;
+        this.writeSelection       = (value >> 5) & 0x1;
+        this.DREQSenseActiveLevel = (value >> 6) & 0x1;
+        this.DACKSenseActiveLevel = (value >> 7) & 0x1;
         break;
       case 0x09:
         this.DMARequestReg = value & 0xFF;
@@ -223,9 +240,5 @@ export default class DMA8237 extends Device{
     }
   }
 
-  deviceCycle(){
-    if (this.config.debug) {
-      console.log(`  CYCLE device: ${this.constructor.name}`);
-    }
-  }
+  deviceCycle() {}
 }

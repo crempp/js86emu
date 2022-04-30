@@ -48,7 +48,7 @@ export default class IO {
     // always have the null device available
     this.availableDevices[null] = new NullDevice(config, this.system);
 
-    this.devices = [];
+    this.devices = {};
     this.ports = new Array(this.config.ports.size);
 
     // Initialize ports with null (nothing attached)
@@ -84,8 +84,9 @@ export default class IO {
   }
 
   boot() {
-    for(let i = 0; i < this.devices.length; i++) {
-      this.devices[i].boot();
+    // Loop through devices and boot
+    for (let d in this.devices){
+      this.devices[d].boot();
     }
   }
 
@@ -135,8 +136,8 @@ export default class IO {
 
   cycle() {
     // Loop through devices and run a cycle
-    for(let i = 0; i < this.devices.length; i++) {
-      this.devices[i].deviceCycle();
+    for (let d in this.devices){
+      this.devices[d].deviceCycle();
     }
   }
 }

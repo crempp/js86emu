@@ -1,4 +1,9 @@
 # Dev Log
+
+### April 20th 2022
+* Yesterday did a bunch of random things and started on the timer.
+* Really good timer documentation - https://wiki.osdev.org/Programmable_Interval_Timer
+
 ### April 18th 2022
 * Created Device, Card base classes and refactored a bunch of the the System, CPU and IO classes to move
   code to more appropriate classes (pushed down)

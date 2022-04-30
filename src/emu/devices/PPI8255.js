@@ -72,7 +72,7 @@ export default class PPI8255 extends Device{
     this.modeSetFlag       = MODE_SET_INACTIVE;
 
     // Port B Interfacing lines         bit
-    this.tim2GateSpk        = 0;        // 0
+    this.timer2GateSpk      = 0;        // 0
     this.spkrData           = 0;        // 1
     this.readSW1SW4OrSW5    = SW5;      // 2
     this.motorOff           = 0;        // 3
@@ -88,9 +88,7 @@ export default class PPI8255 extends Device{
     this.parityChk     = 0;      // 7
   }
 
-  boot() {
-    console.log(`  BOOT device: ${this.constructor.name}`);
-  }
+  boot() {}
 
   write(port, value, size) {
     switch (port) {
@@ -172,7 +170,7 @@ export default class PPI8255 extends Device{
   }
 
   decodeAndApplyPortB() {
-    this.tim2GateSpk        = this.portB & 0x01;
+    this.timer2GateSpk      = this.portB & 0x01;
     this.spkrData           = (this.portB >> 1) & 0x01;
     this.readSW1SW4OrSW5    = (this.portB >> 2) & 0x01;
     this.motorOff           = (this.portB >> 3) & 0x01;
@@ -180,11 +178,9 @@ export default class PPI8255 extends Device{
     this.enableIOCk         = (this.portB >> 5) & 0x01;
     this.holdKbbClkLow      = (this.portB >> 6) & 0x01;
     this.portAKeyboardOrDIP = (this.portB >> 7) & 0x01;
+
+    this.system.io.devices["PIT8253"].setGate(2, this.timer2GateSpk);
   }
 
-  deviceCycle(){
-    if (this.config.debug) {
-      console.log(`  CYCLE device: ${this.constructor.name}`);
-    }
-  }
+  deviceCycle(){}
 }

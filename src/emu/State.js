@@ -28,9 +28,9 @@ export default class State {
 
     let registersWord = {regAX, regBX, regCX, regDX, regSI, regDI, regBP, regSP, regIP, regCS, regDS, regES, regSS};
 
-    if (givenState.cycleCount !== expectedState.cycleCount) {
+    if (givenState.clock.cycles !== expectedState.clock.cycles) {
       same = false;
-      diff += "CYCLE COUNT: " + givenState.cycleCount + " (given) != " + expectedState.cycleCount + " (expected)\n";
+      diff += "CYCLE COUNT: " + givenState.clock.cycles + " (given) != " + expectedState.clock.cycles + " (expected)\n";
     }
     if (givenState.addrSeg !== expectedState.addrSeg) {
       same = false;

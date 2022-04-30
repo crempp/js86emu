@@ -9,9 +9,7 @@ export default class PIC8259 extends Device{
     this.IMR_PIC2 = 0b00000000;
   }
 
-  boot() {
-    console.log(`  BOOT device: ${this.constructor.name}`);
-  }
+  boot() {}
 
   write(port, value, size) {
 
@@ -22,9 +20,9 @@ export default class PIC8259 extends Device{
     return value;
   }
 
-  deviceCycle(){
-    if (this.config.debug) {
-      console.log(`  CYCLE device: ${this.constructor.name}`);
-    }
+  deviceCycle() {}
+
+  setIRQ(irqNumber) {
+
   }
 }

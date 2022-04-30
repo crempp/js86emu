@@ -15,9 +15,7 @@ export default class NMIMaskRegister extends Device {
     this.NMIMaskRegister = 0x0000;
   }
 
-  boot() {
-    console.log(`  BOOT device: ${this.constructor.name}`);
-  }
+  boot() {}
 
   write(port, value, size) {
     this.NMIMaskRegister = value & 0x80;
@@ -27,11 +25,7 @@ export default class NMIMaskRegister extends Device {
     throw new PortAccessException("NMI Mask Register is write-only");
   }
 
-  deviceCycle() {
-    if (this.config.debug) {
-      console.log(`  CYCLE device: ${this.constructor.name}`);
-    }
-  }
+  deviceCycle() {}
 
   isMasked() {
     return (this.NMIMaskRegister === 0x80);
