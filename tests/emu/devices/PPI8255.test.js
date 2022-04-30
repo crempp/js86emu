@@ -6,12 +6,16 @@ import {PortAccessException} from "../../../src/emu/utils/Exceptions";
 import CPU8086 from "../../../src/emu/cpu/8086";
 import IO from "../../../src/emu/IO";
 import PPI8255 from "../../../src/emu/devices/PPI8255";
+import PIT8253 from "../../../src/emu/devices/PIT8253";
 
 class MockSystem {
   constructor (config) {
     this.config = config;
     this.cpu = new CPU8086(config, this);
-    this.io = new IO(this.config, this,{"PPI8255": new PPI8255(this.config, this)});
+    this.io = new IO(this.config, this,{
+      "PPI8255": new PPI8255(this.config, this),
+      "PIT8253": new PIT8253(this.config, this),
+    });
   }
 }
 
@@ -25,7 +29,9 @@ describe('PPI Mode 0', () => {
         memoryMapped: true,
         size: 0xFFFF,
         devices: [
-          {"range": [0x0060, 0x0063], "dir": "w", "device": "PPI8255"},
+          {"range": [0x0060, 0x0063], "dir": "w",  "device": "PPI8255"},
+          {"range": [0x0040, 0x0043], "dir": "rw", "device": "PIT8253"},
+          {"range": [0x0047        ], "dir": "rw", "device": "PIT8253"},
         ],
       },
       jumpers: {
