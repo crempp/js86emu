@@ -194,10 +194,42 @@ let config = new SystemConfig({
         name: "C11",
         enabled: false,
       },
-      0xE0EE: {
-        name: "WIP",
-        enabled: true,
+      0xE0EA: {
+        name: "C12",
+        enabled: false,
       },
+      0xE0FB: {
+        name: "C13",
+        enabled: false,
+      },
+      0xE10F: {
+        name: "C15",
+        enabled: false,
+      },
+      0xE135: {
+        name: "C18",
+        enabled: false,
+      },
+      0xE158: {
+        name: "TEST.04",
+        enabled: false,
+      },
+      0xE178: {
+        name: "C19",
+        enabled: false
+      },
+      0xE188: {
+        name: "C20",
+        enabled: false
+      },
+      // 0xE199: {
+      //   name: "C21",
+      //   enabled: false
+      // },
+      0xE199: {
+        name: "WIP",
+        enabled: true
+      }
     }
   }
 });

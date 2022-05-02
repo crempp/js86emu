@@ -2100,7 +2100,7 @@ export default class Operations {
    * operand.
    *   - [1] p.2-38
    *
-   * Modifies flags: ?
+   * Modifies flags: None
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
@@ -2832,7 +2832,7 @@ export default class Operations {
     for (let shift = 1; shift <= srcVal; shift++) {
       if (dstVal & (size === b ? 0x80 : 0x8000)) cf = 1;
       else cf = 0;
-      dstVal = (dstVal << 1) & 0xFF;
+      dstVal = (dstVal << 1) & 0xFFFF;
     }
 
     // Set CF if a '1' shifted out

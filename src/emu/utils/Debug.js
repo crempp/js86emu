@@ -51,6 +51,7 @@ export default class Debug {
     for (let i = 0; i < this.debugMessageFIFO.length; i++) {
       console[this.debugMessageFIFO[i].type](this.debugMessageFIFO[i].str);
     }
+    this.debugMessageFIFO = [];
   }
 
   trim() {

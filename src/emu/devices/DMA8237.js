@@ -70,74 +70,165 @@
  * 000F	w	DMA write mask registerPort
  */
 import Device from "./Device";
-import {PortAccessException} from "../utils/Exceptions";
+import {FeatureNotImplementedException, PortAccessException} from "../utils/Exceptions";
+import {LSB, MSB} from "../Constants";
+
+const VERIFY_TRANSFER = 0;
+const WRITE_TRANSFER  = 1;
+const READ_TRANSFER   = 2;
+const INC = 0;
+const DEC = 1;
+const DEMAND  = 0;
+const SINGLE  = 1;
+const BLOCK   = 2;
+const CASCADE = 3;
 
 export default class DMA8237 extends Device{
   constructor (config, system) {
     super(config, system);
 
-    this.DMAChannel0_AddressReg = 0x00; // 0x00
-    this.DMAChannel0_WordCntReg = 0x00; // 0x01
-    this.DMAChannel1_AddressReg = 0x00; // 0x02
-    this.DMAChannel1_WordCntReg = 0x00; // 0x03
-    this.DMAChannel2_AddressReg = 0x00; // 0x04
-    this.DMAChannel2_WordCntReg = 0x00; // 0x05
-    this.DMAChannel2_AddressReg = 0x00; // 0x06
-    this.DMAChannel3_WordCntReg = 0x00; // 0x07
+    this.currentByte = LSB;
+
+    this.channels = [
+      {  // Channel 0
+        startAddress: 0,
+        count: 0,
+        masked:                 false,
+        maskedDRQ:              false,
+        request:                false,
+        ctl_TransferType:       VERIFY_TRANSFER,
+        ctl_AutoInitialization: false,
+        ctl_AddressIncDec:      INC,
+        ctl_ModeSelect:         DEMAND,
+      },
+      {  // Channel 1
+        startAddress: 0,
+        count: 0,
+        masked:                 false,
+        maskedDRQ:              false,
+        request:                false,
+        ctl_TransferType:       VERIFY_TRANSFER,
+        ctl_AutoInitialization: false,
+        ctl_AddressIncDec:      INC,
+        ctl_ModeSelect:         DEMAND,
+      },
+      {  // Channel 2
+        startAddress: 0,
+        count: 0,
+        masked:                 false,
+        maskedDRQ:              false,
+        request:                false,
+        ctl_TransferType:       VERIFY_TRANSFER,
+        ctl_AutoInitialization: false,
+        ctl_AddressIncDec:      INC,
+        ctl_ModeSelect:         DEMAND,
+      },
+      {  // Channel 3
+        startAddress: 0,
+        count: 0,
+        masked:                 false,
+        maskedDRQ:              false,
+        request:                false,
+        ctl_TransferType:       VERIFY_TRANSFER,
+        ctl_AutoInitialization: false,
+        ctl_AddressIncDec:      INC,
+        ctl_ModeSelect:         DEMAND,
+      },
+    ]
+
     this.DMAStatCmdReg = 0x00;          // 0x08
     this.DMARequestReg = 0x00;          // 0x09
-    this.DMAMaskReg = 0x00;             // 0x0A
-    this.DMAModeReg = 0x00;             // 0x0B
-    this.DMAClearFlipFlopReg = 0x00;    // 0x0C
-    this.DMAMasterClearTempReg = 0x00;  // 0x0D
-    this.DMAClearMaskReg = 0x00;        // 0x0E
     this.DMAMultipleMaskReg = 0x00;     // 0x0F
 
     this.DMAChannel2_PageReg = 0x00;    // 0x81
     this.DMAChannel3_PageReg = 0x00;    // 0x82
     this.DMAChannel1_PageReg = 0x00;    // 0x83
 
-    // Control values
-    this.mem2Mem              = 0; // (0=disable, 1=enable)
-    this.channel0AddressHold  = 0; // (0=disable, 1=enable, X if bit 0=0)
-    this.controllerEnable     = 0; // (0=enable, 1=disable)
-    this.timingType           = 0; // (0=normal, 1=compressed, X if bit 0=1)
-    this.priority             = 0; // (0=fixed, 1=rotating)
-    this.writeSelection       = 0; // (0=late, 1=extended, X if bit 3=1)
-    this.DREQSenseActiveLevel = 0; // (0=high, 1=low)
-    this.DACKSenseActiveLevel = 0; // (0=low, 1=high)
+    // Mode register controls
+    this.ctl_ChannelSelect      = 0;
+    this.ctl_TransferType       = VERIFY_TRANSFER;
+    this.ctl_Autoinitialization = false;
+    this.ctl_AddressIncDec      = INC;
+    this.ctl_ModeSelect         = DEMAND;
+
+    // Command register controls
+    this.ctl_Mem2Mem              = 0; // (0=disable, 1=enable)
+    this.ctl_Channel0AddressHold  = 0; // (0=disable, 1=enable, X if bit 0=0)
+    this.ctl_ControllerEnable     = 0; // (0=enable, 1=disable)
+    this.ctl_TimingType           = 0; // (0=normal, 1=compressed, X if bit 0=1)
+    this.ctl_Priority             = 0; // (0=fixed, 1=rotating)
+    this.ctl_WriteSelection       = 0; // (0=late, 1=extended, X if bit 3=1)
+    this.ctl_DREQSenseActiveLevel = 0; // (0=high, 1=low)
+    this.ctl_DACKSenseActiveLevel = 0; // (0=low, 1=high)
+
+    // Masks
+    this.mask_Channel0 = false;
+    this.mask_Channel1 = false;
+    this.mask_Channel2 = false;
+    this.mask_Channel3 = false;
   }
 
-  boot() {}
+  /**
+   * Write a word to a register one byte at a time keeping track of which byte
+   * we're on.
+   *
+   * @param {number} channel Register channel
+   * @param {string} register Name of the register to write
+   * @param {number} value Value to write to the register
+   */
+  writeRegisterWord(channel, register, value) {
+    if (this.currentByte === MSB) {
+      this.channels[channel][register] = this.channels[channel][register] | (value << 8);
+    }
+    else this.channels[channel][register] = (this.channels[channel][register] & 0xFF00) | (value & 0xFF);
+    this.currentByte = (this.currentByte + 1) % 2;
+  }
+
+  /**
+   * Read a value from a register one byte at a time keeping track of which byte
+   * we're on.
+   *
+   * @param {number} channel Register channel
+   * @param {string} register Name of the register to read
+   * @returns {number} Register value
+   */
+  readRegisterWord(channel, register) {
+    let value;
+    if (this.currentByte === MSB) value = (this.channels[channel][register] >> 8) & 0xFF;
+    else value = this.channels[channel][register] & 0xFF;
+    this.currentByte = (this.currentByte + 1) % 2;
+    return value;
+  }
 
   write(port, value, size) {
+    let channel;
     // 8237 Registers
     switch (port) {
-      case 0x00:
-        this.DMAChannel0_AddressReg = value & 0xFF;
+      case 0x00:  // Channel 0 Start Address Register
+        this.writeRegisterWord(0,"startAddress", value);
         break;
-      case 0x01:
-        this.DMAChannel0_WordCntReg = value & 0xFF;
+      case 0x01:  // Channel 0 Count Register
+        this.writeRegisterWord(0,"count", value);
         break;
-      case 0x02:
-        this.DMAChannel1_AddressReg = value & 0xFF;
+      case 0x02:  // Channel 1 Start Address Register
+        this.writeRegisterWord(1, "startAddress", value);
         break;
-      case 0x03:
-        this.DMAChannel1_WordCntReg = value & 0xFF;
+      case 0x03:  // Channel 1 Count Register
+        this.writeRegisterWord(1, "count", value);
         break;
-      case 0x04:
-        this.DMAChannel2_AddressReg = value & 0xFF;
+      case 0x04:  // Channel 2 Start Address Register
+        this.writeRegisterWord(2, "startAddress", value);
         break;
-      case 0x05:
-        this.DMAChannel2_WordCntReg = value & 0xFF;
+      case 0x05:  // Channel 2 Count Register
+        this.writeRegisterWord(2, "count", value);
         break;
-      case 0x06:
-        this.DMAChannel2_AddressReg = value & 0xFF;
+      case 0x06:  // Channel 3 Start Address Register
+        this.writeRegisterWord(3, "startAddress", value);
         break;
-      case 0x07:
-        this.DMAChannel3_WordCntReg = value & 0xFF;
+      case 0x07:  // Channel 3 Count Register
+        this.writeRegisterWord(3, "count", value);
         break;
-      case 0x08:
+      case 0x08:  // Command Register
         // Can test with a breakpoint at 0xF000:0xE0DC
         this.DMAStatCmdReg        = value & 0xFF;
         this.mem2Mem              = value & 0x1;
@@ -149,26 +240,55 @@ export default class DMA8237 extends Device{
         this.DREQSenseActiveLevel = (value >> 6) & 0x1;
         this.DACKSenseActiveLevel = (value >> 7) & 0x1;
         break;
-      case 0x09:
-        this.DMARequestReg = value & 0xFF;
+      case 0x09:  // Request Register
+        throw new FeatureNotImplementedException("DMA port not implemented");
+        // this.DMARequestReg = value & 0xFF;
+        // break;
+      case 0x0A:  // Set channel mask
+        channel = (value & 0x3);
+        this.channels[channel].masked = ((value >> 2) & 0x1) === 1;
         break;
-      case 0x0A:
-        this.DMAMaskReg = value & 0xFF;
+      case 0x0B:  // Mode Register
+        channel = value & 0x3;
+        this.channels[channel].ctl_TransferType = (value >> 2) & 0x3;
+        this.channels[channel].ctl_AutoInitialization = ((value >> 4) & 0x1) === 1;
+        this.channels[channel].ctl_AddressIncDec = (value >> 5) & 0x1;
+        this.channels[channel].ctl_ModeSelect = (value >> 6) & 0x3;
         break;
-      case 0x0B:
-        this.DMAModeReg = value & 0xFF;
+      case 0x0C:  // Flip-flop reset (value doesn't matter)
+        this.currentByte = LSB;
         break;
-      case 0x0C:
-        this.DMAClearFlipFlopReg = value & 0xFF;
+      case 0x0D:  // Master Reset (value doesn't matter)
+        // sets flip-flop low,
+        this.currentByte = LSB;
+        // clears status,
+        this.DMAStatCmdReg        = 0;
+        this.mem2Mem              = 0;
+        this.channel0AddressHold  = 0;
+        this.controllerEnable     = 0;
+        this.timingType           = 0;
+        this.priority             = 0;
+        this.writeSelection       = 0;
+        this.DREQSenseActiveLevel = 0;
+        this.DACKSenseActiveLevel = 0;
+        // and sets all Mask bits ON.
+        this.channels[0].maskedDRQ = true;
+        this.channels[1].maskedDRQ = true;
+        this.channels[2].maskedDRQ = true;
+        this.channels[3].maskedDRQ = true;
         break;
-      case 0x0D:
-        this.DMAMasterClearTempReg = value & 0xFF;
+      case 0x0E:  // Mask Reset (value doesn't matter)
+        // sets all mask bits OFF.
+        this.channels[0].maskedDRQ = false;
+        this.channels[1].maskedDRQ = false;
+        this.channels[2].maskedDRQ = false;
+        this.channels[3].maskedDRQ = false;
         break;
-      case 0x0E:
-        this.DMAClearMaskReg = value & 0xFF;
-        break;
-      case 0x0F:
-        this.DMAMultipleMaskReg = value & 0xFF;
+      case 0x0F:  // Set multiple channel masks
+        this.channels[0].maskedDRQ = value & 0x1;
+        this.channels[1].maskedDRQ = (value >> 1) & 0x1;
+        this.channels[2].maskedDRQ = (value >> 2) & 0x1;
+        this.channels[3].maskedDRQ = (value >> 3) & 0x1;
         break;
 
       // DMA Page Registers
@@ -185,7 +305,6 @@ export default class DMA8237 extends Device{
       case 0x83:
         this.DMAChannel1_PageReg = value & 0xF;
         break;
-
       default:
         throw new PortAccessException("Unhandled port write");
     }
@@ -193,24 +312,25 @@ export default class DMA8237 extends Device{
 
   read(port, size){
     switch (port) {
-      case 0x00:
-        return this.DMAChannel0_AddressReg;
-      case 0x01:
-        return this.DMAChannel0_WordCntReg;
-      case 0x02:
-        return this.DMAChannel1_AddressReg;
-      case 0x03:
-        return this.DMAChannel1_WordCntReg;
-      case 0x04:
-        return this.DMAChannel2_AddressReg;
-      case 0x05:
-        return this.DMAChannel2_WordCntReg;
-      case 0x06:
-        return this.DMAChannel2_AddressReg;
-      case 0x07:
-        return this.DMAChannel3_WordCntReg;
-      case 0x08:
-        return this.DMAStatCmdReg;
+      case 0x00:  // Channel 0 Start Address Register
+        return this.readRegisterWord(0,"startAddress");
+      case 0x01:  // Channel 0 Count Register
+        return this.readRegisterWord(0,"count");
+      case 0x02:  // Channel 1 Start Address Register
+        return this.readRegisterWord(1, "startAddress");
+      case 0x03:  // Channel 0 Count Register
+        return this.readRegisterWord(1, "count");
+      case 0x04:  // Channel 2 Start Address Register
+        return this.readRegisterWord(2, "startAddress");
+      case 0x05:  // Channel 0 Count Register
+        return this.readRegisterWord(2, "count");
+      case 0x06:  // Channel 3 Start Address Register
+        return this.readRegisterWord(3, "startAddress");
+      case 0x07:  // Channel 0 Count Register
+        return this.readRegisterWord(3, "count");
+      case 0x08:  // Status Register
+        throw new FeatureNotImplementedException("DMA port not implemented");
+        // return this.DMAStatCmdReg;
       case 0x09:
         throw new PortAccessException("Read from write-only port");
       case 0x0A:
@@ -241,4 +361,5 @@ export default class DMA8237 extends Device{
   }
 
   deviceCycle() {}
+  boot() {}
 }

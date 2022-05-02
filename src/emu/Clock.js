@@ -3,7 +3,7 @@ import {NS_PER_SEC} from "./Constants";
 export default class Clock {
   constructor(system) {
     this.config = system.config;
-    this.timers = [];
+    this.timers = new Map();
 
     this.system = system;
     this.cycles = 0;
@@ -11,6 +11,7 @@ export default class Clock {
     this.hz = 0;
     this.cyclePeriodNS = 0; // nanoseconds
     this.videoSyncCycles = this.config.video.defaultCycleSync;
+    // TODO: Make this configurable
     this.timerCheckCycles = 10;
   }
 
@@ -23,8 +24,6 @@ export default class Clock {
       this.sync();
     }
 
-    // Every 100 cycles check timers
-    // TODO: Make this configurable
     if (this.cycles % this.timerCheckCycles === 0) {
       this.checkTimers();
     }
@@ -61,29 +60,26 @@ export default class Clock {
   addTimer(triggerTimeNS, fn) {
     // Use nano second time as the key
     triggerTimeNS = Math.trunc(triggerTimeNS);
-    this.timers[triggerTimeNS] = {
+    this.timers.set(triggerTimeNS, {
       fn: fn,
       triggerTime: triggerTimeNS,
-    };
+    });
     return triggerTimeNS;
   }
 
   removeTimer(timerID) {
-    if (timerID in this.timers) {
-      delete this.timers[timerID];
+    if (this.timers.has(timerID)) {
+      this.timers.delete(timerID);
     }
   }
 
   checkTimers() {
     // TODO: Log now - triggerTime to Debug (array) so we can watch and see problems
     let nowNS = Math.trunc(performance.now() * 1e6);
-
-    for (let key in this.timers) {
-      let triggerTime = this.timers[key].triggerTime;
+    for (let [id, timer] of this.timers) {
       let halfWayToNextTime = nowNS + ((this.timerCheckCycles * this.cyclePeriodNS) / 2);
-
-      if (nowNS > triggerTime || triggerTime < halfWayToNextTime) {
-        this.timers[key].fn();
+      if (nowNS > timer.triggerTime || timer.triggerTime < halfWayToNextTime) {
+        timer.fn();
       }
     }
   }

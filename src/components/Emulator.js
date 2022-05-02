@@ -59,7 +59,7 @@ export default class extends Component {
     await system.boot();
 
     console.log("running...");
-    await system.run(100000); // Temporarily put a max cycle in
+    await system.run();
   };
 
   render() {

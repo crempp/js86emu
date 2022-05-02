@@ -2,9 +2,8 @@
 
 import Device from "./Device";
 import {FeatureNotImplementedException} from "../utils/Exceptions";
+import {LSB, MSB} from "../Constants";
 
-const LSB = 0;
-const MSB = 1;
 
 const RL_LATCH    = 0;
 const RL_LSB_ONLY = 1;
@@ -67,7 +66,6 @@ export default class PIT8253 extends Device {
     this.timerPeriodNS = Math.trunc(1e9 / this.timerFreq);
 
     this.currentByte = LSB;
-    // TODO: rename to channels
     this.channels = [
       {
         readLoad:  RL_LATCH,
@@ -286,21 +284,20 @@ export default class PIT8253 extends Device {
   }
 
   restartTimer(channel) {
+    // Remove the current timer from the clock
     if (this.channels[channel].timerID !== null) {
       this.system.clock.removeTimer(this.channels[channel].timerID);
     }
 
+    // Add a new timer to the clock
     let nowNS = Math.trunc(performance.now() * 1e6);
-    // TODO: Account for count having wrapped around
     let nsFromNow = this.timerPeriodNS * this.channels[channel].resetVal;
     this.channels[channel].timerID = this.system.clock.addTimer(
         nowNS + nsFromNow,
         () => this.handleChannelCount0(channel));
-    this.channels[channel].counter = this.channels[channel].resetVal;
   }
 
   handleChannelCount0(channel) {
-    let a = 1;
     switch (this.channels[channel].mode) {
       case 0:
         // Output goes high and stays high. Counter wraps and continues

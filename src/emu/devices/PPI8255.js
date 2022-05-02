@@ -38,18 +38,7 @@ const SW1SW4 = 1;
  *
  * Port C upper is not used
  *
- *                Control Word
- * +----+----+----+----+----+----+----+----+
- * | D7 | D6 | D5 | D4 | D3 | D2 | D1 | D0 |
- * +----+----+----+----+----+----+----+----+
- *         / D0: Port C Lower [1 = Input, 0 = Output]
- *   Grp B | D1: Port B [1 = Input, 0 = Output]
- *         \ D2: Mode Selection [0 = Mode 0, 1 = Mode 1]
- *         / D3: Port C Upper [1 = Input, 0 = Output]
- *         | D4: Port A [1 = Input, 0 = Output]
- *   Grp A | D5: | Mode Selection [00 = Mode 0,
- *         \ D6: |    01 = Mode 1, 1X = Mode 2]
- *           D7: Mode Set Flag [1 = Active]
+
  */
 export default class PPI8255 extends Device{
   constructor (config, system) {
@@ -112,16 +101,28 @@ export default class PPI8255 extends Device{
         }
         break;
       case 0x63:
+        //                Control Word
+        // +----+----+----+----+----+----+----+----+
+        // | D7 | D6 | D5 | D4 | D3 | D2 | D1 | D0 |
+        // +----+----+----+----+----+----+----+----+
+        //         / D0: Port C Lower [1 = Input, 0 = Output]
+        //   Grp B | D1: Port B [1 = Input, 0 = Output]
+        //         \ D2: Mode Selection [0 = Mode 0, 1 = Mode 1]
+        //         / D3: Port C Upper [1 = Input, 0 = Output]
+        //         | D4: Port A [1 = Input, 0 = Output]
+        //   Grp A | D5: | Mode Selection [00 = Mode 0,
+        //         \ D6: |    01 = Mode 1, 1X = Mode 2]
+        //           D7: Mode Set Flag [1 = Active]
+          // 1 00 1   1 0 0 1
         this.PPIControlWordRegister = value;
-        this.grpBmodeSelection      = value & 0x4  >> 2;
-        this.portAInOut             = value & 0x10 >> 4;
-        this.portBInOut             = value & 0x2  >> 1;
-        this.portCLowerInOut        = value & 0x1;
-        this.portCUpperInOut        = value & 0x8  >> 3;
-        this.modeSetFlag            = value & 0x80 >> 7;
-        if ((value & 0x60) >> 5 === 0) this.grpAModeSelection = MODE0;
-        else if ((value & 0x60) >> 5 === 1) this.grpAModeSelection = MODE1;
-        else this.grpAModeSelection = MODE2;
+
+        this.portCLowerInOut   = value & 0x1;
+        this.portBInOut        = (value >> 1) & 0x1;
+        this.grpBmodeSelection = (value >> 2) & 0x1;
+        this.portCUpperInOut   = (value >> 3) & 0x1;
+        this.portAInOut        = (value >> 4) & 0x1
+        this.grpAModeSelection = (value >> 5) & 0x3;
+        this.modeSetFlag       = (value >> 7) & 0x1;
         break;
     }
   }
@@ -160,7 +161,7 @@ export default class PPI8255 extends Device{
           //       switch 5 however is connected to readSW1SW4OrSW5 through
           //       circuitry and looks like it could conflict with switch 1.
           //       not sure how to handle this.
-          value |= (this.config.jumpers.sw2 & 0xF);
+          value |= ((this.config.jumpers.sw2 >> 4) & 0xF);
         }
         break;
       case 0x63:

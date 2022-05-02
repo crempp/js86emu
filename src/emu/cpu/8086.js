@@ -722,7 +722,7 @@ export default class CPU8086 extends CPU {
       debugger;
     }
 
-    this. opcode.inst.run();
+    this.opcode.inst.run();
 
     this.prefixTermination();
 

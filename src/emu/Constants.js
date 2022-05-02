@@ -147,6 +147,5 @@ export const PIN_8080_NMI   = 17;
 export const PIN_LOW  = 0;
 export const PIN_HIGH = 1;
 
-
-
-
+export const LSB = 0;
+export const MSB = 1;
