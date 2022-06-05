@@ -22,7 +22,7 @@
   "devDependencies": {
     "jest": "^27.5.1",
     "jest-each": "^27.5.1",
-    "jest-junit": "^13.0.0"
+    "jest-junit": "^13.2.0"
   },
   "scripts": {
     "build:web": "next build",
