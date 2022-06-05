@@ -11,7 +11,7 @@
     "@babel/runtime": "^7.17.2",
     "browser-process-hrtime": "^1.0.0",
     "browserfs": "^2.0.0",
-    "bson": "^4.2.2",
+    "bson": "^4.6.4",
     "compression": "^1.7.4",
     "next": "^12.1.0",
     "pngjs": "^6.0.0",
