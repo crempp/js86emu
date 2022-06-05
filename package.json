@@ -17,7 +17,7 @@
     "pngjs": "^6.0.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
-    "serve-static": "^1.14.1"
+    "serve-static": "^1.15.0"
   },
   "devDependencies": {
     "jest": "^27.5.1",
