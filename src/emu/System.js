@@ -10,6 +10,7 @@ import { SystemConfigException } from "./utils/Exceptions";
 import {loadBINAsync, seg2abs} from "./utils/Utils";
 import Debug, {hexString32} from "./utils/Debug";
 import Clock from "./Clock";
+import Keyboard from "./devices/Keyboard";
 
 export default class System {
   constructor (config) {
@@ -32,7 +33,7 @@ export default class System {
     this.NMIMasked = false; // update this with this.io.devices["NMIMaskRegister"].isMasked();
 
     // Create clock
-    this.clock = new Clock(this)
+    this.clock = new Clock(this);
 
     // Create CPU
     this.cpu = new CPU8086(config, this);
@@ -43,6 +44,9 @@ export default class System {
 
     // Temporary handle on video card until I find a better way to access it
     this.videoCard = this.io.availableDevices["VideoMDA"];
+
+    // Create keyboard
+    this.keyboard = new Keyboard(config, this);
   }
 
   /**
@@ -58,7 +62,7 @@ export default class System {
       this.loadMem(bin, this.config.programBlob.addr);
     }
     else if (typeof this.config.bios.file === 'string') {
-      console.log("Loading BIOS...");
+      this.debug.info("Loading BIOS...", true);
       // Load BIOS file
       let biosPath = `${this.config.bios.path}${this.config.bios.file}`;
       let bios = await loadBINAsync(biosPath);
@@ -66,7 +70,7 @@ export default class System {
       // Currently hard-coded for 8086
       let biosAddr = this.config.memorySize - bios.length;
 
-      if (this.config.debug) console.info(`Loading BIOS at ${hexString32(biosAddr)}`);
+      if (this.config.debug) this.debug.info(`Loading BIOS at ${hexString32(biosAddr)}`, true);
       this.loadMem(bios, biosAddr);
     }
 
@@ -147,6 +151,10 @@ export default class System {
     // Print debug info
     console.log(`Done running - ${this.clock.cycles} cycles`);
     console.log(`  ran at ${(this.clock.hz / (1000 ** 2)).toFixed(6)} MHZ`);
+  }
+
+  getDevice(name) {
+    return this.io.devices[name];
   }
 
   /**

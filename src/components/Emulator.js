@@ -55,10 +55,10 @@ export default class extends Component {
     // make global for debugging
     window.system = system
 
-    console.log("booting...");
+    system.debug.info("booting...", true);
     await system.boot();
 
-    console.log("running...");
+    system.debug.info("running...", true);
     await system.run();
   };
 

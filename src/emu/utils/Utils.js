@@ -1,6 +1,40 @@
 import { PNG } from 'pngjs';
 import fs from 'fs';
-import { regIP, regCS } from '../Constants';
+import {regIP, regCS, regSP, regSS} from '../Constants';
+
+/**
+ * Push a value onto the stack. SP is decremented by two and the value is
+ * stored at regSS:regSP
+ *
+ * SP is decremented first
+ *   - [4] 4-508
+ *
+ * @param {CPU} cpu CPU instance to use for pushing
+ * @param {number} value Word value to push onto the stack
+ *
+ */
+export function push16 (cpu, value) {
+  cpu.reg16[regSP] -= 2;
+
+  cpu.mem8[seg2abs(cpu.reg16[regSS], cpu.reg16[regSP]    )] = (value & 0x00FF);
+  cpu.mem8[seg2abs(cpu.reg16[regSS], cpu.reg16[regSP] + 1)] = (value >> 8);
+}
+
+/**
+ * Pop a value off the stack. SP is incremented by two and the value at
+ * regSS:regSP is returned.
+ *
+ * @param {CPU} cpu CPU instance to use for popping
+ * @return {number} Word value popped off the stack
+ */
+export function pop16 (cpu) {
+  let value = cpu.mem8[seg2abs(cpu.reg16[regSS], cpu.reg16[regSP] + 1)] << 8 |
+      cpu.mem8[seg2abs(cpu.reg16[regSS], cpu.reg16[regSP]    )];
+
+  cpu.reg16[regSP] += 2;
+
+  return value;
+}
 
 /**
  * Convert a segmented (seg:offset) memory address into an absolute address.

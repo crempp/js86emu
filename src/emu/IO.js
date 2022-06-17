@@ -27,6 +27,7 @@ export default class IO {
   constructor (config, system, availableDevices = null) {
     this.config = config;
     this.system = system;
+    this.debug = this.system.debug;
 
     // I think this must happen after creating the CPU because devices need
     // access to the instantiated CPU
@@ -116,7 +117,7 @@ export default class IO {
     this.ports[port].write(port, value, size);
 
     if (this.config.debug) {
-      console.log(`  I/O WRITE device: ${this.ports[port].constructor.name} port: ${hexString16(port)}, value:${hexString16(value)}, size: ${(size === b)? 'b': 'w'}`);
+      this.debug.debug(`  I/O WRITE device: ${this.ports[port].constructor.name} port: ${hexString16(port)}, value:${hexString16(value)}, size: ${(size === b)? 'b': 'w'}`);
     }
   }
 
@@ -128,7 +129,7 @@ export default class IO {
     let value = this.ports[port].read(port, size);
 
     if (this.config.debug) {
-      console.log(`  I/O READ device: ${this.ports[port].constructor.name} port: ${hexString16(port)}, value:${hexString16(value)}, size: ${(size === b)? 'b': 'w'}`);
+      this.debug.debug(`  I/O READ device: ${this.ports[port].constructor.name} port: ${hexString16(port)}, value:${hexString16(value)}, size: ${(size === b)? 'b': 'w'}`);
     }
 
     return value;

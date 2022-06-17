@@ -222,12 +222,36 @@ let config = new SystemConfig({
         name: "C20",
         enabled: false
       },
-      // 0xE199: {
-      //   name: "C21",
-      //   enabled: false
-      // },
       0xE199: {
-        name: "WIP",
+        name: "C21", // Line 483
+        enabled: false
+      },
+      0xE1C6: {
+        name: "Set KB Int", // Line 505
+        enabled: false
+      },
+      0xE688: {
+        name: "KBD_RESET",
+        enabled: false
+      },
+      0xE1E4: {
+        name: "C23",  // LINE 519
+        enabled: false
+      },
+      0xE01A: {
+        name: "STGTEST",  // LINE 220
+        enabled: false
+      },
+      0xE1F2: {
+        name: "C25",  // LINE 530
+        enabled: false
+      },
+      0xE235: {
+        name: "TST6",  // LINE 568
+        enabled: false
+      },
+      0xE237: {
+        name: "WIP",  // LINE 570
         enabled: true
       }
     }

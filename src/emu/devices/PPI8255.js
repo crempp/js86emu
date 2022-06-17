@@ -74,7 +74,7 @@ export default class PPI8255 extends Device{
     this.CassDataIn    = 0;      // 4
     this.TC2Out        = 0;      // 5
     this.IOChk         = 0;      // 6
-    this.parityChk     = 0;      // 7
+    this.parityChk     = 0;      // 7 (Leave as 0 always, shouldn't have errors)
   }
 
   boot() {}
@@ -136,8 +136,7 @@ export default class PPI8255 extends Device{
           if (this.portAKeyboardOrDIP === DIP) {
             value = this.config.jumpers.sw1
           } else {
-            // TODO: Add keyboard logic here
-            value = this.portA;
+            value = this.system.keyboard.buffer;
           }
         }
         break;
@@ -181,6 +180,8 @@ export default class PPI8255 extends Device{
     this.portAKeyboardOrDIP = (this.portB >> 7) & 0x01;
 
     this.system.io.devices["PIT8253"].setGate(2, this.timer2GateSpk);
+    this.system.keyboard.setLine("clk", this.holdKbbClkLow);
+    if (this.portAKeyboardOrDIP === 1) this.system.keyboard.clear();
   }
 
   deviceCycle(){}

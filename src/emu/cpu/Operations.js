@@ -1,4 +1,6 @@
 import {
+  push16,
+  pop16,
   seg2abs,
   segIP,
   signExtend16,
@@ -264,26 +266,26 @@ export default class Operations {
     switch (this.cpu.opcode.opcode_byte) {
       case 0x9A:
         // CALL Ap (far)
-        this.push16(this.cpu.reg16[regCS]);
-        this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
+        push16(this.cpu, this.cpu.reg16[regCS]);
+        push16(this.cpu, this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
         this.cpu.reg16[regCS] = dstVal[0];
         this.cpu.reg16[regIP] = dstVal[1];
         break;
       case 0xE8:
         // CALL Jv (near)
-        this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
+        push16(this.cpu, this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
         this.cpu.reg16[regIP] = dstVal;
         break;
       case 0xFF:
         if (this.cpu.opcode.reg === 2) {
           // 0xFF (2) CALL Ev (near)
-          this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
+          push16(this.cpu, this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
           this.cpu.reg16[regIP] = dstVal;
         }
         else if (this.cpu.opcode.reg === 3) {
           // 0xFF (3) CALL Ep (far)
-          this.push16(this.cpu.reg16[regCS]);
-          this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
+          push16(this.cpu, this.cpu.reg16[regCS]);
+          push16(this.cpu, this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
           this.cpu.reg16[regCS] = dstVal[0];
           this.cpu.reg16[regIP] = dstVal[1];
         }
@@ -956,11 +958,11 @@ export default class Operations {
     let dstVal  = dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
 
     // 1. Flag registerPort value is pushed on to the stack.
-    this.push16(this.cpu.reg16[regFlags]);
+    push16(this.cpu, this.cpu.reg16[regFlags]);
     // 2. CS value of the Return address and IP value of the Return address
     //    are pushed on to the stack.
-    this.push16(this.cpu.reg16[regCS]);
-    this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
+    push16(this.cpu, this.cpu.reg16[regCS]);
+    push16(this.cpu, this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
     // 3. IP is loaded from the contents of the word location N x 4.
     this.cpu.reg16[regIP] = ((this.cpu.mem8[seg2abs(0x0000, dstVal * 4 + 1)] << 8) |
                               this.cpu.mem8[seg2abs(0x0000, dstVal * 4    )]);
@@ -971,7 +973,7 @@ export default class Operations {
     this.cpu.reg16[regFlags] &= ~FLAG_IF_MASK;
     this.cpu.reg16[regFlags] &= ~FLAG_TF_MASK;
 
-    // HACK! ... or is it?
+    // TODO: HACK! ... or is it?
     // The way the cycle code is structured we will end up with the IP being
     // incremented by the instruction base size if we don't reset it.
     this.cpu.instIPInc = this.cpu.addrIPInc = 0;
@@ -997,11 +999,11 @@ export default class Operations {
       let dstVal = 4;
 
       // 1. Flag registerPort value is pushed on to the stack.
-      this.push16(this.cpu.reg16[regFlags]);
+      push16(this.cpu, this.cpu.reg16[regFlags]);
       // 2. CS value of the Return address and IP value of the Return address
       //    are pushed on to the stack.
-      this.push16(this.cpu.reg16[regCS]);
-      this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
+      push16(this.cpu, this.cpu.reg16[regCS]);
+      push16(this.cpu, this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
       // 3. IP is loaded from the contents of the word location N x 4.
       this.cpu.reg16[regIP] = ((this.cpu.mem8[seg2abs(0x0000, dstVal * 4 + 1)] << 8) |
         this.cpu.mem8[seg2abs(0x0000, dstVal * 4)]);
@@ -1033,9 +1035,9 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   iret (dst, src) {
-    this.cpu.reg16[regIP] = this.pop16();
-    this.cpu.reg16[regCS] = this.pop16();
-    this.cpu.reg16[regFlags] = this.pop16();
+    this.cpu.reg16[regIP] = pop16(this.cpu);
+    this.cpu.reg16[regCS] = pop16(this.cpu);
+    this.cpu.reg16[regFlags] = pop16(this.cpu);
 
     // HACK! ... or is it?
     // The way the cycle code is structured we will end up with the IP being
@@ -1958,7 +1960,7 @@ export default class Operations {
    * MOVS (Move String) transfers a byte or a word from the source string
    * (addressed by SI) to the destination string (addressed by DI) and updates
    * SI and DI to point to the next string element. When used in conjunction
-   * with REP, MOYS performs a memory-to-memory block transfer.
+   * with REP, MOVS performs a memory-to-memory block transfer.
    *    - [1] p.2-42
    *
    * Modifies flags: NONE
@@ -2181,7 +2183,7 @@ export default class Operations {
   pop (dst, src) {
     let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
 
-    dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr, this.pop16());
+    dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr, pop16(this.cpu));
   }
 
   /**
@@ -2201,7 +2203,7 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   popf (dst, src) {
-    this.cpu.reg16[regFlags] = this.pop16();
+    this.cpu.reg16[regFlags] = pop16(this.cpu);
   }
 
   /**
@@ -2221,7 +2223,7 @@ export default class Operations {
     let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
     let dstVal  = dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
 
-    this.push16(dstVal);
+    push16(this.cpu, dstVal);
   }
 
   /**
@@ -2236,7 +2238,7 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   pushf (dst, src) {
-    this.push16(this.cpu.reg16[regFlags]);
+    push16(this.cpu, this.cpu.reg16[regFlags]);
   }
 
   /**
@@ -2472,11 +2474,11 @@ export default class Operations {
       case 0xC2:
         // RET Iw
         let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
-        this.cpu.reg16[regIP] = this.pop16() + dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
+        this.cpu.reg16[regIP] = pop16(this.cpu) + dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
         break;
       case 0xC3:
         // RET
-        this.cpu.reg16[regIP] = this.pop16();
+        this.cpu.reg16[regIP] = pop16(this.cpu);
         break;
     }
 
@@ -2508,13 +2510,13 @@ export default class Operations {
         // RETF Iw
         let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
 
-        this.cpu.reg16[regIP] = this.pop16() + dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
-        this.cpu.reg16[regCS] = this.pop16();
+        this.cpu.reg16[regIP] = pop16(this.cpu) + dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
+        this.cpu.reg16[regCS] = pop16(this.cpu);
         break;
       case 0xCB:
         // RETF
-        this.cpu.reg16[regIP] = this.pop16();
-        this.cpu.reg16[regCS] = this.pop16();
+        this.cpu.reg16[regIP] = pop16(this.cpu);
+        this.cpu.reg16[regCS] = pop16(this.cpu);
         break;
     }
     // HACK! ... or is it?
@@ -3181,35 +3183,11 @@ export default class Operations {
     throw new FeatureNotImplementedException("Operation not implemented");
   };
 
-  /**
-   * Push a value onto the stack. SP is decremented by two and the value is
-   * stored at regSS:regSP
-   *
-   * SP is decremented first
-   *   - [4] 4-508
-   *
-   * @param {number} value Word value to push onto the stack
-   */
   push16 (value) {
-    this.cpu.reg16[regSP] -= 2;
-
-    this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP]    )] = (value & 0x00FF);
-    this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP] + 1)] = (value >> 8);
+    throw new Error("Operation.push16 has moved to Utils");
   }
-
-  /**
-   * Pop a value off the stack. SP is incremented by two and the value at
-   * regSS:regSP is returned.
-   *
-   * @return {number} Word value popped off the stack
-   */
   pop16 () {
-    let value = this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP] + 1)] << 8 |
-                this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP]    )];
-
-    this.cpu.reg16[regSP] += 2;
-
-    return value;
+    throw new Error("Operation.pop16 has moved to Utils");
   }
 
   /**

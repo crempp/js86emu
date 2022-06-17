@@ -13,6 +13,9 @@ export default class Clock {
     this.videoSyncCycles = this.config.video.defaultCycleSync;
     // TODO: Make this configurable
     this.timerCheckCycles = 10;
+    this.targetFrequency = this.config.cpu.frequency;
+
+    this.timeScale = 1;
   }
 
   tick() {
@@ -44,6 +47,8 @@ export default class Clock {
     this.videoSyncCycles = Math.min(
         Math.round(this.hz / this.config.video.verticalSync),
         this.config.video.defaultCycleSync);
+
+    this.timeScale = this.hz / this.config.cpu.frequency;
   }
 
   /**

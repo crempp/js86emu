@@ -1,4 +1,26 @@
 # Dev Log
+### June 17th 2022
+* Been stuck on getting keyboard interrupt timing working to get past line 1298 in the BIOS
+* Finding docs on the keyboard controller and how to you port B of the 8255 is proving difficult. So far found this
+  * https://fd.lod.bz/rbil/ports/keyboard/p0060006f.html#table-P0392
+* On line 505 a temp KB INT is setup. This sets a reset vector as follows
+  SEG:ADDR        VAL
+  0x0000:0x0024   0xE2B6  (offset)
+  0x0000:0x0026   0xF000  (segment)
+* More references for PIC8258
+  * https://www.geeksforgeeks.org/command-words-of-8259-pic/
+  * https://www.eeeguide.com/8259-programmable-interrupt-controller/
+* TODO: Things I need to revisit
+  * Build interface for debug, docs, library, etc.
+  * Check all instruction tests and ensure that the instruction byte is set correctly
+  * Check that all opcode variations (inst opcodes) are tested.
+  * Does the MUL operation actually work with negative values? I don't think so.
+  * Create flag set/clear helper functions. It's really confusing now. Optimize later.
+  * Replace sign bit checks with isByteSigned/isWordSigned
+  * When interupts are done update IDIV and tests
+* Reference: For MDA I/O reference
+  * https://www.seasip.info/VintagePC/mda.html
+* Idea: Use a FIFO queue to keep decoded instructions for debugging
 
 ### April 20th 2022
 * Yesterday did a bunch of random things and started on the timer.

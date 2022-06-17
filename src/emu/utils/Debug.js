@@ -23,12 +23,49 @@ export default class Debug {
     this.queueSize = 100;
   }
 
-  log(message) {
+  log(message, flush=false) {
     this.debugMessageFIFO.push({
       type: "log",
       str: message,
     });
     this.trim();
+    if (flush) this.flush();
+  }
+
+  error(message, flush=false) {
+    this.debugMessageFIFO.push({
+      type: "error",
+      str: message,
+    });
+    this.trim();
+    if (flush) this.flush();
+  }
+
+  info(message, flush=false) {
+    this.debugMessageFIFO.push({
+      type: "info",
+      str: message,
+    });
+    this.trim();
+    if (flush) this.flush();
+  }
+
+  warn(message, flush=false) {
+    this.debugMessageFIFO.push({
+      type: "warn",
+      str: message,
+    });
+    this.trim();
+    if (flush) this.flush();
+  }
+
+  debug(message, flush=false) {
+    this.debugMessageFIFO.push({
+      type: "debug",
+      str: message,
+    });
+    this.trim();
+    if (flush) this.flush();
   }
 
   group(message) {

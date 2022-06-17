@@ -1,7 +1,7 @@
 import Operations from './Operations.js'
 import Addressing from './Addressing.js'
 import CPU from './CPU';
-import { segIP } from "../utils/Utils";
+import {push16, segIP} from "../utils/Utils";
 import {
   regAX, regBX, regCX, regDX,
   regSI, regDI, regBP, regSP, regIP,
@@ -22,7 +22,6 @@ import {
   PIN_8080_TEST, PIN_8080_READY, PIN_8080_RESET, PIN_8080_CLK, PIN_8080_INTR,
   PIN_8080_NMI, PIN_LOW, PIN_HIGH, STATE_WAIT, STATE_RUNNING
 } from '../Constants';
-import { logState } from '../utils/Debug'
 
 /**
  * @class
@@ -80,6 +79,20 @@ export default class CPU8086 extends CPU {
      * The CPU state.
      */
     this.state = STATE_HALT;
+
+    /**
+     * Interrupt number, IP and CS value if one is triggered. This will cause
+     * the CPU to jump to the interrupt vector specified by CS:IP once the
+     * current instruction is completed.
+     *
+     * The triggeredInt value is an object of the form
+     * {
+     *   interrupt: number,
+     *   ip: number,
+     *   cs: number,
+     * }
+     */
+    this.triggeredInt = null;
 
     // Pins
     this.pins = new Uint8Array(40);
@@ -718,7 +731,7 @@ export default class CPU8086 extends CPU {
     if (this.system && this.system.steppingMode) {
       this.system.clock.sync();
       this.debug.flush();
-      console.log(`  ran at ${(this.system.clock.hz / (1000 ** 2)).toFixed(6)} MHZ`);
+      this.debug.info(`  ran at ${(this.system.clock.hz / (1000 ** 2)).toFixed(6)} MHZ`, true);
       debugger;
     }
 
@@ -728,5 +741,42 @@ export default class CPU8086 extends CPU {
 
     // Move the IP
     this.reg16[regIP] += this.instIPInc + this.addrIPInc;
+
+    // We wait until the end of cycle to handle interrupts so we don't
+    // disrupt a partially completed instruction
+    if (this.triggeredInt !== null) this.handleInt();
+  }
+
+  /**
+   * Initiate a hardware interrupt
+   *
+   * @param interrupt The interrupt number
+   * @param ip The IP component of the interrupt vector
+   * @param cs The CS component of the interrupt vector
+   */
+  int(interrupt, ip, cs) {
+    this.triggeredInt = {
+      interrupt: interrupt,
+      IP: ip,
+      CS: cs,
+    }
+  }
+
+  /**
+   * Handle a triggered interrupt by pushing state and updating CS:IP to the
+   * interrupt vector.
+   */
+  handleInt() {
+    // Push some values to the stack for when we return
+    push16(this, this.reg16[regFlags]);
+    push16(this, this.reg16[regCS]);
+    push16(this, this.reg16[regIP]);
+
+    // Set CS:IP to the location of the interrupt vector
+    this.system.cpu.reg16[regIP] = this.triggeredInt.IP;
+    this.system.cpu.reg16[regCS] = this.triggeredInt.CS;
+
+    // Reset interrupt trigger
+    this.triggeredInt = null;
   }
 }
