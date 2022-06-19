@@ -1,6 +1,17 @@
+/**
+ *  0  RAM REFRESH & CLOCK TICK
+ *  1  KEYBOARD INTERFACE
+ *  2  EGA VIDEO (some interface cards have the option of using an IRQ)
+ *  3  COM2 (also COM4)
+ *  4  COM1 (also COM3)
+ *  5  HARD DISK (PC/XT type computer only)
+ *  6  FLOPPY DISK
+ *  7  PARALLEL PRINTER PORT LPT 1
+ */
+
 import Device from "./Device";
-import {FLAG_IF_MASK, regCS, regFlags, regIP} from "../Constants";
-import {push16} from "../utils/Utils";
+import {FLAG_IF_MASK, PIN_HIGH, regCS, regFlags, regIP} from "../Constants";
+import {FeatureNotImplementedException} from "../utils/Exceptions";
 
 // singleCascadeMode
 const CASCADE = 0;
@@ -33,22 +44,9 @@ const NO_MODE = 0;
 const RESET_SPECIAL_MASK = 1;
 const SET_SPECIAL_MASK = 2;
 
-/**
- *
- *  0  RAM REFRESH & CLOCK TICK
- *  1  KEYBOARD INTERFACE
- *  2  EGA VIDEO (some interface cards have the option of using an IRQ)
- *  3  COM2 (also COM4)
- *  4  COM1 (also COM3)
- *  5  HARD DISK (PC/XT type computer only)
- *  6  FLOPPY DISK
- *  7  PARALLEL PRINTER PORT LPT 1
- */
 export default class PIC8259 extends Device{
   constructor(config, system) {
     super(config, system);
-
-    this.debug = this.system.debug;
 
     this.state = NONE;
     this.interruptMask = 0x00;
@@ -71,9 +69,6 @@ export default class PIC8259 extends Device{
     this.pollCommand = false;
     this.specialMaskMode = NO_MODE;
   }
-
-  boot() {}
-  deviceCycle() {}
 
   write(port, value, size) {
     switch (port) {
@@ -219,7 +214,6 @@ export default class PIC8259 extends Device{
           //===================================================================
           // OCW1
           //===================================================================
-
           this.interruptMask = value & 0xFF;
         }
         break;
@@ -227,8 +221,13 @@ export default class PIC8259 extends Device{
   }
 
   read(port, size){
-    let value = 0xFF;
-    return value;
+    switch (port) {
+      case 0x20: // Master PIC command port
+        throw new FeatureNotImplementedException("Reading from port 0x20 is not implemented");
+      case 0x21:
+        return this.interruptMask;
+    }
+
   }
 
   /**
@@ -239,19 +238,29 @@ export default class PIC8259 extends Device{
    * @param irqNumber IRQ number to trigger
    */
   triggerIRQ(irqNumber) {
-    if ((this.system.cpu.reg16[regFlags] & FLAG_IF_MASK) > 0 &&
-        this.interruptMask & (2**irqNumber) > 0 ) {
-      this.system.debug.info(`INT:${irqNumber}`, true);
+    if ((this.system.cpu.reg16[regFlags] & FLAG_IF_MASK) > 0 && this.interruptMask & (2**irqNumber) > 0 ) {
+      this.system.debug.info(`INT:${irqNumber}`);
       let vector = (this.vectorByte + irqNumber) * 4;
-
 
       this.system.cpu.int(irqNumber,
           (this.system.cpu.mem8[vector + 1] << 8) + this.system.cpu.mem8[vector],
           (this.system.cpu.mem8[vector + 3] << 8) + this.system.cpu.mem8[vector + 2]);
     }
     else {
-      this.system.debug.info(`MASKED INTERRUPT ${irqNumber}`, true);
-      this.system.debug.flush();
+      this.system.debug.info(`MASKED INT: ${irqNumber}`);
     }
   }
+
+  timerHandler(value) {
+    this.debug.info(`PIC8259:timerHandler(${value})`);
+    if (value === PIN_HIGH) {
+      this.triggerIRQ(0);
+    }
+  }
+
+  boot() {
+    this.system.io.devices["PIT8253"].registerChannelLister(0, this.timerHandler.bind(this));
+  }
+
+  deviceCycle() {}
 }

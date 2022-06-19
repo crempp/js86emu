@@ -1,4 +1,6 @@
-import Device from "./Device";
+/**
+ *
+ */
 
 const XT_KEYCODE_MAP = {
   "Backspace": null,
@@ -106,11 +108,12 @@ const XT_KEYCODE_MAP = {
   "Quote": null,
 }
 
-export default class Keyboard extends Device {
+export default class Keyboard {
   constructor(config, system) {
-    super(config, system);
+    this.config = config;
+    this.system = system;
+    this.debug = system.debug;
     this.resetTimer = null;
-    this.debug = this.system.debug;
     this.buffer = null;
 
     document.addEventListener('keydown', this.handleKeyDown);
@@ -145,7 +148,6 @@ export default class Keyboard extends Device {
    * @param value Value to set line to
    */
   setLine(line, value) {
-    this.debug.info(`  KEYBOARD LINE - ${line} : ${value == 0 ? 'low' : 'high'}`);
     if (line === 'clk') {
       // If clock held low for 20ms then reset keyboard
       if (value === 0) {
@@ -167,7 +169,6 @@ export default class Keyboard extends Device {
    * TODO: investigate more about what an XT reset does.
    */
   reset() {
-    this.debug.info("  resetting keyboard");
     // Send AA to the system
     this.buffer = 0xAA;
 
@@ -182,4 +183,6 @@ export default class Keyboard extends Device {
   clear() {
     this.buffer = null;
   }
+
+  boot() {}
 }

@@ -87,8 +87,6 @@ export default class DMA8237 extends Device{
   constructor (config, system) {
     super(config, system);
 
-    this.currentByte = LSB;
-
     this.channels = [
       {  // Channel 0
         startAddress: 0,
@@ -134,7 +132,9 @@ export default class DMA8237 extends Device{
         ctl_AddressIncDec:      INC,
         ctl_ModeSelect:         DEMAND,
       },
-    ]
+    ];
+
+    this.currentByte = LSB;
 
     this.DMAStatCmdReg = 0x00;          // 0x08
     this.DMARequestReg = 0x00;          // 0x09
@@ -360,6 +360,15 @@ export default class DMA8237 extends Device{
     }
   }
 
+  timerHandler(value) {
+    // We don't actually have to do anything for DMA refreshes.
+    this.debug.info(`DMA8237:timerHandler(${value})`);
+  }
+
+  boot() {
+    this.system.io.devices["PIT8253"].registerChannelLister(1, this.timerHandler.bind(this));
+  }
+
   deviceCycle() {}
-  boot() {}
+
 }

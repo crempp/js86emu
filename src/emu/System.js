@@ -11,6 +11,7 @@ import {loadBINAsync, seg2abs} from "./utils/Utils";
 import Debug, {hexString32} from "./utils/Debug";
 import Clock from "./Clock";
 import Keyboard from "./devices/Keyboard";
+import Speaker from "./devices/Speaker";
 
 export default class System {
   constructor (config) {
@@ -47,6 +48,9 @@ export default class System {
 
     // Create keyboard
     this.keyboard = new Keyboard(config, this);
+
+    // Create a speaker
+    this.speaker = new Speaker(config, this);
   }
 
   /**
@@ -76,8 +80,15 @@ export default class System {
 
     // Load video BIOS
 
-    // TODO: Boot I/O devices. This is where the videoCard.init() should go
+    // IO Devices
     this.io.boot();
+
+    // Other Devices
+    this.speaker.boot();
+    this.keyboard.boot();
+
+    // Cards
+    // TODO: This is where the videoCard.init() should go
 
     // Clear cache
 

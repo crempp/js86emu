@@ -1,15 +1,16 @@
 import SystemConfig from "./SystemConfig";
 
 let config = new SystemConfig({
+  // TODO move to memory section
   // Memory size must remain at 1Mb despite what the jumpers are set to because
   // the BIOS loads at the top of that and we don't support memory holes yet.
   memorySize: 0x100000,
   memory: null,
+  programBlob: null,
 
+  // TODO: Move to clock section
   /** The number of cycles between timing syncs */
   timeSyncCycles: 4 * 1000000 / 100, // About 100 times per sec
-
-  programBlob: null,
 
   bios: {
     path: "/files/bios-roms/",
@@ -35,7 +36,7 @@ let config = new SystemConfig({
       /* SS */ 0,
       /* FL */ 0,
     ],
-    frequency:   4 * 1024**2, // 4 Mhz
+    frequency:   4 * 1024**2, // 4 Mhz TODO: move to clock section
     flags:       0x0000,
   },
 
@@ -94,6 +95,8 @@ let config = new SystemConfig({
       {"range": [0x0400, 0xFFFF], "dir": "rw", "device": null}
     ]
   },
+
+  // TODO: Document switches here
   jumpers: {
     // Switch 1
     // 1-7-8: Number of 5 1/4" drives
@@ -153,6 +156,7 @@ let config = new SystemConfig({
     sw2: 0b11110000,
   },
 
+  // TODO: Move these into a debug sub-section
   debug: true,
   cycleBreak: false,
   debugAtCycle: null,
@@ -250,8 +254,16 @@ let config = new SystemConfig({
         name: "TST6",  // LINE 568
         enabled: false
       },
-      0xE237: {
-        name: "WIP",  // LINE 570
+      0xE263: {
+        name: "D3",  // LINE 596
+        enabled: false
+      },
+      0xE285: {
+        name: "D7",  // LINE 624
+        enabled: false
+      },
+      0xE28F: {
+        name: "WIP",  // LINE 630
         enabled: true
       }
     }

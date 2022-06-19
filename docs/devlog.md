@@ -1,4 +1,10 @@
 # Dev Log
+### Current
+* Decided to finish all the functionality of the PIT (minus testing).
+* Need to create a separate timer in the PIT, the current one will be the countdown timer, the new one will be the 
+  rate timer
+* Line 627, int 0 is being masked and it shouldn't
+
 ### June 17th 2022
 * Been stuck on getting keyboard interrupt timing working to get past line 1298 in the BIOS
 * Finding docs on the keyboard controller and how to you port B of the 8255 is proving difficult. So far found this
