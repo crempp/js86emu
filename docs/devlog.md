@@ -1,4 +1,12 @@
 # Dev Log
+### June 21st 2022
+* At D9, set PIT Chan 0 to 0xFF, then loop 18 times. Must finish loop before timer INT.
+  * Int is happening first
+  * I fixed the timing issue by forcing a timing sync but now it messes up the freq calculation (shows 3336.468000 MHZ)
+    . This makes me think the INT timing fix could be due to bad math. I'll leave it for a bit and see. I think the 
+    next timing sync would fix the bad MHZ calc.
+* TOOD: Implement and test blinking LED used in BIOS
+
 ### June 20th 2022
 * The BIOS encountered an error in D9, it detected incorrect timer speed. I need to look into this but I decided to 
   go on a side quest to implement the speaker while I was there.

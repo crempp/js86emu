@@ -268,7 +268,7 @@ let config = new SystemConfig({
       },
       0xE27D: {
         name: "D6 - ERR",  // LINE 613
-        enabled: false
+        enabled: true
       },
       0xE630: {
         name: "ERR_BEEP",  // LINE 1225
@@ -278,10 +278,20 @@ let config = new SystemConfig({
         name: "BEEP",  // LINE 1259
         enabled: false
       },
-      0xE663: {
-        name: "WIP",  // LINE 1252
+      0xE2EC: {
+        name: "TST8",  // LINE 1259
         enabled: false
+      },
+      0xE2B1: {
+        name: "WIP",  // LINE 646
+        enabled: false
+      },
+      0xE2B3: {
+        name: "WIP2-Success",  // LINE 647
+        enabled: true
       }
+
+
     }
   }
 });
