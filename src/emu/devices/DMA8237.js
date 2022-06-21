@@ -362,7 +362,7 @@ export default class DMA8237 extends Device{
 
   timerHandler(value) {
     // We don't actually have to do anything for DMA refreshes.
-    this.debug.info(`DMA8237:timerHandler(${value})`);
+    this.debug.info(`  DMA8237:timerHandler(${value})`);
   }
 
   boot() {

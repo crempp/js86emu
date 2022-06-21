@@ -22,6 +22,7 @@ import {
   PIN_8080_TEST, PIN_8080_READY, PIN_8080_RESET, PIN_8080_CLK, PIN_8080_INTR,
   PIN_8080_NMI, PIN_LOW, PIN_HIGH, STATE_WAIT, STATE_RUNNING
 } from '../Constants';
+import {hexString16, hexString32} from "../utils/Debug";
 
 /**
  * @class
@@ -723,7 +724,9 @@ export default class CPU8086 extends CPU {
         this.config.breakpoints?.[this.reg16[regCS]]?.[this.reg16[regIP]]?.enabled
     ) {
       this.system.steppingMode = true;
-
+      let breakpointName = this.config.breakpoints[this.reg16[regCS]][this.reg16[regIP]].name;
+      this.debug.info(`BREAKPOINT: ${breakpointName} ${hexString16(this.reg16[regCS])}:${hexString16(this.reg16[regIP])}`);
+      this.debug.info(`  ran at ${(this.system.clock.hz / (1000 ** 2)).toFixed(6)} MHZ`, true);
     }
 
     // Temporarily guarding against no system (for tests)
@@ -731,7 +734,6 @@ export default class CPU8086 extends CPU {
     if (this.system && this.system.steppingMode) {
       this.system.clock.sync();
       this.debug.flush();
-      this.debug.info(`  ran at ${(this.system.clock.hz / (1000 ** 2)).toFixed(6)} MHZ`, true);
       debugger;
     }
 

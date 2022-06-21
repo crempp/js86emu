@@ -238,21 +238,22 @@ export default class PIC8259 extends Device{
    * @param irqNumber IRQ number to trigger
    */
   triggerIRQ(irqNumber) {
-    if ((this.system.cpu.reg16[regFlags] & FLAG_IF_MASK) > 0 && this.interruptMask & (2**irqNumber) > 0 ) {
+    let isFlagMasked = (this.system.cpu.reg16[regFlags] & FLAG_IF_MASK) === 0;
+    let isPICMasked = (this.interruptMask & (2**irqNumber)) !== 0 ;
+    if (isFlagMasked || isPICMasked) {
+      this.system.debug.info(`MASKED INT: ${irqNumber}`);
+    }
+    else {
       this.system.debug.info(`INT:${irqNumber}`);
       let vector = (this.vectorByte + irqNumber) * 4;
-
       this.system.cpu.int(irqNumber,
           (this.system.cpu.mem8[vector + 1] << 8) + this.system.cpu.mem8[vector],
           (this.system.cpu.mem8[vector + 3] << 8) + this.system.cpu.mem8[vector + 2]);
     }
-    else {
-      this.system.debug.info(`MASKED INT: ${irqNumber}`);
-    }
   }
 
   timerHandler(value) {
-    this.debug.info(`PIC8259:timerHandler(${value})`);
+    this.debug.info(`  PIC8259:timerHandler(${value})`);
     if (value === PIN_HIGH) {
       this.triggerIRQ(0);
     }

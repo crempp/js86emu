@@ -174,6 +174,7 @@ export default class PIT8253 extends Device {
         timerID:       null,
         squareWaveTimerId: null,
         latchRegister: null,
+        running:       false,
       },
       {
         readLoad: RL_LATCH,
@@ -188,6 +189,7 @@ export default class PIT8253 extends Device {
         timerID:       null,
         squareWaveTimerId: null,
         latchRegister: null,
+        running:       false,
       },
       {
         readLoad: RL_LATCH,
@@ -202,6 +204,7 @@ export default class PIT8253 extends Device {
         timerID:       null,
         squareWaveTimerId: null,
         latchRegister: null,
+        running:       false,
       },
     ]
   }
@@ -395,6 +398,7 @@ export default class PIT8253 extends Device {
    */
   setGate(channel, value) {
     this.channels[channel].gate = value;
+
     switch (this.channels[channel].mode) {
       case 0: // Mode 0 - Interrupt on Terminal Count
         if (value === PIN_LOW) {
@@ -424,14 +428,14 @@ export default class PIT8253 extends Device {
         break;
       case 3:  // Mode 3 - Square Wave Generator
         if (value === PIN_LOW) {
-          this.channels[channel].out = PIN_HIGH;
-          this.channels[channel].outputFn(PIN_HIGH);
           this.stopTimer(channel);
+          this.channels[channel].out = PIN_LOW;
+          this.channels[channel].outputFn(PIN_LOW);
         }
         else {
+          this.restartTimer(channel);
           this.channels[channel].out = PIN_HIGH;
           this.channels[channel].outputFn(PIN_HIGH);
-          this.restartTimer(channel);
         }
         break;
       case 4: // Mode 4 - Software Triggered Strobe
@@ -501,6 +505,7 @@ export default class PIT8253 extends Device {
     this.channels[channel].timerID = this.system.clock.addTimer(
         nowNS + nsFromNow,
         () => this.handleChannelCount0(channel));
+    this.channels[channel].running = true;
   }
 
   restartSquareWaveTimer(channel, count) {
@@ -525,6 +530,7 @@ export default class PIT8253 extends Device {
     if (timerId !== null) {
       this.system.clock.removeTimer(timerId);
     }
+    this.channels[channel].running = false;
   }
 
   /**
@@ -533,6 +539,8 @@ export default class PIT8253 extends Device {
    * @param channel {number} Channel of the timer which reached 0
    */
   handleChannelCount0(channel) {
+    this.debug.info(`TIMER: Channel ${channel} reached 0`);
+
     // Update the count
     this.channels[channel].counter = 0;
 
@@ -579,6 +587,7 @@ export default class PIT8253 extends Device {
    * @param channel Channel of timer to handle
    */
   handleSquareWaveTimer(channel) {
+    this.debug.info(`TIMER: SquareWave Channel ${channel} reached 0`);
     if (this.channels[channel].out === PIN_HIGH) {
       this.channels[channel].out = PIN_LOW;
       this.channels[channel].outputFn(PIN_LOW);

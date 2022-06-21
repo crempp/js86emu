@@ -259,12 +259,28 @@ let config = new SystemConfig({
         enabled: false
       },
       0xE285: {
-        name: "D7",  // LINE 624
+        name: "D7",  // LINE 625
         enabled: false
       },
-      0xE28F: {
-        name: "WIP",  // LINE 630
-        enabled: true
+      0xE2A0: {
+        name: "D9",  // LINE 638
+        enabled: false
+      },
+      0xE27D: {
+        name: "D6 - ERR",  // LINE 613
+        enabled: false
+      },
+      0xE630: {
+        name: "ERR_BEEP",  // LINE 1225
+        enabled: false
+      },
+      0xE666: {
+        name: "BEEP",  // LINE 1259
+        enabled: false
+      },
+      0xE663: {
+        name: "WIP",  // LINE 1252
+        enabled: false
       }
     }
   }

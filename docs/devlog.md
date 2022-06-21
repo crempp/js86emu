@@ -1,8 +1,16 @@
 # Dev Log
-### Current
+### June 20th 2022
+* The BIOS encountered an error in D9, it detected incorrect timer speed. I need to look into this but I decided to 
+  go on a side quest to implement the speaker while I was there.
+* I'm not happy with the implementation of the speaker. It references back to the PIT.
+* TODO: Complete PIT BCD counting
+
+### June 18th 2022
 * Decided to finish all the functionality of the PIT (minus testing).
 * Need to create a separate timer in the PIT, the current one will be the countdown timer, the new one will be the 
   rate timer
+* Good doc on the PIT modes
+  * http://www.idc-online.com/technical_references/pdfs/electronic_engineering/Modes_Of_8253.pdf
 * Line 627, int 0 is being masked and it shouldn't
 
 ### June 17th 2022
@@ -23,7 +31,7 @@
   * Does the MUL operation actually work with negative values? I don't think so.
   * Create flag set/clear helper functions. It's really confusing now. Optimize later.
   * Replace sign bit checks with isByteSigned/isWordSigned
-  * When interupts are done update IDIV and tests
+  * When interrupts are done update IDIV and tests
 * Reference: For MDA I/O reference
   * https://www.seasip.info/VintagePC/mda.html
 * Idea: Use a FIFO queue to keep decoded instructions for debugging

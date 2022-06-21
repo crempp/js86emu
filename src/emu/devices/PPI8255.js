@@ -77,8 +77,6 @@ export default class PPI8255 extends Device{
     this.parityChk     = 0;      // 7 (Leave as 0 always, shouldn't have errors)
   }
 
-  boot() {}
-
   write(port, value, size) {
     switch (port) {
       case 0x60: // Port A
@@ -183,6 +181,8 @@ export default class PPI8255 extends Device{
     this.system.keyboard.setLine("clk", this.holdKbbClkLow);
     if (this.portAKeyboardOrDIP === 1) this.system.keyboard.clear();
   }
+
+  boot() {}
 
   deviceCycle(){}
 }
