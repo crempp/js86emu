@@ -32,7 +32,7 @@ export default class CPU8086 extends CPU {
   constructor(config, system) {
     super();
 
-    this.cycleCount = 0;
+    // this.cycleCount = 0;
     this.config = config;
     this.system = system;
 
@@ -43,6 +43,8 @@ export default class CPU8086 extends CPU {
 
     /**
      * CPU frequency in hertz (cycles per second).
+     *
+     * @type {number}
      */
     this.frequency = config.cpu.frequency;
 
@@ -50,18 +52,50 @@ export default class CPU8086 extends CPU {
      * Segment registerPort to use for addressing. Typically it is assumed to be
      * DS, unless the base registerPort is SP or BP; in which case the address is
      * assumed to be relative to SS
+     *
+     * @type {number}
      */
     this.addrSeg = regDS;
 
     /**
+     * Address segment saved during an interrupt, will be used to set addrSeg
+     * upon return from interrupt.
+     *
+     * @type {number|null}
+     */
+    this.savedAddrSeg = null;
+
+    /**
      * Repeat prefix state
+     *
+     * @type {number}
      */
     this.prefixRepeatState = STATE_REP_NONE;
 
     /**
+     * Repeat prefix state saved during an interrupt, will be used to set
+     * prefixRepeatState upon return from interrupt.
+     *
+     * @type {number}
+     */
+    this.savedPrefixRepeatState = STATE_REP_NONE;
+
+    /**
      * Segment override state
+     *
+     * @type {number}
      */
     this.prefixSegmentState = STATE_SEG_NONE;
+
+    /**
+     * Segment prefix state saved during an interrupt, will be used to set
+     * prefixSegmentState upon return from interrupt.
+     *
+     * @type {number}
+     */
+    this.savedPrefixSegmentState = STATE_SEG_NONE;
+
+
 
     /**
      * Instruction Pointer increment counter. This tracks the amount to
@@ -773,6 +807,16 @@ export default class CPU8086 extends CPU {
     push16(this, this.reg16[regFlags]);
     push16(this, this.reg16[regCS]);
     push16(this, this.reg16[regIP]);
+
+    // Save cpu states and reset original states. This protects against
+    // entering an interrupt in the middle of a REP or ES or ...
+    // instruction
+    this.savedPrefixRepeatState = this.prefixRepeatState;
+    this.prefixRepeatState = STATE_REP_NONE;
+    this.savedPrefixSegmentState = this.prefixSegmentState;
+    this.prefixSegmentState = STATE_SEG_NONE;
+    this.savedAddrSeg = this.addrSeg;
+    this.addrSeg = regDS;
 
     // Set CS:IP to the location of the interrupt vector
     this.system.cpu.reg16[regIP] = this.triggeredInt.IP;

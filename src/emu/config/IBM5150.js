@@ -279,19 +279,17 @@ let config = new SystemConfig({
         enabled: false
       },
       0xE2EC: {
-        name: "TST8",  // LINE 1259
+        name: "TST8",  // LINE 695
         enabled: false
       },
-      0xE2B1: {
-        name: "WIP",  // LINE 646
+      0xE33B: {
+        name: "E3",  // LINE 743
         enabled: false
       },
-      0xE2B3: {
-        name: "WIP2-Success",  // LINE 647
+      0xE343: {
+        name: "WIP",  // LINE 745
         enabled: true
-      }
-
-
+      },
     }
   }
 });

@@ -23,7 +23,7 @@ import {
   PARITY, REP_INSTS,
   STATE_HALT,
   STATE_REP_Z, STATE_REP_NZ, STATE_REP_NONE, STATE_REP,
-  STATE_SEG_CS, STATE_SEG_DS, STATE_SEG_ES, STATE_SEG_SS, USED_FLAG_MASK, STATE_WAIT,
+  STATE_SEG_CS, STATE_SEG_DS, STATE_SEG_ES, STATE_SEG_SS, USED_FLAG_MASK, STATE_WAIT, STATE_SEG_NONE,
 } from '../Constants';
 import {FeatureNotImplementedException, TemporaryInterruptException} from "../utils/Exceptions";
 
@@ -1038,6 +1038,14 @@ export default class Operations {
     this.cpu.reg16[regIP] = pop16(this.cpu);
     this.cpu.reg16[regCS] = pop16(this.cpu);
     this.cpu.reg16[regFlags] = pop16(this.cpu);
+
+    // Restore cpu states
+    this.cpu.prefixRepeatState = this.cpu.savedPrefixRepeatState;
+    this.cpu.savedPrefixRepeatState = STATE_REP_NONE;
+    this.cpu.prefixSegmentState = this.cpu.savedPrefixSegmentState;
+    this.cpu.savedPrefixSegmentState = STATE_SEG_NONE;
+    this.cpu.addrSeg = this.cpu.savedAddrSeg;
+    this.cpu.savedAddrSeg = null;
 
     // HACK! ... or is it?
     // The way the cycle code is structured we will end up with the IP being

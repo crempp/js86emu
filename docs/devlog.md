@@ -1,4 +1,5 @@
 # Dev Log
+
 ### June 21st 2022
 * At D9, set PIT Chan 0 to 0xFF, then loop 18 times. Must finish loop before timer INT.
   * Int is happening first
@@ -6,6 +7,15 @@
     . This makes me think the INT timing fix could be due to bad math. I'll leave it for a bit and see. I think the 
     next timing sync would fix the bad MHZ calc.
 * TOOD: Implement and test blinking LED used in BIOS
+  * Line 730 of BIOS
+* BUG: When an interupt occurs after a REP but before the REP inst is complete the INT code gets confused
+  * FIXED: Store the REP state and restore it after interrupt
+* We have to load all the BIOS ROMs, including Basic because the BIOS does a checksum of them all (line 743)
+  * Actually we probably don't, it checks if the 8-bit checksum is = 0 which it is if the memory is all zeros, which
+    it is since we initialize the memory to 0
+* BUG: On line 728 it incorrectly enters MGG mode
+* I'm bored with this, let's try to fix up some tests
+  * When I come back, look at the bug on line 728 and try to get through TEST.05
 
 ### June 20th 2022
 * The BIOS encountered an error in D9, it detected incorrect timer speed. I need to look into this but I decided to 
