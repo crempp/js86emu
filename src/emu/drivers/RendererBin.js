@@ -1,7 +1,7 @@
-import fs from 'fs';
+import fs from "fs";
 
 export default class RendererBin {
-  constructor (options) {
+  constructor () {
     this.path = "screenOut";
     this.width = null;
     this.height = null;
@@ -43,6 +43,7 @@ export default class RendererBin {
    */
   saveBinAwait (path, data) {
     return new Promise(resolve => {
+      // eslint-disable-next-line no-undef
       const buf = Buffer.from(data);
       fs.writeFile(path, buf, (e) => {
         if (e) throw e;

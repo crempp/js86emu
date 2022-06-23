@@ -34,6 +34,7 @@
     "build:web": "next build",
     "build:cli": "babel src -d dist/cli --ignore src/site,src/web.js --source-maps --presets env -r babel-polyfill",
     "test": "jest",
+    "lint": "npx eslint --ext .js,.jsx .",
     "start:cli": "node ./dist/cli/cli.js",
     "start:web": "next start",
     "start:dev": "next dev"

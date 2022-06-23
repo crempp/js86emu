@@ -32,7 +32,7 @@ export default class IO {
     // I think this must happen after creating the CPU because devices need
     // access to the instantiated CPU
     if (availableDevices !== null) {
-      this.availableDevices = availableDevices
+      this.availableDevices = availableDevices;
     }
     else {
       this.availableDevices = {
@@ -54,7 +54,7 @@ export default class IO {
 
     // Initialize ports with null (nothing attached)
     for (let i = 0; i < this.ports.length; i++) {
-      this.registerPort(i, 'rw', this.availableDevices[null]);
+      this.registerPort(i, "rw", this.availableDevices[null]);
     }
 
     // Register the defined ports from the ranges defined in the config
@@ -117,7 +117,7 @@ export default class IO {
     this.ports[port].write(port, value, size);
 
     if (this.config.debug) {
-      this.debug.debug(`  I/O WRITE device: ${this.ports[port].constructor.name} port: ${hexString16(port)}, value:${hexString16(value)}, size: ${(size === b)? 'b': 'w'}`);
+      this.debug.debug(`  I/O WRITE device: ${this.ports[port].constructor.name} port: ${hexString16(port)}, value:${hexString16(value)}, size: ${(size === b)? "b": "w"}`);
     }
   }
 
@@ -129,7 +129,7 @@ export default class IO {
     let value = this.ports[port].read(port, size);
 
     if (this.config.debug) {
-      this.debug.debug(`  I/O READ device: ${this.ports[port].constructor.name} port: ${hexString16(port)}, value:${hexString16(value)}, size: ${(size === b)? 'b': 'w'}`);
+      this.debug.debug(`  I/O READ device: ${this.ports[port].constructor.name} port: ${hexString16(port)}, value:${hexString16(value)}, size: ${(size === b)? "b": "w"}`);
     }
 
     return value;

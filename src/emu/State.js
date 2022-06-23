@@ -1,4 +1,7 @@
-import BSON from 'bson';
+import BSON from "bson";
+import {regAX, regBX, regCX, regDX, regSI, regDI, regBP, regSP,
+  regIP, regCS, regDS, regES, regSS} from "./Constants";
+import {hexString16} from "./utils/Debug";
 
 export default class State {
   constructor () {
@@ -69,5 +72,5 @@ export default class State {
     }
 
     return [same, diff];
-  };
+  }
 }

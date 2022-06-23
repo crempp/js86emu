@@ -24,7 +24,7 @@ let config = new SystemConfig({
   timeSyncCycles: 10000,
 
   renderer: {
-    class: 'RendererCanvas'
+    class: "RendererCanvas"
   },
 
   ports: {

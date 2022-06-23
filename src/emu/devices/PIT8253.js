@@ -156,7 +156,7 @@ export default class PIT8253 extends Device {
   constructor(config, system) {
     super(config, system);
 
-    this.timerFreq = 1193181.6666 // Timer runs at 1.193182 MHZ
+    this.timerFreq = 1193181.6666; // Timer runs at 1.193182 MHZ
     this.timerPeriodNS = Math.trunc(1e9 / this.timerFreq);
 
     this.currentByte = LSB;
@@ -206,7 +206,7 @@ export default class PIT8253 extends Device {
         latchRegister: null,
         running:       false,
       },
-    ]
+    ];
   }
 
   /**
@@ -218,12 +218,15 @@ export default class PIT8253 extends Device {
    */
   write(port, value, size) {
     let channel;
+    let rlMode;
+    let readLoad;
+
     switch (port) {
       case 0x40: // Channel 0, counter divisor
       case 0x41: // Channel 1, RAM refresh counter, we don't care about this
       case 0x42: // Channel 2, Cassette and speaker functions
         channel = port - 0x40;
-        let rlMode = this.channels[channel].readLoad;
+        rlMode = this.channels[channel].readLoad;
 
         // Set the appropriate byte
         if (this.currentByte === MSB) {
@@ -275,14 +278,14 @@ export default class PIT8253 extends Device {
               break;
             case 5: // Mode 5 - Hardware Triggered Strobe
               // Do nothing her for mode 5, timer is started by the gate
-            }
+          }
         }
         break;
       case 0x43: // Mode control
-        channel = (value >> 6) & 0x3
+        channel = (value >> 6) & 0x3;
 
         // Latch commands only set the latch and do nothing else
-        let readLoad = (value >> 4) & 0x3;
+        readLoad = (value >> 4) & 0x3;
         if (readLoad === 0) {
           this.channels[channel].latchRegister = this.getCount(channel);
         }
@@ -500,14 +503,14 @@ export default class PIT8253 extends Device {
 
     // Add a new timer to the clock
     let nowNS = Math.trunc(performance.now() * 1e6);
-    let count = fromCount ? this.channels[channel].counter : this.channels[channel].resetVal
+    let count = fromCount ? this.channels[channel].counter : this.channels[channel].resetVal;
     let nsFromNow = this.timerPeriodNS * count;
     // Adjust for running speed
     this.system.clock.sync();
     nsFromNow *= this.system.clock.timeScale;
     this.channels[channel].timerID = this.system.clock.addTimer(
-        nowNS + nsFromNow,
-        () => this.handleChannelCount0(channel));
+      nowNS + nsFromNow,
+      () => this.handleChannelCount0(channel));
     this.channels[channel].running = true;
   }
 
@@ -518,8 +521,8 @@ export default class PIT8253 extends Device {
     let nowNS = Math.trunc(performance.now() * 1e6);
     let nsFromNow = this.timerPeriodNS * count;
     this.channels[channel].timerID = this.system.clock.addTimer(
-        nowNS + nsFromNow,
-        () => this.handleSquareWaveTimer(channel));
+      nowNS + nsFromNow,
+      () => this.handleSquareWaveTimer(channel));
   }
 
   /**
@@ -529,7 +532,7 @@ export default class PIT8253 extends Device {
    * @param isSquareWaveTimer {boolean} Is this a rate timer?
    */
   stopTimer(channel, isSquareWaveTimer=false) {
-    let timerId = (isSquareWaveTimer) ? this.channels[channel].squareWaveTimerId : this.channels[channel].timerID
+    let timerId = (isSquareWaveTimer) ? this.channels[channel].squareWaveTimerId : this.channels[channel].timerID;
     if (timerId !== null) {
       this.system.clock.removeTimer(timerId);
     }

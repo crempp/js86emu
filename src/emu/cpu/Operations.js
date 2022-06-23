@@ -24,7 +24,7 @@ import {
   STATE_HALT,
   STATE_REP_Z, STATE_REP_NZ, STATE_REP_NONE, STATE_REP,
   STATE_SEG_CS, STATE_SEG_DS, STATE_SEG_ES, STATE_SEG_SS, USED_FLAG_MASK, STATE_WAIT, STATE_SEG_NONE,
-} from '../Constants';
+} from "../Constants";
 import {FeatureNotImplementedException, TemporaryInterruptException} from "../utils/Exceptions";
 
 export default class Operations {
@@ -185,7 +185,7 @@ export default class Operations {
     result = this.correctAddition(result);
 
     dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr, result);
-  };
+  }
 
   /**
    * AND performs the logical "and" of the two operands (byte or word) and
@@ -369,7 +369,7 @@ export default class Operations {
    */
   cmc (dst, src) {
     if ((this.cpu.reg16[regFlags] & FLAG_CF_MASK) === 0) {
-      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
     }
     else {
       this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
@@ -2294,9 +2294,9 @@ export default class Operations {
     }
 
     if (cf === 1) {
-      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
     } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
     }
 
     if ( of === 1 ) {
@@ -2348,9 +2348,9 @@ export default class Operations {
     }
 
     if (cf === 1) {
-      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
     } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
     }
 
     if ( of === 1 ) {
@@ -2478,10 +2478,12 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   ret (dst, src) {
+    let dstAddr;
+
     switch (this.cpu.opcode.opcode_byte) {
       case 0xC2:
         // RET Iw
-        let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
+        dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
         this.cpu.reg16[regIP] = pop16(this.cpu) + dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
         break;
       case 0xC3:
@@ -2513,10 +2515,12 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   retf (dst, src) {
+    let dstAddr;
+
     switch (this.cpu.opcode.opcode_byte) {
       case 0xCA:
         // RETF Iw
-        let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
+        dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
 
         this.cpu.reg16[regIP] = pop16(this.cpu) + dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
         this.cpu.reg16[regCS] = pop16(this.cpu);
@@ -2572,9 +2576,9 @@ export default class Operations {
     } else of = 0;
 
     if (cf === 1) {
-      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
     } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
     }
 
     if ( of === 1 ) {
@@ -2624,9 +2628,9 @@ export default class Operations {
     }
 
     if (cf === 1) {
-      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
     } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
     }
 
     if ( of === 1 ) {
@@ -2693,9 +2697,9 @@ export default class Operations {
 
     // Set CF if a '1' shifted out
     if (cf === 1) {
-      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
     } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
     }
 
     this.setPF_FLAG(dstVal);
@@ -2847,9 +2851,9 @@ export default class Operations {
 
     // Set CF if a '1' shifted out
     if (cf === 1) {
-      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
     } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
     }
 
     // Clamp the shifted value
@@ -2892,10 +2896,10 @@ export default class Operations {
 
     // Set OF if the first operand changes sign
     if ( (srcVal === 1) && (dstVal & (size === b ? 0x80 : 0x8000)) ) {
-      this.cpu.reg16[regFlags] |= FLAG_OF_MASK
+      this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
     }
     else {
-      this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK
+      this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
     }
 
     for (let shift = 1; shift <= srcVal; shift++) {
@@ -2905,9 +2909,9 @@ export default class Operations {
 
     // Set CF if a '1' shifted out
     if (cf === 1) {
-      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
     } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
     }
 
     this.setPF_FLAG(dstVal);
@@ -2940,7 +2944,7 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   stc (dst, src) {
-    this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+    this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
   }
 
   /**
@@ -2955,7 +2959,7 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   std (dst, src) {
-    this.cpu.reg16[regFlags] |= FLAG_DF_MASK
+    this.cpu.reg16[regFlags] |= FLAG_DF_MASK;
   }
 
   /**
@@ -2972,7 +2976,7 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   sti (dst, src) {
-    this.cpu.reg16[regFlags] |= FLAG_IF_MASK
+    this.cpu.reg16[regFlags] |= FLAG_IF_MASK;
   }
 
   /**
@@ -3189,7 +3193,7 @@ export default class Operations {
   notimp () {
     // console.log("Operations - Instruction not implemented");
     throw new FeatureNotImplementedException("Operation not implemented");
-  };
+  }
 
   push16 (value) {
     throw new Error("Operation.push16 has moved to Utils");
@@ -3301,9 +3305,9 @@ export default class Operations {
     let size = this.cpu.opcode.addrSize;
 
     if ((sub && v1 < v2) || (result & (size === b ? 0xFF00 : 0xFFFF0000))) {
-      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
     } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
     }
   }
 

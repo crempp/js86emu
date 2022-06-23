@@ -1,6 +1,6 @@
-import { PNG } from 'pngjs';
-import fs from 'fs';
-import {regIP, regCS, regSP, regSS} from '../Constants';
+import { PNG } from "pngjs";
+import fs from "fs";
+import {regIP, regCS, regSP, regSS} from "../Constants";
 
 /**
  * Push a value onto the stack. SP is decremented by two and the value is
@@ -55,7 +55,7 @@ export function seg2abs (segment, offset) {
  * Note: The IP always uses the CS registerPort for the segment (verify and
  * source this).
  *
- * @param {Cpu} cpu Cpu instance to perform conversion for
+ * @param {CPU} cpu Cpu instance to perform conversion for
  * @returns {number} Absolute memory address
  */
 export function segIP(cpu) {
@@ -237,6 +237,7 @@ export function loadBINAsync (path) {
  */
 export function BrowserFSAsync (config) {
   return new Promise(resolve => {
+    // eslint-disable-next-line no-undef
     BrowserFS.configure(config, (e) => {
       if (e) throw e;
       resolve();
@@ -257,12 +258,12 @@ export function BrowserFSAsync (config) {
 export function assign (target, ...sources) {
   sources.forEach(source => {
     Object.keys(source).forEach(key => {
-      const s_val = source[key]
-      const t_val = target[key]
-      target[key] = t_val && s_val && typeof t_val === 'object' && typeof s_val === 'object'
-          ? assign(t_val, s_val)
-          : s_val
-    })
-  })
-  return target
+      const s_val = source[key];
+      const t_val = target[key];
+      target[key] = t_val && s_val && typeof t_val === "object" && typeof s_val === "object"
+        ? assign(t_val, s_val)
+        : s_val;
+    });
+  });
+  return target;
 }

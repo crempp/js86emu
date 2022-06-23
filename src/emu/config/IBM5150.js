@@ -19,7 +19,7 @@ let config = new SystemConfig({
   },
 
   cpu : {
-    class:       '8086',
+    class:       "8086",
     registers16: [
       /* AX */ 0,
       /* BX */ 0,
@@ -41,7 +41,7 @@ let config = new SystemConfig({
   },
 
   video: {
-    class:        'VideoMDA',
+    class:        "VideoMDA",
     memorySize:   4 * 1024,
     memoryStart:  0xB8000,
     verticalSync: 50,       // Hertz
@@ -50,7 +50,7 @@ let config = new SystemConfig({
   },
 
   renderer: {
-    class:   'RendererCanvas',
+    class:   "RendererCanvas",
     options: {
       canvas: null,
     },

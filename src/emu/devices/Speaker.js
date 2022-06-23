@@ -15,8 +15,8 @@ export default class Speaker  {
     let timer = this.system.io.devices["PIT8253"].channels[2];
     if (timer.running) {
       if (value === 1) {
-        let timerFreq = this.system.io.devices["PIT8253"].timerFreq
-        let count = timer.resetVal
+        let timerFreq = this.system.io.devices["PIT8253"].timerFreq;
+        let count = timer.resetVal;
         let freq = timerFreq/count;
         this.start(freq);
       }
@@ -29,7 +29,7 @@ export default class Speaker  {
   start(freq) {
     if (!this.muted) {
       this.squareOscilator = this.audioCtx.createOscillator();
-      this.squareOscilator.type = 'square';
+      this.squareOscilator.type = "square";
       this.squareOscilator.frequency.setValueAtTime(freq, this.audioCtx.currentTime); // value in hertz
       this.squareOscilator.connect(this.audioCtx.destination);
       this.squareOscilator.start();

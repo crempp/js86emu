@@ -1,5 +1,5 @@
-import structuredClone from 'core-js-pure/actual/structured-clone';
-import { SystemConfigException } from '../utils/Exceptions';
+import structuredClone from "core-js-pure/actual/structured-clone";
+import { SystemConfigException } from "../utils/Exceptions";
 import {assign} from "../utils/Utils";
 
 const DEFAULTS = {
@@ -19,14 +19,14 @@ const DEFAULTS = {
   },
 
   cpu : {
-    class:       '8086',
+    class:       "8086",
     registers16: null, //[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     frequency:   4 * 1024**2, // 4 Mhz
     flags:       0x0000,
   },
 
   video: {
-    class:        'VideoMDA',
+    class:        "VideoMDA",
     memorySize:   4 * 1024,
     memoryStart:  0xB8000,
     verticalSync: 50,       // Hertz
@@ -36,7 +36,7 @@ const DEFAULTS = {
   },
 
   renderer: {
-    class:   'RendererCanvas',
+    class:   "RendererCanvas",
     options: {
       canvas: null,
     },
@@ -150,7 +150,7 @@ export default class SystemConfig {
       if (!(key in this)) this[key] = config[key];
     }
 
-    this.isNode = (typeof window === 'undefined');
+    this.isNode = (typeof window === "undefined");
   }
 
   validate() {

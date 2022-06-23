@@ -1,7 +1,7 @@
 export default class RendererCanvas {
   constructor (options) {
     this.canvas = options.canvas;
-    this.ctx = this.canvas.getContext('2d');
+    this.ctx = this.canvas.getContext("2d");
     this.width = null;
     this.height = null;
   }

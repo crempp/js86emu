@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 import System from "../emu/System";
 import { BrowserFSAsync } from "../emu/utils/Utils";
 
@@ -11,20 +11,20 @@ import { BrowserFSAsync } from "../emu/utils/Utils";
 const FS_CONFIG = {
   fs: "MountableFileSystem",
   options: {
-    '/files': {
+    "/files": {
       fs: "HTTPRequest",
       options: {
         index: "/files/fs.json",
         baseUrl: "/files"
       }
     },
-    '/tmp/screenOut': {
+    "/tmp/screenOut": {
       fs: "LocalStorage"
     },
   }
 };
 
-export default class extends Component {
+export default class Emulator extends Component {
   canvasRef;
 
   constructor(props) {
@@ -53,14 +53,14 @@ export default class extends Component {
 
     let system = new System(this.state.config);
     // make global for debugging
-    window.system = system
+    window.system = system;
 
     system.debug.info("booting...", true);
     await system.boot();
 
     system.debug.info("running...", true);
     await system.run();
-  };
+  }
 
   render() {
     const { config, width, height } = this.state;
@@ -69,4 +69,4 @@ export default class extends Component {
       <canvas id={"screen"} ref={this.canvasRef}/>
     );
   }
-};
+}

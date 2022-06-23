@@ -45,8 +45,8 @@ export default class Clock {
 
     // Update the number of cycles between video syncs
     this.videoSyncCycles = Math.min(
-        Math.round(this.hz / this.config.video.verticalSync),
-        this.config.video.defaultCycleSync);
+      Math.round(this.hz / this.config.video.verticalSync),
+      this.config.video.defaultCycleSync);
 
     this.timeScale = this.hz / this.config.cpu.frequency;
   }

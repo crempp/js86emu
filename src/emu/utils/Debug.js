@@ -6,7 +6,7 @@ import {
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
   b, w, v, u, regFlags,
-} from '../Constants';
+} from "../Constants";
 import { ValueOverflowException, ValueUnderflowException } from "./Exceptions";
 import {segIP} from "./Utils";
 
@@ -14,7 +14,7 @@ import {segIP} from "./Utils";
 export default class Debug {
   constructor(system) {
     if (Debug._instance) {
-      return Debug._instance
+      return Debug._instance;
     }
     Debug._instance = this;
 
@@ -176,10 +176,10 @@ export function formatOpcode(opcode, indentSize=0) {
   let regBin = opcode.reg ? binString8(opcode.reg).slice(-3) : "   ";
 
   let size;
-  if (opcode.addrSize === b) size = 'b';
-  else if (opcode.addrSize === w) size = 'w';
-  else if (opcode.addrSize === v) size = 'v';
-  else if (opcode.addrSize === u) size = '?';
+  if (opcode.addrSize === b) size = "b";
+  else if (opcode.addrSize === w) size = "w";
+  else if (opcode.addrSize === v) size = "v";
+  else if (opcode.addrSize === u) size = "?";
 
   str += "opcode:  " + binString8(opcode.opcode_byte) + "[" + hexString8(opcode.opcode_byte) + "]    ";
   str += "address: " + addressBin + "[" + hexString8(opcode.addressing_byte) + "]";
@@ -281,7 +281,7 @@ export function formatFlags(flags, indentSize=0) {
   return str;
 }
 
-function disassemble(system, from, to, ip) {
+function disassemble(system, from, to) {
   // TODO: Can't currently get access to addrIPInc for variable size instructions. Need a refactor to make this work.
   // TODO: Cache the disassembly
   // TODO: Support lookback disassembly (could use the cache)
@@ -301,7 +301,7 @@ function disassemble(system, from, to, ip) {
       addr: addr,
       size: size,
       hex: hex,
-    }
+    };
     addr += size;
     i++;
   }
@@ -314,7 +314,7 @@ function formatDisassembly(disassembly, indentSize) {
 
   for (let i = 0; i < disassembly.length; i++) {
     let pointer = (disassembly[i].isCurrent)? "->" : "  ";
-    let hex = disassembly[i].hex.map(x => hexString16(x)).join(' ')
+    let hex = disassembly[i].hex.map(x => hexString16(x)).join(" ");
     str += `${indent}${pointer} ${hexString32(disassembly[i].addr)} [${hex.padEnd(34)}] ${disassembly[i].inst[0]} ${disassembly[i].inst[1]} ${disassembly[i].inst[2]}\n`;
   }
   return str;

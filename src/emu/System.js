@@ -1,4 +1,4 @@
-import 'setimmediate';
+import "setimmediate";
 import Clock from "./Clock";
 import CPU8086 from "./cpu/8086";
 import Debug, {hexString32} from "./utils/Debug";
@@ -6,7 +6,7 @@ import IO from "./IO";
 import Keyboard from "./devices/Keyboard";
 import Speaker from "./devices/Speaker";
 import SystemConfig from "./config/SystemConfig";
-import { regCS, regIP, STATE_RUNNING, STATE_HALT } from './Constants';
+import { regCS, regIP, STATE_RUNNING, STATE_HALT } from "./Constants";
 import { SystemConfigException } from "./utils/Exceptions";
 import { loadBINAsync, seg2abs } from "./utils/Utils";
 
@@ -63,7 +63,7 @@ export default class System {
       let bin = await loadBINAsync(this.config.programBlob.file);
       this.loadMem(bin, this.config.programBlob.addr);
     }
-    else if (typeof this.config.bios.file === 'string') {
+    else if (typeof this.config.bios.file === "string") {
       this.debug.info("Loading BIOS...", true);
       // Load BIOS file
       let biosPath = `${this.config.bios.path}${this.config.bios.file}`;
@@ -110,7 +110,7 @@ export default class System {
       this.cyclesToRun = cyclesToRun;
       this.cycle((sys) => {
         this.end();
-        if (typeof finishedCB === 'function') finishedCB(sys);
+        if (typeof finishedCB === "function") finishedCB(sys);
         resolve(this);
       });
     });
@@ -146,7 +146,7 @@ export default class System {
     }
     // Or finish running
     else {
-      if (typeof finishedCB === 'function') finishedCB(this);
+      if (typeof finishedCB === "function") finishedCB(this);
     }
   }
 

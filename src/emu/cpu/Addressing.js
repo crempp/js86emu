@@ -5,7 +5,7 @@ import {
   regSI, regDI, regBP, regSP, regIP,
   regCS, regDS, regES, regSS,
   b, w, v, STATE_SEG_NONE
-} from '../Constants';
+} from "../Constants";
 import {
   ValueOverflowException, InvalidAddressModeException
 } from "../utils/Exceptions";
@@ -96,7 +96,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regAX] = value & 0xFFFF
+      this.cpu.reg16[regAX] = value & 0xFFFF;
     }
   }
 
@@ -122,7 +122,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg8[regAH] = value & 0xFF
+      this.cpu.reg8[regAH] = value & 0xFF;
     }
   }
 
@@ -148,7 +148,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg8[regAL] = value & 0xFF
+      this.cpu.reg8[regAL] = value & 0xFF;
     }
   }
 
@@ -174,7 +174,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regBX] = value & 0xFFFF
+      this.cpu.reg16[regBX] = value & 0xFFFF;
     }
   }
 
@@ -200,7 +200,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg8[regBH] = value & 0xFF
+      this.cpu.reg8[regBH] = value & 0xFF;
     }
   }
 
@@ -226,7 +226,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg8[regBL] = value & 0xFF
+      this.cpu.reg8[regBL] = value & 0xFF;
     }
   }
 
@@ -252,7 +252,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regCX] = value & 0xFFFF
+      this.cpu.reg16[regCX] = value & 0xFFFF;
     }
   }
 
@@ -278,7 +278,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg8[regCH] = value & 0xFF
+      this.cpu.reg8[regCH] = value & 0xFF;
     }
   }
 
@@ -304,7 +304,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg8[regCL] = value & 0xFF
+      this.cpu.reg8[regCL] = value & 0xFF;
     }
   }
 
@@ -330,7 +330,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regDX] = value & 0xFFFF
+      this.cpu.reg16[regDX] = value & 0xFFFF;
     }
   }
 
@@ -356,7 +356,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg8[regDH] = value & 0xFF
+      this.cpu.reg8[regDH] = value & 0xFF;
     }
   }
 
@@ -382,7 +382,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg8[regDL] = value & 0xFF
+      this.cpu.reg8[regDL] = value & 0xFF;
     }
   }
 
@@ -408,7 +408,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regSI] = value & 0xFFFF
+      this.cpu.reg16[regSI] = value & 0xFFFF;
     }
   }
 
@@ -434,7 +434,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regDI] = value & 0xFFFF
+      this.cpu.reg16[regDI] = value & 0xFFFF;
     }
   }
 
@@ -460,7 +460,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regBP] = value & 0xFFFF
+      this.cpu.reg16[regBP] = value & 0xFFFF;
     }
   }
 
@@ -486,7 +486,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regSP] = value & 0xFFFF
+      this.cpu.reg16[regSP] = value & 0xFFFF;
     }
   }
 
@@ -512,7 +512,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regCS] = value & 0xFFFF
+      this.cpu.reg16[regCS] = value & 0xFFFF;
     }
   }
 
@@ -538,7 +538,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regDS] = value & 0xFFFF
+      this.cpu.reg16[regDS] = value & 0xFFFF;
     }
   }
 
@@ -564,7 +564,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regES] = value & 0xFFFF
+      this.cpu.reg16[regES] = value & 0xFFFF;
     }
   }
 
@@ -591,7 +591,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regSS] = value & 0xFFFF
+      this.cpu.reg16[regSS] = value & 0xFFFF;
     }
   }
 
@@ -665,7 +665,7 @@ export default class Addressing {
     }
     else if (value === undefined) {
       // Read value from calculated address
-      return this.readRMReg8(segment, offset)
+      return this.readRMReg8(segment, offset);
     }
     else {
       // Write value to address
@@ -734,7 +734,7 @@ export default class Addressing {
     }
     else if (value === undefined) {
       // Read value from calculated address
-      return this.readRMReg16(segment, offset)
+      return this.readRMReg16(segment, offset);
     }
     else {
       // Write value to address
@@ -768,7 +768,7 @@ export default class Addressing {
     }
     else if (value === undefined) {
       // Read value from calculated address
-      return this.readRMReg16(segment, offset)
+      return this.readRMReg16(segment, offset);
     }
     else {
       // Write value to address
@@ -1030,7 +1030,7 @@ export default class Addressing {
       // Since the value *is* the offset return that. We can't do the address
       // calculation here and return null in the address mode because the
       // addrIPInc must be calculated in the address mode of this method.
-      return offset
+      return offset;
     }
     else {
       // Write value to address
@@ -1337,6 +1337,7 @@ export default class Addressing {
    */
   calcRMAddrNoDisp (segment) {
     let addr;
+    let ipInc;
 
     switch (this.cpu.opcode.rm)
     {
@@ -1363,7 +1364,7 @@ export default class Addressing {
       case 0b110 : // Direct Address
         // Direct address is always 2 bytes
         //   - yoshicapstonememo.googlecode.com/svn/trunk/4_2_86.pdf
-        let ipInc = this.cpu.instIPInc + this.cpu.addrIPInc;
+        ipInc = this.cpu.instIPInc + this.cpu.addrIPInc;
         addr = (this.cpu.mem8[seg2abs( this.cpu.reg16[regCS], this.cpu.reg16[regIP] + ipInc + 1)] << 8) |
                 this.cpu.mem8[seg2abs( this.cpu.reg16[regCS], this.cpu.reg16[regIP] + ipInc)];
         // if (this.cpu.addrIPInc === 0) this.cpu.addrIPInc += 2;

@@ -1,4 +1,4 @@
-import CPU8086 from '../../../src/emu/cpu/8086';
+import CPU8086 from "../../../src/emu/cpu/8086";
 import SystemConfig from "../../../src/emu/config/SystemConfig";
 import {
   regAX, regAL, regBX, regCS, regCX, regDI, regDS, regES,
@@ -12,13 +12,13 @@ function loadMem (data, from, cpu) {
   }
 }
 
-describe('basic CPU functionality', () => {
-  test('can create a cpu instance', () => {
+describe("basic CPU functionality", () => {
+  test("can create a cpu instance", () => {
     expect(new CPU8086(new SystemConfig({debug: false,})))
       .toBeInstanceOf(CPU8086);
   });
 
-  test('memory size respects config value', () => {
+  test("memory size respects config value", () => {
     let cpu = new CPU8086(new SystemConfig({
       memorySize: 131072,
       debug: false,
@@ -27,7 +27,7 @@ describe('basic CPU functionality', () => {
     expect(cpu.mem16.length).toEqual(131072/2);
   });
 
-  test('memory respects minimum value (1,024 bytes)', () => {
+  test("memory respects minimum value (1,024 bytes)", () => {
     let cpu = new CPU8086(new SystemConfig({
       memorySize: 1024,
       debug: false,
@@ -36,7 +36,7 @@ describe('basic CPU functionality', () => {
     expect(cpu.mem16.length).toEqual(1024/2);
   });
 
-  test('memory respects maximum value (1,048,576 bytes)', () => {
+  test("memory respects maximum value (1,048,576 bytes)", () => {
     let cpu = new CPU8086(new SystemConfig({
       memorySize: 1048576,
       debug: false,
@@ -45,12 +45,12 @@ describe('basic CPU functionality', () => {
     expect(cpu.mem16.length).toEqual(1048576/2);
   });
 
-  test.skip('instruction decodes', () => {
+  test.skip("instruction decodes", () => {
 
   });
 });
 
-describe('CPU States', () => {
+describe("CPU States", () => {
   let cpu;
   beforeEach(() => {
     cpu = new CPU8086(new SystemConfig({
@@ -65,7 +65,7 @@ describe('CPU States', () => {
     cpu.reg16[regFlags] = 0x0000;
   });
 
-  test('can leave wait state with test signal', () => {
+  test("can leave wait state with test signal", () => {
     cpu.instIPInc = 2;
     cpu.state = STATE_WAIT;
     cpu.mem8[0x00FF] = 0x90; // NOP
@@ -77,8 +77,8 @@ describe('CPU States', () => {
   });
 });
 
-describe('Repeat prefix', () => {
-  describe('REP', () => {
+describe("Repeat prefix", () => {
+  describe("REP", () => {
     let cpu, dst, src;
     beforeEach(() => {
       dst = [
@@ -121,7 +121,7 @@ describe('Repeat prefix', () => {
       loadMem(src, 0x02030, cpu);
     });
 
-    test('REP MOVSB', () => {
+    test("REP MOVSB", () => {
       cpu.mem8[0x00] = 0xF3; // REP
       cpu.mem8[0x01] = 0xA4; // MOVSB
 
@@ -138,7 +138,7 @@ describe('Repeat prefix', () => {
       expect(cpu.reg16[regIP]).toBe(0x02);
       expect(cpu.prefixRepeatState).toBe(STATE_REP_NONE);
     });
-    test('REP MOVSW', () => {
+    test("REP MOVSW", () => {
       cpu.mem8[0x00] = 0xF3; // REP
       cpu.mem8[0x01] = 0xA5; // MOVSW
 
@@ -157,7 +157,7 @@ describe('Repeat prefix', () => {
       expect(cpu.reg16[regIP]).toBe(0x02);
       expect(cpu.prefixRepeatState).toBe(STATE_REP_NONE);
     });
-    test('REP LODSB', () => {
+    test("REP LODSB", () => {
       cpu.mem8[0x00] = 0xF3; // REP
       cpu.mem8[0x01] = 0xAC; // LODSB
 
@@ -169,7 +169,7 @@ describe('Repeat prefix', () => {
       expect(cpu.reg16[regIP]).toBe(0x02);
       expect(cpu.prefixRepeatState).toBe(STATE_REP_NONE);
     });
-    test('REP LODSW', () => {
+    test("REP LODSW", () => {
       cpu.mem8[0x00] = 0xF3; // REP
       cpu.mem8[0x01] = 0xAD; // LODSW
 
@@ -182,7 +182,7 @@ describe('Repeat prefix', () => {
       expect(cpu.reg16[regIP]).toBe(0x02);
       expect(cpu.prefixRepeatState).toBe(STATE_REP_NONE);
     });
-    test('REP STOSB', () => {
+    test("REP STOSB", () => {
       cpu.mem8[0x00] = 0xF3; // REP
       cpu.mem8[0x01] = 0xAA; // STOSB
 
@@ -193,13 +193,13 @@ describe('Repeat prefix', () => {
 
       expect(Array.from(cpu.mem8.slice(0x01020, 0x01020 + 0x10)))
         .toEqual([
-        0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA,
-        0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA
-      ]);
+          0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA,
+          0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA
+        ]);
       expect(cpu.reg16[regIP]).toBe(0x02);
       expect(cpu.prefixRepeatState).toBe(STATE_REP_NONE);
     });
-    test('REP STOSW', () => {
+    test("REP STOSW", () => {
       cpu.mem8[0x00] = 0xF3; // REP
       cpu.mem8[0x01] = 0xAB; // STOSW
 
@@ -220,7 +220,7 @@ describe('Repeat prefix', () => {
     });
   });
 
-  describe('REPZ', () => {
+  describe("REPZ", () => {
     let cpu, dst, src;
     beforeEach(() => {
       dst = [
@@ -262,7 +262,7 @@ describe('Repeat prefix', () => {
       // Source Memory
       loadMem(src, 0x02030, cpu);
     });
-    test('REPZ CMPSB hit', () => {
+    test("REPZ CMPSB hit", () => {
       cpu.mem8[0x00] = 0xF3; // REPZ
       cpu.mem8[0x01] = 0xA6; // CMPSB
       loadMem(src, 0x01020, cpu);
@@ -278,7 +278,7 @@ describe('Repeat prefix', () => {
       expect(cpu.reg16[regIP]).toBe(0x0C);
       expect(cpu.prefixRepeatState).toBe(STATE_REP_NONE);
     });
-    test('REPZ CMPSB no hit', () => {
+    test("REPZ CMPSB no hit", () => {
       cpu.mem8[0x00] = 0xF3; // REPZ
       cpu.mem8[0x01] = 0xA6; // CMPSB
       loadMem(src, 0x01020, cpu);
@@ -293,7 +293,7 @@ describe('Repeat prefix', () => {
       expect(cpu.reg16[regIP]).toBe(0x02);
       expect(cpu.prefixRepeatState).toBe(STATE_REP_NONE);
     });
-    test('REPZ CMPSW hit', () => {
+    test("REPZ CMPSW hit", () => {
       cpu.mem8[0x00] = 0xF3; // REPZ
       cpu.mem8[0x01] = 0xA7; // CMPSW
       loadMem(src, 0x01020, cpu);
@@ -310,7 +310,7 @@ describe('Repeat prefix', () => {
       expect(cpu.reg16[regIP]).toBe(0x0E);
       expect(cpu.prefixRepeatState).toBe(STATE_REP_NONE);
     });
-    test('REPZ CMPSW no hit', () => {
+    test("REPZ CMPSW no hit", () => {
       cpu.mem8[0x00] = 0xF3; // REPZ
       cpu.mem8[0x01] = 0xA7; // CMPSW
       loadMem(src, 0x01020, cpu);
@@ -325,7 +325,7 @@ describe('Repeat prefix', () => {
       expect(cpu.reg16[regIP]).toBe(0x02);
       expect(cpu.prefixRepeatState).toBe(STATE_REP_NONE);
     });
-    test('REPZ SCASB hit', () => {
+    test("REPZ SCASB hit", () => {
       cpu.mem8[0x00] = 0xF3; // REPZ
       cpu.mem8[0x01] = 0xAE; // SCASB
       cpu.reg8[regAL] = 0x01;
@@ -341,7 +341,7 @@ describe('Repeat prefix', () => {
       expect(cpu.reg16[regIP]).toBe(0x0C);
       expect(cpu.prefixRepeatState).toBe(STATE_REP_NONE);
     });
-    test('REPZ SCASB no hit', () => {
+    test("REPZ SCASB no hit", () => {
       cpu.mem8[0x00] = 0xF3; // REPZ
       cpu.mem8[0x01] = 0xAE; // SCASB
       cpu.reg8[regAL] = 0x01;
@@ -356,7 +356,7 @@ describe('Repeat prefix', () => {
       expect(cpu.reg16[regIP]).toBe(0x02);
       expect(cpu.prefixRepeatState).toBe(STATE_REP_NONE);
     });
-    test('REPZ SCASW hit', () => {
+    test("REPZ SCASW hit", () => {
       cpu.mem8[0x00] = 0xF3; // REPZ
       cpu.mem8[0x01] = 0xAF; // SCASW
       cpu.reg16[regAX] = 0x0101;
@@ -372,7 +372,7 @@ describe('Repeat prefix', () => {
       expect(cpu.reg16[regIP]).toBe(0x0F);
       expect(cpu.prefixRepeatState).toBe(STATE_REP_NONE);
     });
-    test('REPZ SCASW no hit', () => {
+    test("REPZ SCASW no hit", () => {
       cpu.mem8[0x00] = 0xF3; // REPZ
       cpu.mem8[0x01] = 0xAF; // SCASW
       cpu.reg16[regAX] = 0x0101;
@@ -389,7 +389,7 @@ describe('Repeat prefix', () => {
     });
   });
 
-  describe('REPNZ', () => {
+  describe("REPNZ", () => {
     let cpu, dst, src;
     beforeEach(() => {
       dst = [
@@ -431,7 +431,7 @@ describe('Repeat prefix', () => {
       // Source Memory
       loadMem(src, 0x02030, cpu);
     });
-    test('REPNZ CMPSB hit', () => {
+    test("REPNZ CMPSB hit", () => {
       cpu.mem8[0x00] = 0xF2; // REPNZ
       cpu.mem8[0x01] = 0xA6; // CMPSB
       cpu.mem8[0x02035] = 0x01;
@@ -446,7 +446,7 @@ describe('Repeat prefix', () => {
       expect(cpu.reg16[regIP]).toBe(0x0C);
       expect(cpu.prefixRepeatState).toBe(STATE_REP_NONE);
     });
-    test('REPNZ CMPSB no hit', () => {
+    test("REPNZ CMPSB no hit", () => {
       cpu.mem8[0x00] = 0xF2; // REPNZ
       cpu.mem8[0x01] = 0xA6; // CMPSB
 
@@ -460,7 +460,7 @@ describe('Repeat prefix', () => {
       expect(cpu.reg16[regIP]).toBe(0x02);
       expect(cpu.prefixRepeatState).toBe(STATE_REP_NONE);
     });
-    test('REPNZ CMPSW hit', () => {
+    test("REPNZ CMPSW hit", () => {
       cpu.mem8[0x00] = 0xF2; // REPNZ
       cpu.mem8[0x01] = 0xA7; // CMPSW
       cpu.mem8[0x02036] = 0x01;
@@ -477,7 +477,7 @@ describe('Repeat prefix', () => {
       expect(cpu.prefixRepeatState).toBe(STATE_REP_NONE);
 
     });
-    test('REPNZ CMPSW no hit', () => {
+    test("REPNZ CMPSW no hit", () => {
       cpu.mem8[0x00] = 0xF2; // REPNZ
       cpu.mem8[0x01] = 0xA7; // CMPSW
 
@@ -491,7 +491,7 @@ describe('Repeat prefix', () => {
       expect(cpu.reg16[regIP]).toBe(0x02);
       expect(cpu.prefixRepeatState).toBe(STATE_REP_NONE);
     });
-    test('REPNZ SCASB hit', () => {
+    test("REPNZ SCASB hit", () => {
       cpu.mem8[0x00] = 0xF2; // REPNZ
       cpu.mem8[0x01] = 0xAE; // SCASB
       cpu.reg8[regAL] = 0x08;
@@ -507,7 +507,7 @@ describe('Repeat prefix', () => {
       expect(cpu.reg16[regIP]).toBe(0x0B);
       expect(cpu.prefixRepeatState).toBe(STATE_REP_NONE);
     });
-    test('REPNZ SCASB no hit', () => {
+    test("REPNZ SCASB no hit", () => {
       cpu.mem8[0x00] = 0xF2; // REPNZ
       cpu.mem8[0x01] = 0xAE; // SCASB
       cpu.reg8[regAL] = 0xFF;
@@ -523,7 +523,7 @@ describe('Repeat prefix', () => {
       expect(cpu.reg16[regIP]).toBe(0x02);
       expect(cpu.prefixRepeatState).toBe(STATE_REP_NONE);
     });
-    test('REPNZ SCASW hit', () => {
+    test("REPNZ SCASW hit", () => {
       cpu.mem8[0x00] = 0xF2; // REPNZ
       cpu.mem8[0x01] = 0xAF; // SCASW
       cpu.reg16[regAX] = 0x0908;
@@ -539,7 +539,7 @@ describe('Repeat prefix', () => {
       expect(cpu.reg16[regIP]).toBe(0x0E);
       expect(cpu.prefixRepeatState).toBe(STATE_REP_NONE);
     });
-    test('REPNZ SCASW no hit', () => {
+    test("REPNZ SCASW no hit", () => {
       cpu.mem8[0x00] = 0xF2; // REPNZ
       cpu.mem8[0x01] = 0xAF; // SCASW
       cpu.reg8[regAL] = 0xFFFF;
@@ -558,7 +558,7 @@ describe('Repeat prefix', () => {
   });
 });
 
-describe('Segment prefix', () => {
+describe("Segment prefix", () => {
   let cpu;
   beforeEach(() => {
     cpu = new CPU8086(new SystemConfig({
@@ -574,7 +574,7 @@ describe('Segment prefix', () => {
     cpu.reg16[regFlags] = 0x0000;
   });
 
-  test('MOV DI, WORD PTR CS:0x1D3', () => {
+  test("MOV DI, WORD PTR CS:0x1D3", () => {
     cpu.instIPInc = 2;
     cpu.mem8[0x00FF] = 0x2E; // CS
     cpu.mem8[0x0100] = 0x8B; // MOV
@@ -593,7 +593,7 @@ describe('Segment prefix', () => {
     expect(cpu.instIPInc).toBe(2);
     expect(cpu.addrIPInc).toBe(2);
   });
-  test('MOV DI, WORD PTR DS:0x1D3', () => {
+  test("MOV DI, WORD PTR DS:0x1D3", () => {
     cpu.instIPInc = 2;
     cpu.mem8[0x00FF] = 0x3E; // DS
     cpu.mem8[0x0100] = 0x8B; // MOV
@@ -612,7 +612,7 @@ describe('Segment prefix', () => {
     expect(cpu.instIPInc).toBe(2);
     expect(cpu.addrIPInc).toBe(2);
   });
-  test('MOV DI, WORD PTR ES:0x1D3', () => {
+  test("MOV DI, WORD PTR ES:0x1D3", () => {
     cpu.instIPInc = 2;
     cpu.mem8[0x00FF] = 0x26; // ES
     cpu.mem8[0x0100] = 0x8B; // MOV
@@ -631,7 +631,7 @@ describe('Segment prefix', () => {
     expect(cpu.instIPInc).toBe(2);
     expect(cpu.addrIPInc).toBe(2);
   });
-  test('MOV DI, WORD PTR SS:0x1D3', () => {
+  test("MOV DI, WORD PTR SS:0x1D3", () => {
     cpu.instIPInc = 2;
     cpu.mem8[0x00FF] = 0x36; // SS
     cpu.mem8[0x0100] = 0x8B; // MOV
@@ -652,7 +652,7 @@ describe('Segment prefix', () => {
   });
 });
 
-describe('Port IO', () => {
+describe("Port IO", () => {
   let cpu;
   beforeEach(() => {
     cpu = new CPU8086(new SystemConfig({
@@ -670,7 +670,7 @@ describe('Port IO', () => {
     }));
   });
 
-  test('PIC - disable IRQ 6 (floppy controller) from firing', () => {
+  test("PIC - disable IRQ 6 (floppy controller) from firing", () => {
     let instructions = [
       0x66, 0xe5, 0x21,        // in   ax,   0x21
       0x66, 0x83, 0xc8, 0x40,  // or   ax,   0x40
@@ -683,7 +683,7 @@ describe('Port IO', () => {
 
 });
 
-describe('Regressions', () => {
+describe("Regressions", () => {
   let cpu;
   beforeEach(() => {
     cpu = new CPU8086(new SystemConfig({
@@ -698,7 +698,7 @@ describe('Regressions', () => {
     cpu.reg16[regSS] = 0x0500;
     cpu.reg16[regFlags] = 0x0000;
   });
-  test('[regression] Interrupt jumping to 2 bytes past the intended target', () => {
+  test("[regression] Interrupt jumping to 2 bytes past the intended target", () => {
     cpu.instIPInc = 2;
     // IVT
     cpu.mem8[0x004C] = 0xAF;
@@ -717,7 +717,7 @@ describe('Regressions', () => {
     expect(cpu.reg16[regIP]).toBe(0x0CAF);
     expect(cpu.reg16[regCS]).toBe(0xF000);
   });
-  test('[regression] MOV AX CS where AX is from Ew and CS is from Sw ', () => {
+  test("[regression] MOV AX CS where AX is from Ew and CS is from Sw ", () => {
     cpu.reg16[regAX] = 0xFF23;
     cpu.reg16[regCS] = 0xF000;
     cpu.mem8[0xF00FF] = 0x8C; // MOV
@@ -727,7 +727,7 @@ describe('Regressions', () => {
 
     expect(cpu.reg16[regAX]).toBe(0xF000);
   });
-  test('[regression] AND AL 0b00110000 - IP increments correctly ', () => {
+  test("[regression] AND AL 0b00110000 - IP increments correctly ", () => {
     cpu.reg16[regAX] = 0x0000;
     cpu.mem8[0x00FF] = 0x24; // AND
     cpu.mem8[0x0100] = 0x30; // Operand
@@ -739,7 +739,7 @@ describe('Regressions', () => {
     expect(cpu.instIPInc).toBe(1);
     expect(cpu.instIPInc).toBe(1);
   });
-  test('[regression] MOV BX, [BP+0] - BP uses SS segment ', () => {
+  test("[regression] MOV BX, [BP+0] - BP uses SS segment ", () => {
     cpu.reg16[regBX] = 0x0000;
     cpu.reg16[regBP] = 0x00E6;
     cpu.reg16[regSS] = 0x0030;
@@ -757,7 +757,7 @@ describe('Regressions', () => {
     expect(cpu.instIPInc).toBe(2);
     expect(cpu.addrIPInc).toBe(1);
   });
-  test('[regression] MOV BX, [BP+0] - BP does not use SS segment if override', () => {
+  test("[regression] MOV BX, [BP+0] - BP does not use SS segment if override", () => {
     cpu.reg16[regBX] = 0x0000;
     cpu.reg16[regBP] = 0x00E6;
     cpu.reg16[regSS] = 0x0030;

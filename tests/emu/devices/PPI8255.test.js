@@ -20,7 +20,7 @@ class MockSystem {
   }
 }
 
-describe('PPI Mode 0', () => {
+describe("PPI Mode 0", () => {
   let system, cpu, addr, oper, io;
 
   beforeEach(() => {
@@ -57,7 +57,7 @@ describe('PPI Mode 0', () => {
     cpu.reg16[regFlags] = 0x0000;
   });
 
-  test('set control register', () => {
+  test("set control register", () => {
     io.write(0x0063, 0xFF, b);
 
     expect(io.devices["PPI8255"].PPIControlWordRegister).toBe(0xFF);
@@ -70,12 +70,12 @@ describe('PPI Mode 0', () => {
     expect(io.devices["PPI8255"].modeSetFlag).toBe(1);
 
   });
-  test('read from control register throws error', () => {
+  test("read from control register throws error", () => {
     expect(() => {
       io.read(0x0063, b);
     }).toThrowError(PortAccessException);
   });
-  test('write to port A', () => {
+  test("write to port A", () => {
     // Configure control flags
     io.devices["PPI8255"].grpAModeSelection = 0;
     io.devices["PPI8255"].portAInOut = 0;
@@ -86,7 +86,7 @@ describe('PPI Mode 0', () => {
 
     expect(io.devices["PPI8255"].portA).toBe(0xFF);
   });
-  test('read from port A', () => {
+  test("read from port A", () => {
     // Configure control flags
     io.devices["PPI8255"].grpAModeSelection = 0;
     io.devices["PPI8255"].portAInOut = 1;
@@ -97,10 +97,10 @@ describe('PPI Mode 0', () => {
 
     expect(value).toBe(0xFF);
   });
-  test.skip('write to port A when set to input', () => {});
-  test.skip('read from port A when set to output', () => {});
+  test.skip("write to port A when set to input", () => {});
+  test.skip("read from port A when set to output", () => {});
 
-  test('write to port B', () => {
+  test("write to port B", () => {
     // Configure control flags
     io.devices["PPI8255"].grpBModeSelection = 0;
     io.devices["PPI8255"].portBInOut = 0;
@@ -111,7 +111,7 @@ describe('PPI Mode 0', () => {
 
     expect(io.devices["PPI8255"].portB).toBe(0xFE);
   });
-  test('read from port B', () => {
+  test("read from port B", () => {
     // Configure control flags
     io.devices["PPI8255"].grpBModeSelection = 0;
     io.devices["PPI8255"].portBInOut = 1;
@@ -122,10 +122,10 @@ describe('PPI Mode 0', () => {
 
     expect(value).toBe(0xFF);
   });
-  test.skip('write to port B when set to input', () => {});
-  test.skip('read from port B when set to output', () => {});
+  test.skip("write to port B when set to input", () => {});
+  test.skip("read from port B when set to output", () => {});
 
-  test('write to port C', () => {
+  test("write to port C", () => {
     // Configure control flags
     io.devices["PPI8255"].grpAModeSelection = 0;
     io.devices["PPI8255"].grpBModeSelection = 0;
@@ -139,7 +139,7 @@ describe('PPI Mode 0', () => {
     expect(io.devices["PPI8255"].portCUpper).toBe(0xF);
     expect(io.devices["PPI8255"].portCLower).toBe(0xF);
   });
-  test('write to port C (upper INPUT, lower OUTPUT)', () => {
+  test("write to port C (upper INPUT, lower OUTPUT)", () => {
     // Configure control flags
     io.devices["PPI8255"].grpAModeSelection = 0;
     io.devices["PPI8255"].grpBModeSelection = 0;
@@ -154,7 +154,7 @@ describe('PPI Mode 0', () => {
     expect(io.devices["PPI8255"].portCUpper).toBe(0x0);
     expect(io.devices["PPI8255"].portCLower).toBe(0xF);
   });
-  test('read from port C', () => {
+  test("read from port C", () => {
     // Configure control flags
     io.devices["PPI8255"].grpAModeSelection = 0;
     io.devices["PPI8255"].grpBModeSelection = 0;
@@ -170,7 +170,7 @@ describe('PPI Mode 0', () => {
 
     expect(value).toBe(0x5A);
   });
-  test('read from port C (upper INPUT, lower OUTPUT)', () => {
+  test("read from port C (upper INPUT, lower OUTPUT)", () => {
     // Configure control flags
     io.devices["PPI8255"].grpAModeSelection = 0;
     io.devices["PPI8255"].grpBModeSelection = 0;
@@ -186,8 +186,8 @@ describe('PPI Mode 0', () => {
 
     expect(value).toBe(0x50);
   });
-  test.skip('write to port C when set to input', () => {});
-  test.skip('read from port C when set to output', () => {});
+  test.skip("write to port C when set to input", () => {});
+  test.skip("read from port C when set to output", () => {});
 
   // test('IN instruction throws', () => {
   //   cpu.mem8[0x00FF] = 0xE4;

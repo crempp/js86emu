@@ -1,4 +1,4 @@
-import { b, w } from '../Constants';
+import { b, w } from "../Constants";
 import Device from "./Device";
 
 class TestDevice extends Device{
@@ -39,4 +39,4 @@ class TestDevice extends Device{
   deviceCycle(){}
 }
 
-export default TestDevice
+export default TestDevice;

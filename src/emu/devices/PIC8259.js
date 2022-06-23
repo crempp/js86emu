@@ -36,7 +36,7 @@ const ICW3_COMPLETED = 3;
 const ICW4_COMPLETED = 4;
 const READY          = 5;
 // Read Register Commands
-const NO_COMMAND = 0
+const NO_COMMAND = 0;
 const READ_IR_REG_ON_NEXT_PULSE = 1;
 const READ_IS_REG_ON_NEXT_PULSE = 2;
 // Special Mask Mode
@@ -71,10 +71,12 @@ export default class PIC8259 extends Device{
   }
 
   write(port, value, size) {
+    let bit3, bit4;
+
     switch (port) {
       case 0x20: // Master PIC command port
-        let bit3 = (value >> 3) & 0x1;
-        let bit4 = (value >> 4) & 0x1;
+        bit3 = (value >> 3) & 0x1;
+        bit4 = (value >> 4) & 0x1;
 
         if (bit4 === 1) {
           //===================================================================
@@ -101,7 +103,7 @@ export default class PIC8259 extends Device{
 
           this.ICW4Needed = (value & 0x1) === 1;
           this.singleCascadeMode = (value >> 1) & 0x1;
-          this.IVTInterval = ((value >> 2) & 0x1 === 0) ? 8 : 4
+          this.IVTInterval = ((value >> 2) & 0x1 === 0) ? 8 : 4;
           this.triggeredMode = (value >> 3) & 0x1;
 
           // Update the initialization state
@@ -247,8 +249,8 @@ export default class PIC8259 extends Device{
       this.system.debug.info(`INT:${irqNumber}`);
       let vector = (this.vectorByte + irqNumber) * 4;
       this.system.cpu.int(irqNumber,
-          (this.system.cpu.mem8[vector + 1] << 8) + this.system.cpu.mem8[vector],
-          (this.system.cpu.mem8[vector + 3] << 8) + this.system.cpu.mem8[vector + 2]);
+        (this.system.cpu.mem8[vector + 1] << 8) + this.system.cpu.mem8[vector],
+        (this.system.cpu.mem8[vector + 3] << 8) + this.system.cpu.mem8[vector + 2]);
     }
   }
 

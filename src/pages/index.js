@@ -1,8 +1,9 @@
-import Head from 'next/head'
+import React  from "react";
+import Head from "next/head";
 import Layout from "../components/Layout";
 import Emulator from "../components/Emulator";
 import IBM5150 from "../emu/config/IBM5150";
-import CodeGolf from "../emu/config/Test-CodeGolf"
+// import CodeGolf from "../emu/config/Test-CodeGolf";
 
 function HomePage() {
   return (
@@ -15,7 +16,7 @@ function HomePage() {
         {/*<Emulator config={CodeGolf} />*/}
       </div>
     </Layout>
-  )
+  );
 }
 
-export default HomePage
+export default HomePage;

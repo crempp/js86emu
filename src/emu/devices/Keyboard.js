@@ -106,7 +106,7 @@ const XT_KEYCODE_MAP = {
   "Backslash": null,
   "BracketRight": null,
   "Quote": null,
-}
+};
 
 export default class Keyboard {
   constructor(config, system) {
@@ -116,8 +116,8 @@ export default class Keyboard {
     this.resetTimer = null;
     this.buffer = null;
 
-    document.addEventListener('keydown', this.handleKeyDown);
-    document.addEventListener('keyup', this.handleKeyUp);
+    document.addEventListener("keydown", this.handleKeyDown);
+    document.addEventListener("keyup", this.handleKeyUp);
   }
 
   /**
@@ -148,7 +148,7 @@ export default class Keyboard {
    * @param value Value to set line to
    */
   setLine(line, value) {
-    if (line === 'clk') {
+    if (line === "clk") {
       // If clock held low for 20ms then reset keyboard
       if (value === 0) {
         // We should wait for 20ms but the system may be running slow, so we
@@ -157,7 +157,7 @@ export default class Keyboard {
         // keyboard.
         let timeScaleFactor = (1/this.system.clock.timeScale)*2;
         let time = Math.trunc(performance.now() * 1e6) + (2e7 * timeScaleFactor);
-        this.resetTimer = this.system.clock.addTimer(time, () => { this.reset() });
+        this.resetTimer = this.system.clock.addTimer(time, () => { this.reset(); });
       }
 
     }

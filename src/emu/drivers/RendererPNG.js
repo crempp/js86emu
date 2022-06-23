@@ -1,8 +1,8 @@
-import fs from 'fs';
-import { PNG } from 'pngjs';
+import fs from "fs";
+import { PNG } from "pngjs";
 
 export default class RendererPNG {
-  constructor (options) {
+  constructor () {
     this.path = "screenOut";
     this.width = null;
     this.height = null;

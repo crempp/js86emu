@@ -111,7 +111,7 @@ export default class PPI8255 extends Device{
         //   Grp A | D5: | Mode Selection [00 = Mode 0,
         //         \ D6: |    01 = Mode 1, 1X = Mode 2]
         //           D7: Mode Set Flag [1 = Active]
-          // 1 00 1   1 0 0 1
+        // 1 00 1   1 0 0 1
         this.PPIControlWordRegister = value;
 
         this.portCLowerInOut   = value & 0x1;

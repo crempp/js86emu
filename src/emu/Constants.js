@@ -33,11 +33,11 @@ export const regSS = 12;
 export const regFlags = 13;
 
 export const FLAG_CF_MASK = 0x0001; // 0
-                                    // 1
+// 1
 export const FLAG_PF_MASK = 0x0004; // 2
-                                    // 3
+// 3
 export const FLAG_AF_MASK = 0x0010; // 4
-                                    // 5
+// 5
 export const FLAG_ZF_MASK = 0x0040; // 6
 export const FLAG_SF_MASK = 0x0080; // 7
 export const FLAG_TF_MASK = 0x0100; // 8

@@ -1,6 +1,6 @@
-import Operations from './Operations.js'
-import Addressing from './Addressing.js'
-import CPU from './CPU';
+import Operations from "./Operations.js";
+import Addressing from "./Addressing.js";
+import CPU from "./CPU";
 import {push16, segIP} from "../utils/Utils";
 import {
   regAX, regBX, regCX, regDX,
@@ -21,7 +21,7 @@ import {
   PIN_8080_IOM, PIN_8080_DTR, PIN_8080_DEN, PIN_8080_ALE, PIN_8080_INTA,
   PIN_8080_TEST, PIN_8080_READY, PIN_8080_RESET, PIN_8080_CLK, PIN_8080_INTR,
   PIN_8080_NMI, PIN_LOW, PIN_HIGH, STATE_WAIT, STATE_RUNNING
-} from '../Constants';
+} from "../Constants";
 import {hexString16, hexString32} from "../utils/Debug";
 
 /**
@@ -234,13 +234,13 @@ export default class CPU8086 extends CPU {
         return `${this.opName()} ${this.dstName()}, ${this.srcName()}`;
       }
       opName () {
-        return typeof this.op === 'function' ? this.op.name.replace("bound ", "").replace("_", "") : "[Unknown Op]";
+        return typeof this.op === "function" ? this.op.name.replace("bound ", "").replace("_", "") : "[Unknown Op]";
       }
       dstName () {
-        return typeof this.dst === 'function' ? this.dst.name.replace("bound ", "") : "";
+        return typeof this.dst === "function" ? this.dst.name.replace("bound ", "") : "";
       }
       srcName () {
-        return typeof this.src === 'function' ? this.src.name.replace("bound ", "") : "";
+        return typeof this.src === "function" ? this.src.name.replace("bound ", "") : "";
       }
     }
 
@@ -638,7 +638,7 @@ export default class CPU8086 extends CPU {
     this.opcode["reg"]             = null;
     this.opcode["rm"]              = null;
     this.opcode["inst"]            = instruction;
-    this.opcode["string"]          = ""
+    this.opcode["string"]          = "";
     this.opcode["addrSize"]        = null;
     this.opcode["isGroup"]         = (instruction instanceof Array);
 
@@ -768,6 +768,7 @@ export default class CPU8086 extends CPU {
     if (this.system && this.system.steppingMode) {
       this.system.clock.sync();
       this.debug.flush();
+      // eslint-disable-next-line no-debugger
       debugger;
     }
 
@@ -795,7 +796,7 @@ export default class CPU8086 extends CPU {
       interrupt: interrupt,
       IP: ip,
       CS: cs,
-    }
+    };
   }
 
   /**

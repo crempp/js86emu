@@ -7,7 +7,7 @@ import RendererPNG from "../drivers/RendererPNG";
 import {SystemConfigException} from "../utils/Exceptions";
 
 export const HORIZONTAL_TOTAL      = 0;
-export const HORIZONTAL_DISPLAYED  = 1
+export const HORIZONTAL_DISPLAYED  = 1;
 export const HSYNC_POSITION        = 2;
 export const HSYNC_WIDTH           = 3;
 export const VERTICAL_TOTAL        = 4;
@@ -102,8 +102,8 @@ export default class VideoMDA extends Card{
     this.selectedFont = this.fontFiles[0];
 
     // Create video and renderer
-    if (this.config.isNode && this.config.renderer.class === 'RendererCanvas') {
-      throw new SystemConfigException(`RendererCanvas is not a valid renderer when running in nodejs`);
+    if (this.config.isNode && this.config.renderer.class === "RendererCanvas") {
+      throw new SystemConfigException("RendererCanvas is not a valid renderer when running in nodejs");
     }
     if (!(this.config.renderer.class in this.AVAILABLE_RENDERERS)) {
       throw new SystemConfigException(`${config.renderer.class} is not a valid renderer`);
@@ -220,7 +220,7 @@ export default class VideoMDA extends Card{
       case 0x3B2:
       case 0x3B6:
       case 0x3B4: // Index (Address) Register
-          this.CRTCIndexRegister = value & 0xFF;
+        this.CRTCIndexRegister = value & 0xFF;
         break;
       // All the following ports decode to 0x3B5
       case 0x3B1:
@@ -251,7 +251,7 @@ export default class VideoMDA extends Card{
       case 0x3B2:
       case 0x3B6:
       case 0x3B4: // Index (Address) Register (write only)
-        break
+        break;
       // All the following ports decode to 0x3B5
       case 0x3B1:
       case 0x3B3:
@@ -264,12 +264,10 @@ export default class VideoMDA extends Card{
         break;
       case 0x3B8: // 6845 Mode Control Register
         return this.modeControlRegister;
-        break;
       case 0x3B9: // reserved for color select register on color adapter
         break;
       case 0x3BA: // Status Register (read only)
         return this.statusRegister;
-        break;
       case 0x3BB: // reserved for light pen strobe reset
         break;
     }

@@ -1,7 +1,7 @@
-import structuredClone from 'core-js-pure/actual/structured-clone';
+import structuredClone from "core-js-pure/actual/structured-clone";
 import CPU from "../../../src/emu/cpu/CPU";
 
-describe('CPU shared functionality', () => {
+describe("CPU shared functionality", () => {
   let cpu;
 
   let initialState = {
@@ -29,7 +29,7 @@ describe('CPU shared functionality', () => {
     "state":              1,
     "prefixRepeatState":  0,
     "prefixSegmentState": 1,
-  }
+  };
 
   beforeEach(() => {
     cpu = new CPU();
@@ -39,9 +39,9 @@ describe('CPU shared functionality', () => {
     for (let key in initialState) {
       cpu[key] = initialState[key];
     }
-  })
+  });
 
-  test('set state', () => {
+  test("set state", () => {
     let newState = structuredClone(initialState);
     newState.addrSeg = 16;
     cpu.setState(newState);
@@ -49,7 +49,7 @@ describe('CPU shared functionality', () => {
     expect(cpu.addrSeg).toBe(16);
   });
 
-  test('get state', () => {
+  test("get state", () => {
     let gottenState = cpu.getState();
 
     expect(gottenState).toStrictEqual(initialState);
