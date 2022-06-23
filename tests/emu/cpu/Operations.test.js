@@ -15,6 +15,7 @@ import {
   STATE_HALT, STATE_REP_Z, STATE_REP, STATE_REP_NZ, STATE_SEG_CS, STATE_SEG_DS, STATE_SEG_ES, STATE_SEG_SS, STATE_WAIT,
 } from '../../../src/emu/Constants';
 import TestDevice from "../../../src/emu/devices/TestDevice";
+import Debug from "../../../src/emu/utils/Debug";
 
 let IVT = [
   /* INT   |   Offset   | Segment  */
@@ -78,8 +79,9 @@ function setMemory(cpu, value) {
 class MockSystem {
   constructor (config) {
     this.config = config;
+    this.debug = new Debug(this);
     this.cpu = new CPU8086(config, this);
-    this.io = new IO(this.config, this,{"TestDevice": new TestDevice(config)});
+    this.io = new IO(this.config, this,{"TestDevice": new TestDevice(config, this)});
   }
 }
 
@@ -4107,23 +4109,6 @@ describe('Utility methods', () => {
     setMemory(cpu, 0xAA);
   });
 
-  test('push16()', () => {
-    oper.push16(0x1234);
-
-    expect(cpu.mem8[0x0401E]).toBe(0x34);
-    expect(cpu.mem8[0x0401F]).toBe(0x12);
-    expect(cpu.reg16[regSP]).toBe(0x001E);
-  });
-  test('pop16()', () => {
-    cpu.mem8[0x0401E] = 0x34;
-    cpu.mem8[0x0401F] = 0x12;
-    cpu.reg16[regSP] = 0x001E;
-
-    expect(oper.pop16()).toBe(0x1234);
-    expect(cpu.reg16[regSP]).toBe(0x0020);
-  });
-
-  test.skip('pop16()', () => {});
   test.skip('correctSubtraction()', () => {});
   test.skip('correctAddition()', () => {});
   test.skip('setPF_FLAG()', () => {});
@@ -4131,24 +4116,4 @@ describe('Utility methods', () => {
   test.skip('setZF_FLAG()', () => {});
   test.skip('flagAdd()', () => {});
   test.skip('flagSub()', () => {});
-
-});
-
-describe.skip('Regressions', () => {
-  let cpu, addr, oper;
-
-  // beforeEach(() => {
-  //   cpu = new CPU8086(new SystemConfig({
-  //     memorySize: 2 ** 20,
-  //     logState: false,
-  //   }));
-  //   oper = new Operations(cpu);
-  //   addr = new Addressing(cpu);
-  //   cpu.reg16[regIP] = 0x00FF;
-  //   cpu.reg16[regCS] = 0x0000;
-  //   cpu.reg16[regDS] = 0x0300;
-  //   cpu.reg16[regSS] = 0x0400;
-  //   cpu.reg16[regSP] = 0x0020;
-  //   cpu.reg16[regFlags] = 0x0000;
-  // });
 });

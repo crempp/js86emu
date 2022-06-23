@@ -3,6 +3,7 @@ import System from "../../src/emu/System";
 import SystemConfig from "../../src/emu/config/SystemConfig";
 import path from "path";
 import {STATE_RUNNING} from "../../src/emu/Constants";
+import { AudioContext } from 'standardized-audio-context-mock';
 
 const FILE_PATH_BASE = path.normalize(`${__dirname}../../../public/`);
 
@@ -11,15 +12,13 @@ describe('basic system functionality', () => {
 
   beforeAll(done => {
     done();
+    window.AudioContext = AudioContext;
   })
 
   afterAll(done => {
     done();
+    delete window.AudioContext
   });
-
-  // afterEach(done => {
-  //   done();
-  // });
 
   beforeEach(() => {
     // Make console logs be quiet.

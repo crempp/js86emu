@@ -7,7 +7,7 @@ export default class Device {
   constructor(config, system) {
     this.config = config;
     this.system = system;
-    this.debug = system.debug;
+    this.debug = this.system.debug;
   }
 
   write(port, value, size) {

@@ -1,17 +1,15 @@
-import hrtime from 'browser-process-hrtime';
 import 'setimmediate';
-import CPU8086 from "./cpu/8086";
-import IO from "./IO";
-import SystemConfig from "./config/SystemConfig";
-import {
-  regCS, regIP, STATE_RUNNING, STATE_HALT
-} from './Constants';
-import { SystemConfigException } from "./utils/Exceptions";
-import {loadBINAsync, seg2abs} from "./utils/Utils";
-import Debug, {hexString32} from "./utils/Debug";
 import Clock from "./Clock";
+import CPU8086 from "./cpu/8086";
+import Debug, {hexString32} from "./utils/Debug";
+import IO from "./IO";
 import Keyboard from "./devices/Keyboard";
 import Speaker from "./devices/Speaker";
+import SystemConfig from "./config/SystemConfig";
+import { regCS, regIP, STATE_RUNNING, STATE_HALT } from './Constants';
+import { SystemConfigException } from "./utils/Exceptions";
+import { loadBINAsync, seg2abs } from "./utils/Utils";
+
 
 export default class System {
   constructor (config) {

@@ -11,7 +11,7 @@ class MockSystem {
   constructor (config) {
     this.config = config;
     this.cpu = new CPU8086(config, this);
-    this.io = new IO(this.config, this,{"NMIMaskRegister": new NMIMaskRegister(this)});
+    this.io = new IO(this.config, this,{"NMIMaskRegister": new NMIMaskRegister(this.config, this)});
   }
 }
 

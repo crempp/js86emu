@@ -22,9 +22,13 @@
     "setimmediate": "^1.0.5"
   },
   "devDependencies": {
-    "jest": "^27.5.1",
-    "jest-each": "^27.5.1",
-    "jest-junit": "^13.0.0"
+    "eslint": "^8.18.0",
+    "eslint-plugin-react": "^7.30.0",
+    "jest": "^28.1.1",
+    "jest-each": "^28.1.1",
+    "jest-environment-jsdom": "^28.1.1",
+    "jest-junit": "^13.2.0",
+    "standardized-audio-context-mock": "^9.5.4"
   },
   "scripts": {
     "build:web": "next build",
@@ -36,9 +40,11 @@
   },
   "jest": {
     "verbose": false,
-    "testEnvironment": "node",
+    "testEnvironment": "jsdom",
     "testResultsProcessor": "jest-junit",
-    "setupFilesAfterEnv": [ "./tests/jest-setup.js" ]
+    "setupFilesAfterEnv": [
+      "./tests/jest-setup.js"
+    ]
   },
   "jest-junit": {
     "suiteName": "js86emu tests",

@@ -118,9 +118,21 @@ export default class PPI8255 extends Device{
         this.portBInOut        = (value >> 1) & 0x1;
         this.grpBmodeSelection = (value >> 2) & 0x1;
         this.portCUpperInOut   = (value >> 3) & 0x1;
-        this.portAInOut        = (value >> 4) & 0x1
-        this.grpAModeSelection = (value >> 5) & 0x3;
+        this.portAInOut        = (value >> 4) & 0x1;
         this.modeSetFlag       = (value >> 7) & 0x1;
+
+        switch ((value >> 5) & 0x3) {
+          case 0:
+            this.grpAModeSelection = MODE0;
+            break;
+          case 1:
+            this.grpAModeSelection = MODE1;
+            break;
+          case 2:
+          case 3:
+            this.grpAModeSelection = MODE2;
+            break;
+        }
         break;
     }
   }
@@ -132,9 +144,14 @@ export default class PPI8255 extends Device{
         if (this.grpAModeSelection === MODE0 && this.portAInOut === INPUT) {
           //
           if (this.portAKeyboardOrDIP === DIP) {
-            value = this.config.jumpers.sw1
+            value = this.config.jumpers.sw1;
           } else {
-            value = this.system.keyboard.buffer;
+            if (this.system.keyboard) {
+              value = this.system.keyboard.buffer;
+            }
+            else {
+              value = 0;
+            }
           }
         }
         break;

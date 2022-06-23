@@ -5,7 +5,7 @@ import {
   assign,
   intByte2TwosComplement, intDouble2TwosComplement, intWord2TwosComplement,
   isByteSigned,
-  isWordSigned,
+  isWordSigned, pop16, push16,
   seg2abs,
   segIP, signExtend16, signExtend32,
   twosComplement2IntByte, twosComplement2IntDouble,
@@ -20,6 +20,13 @@ import {
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
 } from '../../src/emu/Constants';
+import Operations from "../../src/emu/cpu/Operations";
+
+function setMemory(cpu, value) {
+  for (let i = 0; i < cpu.mem8.length; i++) {
+    cpu.mem8[i] = value;
+  }
+}
 
 describe('seg2abs() Segment to absolute memory address conversion', () => {
   let addr, cpu;
@@ -236,3 +243,39 @@ describe('assign', () => {
     expect(assign(Object.create(target), source1, source2)).toStrictEqual(expected);
   });
 });
+
+describe("push/pop", () => {
+  let cpu;
+  let oper;
+
+  beforeEach(() => {
+    cpu = new CPU8086(new SystemConfig({
+      memorySize: 2 ** 16,
+      debug: false,
+    }));
+    oper = new Operations(cpu);
+    cpu.reg16[regIP] = 0x00FF;
+    cpu.reg16[regCS] = 0x0000;
+    cpu.reg16[regSS] = 0x0400;
+    cpu.reg16[regSP] = 0x0020;
+
+    setMemory(cpu, 0xAA);
+  });
+
+  test('push16()', () => {
+    push16(cpu, 0x1234);
+
+    expect(cpu.mem8[0x0401E]).toBe(0x34);
+    expect(cpu.mem8[0x0401F]).toBe(0x12);
+    expect(cpu.reg16[regSP]).toBe(0x001E);
+  });
+
+  test('pop16()', () => {
+    cpu.mem8[0x0401E] = 0x34;
+    cpu.mem8[0x0401F] = 0x12;
+    cpu.reg16[regSP] = 0x001E;
+
+    expect(pop16(cpu)).toBe(0x1234);
+    expect(cpu.reg16[regSP]).toBe(0x0020);
+  });
+})

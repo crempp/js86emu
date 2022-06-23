@@ -7,6 +7,7 @@ import CPU8086 from "../../../src/emu/cpu/8086";
 import IO from "../../../src/emu/IO";
 import PPI8255 from "../../../src/emu/devices/PPI8255";
 import PIT8253 from "../../../src/emu/devices/PIT8253";
+import Keyboard from "../../../src/emu/devices/Keyboard";
 
 class MockSystem {
   constructor (config) {
@@ -40,7 +41,9 @@ describe('PPI Mode 0', () => {
       },
       debug: false
     });
-    system = new MockSystem(config)
+    system = new MockSystem(config);
+    system.keyboard = new Keyboard(config, system);
+    system.keyboard.buffer = 0xFF;
     cpu = system.cpu;
     io = system.io;
 
@@ -88,7 +91,7 @@ describe('PPI Mode 0', () => {
     io.devices["PPI8255"].grpAModeSelection = 0;
     io.devices["PPI8255"].portAInOut = 1;
     // Set port value to 0xFF
-    io.devices["PPI8255"].portA = 0xFF;
+    // io.devices["PPI8255"].portA = 0xFF;
 
     let value = io.read(0x0060, b);
 
@@ -104,9 +107,9 @@ describe('PPI Mode 0', () => {
     // Set port value to 0
     io.devices["PPI8255"].portB = 0x00;
 
-    io.write(0x0061, 0xFF, b);
+    io.write(0x0061, 0xFE, b);
 
-    expect(io.devices["PPI8255"].portB).toBe(0xFF);
+    expect(io.devices["PPI8255"].portB).toBe(0xFE);
   });
   test('read from port B', () => {
     // Configure control flags

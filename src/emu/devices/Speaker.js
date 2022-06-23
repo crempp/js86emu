@@ -46,6 +46,8 @@ export default class Speaker  {
   }
 
   boot() {
-    this.system.io.devices["PIT8253"].registerChannelLister(2, this.timerHandler.bind(this));
+    if ("PIT8253" in this.system.io.devices) {
+      this.system.io.devices["PIT8253"].registerChannelLister(2, this.timerHandler.bind(this));
+    }
   }
 }
