@@ -286,9 +286,13 @@ let config = new SystemConfig({
         name: "E3",  // LINE 743
         enabled: false
       },
-      0xE343: {
-        name: "WIP",  // LINE 745
+      0xE1D4: {
+        name: "WIP",  // LINE 721
         enabled: true
+      },
+      0xE69E: {
+        name: "WIP2",  // LINE 1295
+        enabled: false
       },
     }
   }

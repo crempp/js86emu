@@ -18,7 +18,7 @@ const FS_CONFIG = {
         baseUrl: "/files"
       }
     },
-    "/tmp/screenOut": {
+    "/tmp": {
       fs: "LocalStorage"
     },
   }

@@ -8,7 +8,7 @@ import {
   b, w, v, u, regFlags,
 } from "../Constants";
 import { ValueOverflowException, ValueUnderflowException } from "./Exceptions";
-import {segIP} from "./Utils";
+import {downloadFile, saveBinAwait, segIP} from "./Utils";
 
 
 export default class Debug {
@@ -99,8 +99,6 @@ export default class Debug {
 
   /**
    * Print aggregate logState info
-   *
-   * @param {System} system System instance
    */
   logState() {
     // Styling - it doesn't work well with Jetbrains debugger
@@ -121,8 +119,36 @@ export default class Debug {
     // console.log(`  CODE:        \n${formatDisassembly(disassembly)}`);
     // console.log(`  MEMORY STACK:\n${formatStack(this.mem8, this.reg16[regSP], 0x1000, 11)}`);
   }
-}
 
+  /**
+   * Dump
+   * @param data
+   * @returns {Promise<unknown>}
+   */
+  saveUint8ArrayToLocalStorage(data) {
+    let d = new Date();
+    let path = `files/mem-${d.getHours()}${d.getMinutes()}${d.getSeconds()}.bin`;
+    return new Promise(resolve => {
+      saveBinAwait(path, data).then( () => {
+        this.info(`Saved file to ${path}`);
+      });
+    });
+  }
+
+  downloadUint8Array (data) {
+    let d = new Date();
+    let fileName = `mem-${d.getHours()}${d.getMinutes()}${d.getSeconds()}.bin`;
+    let mimeType = "application/octet-stream";
+    let blob = new Blob([data], {
+      type: mimeType
+    });
+    let url = window.URL.createObjectURL(blob);
+    downloadFile(url, fileName);
+    setTimeout(function() {
+      return window.URL.revokeObjectURL(url);
+    }, 1000);
+  }
+}
 
 export function binString8 (value) {
   if (value > 0xFF) throw new ValueOverflowException("Value too large for binString8()");
@@ -191,8 +217,6 @@ export function formatOpcode(opcode, indentSize=0) {
   str += indent + "mod:     " + "      " + modBin + "[" + hexString8(opcode.mod) + "]    ";
   str += "reg:     " + "     " + regBin + "[" + hexString8(opcode.reg) + "]";
   str += indent + "rm:      " + "     " + rmBin + "[" + hexString8(opcode.rm) + "]    ";
-
-
 
   return str;
 }

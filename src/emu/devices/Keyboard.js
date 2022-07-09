@@ -155,11 +155,11 @@ export default class Keyboard {
         // need to adjust for the speed the system is running, so we don't
         // fire the interrupt before the BIOS is ready. After 20ms reset the
         // keyboard.
+        this.system.clock.sync();
         let timeScaleFactor = (1/this.system.clock.timeScale)*2;
         let time = Math.trunc(performance.now() * 1e6) + (2e7 * timeScaleFactor);
         this.resetTimer = this.system.clock.addTimer(time, () => { this.reset(); });
       }
-
     }
   }
 
@@ -169,6 +169,8 @@ export default class Keyboard {
    * TODO: investigate more about what an XT reset does.
    */
   reset() {
+    this.debug.info("KEYBOARD: Reset");
+
     // Send AA to the system
     this.buffer = 0xAA;
 

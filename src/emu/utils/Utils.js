@@ -245,6 +245,33 @@ export function BrowserFSAsync (config) {
   });
 }
 
+/**
+ * Save an array of pixel data to a binary file
+ *
+ * @param {string} path  Path to the file.
+ * @param {Uint8Array} data Array (UInt8) with the raw image data
+ * @return {Promise<any>}
+ */
+export function saveBinAwait (path, data) {
+  return new Promise(resolve => {
+    // eslint-disable-next-line no-undef
+    const buf = Buffer.from(data.buffer);
+    fs.writeFile(path, buf, (e) => {
+      if (e) throw e;
+      resolve();
+    });
+  });
+}
+
+export function downloadFile(data, fileName) {
+  let a = document.createElement("a");
+  a.href = data;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.style = "display: none";
+  a.click();
+  a.remove();
+}
 
 /**
  * Assign any defined elements of sources to the target, overriding existing

@@ -1,4 +1,10 @@
 # Dev Log
+### June 23rd 2022
+* Fixed existing broken tests, added linting and cleaned up existing linting issues. This is nice.
+* BUG: Line 721 jumps to C23 at line 520 when it should jump to E3
+  * I'm going to build a mem dumper...
+  * Currently neck deep in building the mem dumper. It doesn't work like I hoped. When the debugger is paused it 
+    won't run the file write. Also, it's awkward to "write" a file in browser, it'll have to download.
 
 ### June 21st 2022
 * At D9, set PIT Chan 0 to 0xFF, then loop 18 times. Must finish loop before timer INT.
@@ -6,8 +12,10 @@
   * I fixed the timing issue by forcing a timing sync but now it messes up the freq calculation (shows 3336.468000 MHZ)
     . This makes me think the INT timing fix could be due to bad math. I'll leave it for a bit and see. I think the 
     next timing sync would fix the bad MHZ calc.
-* TOOD: Implement and test blinking LED used in BIOS
+* -TODO-: Implement and test blinking LED used in BIOS
   * Line 730 of BIOS
+  * Don't do this, the blinking LED is for a dongle you plug into the keyboard for testing. Not worth it.
+  * http://minuszerodegrees.net/5150/post/5150%20-%20POST%20-%20Manufacturing%20test%20mode.htm
 * BUG: When an interupt occurs after a REP but before the REP inst is complete the INT code gets confused
   * FIXED: Store the REP state and restore it after interrupt
 * We have to load all the BIOS ROMs, including Basic because the BIOS does a checksum of them all (line 743)

@@ -67,6 +67,7 @@ export default class PPI8255 extends Device{
     this.motorOff           = 0;        // 3
     this.enableRamParityChk = 0;        // 4 (Active Low)
     this.enableIOCk         = 0;        // 5 (Active Low)
+    // TODO: Rename this to keyboardClockLine
     this.holdKbbClkLow      = true;     // 6 (Active Low)
     this.portAKeyboardOrDIP = KEYBOARD; // 7
 
