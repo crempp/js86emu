@@ -148,6 +148,20 @@ export default class Debug {
       return window.URL.revokeObjectURL(url);
     }, 1000);
   }
+
+  formatMemory(mem8, from, to, indentSize=0) {
+    let indent = " ".repeat(indentSize);
+    let str = indent;
+
+    let count = 1;
+    for (let i = from; i <= to; i++) {
+      str += "[" + hexString32(i) + "]: " + hexString8(mem8[i]);
+      if (count++ % 4 === 0 && i !== to) str += "\n" + indent;
+      else if (i !== to) str += "    ";
+    }
+
+    return str;
+  }
 }
 
 export function binString8 (value) {

@@ -60,22 +60,135 @@ export default class PPI8255 extends Device{
     this.portCUpperInOut   = INPUT;
     this.modeSetFlag       = MODE_SET_INACTIVE;
 
-    // Port B Interfacing lines         bit
-    this.timer2GateSpk      = 0;        // 0
-    this.spkrData           = 0;        // 1
-    this.readSW1SW4OrSW5    = SW5;      // 2
-    this.motorOff           = 0;        // 3
-    this.enableRamParityChk = 0;        // 4 (Active Low)
-    this.enableIOCk         = 0;        // 5 (Active Low)
-    // TODO: Rename this to keyboardClockLine
-    this.holdKbbClkLow      = true;     // 6 (Active Low)
-    this.portAKeyboardOrDIP = KEYBOARD; // 7
+    //-------------------------------------------------------------------------
+    // Port B Interfacing lines
+    //-------------------------------------------------------------------------
 
-    // Port C Interfacing lines  bit
-    this.CassDataIn    = 0;      // 4
-    this.TC2Out        = 0;      // 5
-    this.IOChk         = 0;      // 6
-    this.parityChk     = 0;      // 7 (Leave as 0 always, shouldn't have errors)
+    /**
+     * Timer Speaker Gate (Port B - Bit 0)
+     *
+     * This bit is connected to the programmable interval timer (PIT) second
+     * channel which is used for the speaker. The way in which the gate
+     * influences the counter depends on the counter mode. It will synchronize
+     * the counter or inhibit counting or affect other behaviours.
+     *
+     * @type {number}
+     */
+    this.timer2GateSpk = 0;
+
+    /**
+     * Speaker Data (Port B - Bit 1)
+     *
+     * This bit is connected to the speaker output line and produces the speaker souned.
+     *
+     * @type {number}
+     */
+    this.spkrData = 0;
+
+    /**
+     * Switch 2 Read 1-4 or 5  (Port B - Bit 2)
+     *
+     * In the 5150, the second dip switch has 8 positions but is only connected
+     * to 4 pins on the 8255. This bit toggles which switch positions are read
+     * by the 8255. When the bit is high positions 1-4 are read, when the bit
+     * is low position 5 is read. Note that positions 6-8 are not used.
+     *
+     * @type {number}
+     */
+    this.readSW1SW4OrSW5 = SW5;
+
+    /**
+     * Motor Off (Port B - Bit 3)
+     *
+     * This bit controls the cassette motor. When low the motor is on, when
+     * high the motor is off.
+     *
+     * @type {number}
+     */
+    this.motorOff = 0;
+
+    /**
+     * Enable RAM Parity Check (Port B - Bit 4)
+     *
+     * This bit controls whether RAM parity check is performed. The signal is
+     * active low so when the bit is low parity check is enabled, when the bit
+     * is high parity check is disabled.
+     *
+     * @type {number}
+     */
+    this.enableRamParityChk = 0;
+
+    /**
+     * Enable IO Check (Port B - Bit 5)
+     *
+     * ?????? (Active Low)
+     *
+     * @type {number}
+     */
+    this.enableIOCk = 0;
+
+    /**
+     * Keyboard Clock Line Low (Port B - Bit 6)
+     *
+     * This bit will hold the keyboard clock line low. When the bit is low the
+     * clock line will be held low. When the bit is high the keyboard clock
+     * will behave normally, following the normal keyboard clock signal.
+     *
+     * @type {boolean}
+     */
+    this.holdKbdClkLow = true;
+
+    /**
+     * Port A Keyboard or DIP Switch 1 (Port B - Bit 7)
+     *
+     * In the 5150 the 8255 shares port A with both the keyboard and DIP switch
+     * 1. This bit controls whether the keyboard or switch 1 is connected to
+     * port A. If the bit is high the switch is connected, if the bit is low
+     * the keyboard is connected.
+     *
+     * @type {number}
+     */
+    this.portAKeyboardOrDIP = KEYBOARD;
+
+    //-------------------------------------------------------------------------
+    // Port B Interfacing lines
+    //-------------------------------------------------------------------------
+
+    /**
+     * CASS Data In (Port C - Bit 4)
+     *
+     * ??
+     *
+     * @type {number}
+     */
+    this.CassDataIn = 0;
+
+    /**
+     * Timer Counter Channel 2 Output (Port C - Bit 5)
+     *
+     * This bit is connected to the 8253 channel 2 timer output.
+     *
+     * @type {number}
+     */
+    this.TC2Out = 0;
+
+    /**
+     * IO Check (Port C - Bit 6)
+     *
+     * ???
+     *
+     * @type {number}
+     */
+    this.IOChk = 0;
+
+    /**
+     * Parity Check (Port C - Bit 7)
+     *
+     * ??? Leave as 0 always, shouldn't have errors
+     *
+     * @type {number}
+     */
+    this.parityChk = 0;
   }
 
   write(port, value, size) {
@@ -192,11 +305,11 @@ export default class PPI8255 extends Device{
     this.motorOff           = (this.portB >> 3) & 0x01;
     this.enableRamParityChk = (this.portB >> 4) & 0x01;
     this.enableIOCk         = (this.portB >> 5) & 0x01;
-    this.holdKbbClkLow      = (this.portB >> 6) & 0x01;
+    this.holdKbdClkLow      = (this.portB >> 6) & 0x01;
     this.portAKeyboardOrDIP = (this.portB >> 7) & 0x01;
 
     this.system.io.devices["PIT8253"].setGate(2, this.timer2GateSpk);
-    this.system.keyboard.setLine("clk", this.holdKbbClkLow);
+    this.system.keyboard.setLine("clk", this.holdKbdClkLow);
     if (this.portAKeyboardOrDIP === 1) this.system.keyboard.clear();
   }
 

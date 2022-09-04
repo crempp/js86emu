@@ -286,14 +286,36 @@ let config = new SystemConfig({
         name: "E3",  // LINE 743
         enabled: false
       },
-      0xE1D4: {
-        name: "WIP",  // LINE 721
-        enabled: true
+      0xE2F5: {
+        name: "Set Vector Table",  // LINE 701
+        enabled: false
       },
+      0xE2FA: {
+        name: "Post Set Vector Table",  // LINE 706
+        enabled: false
+      },
+      0xE30D: {
+        name: "Call KBD_RESET",  // LINE 719
+        enabled: false
+      },
+      0xE310: {
+        name: "Return from KBD_RESET",  // LINE 720
+        enabled: false
+      },
+
+      0xE691: {
+        name: "WIP1",  // LINE 1287
+        enabled: false
+      },
+
       0xE69E: {
         name: "WIP2",  // LINE 1295
         enabled: false
       },
+      // 0xE310: {
+      //   name: "WIP3.1",  // LINE 720
+      //   enabled: true
+      // },
     }
   }
 });

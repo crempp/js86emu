@@ -1,4 +1,10 @@
 # Dev Log
+
+### Sept 3rd 2022
+* The issue on line 721 was because I had the breakpoint set at the wrong address. Back to the original issue, The 
+  KB reset is not setting BL to 0xAA
+* This keyboard test timing may not be possible to easily fix. Maybe switch to the alt BIOS for now.
+
 ### June 23rd 2022
 * Fixed existing broken tests, added linting and cleaned up existing linting issues. This is nice.
 * BUG: Line 721 jumps to C23 at line 520 when it should jump to E3
