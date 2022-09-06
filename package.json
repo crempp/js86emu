@@ -9,6 +9,8 @@
   "main": "./dist/cli/cli.js",
   "dependencies": {
     "@babel/runtime": "^7.17.2",
+    "@emotion/react": "^11.10.4",
+    "@radix-ui/react-toggle": "^1.0.0",
     "browser-process-hrtime": "^1.0.0",
     "browserfs": "^2.0.0",
     "bson": "^4.2.2",

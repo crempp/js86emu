@@ -1,72 +1,58 @@
 import React, { Component } from "react";
-import System from "../emu/System";
-import { BrowserFSAsync } from "../emu/utils/Utils";
+import {SystemContext} from "../Context";
 
 // Good example for resizing
 // https://github.com/yavorsky/yavorsky.org/blob/master/components/canvas/polygon/Lines.js
 
-// Browser filesystem configuration
-// https://github.com/jvilk/BrowserFS
-// TODO: Move this to a config file
-const FS_CONFIG = {
-  fs: "MountableFileSystem",
-  options: {
-    "/files": {
-      fs: "HTTPRequest",
-      options: {
-        index: "/files/fs.json",
-        baseUrl: "/files"
-      }
-    },
-    "/tmp": {
-      fs: "LocalStorage"
-    },
-  }
-};
-
 export default class Emulator extends Component {
   canvasRef;
+
+  static contextType = SystemContext;
 
   constructor(props) {
     super(props);
     this.canvasRef= React.createRef();
     this.state = {
-      config: props.config,
       width: 0,
       height: 0
     };
   }
 
-  componentDidMount() {
+  componentDidMount() {}
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    console.log(this.context);
     let promise = this.runEmulation();
   }
 
-  componentWillUnmount() {
-
-  }
-
   async runEmulation () {
-    await BrowserFSAsync(FS_CONFIG);
+    // TODO: Find a more graceful way of setting the canvas
+    this.context.system.config.renderer.options.canvas = this.canvasRef.current;
 
-    this.state.config.renderer.options = this.state.config.renderer.options || {};
-    this.state.config.renderer.options.canvas = this.canvasRef.current;
+    this.context.system.debug.info("booting...", true);
+    await this.context.system.boot();
 
-    let system = new System(this.state.config);
-    // make global for debugging
-    window.system = system;
-
-    system.debug.info("booting...", true);
-    await system.boot();
-
-    system.debug.info("running...", true);
-    await system.run();
+    this.context.system.debug.info("running...", true);
+    await this.context.system.run();
   }
 
   render() {
-    const { config, width, height } = this.state;
+    const { width, height } = this.state;
 
     return (
       <canvas id={"screen"} ref={this.canvasRef}/>
     );
   }
 }
+
+// const withContext = (Component) => {
+//   return (props) => {
+//     return (<SystemContext.Consumer>
+//       {(context) => (
+//         <Component {...props} context={context}/>
+//       )}
+//     </SystemContext.Consumer>);
+//   };
+// };
+//
+// export default withContext(Emulator);

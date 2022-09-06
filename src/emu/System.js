@@ -32,10 +32,36 @@ export default class System {
     this.NMIMasked = false; // update this with this.io.devices["NMIMaskRegister"].isMasked();
 
     // Create clock
+    this.clock = null;
+
+    // Create CPU
+    this.cpu = null;
+
+    // Create IO port interface
+    // This needs to be done after initializing CPU
+    this.io = null;
+
+    // Temporary handle on video card until I find a better way to access it
+    this.videoCard = null;
+
+    // Create keyboard
+    this.keyboard = null;
+
+    // Create a speaker
+    this.speaker = null;
+  }
+
+  /**
+   * System boot initialization. This method is asynchronous and returns a promise.
+   *
+   * @return {Promise<void>}
+   */
+  async boot () {
+    // Create clock
     this.clock = new Clock(this);
 
     // Create CPU
-    this.cpu = new CPU8086(config, this);
+    this.cpu = new CPU8086(this.config, this);
 
     // Create IO port interface
     // This needs to be done after initializing CPU
@@ -45,18 +71,11 @@ export default class System {
     this.videoCard = this.io.availableDevices["VideoMDA"];
 
     // Create keyboard
-    this.keyboard = new Keyboard(config, this);
+    this.keyboard = new Keyboard(this.config, this);
 
     // Create a speaker
-    this.speaker = new Speaker(config, this);
-  }
+    this.speaker = new Speaker(this.config, this);
 
-  /**
-   * System boot initialization. This method is asynchronous and returns a promise.
-   *
-   * @return {Promise<void>}
-   */
-  async boot () {
     // Load system BIOS or blob
     if (this.config.programBlob) {
       console.log(`Loading program blob ${this.config.programBlob.file}...`);
@@ -68,6 +87,7 @@ export default class System {
       // Load BIOS file
       let biosPath = `${this.config.bios.path}${this.config.bios.file}`;
       let bios = await loadBINAsync(biosPath);
+
       // Calculate start address for the BIOS
       // Currently hard-coded for 8086
       let biosAddr = this.config.memorySize - bios.length;
