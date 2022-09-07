@@ -2,8 +2,9 @@ import React, {Component} from "react";
 import { css } from "@emotion/react";
 import {DebugContext, SystemContext} from "../Context";
 
-const componentCss = {
-  sdf: "asdf",
+const style = {
+  width: "84px",
+  justifyContent: "right",
 };
 
 export default class DisplaySpeed extends Component {
@@ -13,7 +14,7 @@ export default class DisplaySpeed extends Component {
     super(props);
     this.state = {
       speed: 0,
-    }
+    };
   }
 
   componentDidMount() {
@@ -21,13 +22,13 @@ export default class DisplaySpeed extends Component {
   }
 
   componentWillUnmount() {
-    clearInterval(this.interval);
+    clearInterval(this.stateInterval);
   }
 
   render() {
     return (
-      <div css={css`${componentCss}`}>
-        {this.state.speed.toFixed(2)} MHz
+      <div css={css`${style}`}>
+        {(this.state.speed / 1000000).toFixed(2)} MHz
       </div>
     );
   }

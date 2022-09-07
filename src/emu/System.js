@@ -18,6 +18,9 @@ export default class System {
     }
     config.validate();
 
+    this.running = true;
+    this.debugging = false;
+
     this.config = config;
 
     this.immediateHandle = null;
@@ -143,22 +146,25 @@ export default class System {
    * intervalID when the system is done running.
    */
   cycle(finishedCB) {
-    if (this.clock.cycles === this.config.debugAtCycle ||
+    if (this.running) {
+      if (this.clock.cycles === this.config.debugAtCycle ||
         seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP]) === this.config.debugAtIP)
-    {
-      this.config.debug = true;
+      {
+        // TODO: Don't use config value, move to a property of this class
+        this.config.debug = true;
+      }
+
+      // Do a CPU Cycle
+      this.cpu.cycle();
+
+      // Cycle Devices
+      this.io.cycle();
+
+      // Tick the clock
+      this.clock.tick();
+
+      if (this.cyclesToRun !== null && --this.cyclesToRun <= 0) this.cpu.state = STATE_HALT;
     }
-
-    // Do a CPU Cycle
-    this.cpu.cycle();
-
-    // Cycle Devices
-    this.io.cycle();
-
-    // Tick the clock
-    this.clock.tick();
-
-    if (this.cyclesToRun !== null && --this.cyclesToRun <= 0) this.cpu.state = STATE_HALT;
 
     // Queue next cycle
     if (this.cpu.state === STATE_RUNNING) {
@@ -196,5 +202,23 @@ export default class System {
     for (let i = 0; i < data.length; i++) {
       this.cpu.mem8[from + i] = data[i];
     }
+  }
+
+  play() {
+    this.running = true;
+  }
+
+  pause() {
+    this.running = false;
+  }
+
+  debugOn() {
+    this.config.debug = true;
+    console.log("debugOn");
+  }
+
+  debugOff() {
+    this.config.debug = false;
+    console.log("debugOff");
   }
 }

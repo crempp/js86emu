@@ -1,35 +1,17 @@
 import React, {Component} from "react";
 import { Global, css } from "@emotion/react";
 import { BrowserFSAsync } from "../emu/utils/Utils";
+import FS_CONFIG from "../FileSystemConfig";
 import { SystemContext } from "../Context";
 import System from "../emu/System";
 import IBM5150 from "../emu/config/IBM5150";
 // import CodeGolf from "../emu/config/Test-CodeGolf";
 
-// Browser filesystem configuration
-// https://github.com/jvilk/BrowserFS
-// TODO: Move this to a config file
-const FS_CONFIG = {
-  fs: "MountableFileSystem",
-  options: {
-    "/files": {
-      fs: "HTTPRequest",
-      options: {
-        index: "/files/fs.json",
-        baseUrl: "/files"
-      }
-    },
-    "/tmp": {
-      fs: "LocalStorage"
-    },
-  }
-};
 
 export default class App extends Component {
   state = {
     getSystemConfig: null,
     getSystemState: null,
-    // TODO: This hack allows passing via context but prevents rerenders
     getSystem: null,
   };
 
@@ -95,13 +77,9 @@ export default class App extends Component {
     );
   }
 
-  loadFS = async () => {
-    await BrowserFSAsync(FS_CONFIG);
-  };
-
   getSystemState = () => {
     return {
-      speed: this.system.clock.hz / 1000000,
+      speed: this.system.clock.hz,
     };
   };
 }

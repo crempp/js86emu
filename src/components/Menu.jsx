@@ -3,8 +3,10 @@ import Image from "next/image";
 import { css } from "@emotion/react";
 import Toggle from "./radix/Toggle";
 import DisplaySpeed from "./DisplaySpeed";
+import RunToggle from "./RunToggle";
+import DebugToggle from "./DebugToggle";
 
-const componentCss = {
+const style = {
   menuItem: css({
     marginLeft: "0.6rem",
   }),
@@ -37,24 +39,16 @@ export default class Menu extends Component {
           height={32}
         />
 
-        <div css={css`${componentCss.menuItem};`}>
+        <div css={css`${style.menuItem};`}>
           js86emu
         </div>
 
-        <div css={css`${componentCss.menuItem}; flex-grow: 5`}></div>
+        <div css={css`${style.menuItem}; flex-grow: 5`}></div>
 
-        <Toggle
-          css={css`${componentCss.menuItem}`}
-          onPressedChange={() => console.log("pressed")}
-        >
-          <ion-icon name="play-outline"></ion-icon>
-        </Toggle>
+        <RunToggle css={css`${style.menuItem}`} />
+        <DebugToggle css={css`${style.menuItem}`} />
 
-        <Toggle css={css`${componentCss.menuItem}`}>
-          debug
-        </Toggle>
-
-        <div css={css`${componentCss.menuItem}; ${componentCss.small};`}>
+        <div css={css`${style.menuItem}; ${style.small};`}>
           <DisplaySpeed />
         </div>
       </>

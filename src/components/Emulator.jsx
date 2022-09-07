@@ -1,8 +1,15 @@
 import React, { Component } from "react";
+import { css } from "@emotion/react";
 import { SystemContext } from "../Context";
 
 // Good example for resizing
 // https://github.com/yavorsky/yavorsky.org/blob/master/components/canvas/polygon/Lines.js
+
+const style = {
+  backgroundColor: "#000000",
+  padding: "0",
+  margin: "auto",
+};
 
 export default class Emulator extends Component {
   canvasRef;
@@ -21,13 +28,7 @@ export default class Emulator extends Component {
   componentDidMount() {}
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log("componentDidUpdate", this.context);
     let promise = this.runEmulation();
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    console.log("shouldComponentUpdate", nextProps);
-    return true;
   }
 
   async runEmulation () {
@@ -47,7 +48,7 @@ export default class Emulator extends Component {
     const { width, height } = this.state;
 
     return (
-      <canvas id={"screen"} ref={this.canvasRef}/>
+      <canvas id={"screen"} ref={this.canvasRef} css={css`${style}`}/>
     );
   }
 }
