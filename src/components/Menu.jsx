@@ -2,6 +2,7 @@ import React, {Component} from "react";
 import Image from "next/image";
 import { css } from "@emotion/react";
 import Toggle from "./radix/Toggle";
+import DisplaySpeed from "./DisplaySpeed";
 
 const componentCss = {
   menuItem: css({
@@ -54,7 +55,7 @@ export default class Menu extends Component {
         </Toggle>
 
         <div css={css`${componentCss.menuItem}; ${componentCss.small};`}>
-          3.67 MHz
+          <DisplaySpeed />
         </div>
       </>
     );

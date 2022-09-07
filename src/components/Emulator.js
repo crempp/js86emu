@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {SystemContext} from "../Context";
+import { SystemContext } from "../Context";
 
 // Good example for resizing
 // https://github.com/yavorsky/yavorsky.org/blob/master/components/canvas/polygon/Lines.js
@@ -21,19 +21,26 @@ export default class Emulator extends Component {
   componentDidMount() {}
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log(this.context);
+    console.log("componentDidUpdate", this.context);
     let promise = this.runEmulation();
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    console.log("shouldComponentUpdate", nextProps);
+    return true;
+  }
+
   async runEmulation () {
+    let system = this.context.getSystem();
+
     // TODO: Find a more graceful way of setting the canvas
-    this.context.system.config.renderer.options.canvas = this.canvasRef.current;
+    system.config.renderer.options.canvas = this.canvasRef.current;
 
-    this.context.system.debug.info("booting...", true);
-    await this.context.system.boot();
+    system.debug.info("booting...", true);
+    await system.boot();
 
-    this.context.system.debug.info("running...", true);
-    await this.context.system.run();
+    system.debug.info("running...", true);
+    await system.run();
   }
 
   render() {
@@ -44,15 +51,3 @@ export default class Emulator extends Component {
     );
   }
 }
-
-// const withContext = (Component) => {
-//   return (props) => {
-//     return (<SystemContext.Consumer>
-//       {(context) => (
-//         <Component {...props} context={context}/>
-//       )}
-//     </SystemContext.Consumer>);
-//   };
-// };
-//
-// export default withContext(Emulator);

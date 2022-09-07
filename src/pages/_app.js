@@ -27,9 +27,13 @@ const FS_CONFIG = {
 
 export default class App extends Component {
   state = {
-    system: null,
-    config: null,
+    getSystemConfig: null,
+    getSystemState: null,
+    // TODO: This hack allows passing via context but prevents rerenders
+    getSystem: null,
   };
+
+  system = null;
 
   constructor(props) {
     super(props);
@@ -40,15 +44,19 @@ export default class App extends Component {
 
     let config = IBM5150;
     let system =  new System(config);
+    this.system = system;
 
     this.setState({
-      system: system,
-      config: config,
+      getSystemConfig: () => this.system.config,
+      getSystemState: this.getSystemState,
+      getSystem: () => this.system,
     });
 
     // make global for debugging
     window.system = system;
   }
+
+  componentWillUnmount() {}
 
   render() {
     const { Component, pageProps } = this.props;
@@ -75,9 +83,11 @@ export default class App extends Component {
           margin: 0;
         }
       `}/>
+
         <SystemContext.Provider value={{
-          system: this.state.system,
-          config: this.state.config,
+          getSystemConfig: this.state.getSystemConfig,
+          getSystemState: this.state.getSystemState,
+          getSystem: this.state.getSystem,
         }}>
           <Component {...pageProps} />
         </SystemContext.Provider>
@@ -87,5 +97,11 @@ export default class App extends Component {
 
   loadFS = async () => {
     await BrowserFSAsync(FS_CONFIG);
+  };
+
+  getSystemState = () => {
+    return {
+      speed: this.system.clock.hz / 1000000,
+    };
   };
 }
