@@ -5,6 +5,7 @@ import Toggle from "./radix/Toggle";
 import DisplaySpeed from "./DisplaySpeed";
 import RunToggle from "./RunToggle";
 import DebugToggle from "./DebugToggle";
+import SoundToggle from "./SoundToggle";
 
 const style = {
   menuItem: css({
@@ -47,10 +48,8 @@ export default class Menu extends Component {
 
         <RunToggle css={css`${style.menuItem}`} />
         <DebugToggle css={css`${style.menuItem}`} />
-
-        <div css={css`${style.menuItem}; ${style.small};`}>
-          <DisplaySpeed />
-        </div>
+        <SoundToggle css={css`${style.menuItem}`} />
+        <DisplaySpeed css={css`${style.menuItem}; ${style.small};`} />
       </>
     );
   }

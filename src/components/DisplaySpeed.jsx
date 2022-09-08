@@ -27,7 +27,10 @@ export default class DisplaySpeed extends Component {
 
   render() {
     return (
-      <div css={css`${style}`}>
+      <div
+        className={this.props.className}
+        css={css`${style}`}
+      >
         {(this.state.speed / 1000000).toFixed(2)} MHz
       </div>
     );

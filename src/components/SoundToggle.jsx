@@ -3,13 +3,15 @@ import { css } from "@emotion/react";
 import Toggle from "./radix/Toggle";
 import {SystemContext} from "../Context";
 
-const style = {};
+const style = {
 
-export default class DebugToggle extends Component {
+};
+
+export default class SoundToggle extends Component {
   static contextType = SystemContext;
 
   state = {
-    debug: false,
+    sound: true,
   };
 
   constructor(props) {
@@ -17,23 +19,24 @@ export default class DebugToggle extends Component {
   }
 
   render() {
+    let icon = (this.state.sound) ? <ion-icon name="volume-high-outline" /> :<ion-icon name="volume-mute-outline" />;
+
     return (
       <Toggle
         className={this.props.className}
         css={css`${style}`}
-        defaultPressed={this.state.debug}
+        defaultPressed={this.state.sound}
         onPressedChange={(pressed) => this.toggleState(pressed)}
-        title="Debug emulation"
       >
-        <ion-icon css={css`pointer-events: none`} name="bug-outline"></ion-icon>
+        {icon}
       </Toggle>
     );
   }
 
   toggleState(state) {
-    this.setState({debug: state});
-    if (state) this.context.getSystem().debugOn();
-    else this.context.getSystem().debugOff();
+    this.setState({sound: state});
+    // if (state) this.context.getSystem().play();
+    // else this.context.getSystem().pause();
   }
 
 }

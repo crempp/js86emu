@@ -10,6 +10,8 @@
   "dependencies": {
     "@babel/runtime": "^7.17.2",
     "@emotion/react": "^11.10.4",
+    "@radix-ui/react-label": "^1.0.0",
+    "@radix-ui/react-tabs": "^1.0.0",
     "@radix-ui/react-toggle": "^1.0.0",
     "browser-process-hrtime": "^1.0.0",
     "browserfs": "^2.0.0",

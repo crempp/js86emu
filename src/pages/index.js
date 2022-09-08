@@ -1,8 +1,9 @@
 import React  from "react";
 import { css } from "@emotion/react";
 import Emulator from "../components/Emulator";
-
 import Menu from "../components/Menu";
+import * as Tabs from "@radix-ui/react-tabs";
+import ControlTabs from "../components/ControlTabs";
 
 
 const pageLayoutCss = {
@@ -36,12 +37,14 @@ const pageLayoutCss = {
     display: "flex",
     justifyContent: "center",
     backgroundColor: "#454545",
+
+    paddingTop: "1rem",
+    paddingBottom: "1rem",
   }),
   bottomRow: css({
     order: "0",
     flex: "1 1 auto",
     alignSelf: "stretch",
-    backgroundColor: "hotpink",
   }),
 
 
@@ -61,7 +64,7 @@ function HomePage() {
         </div>
 
         <div css={pageLayoutCss.bottomRow}>
-          BOTTOM
+          <ControlTabs />
         </div>
       </div>
     </>
