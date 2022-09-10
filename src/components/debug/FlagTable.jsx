@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import { styled } from "@stitches/react";
+import { styled } from "../../stitches.config";
 
 const Table = styled("table", {
   fontSize: "0.9rem",

@@ -1,12 +1,14 @@
 import React, {Component} from "react";
-import { styled } from "@stitches/react";
+import { styled } from "../../stitches.config";
 import * as Label from "@radix-ui/react-label";
-import { TabRoot, TabList, TabTrigger, TabContent } from "./radix/Tabs";
-import RegisterTable from "./debug/RegisterTable";
-import FlagTable from "./debug/FlagTable";
-import Disassembly from "./debug/Disassembly";
-import CycleDisplay from "./debug/CycleDisplay";
-import OpcodeTable from "./debug/OpcodeTable";
+import { TabRoot, TabList, TabTrigger, TabContent } from "../radix/Tabs";
+import RegisterTable from "./RegisterTable";
+import FlagTable from "./FlagTable";
+import Disassembly from "./Disassembly";
+import CycleDisplay from "./CycleDisplay";
+import OpcodeTable from "./OpcodeTable";
+import MemoryTable from "./MemoryTable";
+import MemoryViz from "./MemoryViz";
 
 const TabsContainer = styled("div", {
   height: "100%",
@@ -27,7 +29,7 @@ const Column = styled("div", {
   width: "100%",
 });
 
-export default class ControlTabs extends Component {
+export default class DebugTabs extends Component {
   constructor(props) {
     super(props);
   }
@@ -54,7 +56,8 @@ export default class ControlTabs extends Component {
             </Column>
           </ColumnTabContent>
           <ColumnTabContent value="memory">
-            MEMORY
+            <MemoryViz />
+            <MemoryTable />
             {/*TODO: memory map with IP pointer*/}
           </ColumnTabContent>
           <ColumnTabContent value="log">

@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import { styled } from "@stitches/react";
+import { styled } from "../../stitches.config";
 
 const Display = styled("div", {
   fontSize: "0.9rem",
@@ -17,9 +17,7 @@ const Label = styled("span", {
   display: "inline-block",
 });
 
-const Data = styled("span", {
-
-});
+const Data = styled("span", {});
 
 export default class CycleDisplay extends Component {
   constructor(props) {

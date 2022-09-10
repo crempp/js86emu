@@ -1,15 +1,14 @@
 import React, { Component } from "react";
-import { css } from "@emotion/react";
+import { styled } from "../stitches.config";
 import { SystemContext } from "../Context";
 
 // Good example for resizing
 // https://github.com/yavorsky/yavorsky.org/blob/master/components/canvas/polygon/Lines.js
 
-const style = {
+const EmulatorCanvas = styled("canvas", {
   backgroundColor: "#000000",
   padding: "0",
-  margin: "auto",
-};
+});
 
 export default class Emulator extends Component {
   canvasRef;
@@ -48,7 +47,7 @@ export default class Emulator extends Component {
     const { width, height } = this.state;
 
     return (
-      <canvas id={"screen"} ref={this.canvasRef} css={css`${style}`}/>
+      <EmulatorCanvas id={"screen"} ref={this.canvasRef} />
     );
   }
 }

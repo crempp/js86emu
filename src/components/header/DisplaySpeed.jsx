@@ -1,11 +1,12 @@
 import React, {Component} from "react";
-import { css } from "@emotion/react";
-import {DebugContext, SystemContext} from "../Context";
+import { styled } from "../../stitches.config";
+import { SystemContext } from "../../Context";
 
-const style = {
+const Container = styled("div", {
   width: "84px",
   justifyContent: "right",
-};
+  fontSize: "0.7rem",
+});
 
 export default class DisplaySpeed extends Component {
   static contextType = SystemContext;
@@ -27,12 +28,9 @@ export default class DisplaySpeed extends Component {
 
   render() {
     return (
-      <div
-        className={this.props.className}
-        css={css`${style}`}
-      >
+      <Container>
         {(this.state.speed / 1000000).toFixed(2)} MHz
-      </div>
+      </Container>
     );
   }
 

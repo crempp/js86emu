@@ -9,9 +9,6 @@
   "main": "./dist/cli/cli.js",
   "dependencies": {
     "@babel/runtime": "^7.19.0",
-    "@emotion/css": "^11.10.0",
-    "@emotion/react": "^11.10.4",
-    "@emotion/server": "^11.10.0",
     "@radix-ui/react-label": "^1.0.0",
     "@radix-ui/react-tabs": "^1.0.0",
     "@radix-ui/react-toggle": "^1.0.0",
@@ -29,7 +26,6 @@
     "setimmediate": "^1.0.5"
   },
   "devDependencies": {
-    "@emotion/babel-plugin": "^11.10.2",
     "eslint": "^8.22.0",
     "eslint-plugin-react": "^7.31.7",
     "jest": "^29.0.2",

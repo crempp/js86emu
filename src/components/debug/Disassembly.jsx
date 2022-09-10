@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import { styled } from "@stitches/react";
+import { styled } from "../../stitches.config";
 
 const Container = styled("div", {
   backgroundColor: "blue",

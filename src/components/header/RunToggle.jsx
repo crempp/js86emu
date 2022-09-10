@@ -1,11 +1,11 @@
 import React, {Component} from "react";
-import { css } from "@emotion/react";
-import Toggle from "./radix/Toggle";
-import {SystemContext} from "../Context";
+import { styled } from "../../stitches.config";
+import Toggle from "../radix/Toggle";
+import {SystemContext} from "../../Context";
 
-const style = {
-
-};
+const StyledToggle = styled(Toggle, {
+  fontSize: "0.7rem",
+});
 
 export default class RunToggle extends Component {
   static contextType = SystemContext;
@@ -22,14 +22,12 @@ export default class RunToggle extends Component {
     let icon = (this.state.run) ? <ion-icon name="play-outline" /> :<ion-icon name="pause-outline" />;
 
     return (
-      <Toggle
-        className={this.props.className}
-        css={css`${style}`}
+      <StyledToggle
         defaultPressed={this.state.run}
         onPressedChange={(pressed) => this.toggleState(pressed)}
       >
         {icon}
-      </Toggle>
+      </StyledToggle>
     );
   }
 

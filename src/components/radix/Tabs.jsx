@@ -1,6 +1,6 @@
 import React from "react";
 import * as Tabs from "@radix-ui/react-tabs";
-import { styled } from "@stitches/react";
+import { styled } from "../../stitches.config";
 
 export const TabRoot = styled(Tabs.Root, {
   height: "100%",

@@ -3,7 +3,8 @@
 * Working on UI
 * Using Radix for headless components. Ok.
 * Tried emotion, SSR support sucked, switch to stitches because it works well with Radix. Like it so far
-* 
+* Stitches is much better, probably less features but it just works.
+* TODO: Setup breakpoints and mobile styling
 
 ### Sept 3rd 2022
 * The issue on line 721 was because I had the breakpoint set at the wrong address. Back to the original issue, The 

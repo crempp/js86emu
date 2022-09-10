@@ -1,9 +1,15 @@
 import React, {Component} from "react";
-import { css } from "@emotion/react";
-import Toggle from "./radix/Toggle";
-import {SystemContext} from "../Context";
+import { styled } from "../../stitches.config";
+import Toggle from "../radix/Toggle";
+import {SystemContext} from "../../Context";
 
-const style = {};
+const StyledToggle = styled(Toggle, {
+  fontSize: "0.7rem",
+});
+
+const Icon = styled("ion-icon", {
+  pointerEvents: "none,"
+});
 
 export default class DebugToggle extends Component {
   static contextType = SystemContext;
@@ -18,15 +24,13 @@ export default class DebugToggle extends Component {
 
   render() {
     return (
-      <Toggle
-        className={this.props.className}
-        css={css`${style}`}
+      <StyledToggle
         defaultPressed={this.state.debug}
         onPressedChange={(pressed) => this.toggleState(pressed)}
         title="Debug emulation"
       >
-        <ion-icon css={css`pointer-events: none`} name="bug-outline"></ion-icon>
-      </Toggle>
+        <Icon name="bug-outline" />
+      </StyledToggle>
     );
   }
 
