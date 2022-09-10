@@ -52,11 +52,12 @@ export default class App extends Component {
           margin: 0;
           //background-color: #262626;
           background-color: #454545;
+        }
+        html, body, input, textarea, button {
           font-family: 'Space Mono', monospace;
-          //color: #dddddd;
-          color: #e6e6e6;
           font-size: 1rem;
           line-height: 1.4;
+          color: #e6e6e6;
         }
         #__next {
           height: 100%;

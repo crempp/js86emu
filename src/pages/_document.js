@@ -1,6 +1,5 @@
 import React from "react";
 import Document, { Html, Head, Main, NextScript } from "next/document";
-import { css } from "@emotion/react";
 
 class JSEmuDocument extends Document {
   render() {
@@ -18,7 +17,7 @@ class JSEmuDocument extends Document {
           <script noModule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
         </body>
       </Html>
-    )
+    );
   }
 }
 

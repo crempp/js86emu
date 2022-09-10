@@ -30,6 +30,7 @@ export default class Speaker  {
     if (!this.muted) {
       this.squareOscilator = this.audioCtx.createOscillator();
       this.squareOscilator.type = "square";
+      console.log(freq, this.audioCtx.currentTime);
       this.squareOscilator.frequency.setValueAtTime(freq, this.audioCtx.currentTime); // value in hertz
       this.squareOscilator.connect(this.audioCtx.destination);
       this.squareOscilator.start();

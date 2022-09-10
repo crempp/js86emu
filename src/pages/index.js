@@ -2,7 +2,6 @@ import React  from "react";
 import { css } from "@emotion/react";
 import Emulator from "../components/Emulator";
 import Menu from "../components/Menu";
-import * as Tabs from "@radix-ui/react-tabs";
 import ControlTabs from "../components/ControlTabs";
 
 

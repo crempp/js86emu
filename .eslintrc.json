@@ -46,7 +46,8 @@
       "always"
     ],
     "react/prop-types": 0,
-    "react/display-name": "off"
+    "react/display-name": "off",
+    "react/no-unknown-property": "off"
   },
   "settings": {
     "react": {

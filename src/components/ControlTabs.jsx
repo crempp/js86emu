@@ -1,14 +1,31 @@
 import React, {Component} from "react";
-import { css } from "@emotion/react";
-import * as Tabs from "@radix-ui/react-tabs";
+import { styled } from "@stitches/react";
 import * as Label from "@radix-ui/react-label";
+import { TabRoot, TabList, TabTrigger, TabContent } from "./radix/Tabs";
+import RegisterTable from "./debug/RegisterTable";
+import FlagTable from "./debug/FlagTable";
+import Disassembly from "./debug/Disassembly";
+import CycleDisplay from "./debug/CycleDisplay";
+import OpcodeTable from "./debug/OpcodeTable";
 
-const style = {
-  tab: {
-    fontFamily: "'Space Mono', monospace",
-    fontSize: "0.7rem",
-  }
-};
+const TabsContainer = styled("div", {
+  height: "100%",
+});
+
+const ColumnTabContent = styled(TabContent, {
+  display: "flex",
+  flexDirection: "row",
+  flexWrap: "nowrap",
+  justifyContent: "space-between",
+  alignItems: "flex-start",
+  height: "100%",
+  width: "100%",
+});
+
+const Column = styled("div", {
+  height: "100%",
+  width: "100%",
+});
 
 export default class ControlTabs extends Component {
   constructor(props) {
@@ -17,47 +34,37 @@ export default class ControlTabs extends Component {
 
   render() {
     return (
-      <Tabs.Root
-        defaultValue="one"
-        css={{
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          fontFamily: "'Space Mono', monospace",
-          fontStyle: "1rem",
-        }}
-        // value="one"
-      >
-        <Tabs.List
-          css={{
-            backgroundColor: "#808080",
-            paddingLeft: "0.5rem",
-            paddingRight: "0.5rem",
-          }}
-        >
-          <Tabs.Trigger value="one" css={css`${style.tab}`}>
-            Debug
-          </Tabs.Trigger>
-          <Tabs.Trigger value="two" css={css`${style.tab}`}>
-            Log
-          </Tabs.Trigger>
-          <Tabs.Trigger value="three" css={css`${style.tab}`}>
-            Config
-          </Tabs.Trigger>
-        </Tabs.List>
-        <div css={{
-          padding: 20,
-          flexGrow: 1,
-        }}>
-          <Tabs.Content value="one">
-
-          </Tabs.Content>
-          <Tabs.Content value="two">Two content</Tabs.Content>
-          <Tabs.Content value="three">
+      <TabRoot defaultValue="debug">
+        <TabList>
+          <TabTrigger value="debug">Debug</TabTrigger>
+          <TabTrigger value="memory">Memory</TabTrigger>
+          <TabTrigger value="log">Log</TabTrigger>
+          <TabTrigger value="config">Config</TabTrigger>
+        </TabList>
+        <TabsContainer>
+          <ColumnTabContent value="debug">
+            <Column>
+              <CycleDisplay />
+              <OpcodeTable />
+              <RegisterTable />
+              <FlagTable />
+            </Column>
+            <Column>
+              <Disassembly />
+            </Column>
+          </ColumnTabContent>
+          <ColumnTabContent value="memory">
+            MEMORY
+            {/*TODO: memory map with IP pointer*/}
+          </ColumnTabContent>
+          <ColumnTabContent value="log">
+            LOG
+          </ColumnTabContent>
+          <ColumnTabContent value="config">
             <Label.Root>Memory Size</Label.Root> <input></input>
-          </Tabs.Content>
-        </div>
-      </Tabs.Root>
-    )
+          </ColumnTabContent>
+        </TabsContainer>
+      </TabRoot>
+    );
   }
 }
