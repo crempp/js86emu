@@ -1,33 +1,15 @@
-import hrtime from 'browser-process-hrtime';
-
+import "setimmediate";
+import Clock from "./Clock";
 import CPU8086 from "./cpu/8086";
-import {
-  regCS, regIP,
-  NS_PER_SEC, STATE_RUNNING, STATE_HALT,
-} from './Constants';
-import VideoMDA from "./video/VideoMDA";
-import { SystemConfigException } from "./utils/Exceptions";
-import SystemConfig from "./config/SystemConfig";
-
-// We don't know the renderer until runtime. Webpack is a static compiler and
-// thus can't require dynamically. Also I was having issues with dynamic
-// imports in node though it should work.
-// So import all renderers and look them up in the object at runtime.
-// Someday I will do more research to see if I can optimize this.
-import RendererBin from './video/renderers/RendererBin';
-import RendererCanvas from './video/renderers/RendererCanvas';
-import RendererPNG from './video/renderers/RendererPNG';
-import {loadBINAsync, seg2abs, segIP} from "./utils/Utils";
-import {hexString32} from "./utils/Debug";
+import Debug, {hexString32} from "./utils/Debug";
 import IO from "./IO";
-import RendererNoop from "./video/renderers/RendererNoop";
+import Keyboard from "./devices/Keyboard";
+import Speaker from "./devices/Speaker";
+import SystemConfig from "./config/SystemConfig";
+import { regCS, regIP, STATE_RUNNING, STATE_HALT } from "./Constants";
+import { SystemConfigException } from "./utils/Exceptions";
+import { loadBINAsync, seg2abs } from "./utils/Utils";
 
-const RENDERERS = {
-  "RendererNoop": RendererNoop,
-  "RendererBin": RendererBin,
-  "RendererCanvas": RendererCanvas,
-  "RendererPNG": RendererPNG,
-};
 
 export default class System {
   constructor (config) {
@@ -36,32 +18,40 @@ export default class System {
     }
     config.validate();
 
-    this.config = config;
-    this.cycleCount = 0;
-    this.timeSyncCycles = config.timeSyncCycles;
-    this.prevTiming = null;
-    this.videoSync = config.videoSync;
-    this.newVideoSync = config.videoSync;
-    this.runningHz = 0;
+    this.running = true;
+    this.debugging = false;
 
+    this.config = config;
+
+    this.immediateHandle = null;
+    this.cyclesToRun = null;
+    this.io = null;
+
+    this.steppingMode = false;
+    this.debug = new Debug(this);
+
+    // TODO: Figure out what to do with these
     this.videoROMAddress = [0xC000, 0x0000]; // 0x000C0000
+    this.NMIMasked = false; // update this with this.io.devices["NMIMaskRegister"].isMasked();
+
+    // Create clock
+    this.clock = null;
 
     // Create CPU
-    this.cpu = new CPU8086(config, this);
-
-    // Create video and renderer
-    if (config.isNode && config.renderer.class === 'RendererCanvas') {
-      throw new SystemConfigException(`RendererCanvas is not a valid renderer when running in nodejs`);
-    }
-    if (!(config.renderer.class in RENDERERS)) {
-      throw new SystemConfigException(`${config.renderer.class} is not a valid renderer`);
-    }
-    let renderer = new RENDERERS[config.renderer.class](config.renderer.options);
-    this.videoCard = new VideoMDA(this, renderer, config);
+    this.cpu = null;
 
     // Create IO port interface
-    // This needs to be done after initializing all other devices
-    this.io = new IO(this.config);
+    // This needs to be done after initializing CPU
+    this.io = null;
+
+    // Temporary handle on video card until I find a better way to access it
+    this.videoCard = null;
+
+    // Create keyboard
+    this.keyboard = null;
+
+    // Create a speaker
+    this.speaker = null;
   }
 
   /**
@@ -70,7 +60,24 @@ export default class System {
    * @return {Promise<void>}
    */
   async boot () {
-    // Clear memory
+    // Create clock
+    this.clock = new Clock(this);
+
+    // Create CPU
+    this.cpu = new CPU8086(this.config, this);
+
+    // Create IO port interface
+    // This needs to be done after initializing CPU
+    this.io = new IO(this.config, this);
+
+    // Temporary handle on video card until I find a better way to access it
+    this.videoCard = this.io.availableDevices["VideoMDA"];
+
+    // Create keyboard
+    this.keyboard = new Keyboard(this.config, this);
+
+    // Create a speaker
+    this.speaker = new Speaker(this.config, this);
 
     // Load system BIOS or blob
     if (this.config.programBlob) {
@@ -78,20 +85,31 @@ export default class System {
       let bin = await loadBINAsync(this.config.programBlob.file);
       this.loadMem(bin, this.config.programBlob.addr);
     }
-    else {
-      console.log("Loading BIOS...");
+    else if (typeof this.config.bios.file === "string") {
+      this.debug.info("Loading BIOS...", true);
       // Load BIOS file
-      let biosPath = `${this.config.bios.biosPath}${this.config.bios.file}`;
+      let biosPath = `${this.config.bios.path}${this.config.bios.file}`;
       let bios = await loadBINAsync(biosPath);
+
       // Calculate start address for the BIOS
       // Currently hard-coded for 8086
       let biosAddr = this.config.memorySize - bios.length;
 
-      if (this.config.debug) console.info(`Loading BIOS at ${hexString32(biosAddr)}`);
+      if (this.config.debug) this.debug.info(`Loading BIOS at ${hexString32(biosAddr)}`, true);
       this.loadMem(bios, biosAddr);
     }
 
     // Load video BIOS
+
+    // IO Devices
+    this.io.boot();
+
+    // Other Devices
+    this.speaker.boot();
+    this.keyboard.boot();
+
+    // Cards
+    // TODO: This is where the videoCard.init() should go
 
     // Clear cache
 
@@ -99,81 +117,79 @@ export default class System {
 
     // Init state
     await this.videoCard.init();
+
+    this.cpu.state = STATE_RUNNING;
   }
 
   /**
-   * Run the CPU continously or if cyclesToRun is given only run the given
+   * Run the CPU continuously or if cyclesToRun is given only run the given
    * number of cycles.
    *
    * @param {(number|null)} cyclesToRun The number of cycles to run
+   * @param {function} finishedCB Callback to call when the run is completed
    */
-  run (cyclesToRun = null) {
-    this.cpu.state = STATE_RUNNING;
+  async run (cyclesToRun = null, finishedCB = null) {
+    return new Promise(resolve => {
+      this.cyclesToRun = cyclesToRun;
+      this.cycle((sys) => {
+        this.end();
+        if (typeof finishedCB === "function") finishedCB(sys);
+        resolve(this);
+      });
+    });
+  }
 
-    this.prevTiming = hrtime();
-
-    let totalScans = 0;
-
-    while (cyclesToRun === null || cyclesToRun-- > 0) {
-
-      if (this.cycleCount === this.config.debugAtCycle ||
-          seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP]) === this.config.debugAtIP)
+  /**
+   * Perform once cycle of the system.
+   *
+   * This method is designed to be used with setInterval and will clear its
+   * intervalID when the system is done running.
+   */
+  cycle(finishedCB) {
+    if (this.running) {
+      if (this.clock.cycles === this.config.debugAtCycle ||
+        seg2abs(this.cpu.reg16[regCS], this.cpu.reg16[regIP]) === this.config.debugAtIP)
       {
+        // TODO: Don't use config value, move to a property of this class
         this.config.debug = true;
       }
 
-      // if (this.cpu.state === STATE_PAUSED) {
-      //   break;
-      // }
-      if (this.cpu.state === STATE_HALT) {
-        break;
-      }
-
-      // Do a cycle
+      // Do a CPU Cycle
       this.cpu.cycle();
 
       // Cycle Devices
-      this.cycleDevices();
+      this.io.cycle();
 
-      // Run timing check
-      if (this.cycleCount % this.timeSyncCycles === 0) {
-        this.timingCheck();
-      }
+      // Tick the clock
+      this.clock.tick();
 
-      // Run videocard scan
-      if (this.videoSync !== 0 && this.cycleCount % this.videoSync === 0){
-        this.videoSync = this.newVideoSync;
-        totalScans++;
-        this.videoCard.scan();
-      }
-
-      this.cycleCount++;
+      if (this.cyclesToRun !== null && --this.cyclesToRun <= 0) this.cpu.state = STATE_HALT;
     }
 
-    console.log(`Done running - ${this.cycleCount} cycles`);
-    let diff       = hrtime(this.prevTiming);
-    let totalTime  = diff[0] * NS_PER_SEC + diff[1];
-    let hz         = 1 / ((totalTime / this.cycleCount) / NS_PER_SEC);
-    console.log(`  ran at ${(hz / (1000**2)).toFixed(6)} MHZ`);
+    // Queue next cycle
+    if (this.cpu.state === STATE_RUNNING) {
+      this.immediateHandle = setImmediate(this.cycle.bind(this),  finishedCB);
+    }
+    // Or finish running
+    else {
+      if (typeof finishedCB === "function") finishedCB(this);
+    }
   }
 
-  /**
-   * Run a cycle on each device
-   */
-  cycleDevices() {
+  end() {
+    // Do a final video scan to flush video memory to screen
+    this.videoCard.scan();
 
+    // Clear the next immediate
+    clearImmediate(this.immediateHandle);
+
+    // Print debug info
+    console.log(`Done running - ${this.clock.cycles} cycles`);
+    console.log(`  ran at ${(this.clock.hz / (1000 ** 2)).toFixed(6)} MHZ`);
   }
 
-  /**
-   * Check the timing and update the measured cycles per second in MHZ.
-   */
-  timingCheck() {
-    let diff       = hrtime(this.prevTiming);
-    let totalTime  = diff[0] * NS_PER_SEC + diff[1];
-    this.runningHz = 1 / ((totalTime / this.cycleCount) / NS_PER_SEC);
-
-    // Update the number of cycles between video syncs
-    this.newVideoSync = Math.max(Math.round(this.runningHz / this.videoCard.verticalSync), 50000);
+  getDevice(name) {
+    return this.io.devices[name];
   }
 
   /**
@@ -186,5 +202,23 @@ export default class System {
     for (let i = 0; i < data.length; i++) {
       this.cpu.mem8[from + i] = data[i];
     }
+  }
+
+  play() {
+    this.running = true;
+  }
+
+  pause() {
+    this.running = false;
+  }
+
+  debugOn() {
+    this.config.debug = true;
+    console.log("debugOn");
+  }
+
+  debugOff() {
+    this.config.debug = false;
+    console.log("debugOff");
   }
 }

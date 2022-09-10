@@ -7,7 +7,7 @@ The following documents are referenced in the code.
 * [4] Intel 64 and IA-32 Architectures Software Developer’s Manual Volume 2, Intel. Retrieved from  https://software.intel.com/sites/default/files/managed/a4/60/325383-sdm-vol-2abcd.pdf
 * [5] Intel Architecture Software Developer’s Manual Volume 1: Basic Architecture, Intel. Retrieved from  [http://web.eecs.umich.edu/~farnam/482/Winter99/24319001.pdf](http://web.eecs.umich.edu/~farnam/482/Winter99/24319001.pdf)
 * [6] Intel Architecture Software Developer’s Manual Volume 3: System Programming Guide, Intel. Retrieved from  [http://web.eecs.umich.edu/~farnam/482/Winter99/24319201.pdf](http://web.eecs.umich.edu/~farnam/482/Winter99/24319201.pdf)
-
+* [7] IBM 5150 Technical Reference 6025005 Aug 81. Retrieved from http://minuszerodegrees.net/manuals/IBM_5150_Technical_Reference_6025005_AUG81.pdf
 # Files
 The following are sources for files used in js86emu such as BIOS binaries and old executables.
 
@@ -76,3 +76,10 @@ The folowing emulators were inspiration for js86emu as well as a source for me w
 * [8086tiny](https://github.com/adriancable/8086tiny)
 * [v86](https://github.com/copy/v86)
 * [pcjs](https://github.com/jeffpar/pcjs)
+
+
+
+* https://github.com/adriancable/8086tiny
+* https://jaybertsoftware.weebly.com/8086-tiny-plus.html
+* http://www.xtideuniversalbios.org/
+* https://sites.google.com/site/pcdosretro/ibmpcbios

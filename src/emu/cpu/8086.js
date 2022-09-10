@@ -1,7 +1,7 @@
-import Operations from './Operations.js'
-import Addressing from './Addressing.js'
-import CPU from './CPU';
-import { segIP } from "../utils/Utils";
+import Operations from "./Operations.js";
+import Addressing from "./Addressing.js";
+import CPU from "./CPU";
+import {push16, segIP} from "../utils/Utils";
 import {
   regAX, regBX, regCX, regDX,
   regSI, regDI, regBP, regSP, regIP,
@@ -12,8 +12,17 @@ import {
   STATE_HALT,
   STATE_REP_NONE, STATE_REP_Z, STATE_REP, STATE_REP_NZ,
   STATE_SEG_NONE, SEG_PREFIX_INSTS,
-} from '../Constants';
-import { debug } from '../utils/Debug'
+  PIN_8080_AD0, PIN_8080_AD1, PIN_8080_AD2, PIN_8080_AD3, PIN_8080_AD4,
+  PIN_8080_AD5, PIN_8080_AD6, PIN_8080_AD7, PIN_8080_A8, PIN_8080_A9,
+  PIN_8080_A10, PIN_8080_A11, PIN_8080_A12, PIN_8080_A13, PIN_8080_A14,
+  PIN_8080_A15, PIN_8080_A16, PIN_8080_A17, PIN_8080_A18, PIN_8080_A19,
+  PIN_8080_S3, PIN_8080_S4, PIN_8080_S5, PIN_8080_S6, PIN_8080_SSO,
+  PIN_8080_MNMX, PIN_8080_RD, PIN_8080_HOLD, PIN_8080_HLDA, PIN_8080_WR,
+  PIN_8080_IOM, PIN_8080_DTR, PIN_8080_DEN, PIN_8080_ALE, PIN_8080_INTA,
+  PIN_8080_TEST, PIN_8080_READY, PIN_8080_RESET, PIN_8080_CLK, PIN_8080_INTR,
+  PIN_8080_NMI, PIN_LOW, PIN_HIGH, STATE_WAIT, STATE_RUNNING
+} from "../Constants";
+import {hexString16, hexString32} from "../utils/Debug";
 
 /**
  * @class
@@ -23,17 +32,19 @@ export default class CPU8086 extends CPU {
   constructor(config, system) {
     super();
 
+    // this.cycleCount = 0;
     this.config = config;
-
     this.system = system;
 
-    this.io = null;
+    // Tests may not have a system
     if (this.system) {
-      this.io = this.system.io;
+      this.debug = this.system.debug;
     }
 
     /**
-     * CPU frequency in hertz (cyles per second).
+     * CPU frequency in hertz (cycles per second).
+     *
+     * @type {number}
      */
     this.frequency = config.cpu.frequency;
 
@@ -41,18 +52,50 @@ export default class CPU8086 extends CPU {
      * Segment registerPort to use for addressing. Typically it is assumed to be
      * DS, unless the base registerPort is SP or BP; in which case the address is
      * assumed to be relative to SS
+     *
+     * @type {number}
      */
     this.addrSeg = regDS;
 
     /**
+     * Address segment saved during an interrupt, will be used to set addrSeg
+     * upon return from interrupt.
+     *
+     * @type {number|null}
+     */
+    this.savedAddrSeg = null;
+
+    /**
      * Repeat prefix state
+     *
+     * @type {number}
      */
     this.prefixRepeatState = STATE_REP_NONE;
 
     /**
+     * Repeat prefix state saved during an interrupt, will be used to set
+     * prefixRepeatState upon return from interrupt.
+     *
+     * @type {number}
+     */
+    this.savedPrefixRepeatState = STATE_REP_NONE;
+
+    /**
      * Segment override state
+     *
+     * @type {number}
      */
     this.prefixSegmentState = STATE_SEG_NONE;
+
+    /**
+     * Segment prefix state saved during an interrupt, will be used to set
+     * prefixSegmentState upon return from interrupt.
+     *
+     * @type {number}
+     */
+    this.savedPrefixSegmentState = STATE_SEG_NONE;
+
+
 
     /**
      * Instruction Pointer increment counter. This tracks the amount to
@@ -72,7 +115,66 @@ export default class CPU8086 extends CPU {
      */
     this.state = STATE_HALT;
 
+    /**
+     * Interrupt number, IP and CS value if one is triggered. This will cause
+     * the CPU to jump to the interrupt vector specified by CS:IP once the
+     * current instruction is completed.
+     *
+     * The triggeredInt value is an object of the form
+     * {
+     *   interrupt: number,
+     *   ip: number,
+     *   cs: number,
+     * }
+     */
+    this.triggeredInt = null;
+
+    // Pins
+    this.pins = new Uint8Array(40);
+    this.pins[PIN_8080_AD0]   = PIN_LOW;
+    this.pins[PIN_8080_AD1]   = PIN_LOW;
+    this.pins[PIN_8080_AD2]   = PIN_LOW;
+    this.pins[PIN_8080_AD3]   = PIN_LOW;
+    this.pins[PIN_8080_AD4]   = PIN_LOW;
+    this.pins[PIN_8080_AD5]   = PIN_LOW;
+    this.pins[PIN_8080_AD6]   = PIN_LOW;
+    this.pins[PIN_8080_AD7]   = PIN_LOW;
+    this.pins[PIN_8080_A8 ]   = PIN_LOW;
+    this.pins[PIN_8080_A9 ]   = PIN_LOW;
+    this.pins[PIN_8080_A10]   = PIN_LOW;
+    this.pins[PIN_8080_A11]   = PIN_LOW;
+    this.pins[PIN_8080_A12]   = PIN_LOW;
+    this.pins[PIN_8080_A13]   = PIN_LOW;
+    this.pins[PIN_8080_A14]   = PIN_LOW;
+    this.pins[PIN_8080_A15]   = PIN_LOW;
+    this.pins[PIN_8080_A16]   = PIN_LOW;
+    this.pins[PIN_8080_A17]   = PIN_LOW;
+    this.pins[PIN_8080_A18]   = PIN_LOW;
+    this.pins[PIN_8080_A19]   = PIN_LOW;
+    this.pins[PIN_8080_S3 ]   = PIN_LOW;
+    this.pins[PIN_8080_S4 ]   = PIN_LOW;
+    this.pins[PIN_8080_S5 ]   = PIN_LOW;
+    this.pins[PIN_8080_S6 ]   = PIN_LOW;
+    this.pins[PIN_8080_SSO]   = PIN_HIGH;
+    this.pins[PIN_8080_MNMX]  = PIN_LOW;
+    this.pins[PIN_8080_RD ]   = PIN_HIGH;
+    this.pins[PIN_8080_HOLD]  = PIN_LOW;
+    this.pins[PIN_8080_HLDA]  = PIN_LOW;
+    this.pins[PIN_8080_WR ]   = PIN_HIGH;
+    this.pins[PIN_8080_IOM]   = PIN_LOW;
+    this.pins[PIN_8080_DTR]   = PIN_LOW;
+    this.pins[PIN_8080_DEN]   = PIN_HIGH;
+    this.pins[PIN_8080_ALE]   = PIN_LOW;
+    this.pins[PIN_8080_INTA]  = PIN_HIGH;
+    this.pins[PIN_8080_TEST]  = PIN_HIGH;
+    this.pins[PIN_8080_READY] = PIN_LOW;
+    this.pins[PIN_8080_RESET] = PIN_LOW;
+    this.pins[PIN_8080_CLK]   = PIN_LOW;
+    this.pins[PIN_8080_INTR]  = PIN_LOW;
+    this.pins[PIN_8080_NMI]   = PIN_LOW;
+
     // Memory
+    // TODO: move memory to system???
     this.mem8 = new Uint8Array(config.memorySize);
     this.mem16 = new Uint16Array(this.mem8.buffer);
 
@@ -114,6 +216,8 @@ export default class CPU8086 extends CPU {
      * Wrapper class for instructions. I don't think I can move this to a
      * module because I need to close over oper and addr for binding and I
      * don't want to make the signature messy by passing them in.
+     *
+     * But this makes testing really hard
      */
     class inst {
       constructor(op, baseSize, addrSize, dst, src) {
@@ -130,13 +234,13 @@ export default class CPU8086 extends CPU {
         return `${this.opName()} ${this.dstName()}, ${this.srcName()}`;
       }
       opName () {
-        return typeof this.op === 'function' ? this.op.name.replace("bound ", "").replace("_", "") : "[Unknown Op]";
+        return typeof this.op === "function" ? this.op.name.replace("bound ", "").replace("_", "") : "[Unknown Op]";
       }
       dstName () {
-        return typeof this.dst === 'function' ? this.dst.name.replace("bound ", "") : "";
+        return typeof this.dst === "function" ? this.dst.name.replace("bound ", "") : "";
       }
       srcName () {
-        return typeof this.src === 'function' ? this.src.name.replace("bound ", "") : "";
+        return typeof this.src === "function" ? this.src.name.replace("bound ", "") : "";
       }
     }
 
@@ -518,12 +622,12 @@ export default class CPU8086 extends CPU {
    * Decode the current instruction pointed to by the IP registerPort.
    */
   decode () {
+    // noinspection JSCheckFunctionSignatures
     let opcode_byte = this.mem8[segIP(this)];
 
     // Retrieve the operation from the opcode table
     let instruction = this.inst[opcode_byte];
 
-    // this.opcode = {
     this.opcode["opcode_byte"]     = opcode_byte;
     this.opcode["addressing_byte"] = null;
     this.opcode["prefix"]          = 0x00;  // Not supporting prefix opcodes yet
@@ -540,6 +644,7 @@ export default class CPU8086 extends CPU {
 
     // If this instruction has an addressing mode byte decode it
     if (this.opcode.isGroup || this.opcode.inst.baseSize > 1) {
+      // noinspection JSCheckFunctionSignatures
       this.opcode.addressing_byte = this.mem8[segIP(this) + 1];
       this.opcode.mod = (this.opcode.addressing_byte & 0xC0) >>> 6;
       this.opcode.reg = (this.opcode.addressing_byte & 0x38) >>> 3;
@@ -613,6 +718,23 @@ export default class CPU8086 extends CPU {
    * Run a single CPU cycle
    */
   cycle () {
+    // If the CPU is in the HALT state return
+    if (this.state === STATE_HALT) {
+      return null;
+    }
+
+    // If the CPU is in the WAIT state check the TEST line (active low) and if
+    // active reset the state to running.
+    // NOTE: the documentation says the TEST line check only happens every 5
+    //       cycles. That's a pain, and I don't think it will matter, so I'm
+    //       not doing that.
+    if (this.state === STATE_WAIT) {
+      if (this.pins[PIN_8080_TEST] === PIN_LOW) {
+        this.state = STATE_RUNNING;
+      }
+      else return null;
+    }
+
     // Reset per-cycle values
     this.instIPInc = 0;
     this.addrIPInc = 0;
@@ -620,24 +742,88 @@ export default class CPU8086 extends CPU {
     // Decode the instruction
     this.decode();
 
-    // if (this.system.cycleCount > 6 && this.opcode.opcode_byte === 0xFA) this.config.debug = true;
-
     // Increase the instIPInc by the instruction base size
     if (this.prefixRepeatState === STATE_REP_NONE) {
       this.instIPInc += this.opcode.inst.baseSize;
     }
 
+    // We break in logState after the instruction has been decoded but before we
+    // execute it. So it must be here. Also print the logState info before
+    // pausing execution.
+    // Check for breakpoint
     if (this.config.debug) {
-      debug(this.system);
-      if (this.config.cycleBreak) debugger;
+      this.debug.logState(this.system);
+    }
+    if (this.config.debug &&
+        this.config.breakpoints?.[this.reg16[regCS]]?.[this.reg16[regIP]]?.enabled
+    ) {
+      this.system.steppingMode = true;
+      let breakpointName = this.config.breakpoints[this.reg16[regCS]][this.reg16[regIP]].name;
+      this.debug.info(`BREAKPOINT: ${breakpointName} ${hexString16(this.reg16[regCS])}:${hexString16(this.reg16[regIP])}`);
+      this.debug.info(`  ran at ${(this.system.clock.hz / (1000 ** 2)).toFixed(6)} MHZ`, true);
     }
 
-    // Run the instruction
+    // Temporarily guarding against no system (for tests)
+    // TODO: Move steppingMode somewhere where it can be mocked easily
+    if (this.system && this.system.steppingMode) {
+      this.system.clock.sync();
+      this.debug.flush();
+      // eslint-disable-next-line no-debugger
+      debugger;
+    }
+
     this.opcode.inst.run();
 
     this.prefixTermination();
 
     // Move the IP
     this.reg16[regIP] += this.instIPInc + this.addrIPInc;
+
+    // We wait until the end of cycle to handle interrupts so we don't
+    // disrupt a partially completed instruction
+    if (this.triggeredInt !== null) this.handleInt();
+  }
+
+  /**
+   * Initiate a hardware interrupt
+   *
+   * @param interrupt The interrupt number
+   * @param ip The IP component of the interrupt vector
+   * @param cs The CS component of the interrupt vector
+   */
+  int(interrupt, ip, cs) {
+    this.triggeredInt = {
+      interrupt: interrupt,
+      IP: ip,
+      CS: cs,
+    };
+  }
+
+  /**
+   * Handle a triggered interrupt by pushing state and updating CS:IP to the
+   * interrupt vector.
+   */
+  handleInt() {
+    // Push some values to the stack for when we return
+    push16(this, this.reg16[regFlags]);
+    push16(this, this.reg16[regCS]);
+    push16(this, this.reg16[regIP]);
+
+    // Save cpu states and reset original states. This protects against
+    // entering an interrupt in the middle of a REP or ES or ...
+    // instruction
+    this.savedPrefixRepeatState = this.prefixRepeatState;
+    this.prefixRepeatState = STATE_REP_NONE;
+    this.savedPrefixSegmentState = this.prefixSegmentState;
+    this.prefixSegmentState = STATE_SEG_NONE;
+    this.savedAddrSeg = this.addrSeg;
+    this.addrSeg = regDS;
+
+    // Set CS:IP to the location of the interrupt vector
+    this.system.cpu.reg16[regIP] = this.triggeredInt.IP;
+    this.system.cpu.reg16[regCS] = this.triggeredInt.CS;
+
+    // Reset interrupt trigger
+    this.triggeredInt = null;
   }
 }

@@ -1,8 +1,9 @@
-import { b, w } from '../Constants';
+import { b, w } from "../Constants";
+import Device from "./Device";
 
-class TestDevice {
-  constructor (config) {
-    this.config = config;
+class TestDevice extends Device{
+  constructor (config, system) {
+    super(config, system);
     this.buffer8 = new Uint8Array(0xFFFF);
     this.buffer16 = new Uint16Array(0xFFFF);
     for (let i = 0; i < this.buffer8.length; i++) {
@@ -11,6 +12,10 @@ class TestDevice {
     for (let i = 0; i < this.buffer16.length; i++) {
       this.buffer16[i] = 0;
     }
+  }
+
+  boot() {
+    console.log(`  BOOT device: ${this.constructor.name}`);
   }
 
   write(port, value, size) {
@@ -34,4 +39,4 @@ class TestDevice {
   deviceCycle(){}
 }
 
-export default TestDevice
+export default TestDevice;

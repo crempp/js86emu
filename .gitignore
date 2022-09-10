@@ -7,6 +7,6 @@ coverage
 .log
 screenOut
 npm-debug.log
-tmp/*
+tmp
 .next
 junit.xml

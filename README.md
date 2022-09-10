@@ -1,7 +1,7 @@
 # js86emu
 
 <img align="right" width="25%" height="25%"
-     title="Size Limit logo" src="./docs/images/logo.svg">
+     title="Size Limit logo" src="./docs/images/logo.png">
 
 [![CircleCI](https://circleci.com/gh/crempp/js86emu.svg?style=svg)](https://circleci.com/gh/crempp/js86emu)
 
@@ -11,7 +11,7 @@ controllers and graphics. This will allow emulation of original PC XT and PC AT 
 systems until it speed becomes a significant issue.
 
 <p align="center">
-  <img src="./docs/images/debug-screen.png" alt="js86emu debug"
+  <img src="./docs/images/debug-screen.png" alt="js86emu logState"
        width="85%" height="85%">
 </p>
 
@@ -19,8 +19,9 @@ Demo : [http://js86emu.chadrempp.com](http://js86emu.chadrempp.com)
 
 Current Progress
 
-* Support for all documented 8086 instructions and addressing modes
+* Support for all documented 8086/88 instructions and addressing modes (except LOCK and ESC)
 * Functioning stack
+* Software Interupts
 * Basic debugging logging
 * 80x25 MDA text mode graphics using code page 437 font set
 * Video renderer support for canvas, PNG and binary output

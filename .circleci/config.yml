@@ -1,3 +1,4 @@
+version: 2.1
 # Requires variables
 #   * DO_TOKEN
 #	* DOCKER_USER
@@ -9,7 +10,6 @@ defaults: &DEFAULT
   docker:
     - image: docker:17.09.0-ce-git
 
-version: 2
 jobs:
   build:
     <<: *DEFAULT
@@ -74,15 +74,32 @@ jobs:
             ssh -o StrictHostKeyChecking=no root@${IP} "service container-js86emu redeploy"
 
 workflows:
-  version: 2
+  run-ci:
+    jobs:
+      - test:
+          filters:
+            branches:
+              ignore:
+                - dev
+                - master
+                - main
   build-test-and-deploy:
     jobs:
       - test:
-          context: deployment
+          filters:
+            branches:
+              only:
+                - dev
+                - master
+                - main
       - build:
-          context: deployment
+          filters:
+            branches:
+              only:
+                - dev
+                - master
+                - main
       - deploy:
-          context: deployment
           requires:
             - build
             - test
@@ -90,3 +107,4 @@ workflows:
             branches:
               only:
                 - master
+                - main

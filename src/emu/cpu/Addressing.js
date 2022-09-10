@@ -1,17 +1,13 @@
-import {seg2abs, twosComplement2Int16, twosComplement2Int8} from "../utils/Utils";
+import {seg2abs, twosComplement2IntWord, twosComplement2IntByte} from "../utils/Utils";
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
   regAX, regBX, regCX, regDX,
   regSI, regDI, regBP, regSP, regIP,
   regCS, regDS, regES, regSS,
-  regFlags,
-  FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
-  FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK, b, w, v, STATE_SEG_NONE
-} from '../Constants';
-import { formatOpcode, hexString16, hexString32 } from "../utils/Debug";
+  b, w, v, STATE_SEG_NONE
+} from "../Constants";
 import {
-  ValueOverflowException, FeatureNotImplementedException,
-  InvalidAddressModeException
+  ValueOverflowException, InvalidAddressModeException
 } from "../utils/Exceptions";
 
 /**
@@ -61,7 +57,7 @@ export default class Addressing {
    * @param {number} segment Memory segment NOT USED
    * @param {(number|null)} [offset] NOT USED
    * @param {(number|null)} [value] NOT USED
-   * @return {number} In read mode returns 0x01, else returns null
+   * @return {number|null} In read mode returns 0x01, else returns null
    */
   _3 (segment, offset, value) {
     if (offset === undefined && value === undefined) {
@@ -100,7 +96,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regAX] = value & 0xFFFF
+      this.cpu.reg16[regAX] = value & 0xFFFF;
     }
   }
 
@@ -126,7 +122,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg8[regAH] = value & 0xFF
+      this.cpu.reg8[regAH] = value & 0xFF;
     }
   }
 
@@ -152,7 +148,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg8[regAL] = value & 0xFF
+      this.cpu.reg8[regAL] = value & 0xFF;
     }
   }
 
@@ -178,7 +174,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regBX] = value & 0xFFFF
+      this.cpu.reg16[regBX] = value & 0xFFFF;
     }
   }
 
@@ -204,7 +200,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg8[regBH] = value & 0xFF
+      this.cpu.reg8[regBH] = value & 0xFF;
     }
   }
 
@@ -230,7 +226,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg8[regBL] = value & 0xFF
+      this.cpu.reg8[regBL] = value & 0xFF;
     }
   }
 
@@ -256,7 +252,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regCX] = value & 0xFFFF
+      this.cpu.reg16[regCX] = value & 0xFFFF;
     }
   }
 
@@ -282,7 +278,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg8[regCH] = value & 0xFF
+      this.cpu.reg8[regCH] = value & 0xFF;
     }
   }
 
@@ -308,7 +304,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg8[regCL] = value & 0xFF
+      this.cpu.reg8[regCL] = value & 0xFF;
     }
   }
 
@@ -334,7 +330,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regDX] = value & 0xFFFF
+      this.cpu.reg16[regDX] = value & 0xFFFF;
     }
   }
 
@@ -360,7 +356,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg8[regDH] = value & 0xFF
+      this.cpu.reg8[regDH] = value & 0xFF;
     }
   }
 
@@ -386,7 +382,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg8[regDL] = value & 0xFF
+      this.cpu.reg8[regDL] = value & 0xFF;
     }
   }
 
@@ -412,7 +408,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regSI] = value & 0xFFFF
+      this.cpu.reg16[regSI] = value & 0xFFFF;
     }
   }
 
@@ -438,7 +434,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regDI] = value & 0xFFFF
+      this.cpu.reg16[regDI] = value & 0xFFFF;
     }
   }
 
@@ -464,7 +460,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regBP] = value & 0xFFFF
+      this.cpu.reg16[regBP] = value & 0xFFFF;
     }
   }
 
@@ -490,7 +486,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regSP] = value & 0xFFFF
+      this.cpu.reg16[regSP] = value & 0xFFFF;
     }
   }
 
@@ -516,7 +512,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regCS] = value & 0xFFFF
+      this.cpu.reg16[regCS] = value & 0xFFFF;
     }
   }
 
@@ -542,7 +538,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regDS] = value & 0xFFFF
+      this.cpu.reg16[regDS] = value & 0xFFFF;
     }
   }
 
@@ -568,7 +564,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regES] = value & 0xFFFF
+      this.cpu.reg16[regES] = value & 0xFFFF;
     }
   }
 
@@ -595,7 +591,7 @@ export default class Addressing {
     }
     else {
       // Write value to registerPort
-      this.cpu.reg16[regSS] = value & 0xFFFF
+      this.cpu.reg16[regSS] = value & 0xFFFF;
     }
   }
 
@@ -669,7 +665,7 @@ export default class Addressing {
     }
     else if (value === undefined) {
       // Read value from calculated address
-      return this.readRMReg8(segment, offset)
+      return this.readRMReg8(segment, offset);
     }
     else {
       // Write value to address
@@ -738,7 +734,7 @@ export default class Addressing {
     }
     else if (value === undefined) {
       // Read value from calculated address
-      return this.readRMReg16(segment, offset)
+      return this.readRMReg16(segment, offset);
     }
     else {
       // Write value to address
@@ -772,7 +768,7 @@ export default class Addressing {
     }
     else if (value === undefined) {
       // Read value from calculated address
-      return this.readRMReg16(segment, offset)
+      return this.readRMReg16(segment, offset);
     }
     else {
       // Write value to address
@@ -963,7 +959,7 @@ export default class Addressing {
     else if (value === undefined) {
       // Read value from calculated address
       let result = this.readMem8(segment, offset);
-      return this.cpu.reg16[regIP] + twosComplement2Int8(result);
+      return this.cpu.reg16[regIP] + twosComplement2IntByte(result);
     }
     else {
       // Write value to address
@@ -996,7 +992,7 @@ export default class Addressing {
     else if (value === undefined) {
       // Read value from calculated address
       let result = this.readMem16(segment, offset);
-      return this.cpu.reg16[regIP] + twosComplement2Int16(result);
+      return this.cpu.reg16[regIP] + twosComplement2IntWord(result);
     }
     else {
       // Write value to address
@@ -1034,7 +1030,7 @@ export default class Addressing {
       // Since the value *is* the offset return that. We can't do the address
       // calculation here and return null in the address mode because the
       // addrIPInc must be calculated in the address mode of this method.
-      return offset
+      return offset;
     }
     else {
       // Write value to address
@@ -1253,7 +1249,7 @@ export default class Addressing {
   readRMReg32 (segment, offset) {
     if (this.cpu.opcode.mod === 0b11) {
       // Two registerPort instruction; use REG table
-      // TODO: Is this codepath ever hit? Becuase I don't think it'll work
+      // TODO: Is this codepath ever hit? Because I don't think it'll work
       return this.readRegVal(true);
     }
     else {
@@ -1306,8 +1302,8 @@ export default class Addressing {
   /**
    * Calculate an offset address in RM addressing mode
    *
-   * @param {number} segment Memory segment
-   * @return {number} Calculated address
+   * @param {number} [segment] Memory segment
+   * @return {number|null} Calculated address
    */
   calcRMAddr (segment) {
     let offset;
@@ -1341,6 +1337,7 @@ export default class Addressing {
    */
   calcRMAddrNoDisp (segment) {
     let addr;
+    let ipInc;
 
     switch (this.cpu.opcode.rm)
     {
@@ -1367,7 +1364,7 @@ export default class Addressing {
       case 0b110 : // Direct Address
         // Direct address is always 2 bytes
         //   - yoshicapstonememo.googlecode.com/svn/trunk/4_2_86.pdf
-        let ipInc = this.cpu.instIPInc + this.cpu.addrIPInc;
+        ipInc = this.cpu.instIPInc + this.cpu.addrIPInc;
         addr = (this.cpu.mem8[seg2abs( this.cpu.reg16[regCS], this.cpu.reg16[regIP] + ipInc + 1)] << 8) |
                 this.cpu.mem8[seg2abs( this.cpu.reg16[regCS], this.cpu.reg16[regIP] + ipInc)];
         // if (this.cpu.addrIPInc === 0) this.cpu.addrIPInc += 2;
@@ -1450,8 +1447,8 @@ export default class Addressing {
     let rmReg = useRM ? this.cpu.opcode.rm : this.cpu.opcode.reg;
     let size;
     if (sizeOverride !== null) {
-      if (sizeOverride === b) size = 0;
-      else size = 1;
+      if (sizeOverride === b) size = b;
+      else size = w;
     }
     else {
       size = this.cpu.opcode.w;
