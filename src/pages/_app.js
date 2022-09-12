@@ -13,14 +13,13 @@ const globalStyles = globalCss({
     width: "100%",
     padding: 0,
     margin: 0,
-    //background-color: #262626;
-    backgroundColor: "#454545",
+    backgroundColor: "$background",
   },
   "html, body, input, textarea, button": {
     fontFamily: "'Space Mono', monospace",
     fontSize: "1rem",
     lineHeight: "1.4",
-    color: "#e6e6e6",
+    color: "$fontColor",
   },
   "#__next": {
     height: "100%",
@@ -32,6 +31,7 @@ const globalStyles = globalCss({
 
 export default class App extends Component {
   state = {
+    emuReady: false,
     getSystemConfig: null,
     getSystemState: null,
     getSystem: null,
@@ -51,6 +51,7 @@ export default class App extends Component {
     this.system = system;
 
     this.setState({
+      emuReady: true,
       getSystemConfig: () => this.system.config,
       getSystemState: this.getSystemState,
       getSystem: () => this.system,
@@ -68,6 +69,7 @@ export default class App extends Component {
     return (
       <>
         <SystemContext.Provider value={{
+          emuReady: this.state.emuReady,
           getSystemConfig: this.state.getSystemConfig,
           getSystemState: this.state.getSystemState,
           getSystem: this.state.getSystem,
@@ -81,6 +83,7 @@ export default class App extends Component {
   getSystemState = () => {
     return {
       speed: this.system.clock.hz,
+      mem8: this.system.cpu.mem8,
     };
   };
 }

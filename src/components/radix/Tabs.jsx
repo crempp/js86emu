@@ -15,16 +15,25 @@ export const TabList = styled(Tabs.List, {
 });
 
 export const TabTrigger = styled(Tabs.Trigger, {
-  backgroundColor: "#cccccc",
-  color: "#555555",
+  backgroundColor: "$controlBackground",
+  color: "$fontColor",
   fontSize: "0.7rem",
+  border: "1px solid #888888",
+  borderRadius: "3px",
+  padding: "3px",
   marginRight: "8px",
+  "&:hover": {
+    backgroundColor: "$controlActive"
+  },
   "&[data-state=active]": {
-    backgroundColor: "#e8e8e8",
-    color: "#000000",
-  }
+    backgroundColor: "$controlActive",
+    color: "#e6e6e6"
+  },
+  "&:focus": {
+    boxShadow: "0 0 0 1px #333333"
+  },
 });
 
 export const TabContent = styled(Tabs.Content, {
-
+  height: "100%",
 });

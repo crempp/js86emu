@@ -12,8 +12,12 @@ export const {
 } = createStitches({
   theme: {
     colors: {
-      primary: "IndianRed",
-      secondary: "DarkSlateGray"
+      background: "#454545",
+      fontColor: "#e6e6e6",
+      primary: "#e6e6e6",
+      secondary: "#262626",
+      controlBackground: "#353535",
+      controlActive: "#666666",
     },
     space: {
       1: "5px",
@@ -27,13 +31,8 @@ export const {
     bp3: "(min-width: 1024px)"
   },
   utils: {
-    columnGap: (gap) => ({
-      flexDirection: "column",
-      gap: `var(--space-${gap})`
+    hSize: (value) => ({
+      height: value
     }),
-    rowGap: (gap) => ({
-      flexDirection: "row",
-      gap: `var(--space-${gap})`
-    })
   }
 });

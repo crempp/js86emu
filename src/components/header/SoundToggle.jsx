@@ -1,11 +1,7 @@
 import React, {Component} from "react";
-import { styled } from "../../stitches.config";
 import Toggle from "../radix/Toggle";
 import {SystemContext} from "../../Context";
 
-const StyledToggle = styled(Toggle, {
-  fontSize: "0.7rem",
-});
 
 export default class SoundToggle extends Component {
   static contextType = SystemContext;
@@ -22,12 +18,12 @@ export default class SoundToggle extends Component {
     let icon = (this.state.sound) ? <ion-icon name="volume-high-outline" /> :<ion-icon name="volume-mute-outline" />;
 
     return (
-      <StyledToggle
+      <Toggle
         defaultPressed={this.state.sound}
         onPressedChange={(pressed) => this.toggleState(pressed)}
       >
         {icon}
-      </StyledToggle>
+      </Toggle>
     );
   }
 
