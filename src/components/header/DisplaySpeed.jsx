@@ -35,7 +35,10 @@ export default class DisplaySpeed extends Component {
   }
 
   updateEmuState() {
-    const emuState = this.context.getSystemState();
-    this.setState({speed: emuState.speed});
+    // Protect from seemingly random issues losing context
+    if (typeof this.context.getSystemState === "function") {
+      const emuState = this.context.getSystemState();
+      this.setState({speed: emuState.speed});
+    }
   }
 }

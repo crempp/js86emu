@@ -8,7 +8,7 @@ import Disassembly from "./Disassembly";
 import CycleDisplay from "./CycleDisplay";
 import OpcodeTable from "./OpcodeTable";
 import MemoryTable from "./MemoryTable";
-import MemoryViz from "./MemoryViz";
+import MemoryVisualization from "./MemoryVisualization";
 import {Label} from "../radix/Label";
 import IconContainer from "../utils/IconContainer";
 
@@ -64,7 +64,7 @@ export default class DebugTabs extends Component {
           <TabContent value="memory">
             <ColumnTabContent>
               <Column>
-                <MemoryViz />
+                <MemoryVisualization />
                 <MemoryTable />
               </Column>
             </ColumnTabContent>
