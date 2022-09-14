@@ -1,11 +1,10 @@
-import React, {Component, useEffect} from "react";
+import React, {Component} from "react";
 import { styled } from "../../stitches.config";
 import MemoryCanvas from "./MemoryCanvas";
 import {hexString32} from "../../emu/utils/Debug";
 import {SliderRange, SliderRoot, SliderThumb, SliderTrack} from "../radix/Slider";
 import {SystemContext} from "../../Context";
 
-// TODO: load data at actual 0 point
 
 const CanvasContainer = styled("div", {
   width: "100%",
@@ -34,9 +33,8 @@ export default class MemoryVisualization extends Component {
     this.canvasRef = React.createRef();
 
     let windowWidth = 1000;
-    // The following causes an error where the server returns a different value
-    // then client.
-    // TODO: Convert to a functional component and try this again
+    // TODO: The following causes an error where the server returns a different value
+    //       then client.Convert to a functional component and try this again
     // if (typeof window !== "undefined") {
     //   windowWidth = window.innerWidth;
     // }
@@ -64,11 +62,13 @@ export default class MemoryVisualization extends Component {
     console.log("onMemoryPointerUpdate", memoryPointer);
     // Update slider position
     let newSliderPosition = Math.round((memoryPointer / this.state.memorySize) * 100);
+    console.log("     newSliderPosition", newSliderPosition);
 
     // Update canvas position
-    let viewMidpoint = Math.round(this.state.viewWidth / 2);
-    let dataPosition = this.state.memoryPointer / this.state.imgDataHeight;
+    let viewMidpoint = this.state.viewWidth / 2;
+    let dataPosition = -1 * Math.round(memoryPointer / this.state.imgDataHeight);
     let newCanvasPosition = dataPosition + viewMidpoint;
+    console.log("    ", viewMidpoint, dataPosition, newCanvasPosition);
 
     // Set state
     this.setState({
@@ -81,31 +81,18 @@ export default class MemoryVisualization extends Component {
   }
 
 
-  // onSliderMove(value) {
-  //   let canvasPosition = this.slider2CanvasPos(value);
-  //   this.setState({
-  //     canvasPosition: canvasPosition,
-  //     sliderPos: [value],
-  //   });
-  //
-  //   console.log("[onSliderMove] newCanvas: ", canvasPosition, " newSlider: ", value);
-  // }
-
-  // canvas2SliderPos(value) {
-  //   return -1 * Math.floor( (value / this.state.imageWidth) * 100);
-  //   // 1048576 -200
-  // }
-
-  // slider2CanvasPos(value) {
-  //   return -1 * Math.floor(this.state.memSize / 100 * value);
-  // }
+  onSliderMove(value) {
+    let newMemoryPointer = Math.round((value[0] / 100) * this.state.memorySize);
+    console.log("[onSliderMove] ", value[0], newMemoryPointer);
+    this.onMemoryPointerUpdate(newMemoryPointer);
+  }
 
   getMemoryPointer() {
     return this.state.memoryPointer;
   }
 
   componentDidMount() {
-    console.log("MemoryVisualization::componentDidMount");
+    // console.log("MemoryVisualization::componentDidMount");
 
     // TODO: Debugging, replace with real memory
     let mem8 = new Uint8Array(this.state.memorySize);
@@ -124,7 +111,7 @@ export default class MemoryVisualization extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log("MemoryVisualization::componentDidUpdate");
+    // console.log("MemoryVisualization::componentDidUpdate");
     if (this.context.emuReady && !this.canvasRef.current.initialized) {
       console.log("update:init");
       this.canvasRef.current.updateMemory(this.state.mem8);
@@ -135,6 +122,7 @@ export default class MemoryVisualization extends Component {
   // TODO: Make the actual methods arrow functions
   oMPU = (p) => this.onMemoryPointerUpdate(p);
   gMP = () => this.getMemoryPointer();
+  oSM = (value) => this.onSliderMove(value);
 
   render() {
     // console.log("MemoryVisualization::render");
@@ -144,6 +132,7 @@ export default class MemoryVisualization extends Component {
           ref={this.canvasRef}
           onMemoryPointerUpdate={this.oMPU}
           getMemoryPointer={this.gMP}
+          memorySize={this.state.memorySize}
           imgDataWidth={this.state.imgDataWidth}
           imgDataHeight={this.state.imgDataHeight}
           viewWidth={this.state.viewWidth}
@@ -151,16 +140,14 @@ export default class MemoryVisualization extends Component {
         />
         <Line css={{ hSize: this.viewHeight }}/>
         <Marker>
-          {/*{hexString32(this.state.canvasPosition * this.viewHeight * -1)}*/}
-          {this.state.memoryPointer}
+          {hexString32(this.state.memoryPointer)}
         </Marker>
         <SliderRoot
-          // ref={this.sliderRef}
           value={this.state.sliderPosition}
           max={100}
           step={1}
           aria-label="memoryPointer"
-          // onValueChange={(value) => this.onSliderMove(value)}
+          onValueChange={this.oSM}
         >
           <SliderTrack>
             <SliderRange />

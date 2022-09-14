@@ -25,36 +25,20 @@ export default class MemoryCanvas extends PureComponent {
       // Begin dragging
       this.dragging = true;
 
-      // Update the canvas position
-      // this.canvasPosition += (dx * this.scrollScale);
-
-
-      // dragging direction is inverted from the direction we want the mem
-      // pointer to move
-      dx = dx * -1;
-      // We've moved dx pixels, the height of the image is imgDataHeight
+      // We've moved dx pixels, the height of the image is imgDataHeight,
       // so we've moved dx * imgDataHeight bytes in memory
-      let dBytes = dx * this.props.imgDataHeight;
-
+      let dBytes = -1 * dx * this.props.imgDataHeight;
       let newMemoryPointer = this.props.getMemoryPointer() + dBytes;
       console.log("dx, newMemoryPointer", dx, newMemoryPointer);
 
-      // Update the memory position
-      //let newmemoryPointer = this.state.memoryPointer + (-1 * dx * this.state.imgDataHeight);
-
       // Clamp left edge
-      // if (this.canvasPosition > 0) {
-      //   this.canvasPosition = 0;
-      //   return;
-      // }
+      if (newMemoryPointer < 0) {
+        newMemoryPointer = 0;
+      }
       // Clamp right edge
-      // else if (this.canvasPosition < ((this.state.imageWidth*-1)+this.canvas.width)) {
-      //   this.canvasPosition = ((this.state.imageWidth - this.canvasWidth) * -1);
-      //   return;
-      // }
-
-      // Update image
-      // this.draw();
+      else if (newMemoryPointer > this.props.memorySize) {
+        newMemoryPointer = this.props.newMemoryPointer;
+      }
 
       // Let parent know we've updated the position
       this.props.onMemoryPointerUpdate(newMemoryPointer);
