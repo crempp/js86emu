@@ -7,10 +7,8 @@ import FlagTable from "./FlagTable";
 import Disassembly from "./Disassembly";
 import CycleDisplay from "./CycleDisplay";
 import OpcodeTable from "./OpcodeTable";
-import MemoryTable from "./MemoryTable";
 import MemoryVisualization from "./MemoryVisualization";
 import {Label} from "../radix/Label";
-import IconContainer from "../utils/IconContainer";
 
 const TabsContainer = styled("div", {
   height: "100%",
@@ -65,7 +63,6 @@ export default class DebugTabs extends Component {
             <ColumnTabContent>
               <Column>
                 <MemoryVisualization />
-                <MemoryTable />
               </Column>
             </ColumnTabContent>
           </TabContent>

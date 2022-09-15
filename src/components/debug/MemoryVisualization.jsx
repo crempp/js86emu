@@ -4,6 +4,7 @@ import MemoryCanvas from "./MemoryCanvas";
 import {hexString32} from "../../emu/utils/Debug";
 import {SliderRange, SliderRoot, SliderThumb, SliderTrack} from "../radix/Slider";
 import {SystemContext} from "../../Context";
+import MemoryTable from "./MemoryTable";
 
 
 const CanvasContainer = styled("div", {
@@ -138,10 +139,7 @@ export default class MemoryVisualization extends Component {
           viewWidth={this.state.viewWidth}
           viewHeight={this.state.viewHeight}
         />
-        <Line css={{ hSize: this.viewHeight }}/>
-        <Marker>
-          {hexString32(this.state.memoryPointer)}
-        </Marker>
+        <Line css={{ hSize: this.state.viewHeight }}/>
         <SliderRoot
           value={this.state.sliderPosition}
           max={100}
@@ -154,6 +152,14 @@ export default class MemoryVisualization extends Component {
           </SliderTrack>
           <SliderThumb />
         </SliderRoot>
+        <Marker>
+          {hexString32(this.state.memoryPointer)}
+        </Marker>
+        <MemoryTable
+          mem8={this.state.mem8}
+          memoryPointer={this.state.memoryPointer}
+          memorySize={this.state.memorySize}
+        />
       </CanvasContainer>
     );
   }

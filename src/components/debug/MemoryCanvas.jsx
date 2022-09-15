@@ -37,7 +37,7 @@ export default class MemoryCanvas extends PureComponent {
       }
       // Clamp right edge
       else if (newMemoryPointer > this.props.memorySize) {
-        newMemoryPointer = this.props.newMemoryPointer;
+        newMemoryPointer = this.props.memorySize;
       }
 
       // Let parent know we've updated the position
