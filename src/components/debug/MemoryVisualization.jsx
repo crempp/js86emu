@@ -59,7 +59,7 @@ export default class MemoryVisualization extends Component {
     };
   }
 
-  onMemoryPointerUpdate(memoryPointer) {
+  onMemoryPointerUpdate = (memoryPointer) => {
     console.log("onMemoryPointerUpdate", memoryPointer);
     // Update slider position
     let newSliderPosition = Math.round((memoryPointer / this.state.memorySize) * 100);
@@ -79,18 +79,17 @@ export default class MemoryVisualization extends Component {
     });
 
     this.canvasRef.current.draw(newCanvasPosition);
-  }
+  };
 
-
-  onSliderMove(value) {
+  onSliderMove = (value) => {
     let newMemoryPointer = Math.round((value[0] / 100) * this.state.memorySize);
     console.log("[onSliderMove] ", value[0], newMemoryPointer);
     this.onMemoryPointerUpdate(newMemoryPointer);
-  }
+  };
 
-  getMemoryPointer() {
+  getMemoryPointer = () => {
     return this.state.memoryPointer;
-  }
+  };
 
   componentDidMount() {
     // console.log("MemoryVisualization::componentDidMount");
@@ -120,19 +119,14 @@ export default class MemoryVisualization extends Component {
     }
   }
 
-  // TODO: Make the actual methods arrow functions
-  oMPU = (p) => this.onMemoryPointerUpdate(p);
-  gMP = () => this.getMemoryPointer();
-  oSM = (value) => this.onSliderMove(value);
-
   render() {
     // console.log("MemoryVisualization::render");
     return (
       <CanvasContainer>
         <MemoryCanvas
           ref={this.canvasRef}
-          onMemoryPointerUpdate={this.oMPU}
-          getMemoryPointer={this.gMP}
+          onMemoryPointerUpdate={this.onMemoryPointerUpdate}
+          getMemoryPointer={this.getMemoryPointer}
           memorySize={this.state.memorySize}
           imgDataWidth={this.state.imgDataWidth}
           imgDataHeight={this.state.imgDataHeight}
@@ -145,7 +139,7 @@ export default class MemoryVisualization extends Component {
           max={100}
           step={1}
           aria-label="memoryPointer"
-          onValueChange={this.oSM}
+          onValueChange={this.onSliderMove}
         >
           <SliderTrack>
             <SliderRange />
@@ -156,6 +150,7 @@ export default class MemoryVisualization extends Component {
           {hexString32(this.state.memoryPointer)}
         </Marker>
         <MemoryTable
+          onMemoryPointerUpdate={this.onMemoryPointerUpdate}
           mem8={this.state.mem8}
           memoryPointer={this.state.memoryPointer}
           memorySize={this.state.memorySize}

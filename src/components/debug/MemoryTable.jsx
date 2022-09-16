@@ -1,16 +1,18 @@
 import React, {Component} from "react";
 import { styled } from "../../stitches.config";
 import {SystemContext} from "../../Context";
-import {hexString32, hexString8} from "../../emu/utils/Debug";
+import {byte2Ascii, hexString32, hexString8} from "../../emu/utils/Debug";
+
+const TableContainer = styled("div", {
+  overflow: "scroll",
+});
 
 const Table = styled("table", {
   fontSize: "0.9rem",
   borderCollapse: "collapse",
 });
 
-const TableBody = styled("tbody", {
-
-});
+const TableBody = styled("tbody", {});
 
 const Row = styled("tr", {
   "&[data-current]": {
@@ -21,6 +23,9 @@ const Row = styled("tr", {
 const Cell = styled("td", {
   "&:first-child": {
     fontWeight: "bold",
+  },
+  "&:nth-child(17)": {
+    borderRight: "3px double #888888",
   },
   padding: "4px",
 });
@@ -34,6 +39,8 @@ export default class MemoryTable extends Component {
     this.tableRows = 11;
     this.tableColumns = 16;
     this.genSlice = this.genSlice.bind(this);
+    this.containerRef = React.createRef();
+    this.preventDefault = e => e.preventDefault();
 
     if (this.tableRows % 2 === 0) {
       throw new Error("Number of rows for memory table must be odd");
@@ -45,6 +52,7 @@ export default class MemoryTable extends Component {
   }
 
   componentDidMount() {
+    this.containerRef.current.addEventListener("wheel", this.preventDefault);
     if (this.context.emuReady && !this.initialized) {
       this.setState({mem8: this.props.mem8});
       this.initialized = true;
@@ -56,6 +64,10 @@ export default class MemoryTable extends Component {
       this.setState({mem8: this.props.mem8});
       this.initialized = true;
     }
+  }
+
+  componentWillUnmount() {
+    this.containerRef.current.removeEventListener("wheel", this.preventDefault);
   }
 
   /**
@@ -70,14 +82,29 @@ export default class MemoryTable extends Component {
   genSlice (data, start, width, height) {
     return [...Array(height)].map((v, i) => {
       let a = start + (i * width);
-      return [(a < 0) ? "-" : hexString32(a)].concat(
+      return [].concat(
+        [(a < 0 || a >= this.props.memorySize) ? "-" : hexString32(a)],
         [...Array(width)].map((w, j) => {
           let address = start + ((i * width) + j);
           if (address < 0 || address >= this.props.memorySize ) return "-";
           else return hexString8(data[address]);
-        }));
+        }),
+        [(a < 0 || a >= this.props.memorySize) ? ". ".repeat(width) : Array.from(data.slice(a, a + width)).map((u) => byte2Ascii(u)).join(" ")]
+      );
     });
   }
+
+  onScroll = (e) => {
+    // let delta = (e.deltaY < 0) ? -1 : 1;
+    let delta = e.deltaY;
+    let newPointer = this.props.memoryPointer + delta;
+    console.log("newPointer", e.deltaY, this.props.memoryPointer, delta,  newPointer);
+    if (newPointer > 0 && newPointer < this.props.memorySize) {
+
+      this.props.onMemoryPointerUpdate(newPointer);
+    }
+
+  };
 
   render() {
     console.log("table render", this.props.memoryPointer);
@@ -112,22 +139,27 @@ export default class MemoryTable extends Component {
     );
 
     return (
-      <Table>
-        <TableBody>
-          {memData.map((x, i) =>
-            <Row
-              key={`memrow-pre-${i}`}
-              {...(i === halfRows && { "data-current": true })}
-            >
-              {memData[i].map((y, j) =>
-                <Cell key={`memcell-pre-${i}-${j}`}>
-                  {memData[i][j]}
-                </Cell>
-              )}
-            </Row>
-          )}
-        </TableBody>
-      </Table>
+      <TableContainer
+        ref={this.containerRef}
+        onWheel={this.onScroll}
+      >
+        <Table>
+          <TableBody>
+            {memData.map((x, i) =>
+              <Row
+                key={`memrow-pre-${i}`}
+                {...(i === halfRows && { "data-current": true })}
+              >
+                {memData[i].map((y, j) =>
+                  <Cell key={`memcell-pre-${i}-${j}`}>
+                    {memData[i][j]}
+                  </Cell>
+                )}
+              </Row>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
     );
   }
 }

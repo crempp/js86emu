@@ -206,6 +206,14 @@ export function hexString32 (value) {
   else return "0x" + String("00000000" + value.toString(16).toUpperCase()).slice(-8);
 }
 
+export function byte2Ascii (value) {
+  if (value >= 0x20 && value <= 0x7E) {
+    return String.fromCharCode(value);
+  }
+  else return ".";
+
+}
+
 export function formatOpcode(opcode, indentSize=0) {
   let str = "";
   let indent = " ".repeat(indentSize);
