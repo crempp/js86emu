@@ -53,21 +53,24 @@ export default class MemoryTable extends Component {
 
   componentDidMount() {
     this.containerRef.current.addEventListener("wheel", this.preventDefault);
-    if (this.context.emuReady && !this.initialized) {
-      this.setState({mem8: this.props.mem8});
-      this.initialized = true;
+    if (this.context.emuReady && !this.initialized && this.props.mem8 !== null) {
+      this.init();
     }
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.context.emuReady && !this.initialized) {
-      this.setState({mem8: this.props.mem8});
-      this.initialized = true;
+    if (this.context.emuReady && !this.initialized && this.props.mem8 !== null) {
+      this.init();
     }
   }
 
   componentWillUnmount() {
     this.containerRef.current.removeEventListener("wheel", this.preventDefault);
+  }
+
+  init() {
+    this.setState({mem8: this.props.mem8});
+    this.initialized = true;
   }
 
   /**
@@ -95,19 +98,14 @@ export default class MemoryTable extends Component {
   }
 
   onScroll = (e) => {
-    // let delta = (e.deltaY < 0) ? -1 : 1;
     let delta = e.deltaY;
     let newPointer = this.props.memoryPointer + delta;
-    console.log("newPointer", e.deltaY, this.props.memoryPointer, delta,  newPointer);
     if (newPointer > 0 && newPointer < this.props.memorySize) {
-
       this.props.onMemoryPointerUpdate(newPointer);
     }
-
   };
 
   render() {
-    console.log("table render", this.props.memoryPointer);
     // Align start address with the width of the table.
     let offset = this.props.memoryPointer % this.tableColumns;
     let alignedPointer = this.props.memoryPointer - offset;

@@ -6,6 +6,17 @@ const MemCanvas = styled("canvas", {
   cursor: "grab",
 });
 
+/**
+ * MemoryCanvas Component
+ *
+ * We do not have mem8 as part of state because we don't want to rerender the
+ * canvas when it changes. We only want to update the contents of the canvas.
+ *
+ * So we count on parent components to call `updateMemory` and `draw`.
+ *
+ * There is likely a better way to do this but this works decently well for the
+ * moment.
+ */
 export default class MemoryCanvas extends PureComponent {
   constructor(props) {
     super(props);
@@ -29,7 +40,6 @@ export default class MemoryCanvas extends PureComponent {
       // so we've moved dx * imgDataHeight bytes in memory
       let dBytes = -1 * dx * this.props.imgDataHeight;
       let newMemoryPointer = this.props.getMemoryPointer() + dBytes;
-      console.log("dx, newMemoryPointer", dx, newMemoryPointer);
 
       // Clamp left edge
       if (newMemoryPointer < 0) {
@@ -50,45 +60,35 @@ export default class MemoryCanvas extends PureComponent {
   }
 
   updateMemory(memData) {
-    console.log("MemoryCanvas::updateMemory");
     this.initialized = true;
     this.imgData = new Uint8ClampedArray(this.props.imgDataWidth * this.props.imgDataHeight * 4);
-    for (let y = 0; y < this.props.imgDataHeight; y++) {
-      for (let x = 0; x < this.props.imgDataWidth; x++) {
-        const i = (y * this.props.imgDataWidth + x) * 4;
-        const j = (y * this.props.imgDataWidth + x);
 
-        // Convert byte to color
-        const c = [
-          (memData[j] & 0b00000011) * 36,
-          ((memData[j] & 0b00011100) >> 2) * 36,
-          ((memData[j] & 0b11100000) >> 5) * 36
-        ];
+    for (let u = 0; u < this.props.imgDataWidth; u++) {
+      for (let v = 0; v < this.props.imgDataHeight; v++) {
+        const iMem = (u * this.props.imgDataHeight) + v;
+        const iImg = (v * this.props.imgDataWidth * 4) + (u * 4);
 
-        this.imgData[i  ] = c[0];   // red
-        this.imgData[i+1] = c[1];   // green
-        this.imgData[i+2] = c[2];   // blue
-        this.imgData[i+3] = 255;    // alpha
+        this.imgData[iImg  ] = (memData[iMem] & 0b00000011) * 36;        // red
+        this.imgData[iImg+1] = ((memData[iMem] & 0b00011100) >> 2) * 36; // green
+        this.imgData[iImg+2] = ((memData[iMem] & 0b11100000) >> 5) * 36; // blue
+        this.imgData[iImg+3] = 255;                                      // alpha
       }
     }
   }
 
   draw(position) {
-    console.log("MemoryCanvas::draw", position);
     const imageData = new ImageData(this.imgData, this.props.imgDataWidth, this.props.imgDataHeight);
-    this.ctx.fillStyle = "pink";
-    this.ctx.fillRect(0, 0, this.props.viewWidth, this.props.viewHeight)
+    this.ctx.fillStyle = "#e6e6e6";
+    this.ctx.fillRect(0, 0, this.props.viewWidth, this.props.viewHeight);
     this.ctx.putImageData(imageData, position, 0);
   }
 
   componentDidMount() {
-    // console.log("MemoryCanvas::componentDidMount");
     this.canvas = this.canvasRef.current;
     this.ctx = this.canvas.getContext("2d");
   }
 
   render() {
-    // console.log("MemoryCanvas::render");
     return (
       <MemCanvas
         ref={this.canvasRef}

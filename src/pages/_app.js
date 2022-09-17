@@ -84,6 +84,7 @@ export default class App extends Component {
     return {
       speed: this.system.clock.hz,
       mem8: this.system.cpu.mem8,
+      memorySize: this.system.config.memorySize,
     };
   };
 }

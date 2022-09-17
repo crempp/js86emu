@@ -14,7 +14,7 @@ const CanvasContainer = styled("div", {
 
 const Line = styled("div", {
   width: "3px",
-  backgroundColor: "rgb(5,5,5,0.5)",
+  backgroundColor: "rgb(200,200,200,0.5)",
   position: "absolute",
   top: 0,
   left: "50%",
@@ -32,24 +32,24 @@ export default class MemoryVisualization extends Component {
     super(props);
 
     this.canvasRef = React.createRef();
+    this.initialized = false;
 
-    let windowWidth = 1000;
     // TODO: The following causes an error where the server returns a different value
     //       then client.Convert to a functional component and try this again
     // if (typeof window !== "undefined") {
     //   windowWidth = window.innerWidth;
     // }
 
-    // Some of these should come from context
-    let memorySize = 0x100000; // (1048576)
-    let viewHeight = 64;
+    let windowWidth = 1000;
+    this.viewHeight = 64;
 
     this.state = {
-      memorySize: memorySize,
-      imgDataWidth: memorySize / viewHeight,
-      imgDataHeight: viewHeight,
+      mem8: null,
+      memorySize: 0,
+      imgDataWidth: 0,
+      imgDataHeight: this.viewHeight,
       viewWidth: windowWidth,
-      viewHeight: viewHeight,
+      viewHeight: this.viewHeight,
       canvasScrollScale: 1,
       canvasMidpoint: 1000/2,
 
@@ -60,16 +60,13 @@ export default class MemoryVisualization extends Component {
   }
 
   onMemoryPointerUpdate = (memoryPointer) => {
-    console.log("onMemoryPointerUpdate", memoryPointer);
     // Update slider position
     let newSliderPosition = Math.round((memoryPointer / this.state.memorySize) * 100);
-    console.log("     newSliderPosition", newSliderPosition);
 
     // Update canvas position
     let viewMidpoint = this.state.viewWidth / 2;
     let dataPosition = -1 * Math.round(memoryPointer / this.state.imgDataHeight);
     let newCanvasPosition = dataPosition + viewMidpoint;
-    console.log("    ", viewMidpoint, dataPosition, newCanvasPosition);
 
     // Set state
     this.setState({
@@ -83,7 +80,6 @@ export default class MemoryVisualization extends Component {
 
   onSliderMove = (value) => {
     let newMemoryPointer = Math.round((value[0] / 100) * this.state.memorySize);
-    console.log("[onSliderMove] ", value[0], newMemoryPointer);
     this.onMemoryPointerUpdate(newMemoryPointer);
   };
 
@@ -91,36 +87,35 @@ export default class MemoryVisualization extends Component {
     return this.state.memoryPointer;
   };
 
-  componentDidMount() {
-    // console.log("MemoryVisualization::componentDidMount");
 
-    // TODO: Debugging, replace with real memory
-    let mem8 = new Uint8Array(this.state.memorySize);
-    for (let i = 0; i<this.state.memorySize; i++) {
-      mem8[i] = Math.random() * 255;
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (!this.initialized && !this.canvasRef.current.initialized && this.context.emuReady) {
+      this.init();
     }
-    // this.canvasRef.current.updateMemory(mem8);
-
-    this.setState({mem8: mem8});
-
-    if (this.context.emuReady && !this.canvasRef.current.initialized) {
-      console.log("mount:init");
-      this.canvasRef.current.updateMemory(mem8);
-      this.onMemoryPointerUpdate(this.state.memoryPointer);
+    else if (this.initialized && this.context.emuReady) {
+      // Since MemoryCanvas does not listen to any state (to avoid redrawing
+      // the canvas) we must tell MemoryCanvas there was an update and to draw
+      // the new memory data.
+      let sysState = this.context.getSystemState();
+      this.canvasRef.current.updateMemory(sysState.mem8);
+      this.canvasRef.current.draw(this.state.canvasPosition);
     }
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    // console.log("MemoryVisualization::componentDidUpdate");
-    if (this.context.emuReady && !this.canvasRef.current.initialized) {
-      console.log("update:init");
-      this.canvasRef.current.updateMemory(this.state.mem8);
+  init() {
+    this.initialized = true;
+    let sysState = this.context.getSystemState();
+    this.setState({
+      mem8: sysState.mem8,
+      memorySize: sysState.memorySize,
+      imgDataWidth: sysState.memorySize / this.viewHeight,
+    }, () => {
+      this.canvasRef.current.updateMemory(sysState.mem8);
       this.onMemoryPointerUpdate(this.state.memoryPointer);
-    }
+    });
   }
 
   render() {
-    // console.log("MemoryVisualization::render");
     return (
       <CanvasContainer>
         <MemoryCanvas
@@ -133,7 +128,9 @@ export default class MemoryVisualization extends Component {
           viewWidth={this.state.viewWidth}
           viewHeight={this.state.viewHeight}
         />
+
         <Line css={{ hSize: this.state.viewHeight }}/>
+
         <SliderRoot
           value={this.state.sliderPosition}
           max={100}
@@ -146,12 +143,14 @@ export default class MemoryVisualization extends Component {
           </SliderTrack>
           <SliderThumb />
         </SliderRoot>
+
         <Marker>
           {hexString32(this.state.memoryPointer)}
         </Marker>
+
         <MemoryTable
-          onMemoryPointerUpdate={this.onMemoryPointerUpdate}
           mem8={this.state.mem8}
+          onMemoryPointerUpdate={this.onMemoryPointerUpdate}
           memoryPointer={this.state.memoryPointer}
           memorySize={this.state.memorySize}
         />
