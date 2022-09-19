@@ -9,7 +9,6 @@ import CycleDisplay from "./CycleDisplay";
 import OpcodeTable from "./OpcodeTable";
 import MemoryVisualization from "./MemoryVisualization";
 import {Label} from "../radix/Label";
-import {SystemContext} from "../../Context";
 
 const TabsContainer = styled("div", {
   height: "100%",
@@ -31,42 +30,12 @@ const Column = styled("div", {
 });
 
 export default class DebugTabs extends Component {
-  static contextType = SystemContext;
-
-  constructor(props) {
-    super(props);
-
-    this.updateTime = 1000; // ms
-
-    this.state = {
-      systemState: null,
-    };
-  }
-
-  updateEmuState() {
-    // Protect from seemingly random issues losing context
-    if (typeof this.context.getSystemState === "function") {
-      const systemState = this.context.getSystemState();
-      this.setState({systemState: systemState});
-    }
-  }
-
-  componentDidMount() {
-    this.stateInterval = setInterval(() => this.updateEmuState(), this.updateTime);
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.stateInterval);
-  }
-
   render() {
     return (
-      <TabRoot defaultValue="memory">
+      <TabRoot defaultValue="debug">
         <TabList>
           <TabTrigger value="debug">Debug</TabTrigger>
-          <TabTrigger value="memory">
-            Memory
-          </TabTrigger>
+          <TabTrigger value="memory">Memory</TabTrigger>
           <TabTrigger value="log">Log</TabTrigger>
           <TabTrigger value="config">Config</TabTrigger>
         </TabList>

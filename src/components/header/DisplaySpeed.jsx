@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import { styled } from "../../stitches.config";
-import { SystemContext } from "../../Context";
+import { EmulationContext } from "../../Context";
 
 const Container = styled("div", {
   width: "84px",
@@ -9,36 +9,19 @@ const Container = styled("div", {
 });
 
 export default class DisplaySpeed extends Component {
-  static contextType = SystemContext;
+  static contextType = EmulationContext;
 
   constructor(props) {
     super(props);
-    this.state = {
-      speed: 0,
-    };
-  }
-
-  componentDidMount() {
-    this.stateInterval = setInterval(() => this.updateEmuState(), 1000);
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.stateInterval);
   }
 
   render() {
+    let emulationState = this.context.getSystemState();
+    let speed = emulationState.speed ? emulationState.speed : "-";
     return (
       <Container>
-        {(this.state.speed / 1000000).toFixed(2)} MHz
+        {(speed / 1000000).toFixed(2)} MHz
       </Container>
     );
-  }
-
-  updateEmuState() {
-    // Protect from seemingly random issues losing context
-    if (typeof this.context.getSystemState === "function") {
-      const emuState = this.context.getSystemState();
-      this.setState({speed: emuState.speed});
-    }
   }
 }

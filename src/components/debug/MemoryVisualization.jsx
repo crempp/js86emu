@@ -3,7 +3,7 @@ import { styled } from "../../stitches.config";
 import MemoryCanvas from "./MemoryCanvas";
 import {hexString32} from "../../emu/utils/Debug";
 import {SliderRange, SliderRoot, SliderThumb, SliderTrack} from "../radix/Slider";
-import {SystemContext} from "../../Context";
+import {EmulationContext} from "../../Context";
 import MemoryTable from "./MemoryTable";
 
 
@@ -26,7 +26,7 @@ const Marker = styled("div", {
 });
 
 export default class MemoryVisualization extends Component {
-  static contextType = SystemContext;
+  static contextType = EmulationContext;
 
   constructor(props) {
     super(props);
@@ -40,16 +40,13 @@ export default class MemoryVisualization extends Component {
     //   windowWidth = window.innerWidth;
     // }
 
-    let windowWidth = 1000;
-    this.viewHeight = 64;
-
     this.state = {
       mem8: null,
       memorySize: 0,
       imgDataWidth: 0,
-      imgDataHeight: this.viewHeight,
-      viewWidth: windowWidth,
-      viewHeight: this.viewHeight,
+      imgDataHeight: 64,
+      viewWidth: 1000,
+      viewHeight: 64,
       canvasScrollScale: 1,
       canvasMidpoint: 1000/2,
 
@@ -87,7 +84,6 @@ export default class MemoryVisualization extends Component {
     return this.state.memoryPointer;
   };
 
-
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (!this.initialized && !this.canvasRef.current.initialized && this.context.emuReady) {
       this.init();
@@ -108,7 +104,7 @@ export default class MemoryVisualization extends Component {
     this.setState({
       mem8: sysState.mem8,
       memorySize: sysState.memorySize,
-      imgDataWidth: sysState.memorySize / this.viewHeight,
+      imgDataWidth: sysState.memorySize / this.state.viewHeight,
     }, () => {
       this.canvasRef.current.updateMemory(sysState.mem8);
       this.onMemoryPointerUpdate(this.state.memoryPointer);

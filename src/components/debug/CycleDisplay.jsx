@@ -1,5 +1,8 @@
 import React, {Component} from "react";
 import { styled } from "../../stitches.config";
+import { EmulationContext } from "../../Context";
+import {regCS, regIP} from "../../emu/Constants";
+import {hexString16} from "../../emu/utils/Debug";
 
 const Display = styled("div", {
   fontSize: "0.9rem",
@@ -20,18 +23,20 @@ const Label = styled("span", {
 const Data = styled("span", {});
 
 export default class CycleDisplay extends Component {
-  constructor(props) {
-    super(props);
-  }
+  static contextType = EmulationContext;
 
   render() {
+    let emulationState = this.context.getSystemState();
+    let cycles = emulationState.cycles ? emulationState.cycles : "-";
+    let cs = emulationState.cpu ? hexString16(emulationState.cpu.reg16[regCS]) : "-";
+    let ip = emulationState.cpu ? hexString16(emulationState.cpu.reg16[regIP]) : "-";
     return (
       <Display>
         <div>
-          <Label>cycle</Label><Data>9335772</Data>
+          <Label>cycle</Label><Data>{cycles}</Data>
         </div>
         <div>
-          <Label>CS:IP:</Label><Data>0xF000:0xE6B3</Data>
+          <Label>CS:IP:</Label><Data>{cs}:{ip}</Data>
         </div>
       </Display>
     );

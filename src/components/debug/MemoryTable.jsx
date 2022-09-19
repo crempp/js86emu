@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import { styled } from "../../stitches.config";
-import {SystemContext} from "../../Context";
+import {EmulationContext} from "../../Context";
 import {byte2Ascii, hexString32, hexString8} from "../../emu/utils/Debug";
 
 const TableContainer = styled("div", {
@@ -31,7 +31,7 @@ const Cell = styled("td", {
 });
 
 export default class MemoryTable extends Component {
-  static contextType = SystemContext;
+  static contextType = EmulationContext;
 
   constructor(props) {
     super(props);

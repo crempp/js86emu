@@ -1,3 +1,4 @@
 import React from "react";
 
-export const SystemContext = React.createContext();
+export const EmulationContext = React.createContext();
+

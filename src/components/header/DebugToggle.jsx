@@ -1,9 +1,9 @@
 import React, {Component} from "react";
 import Toggle from "../radix/Toggle";
-import {SystemContext} from "../../Context";
+import {EmulationContext} from "../../Context";
 
 export default class DebugToggle extends Component {
-  static contextType = SystemContext;
+  static contextType = EmulationContext;
 
   state = {
     debug: false,

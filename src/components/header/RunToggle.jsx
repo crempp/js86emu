@@ -1,16 +1,22 @@
 import React, {Component} from "react";
 import Toggle from "../radix/Toggle";
-import {SystemContext} from "../../Context";
+import {EmulationContext} from "../../Context";
 
 export default class RunToggle extends Component {
-  static contextType = SystemContext;
-
-  state = {
-    run: true,
-  };
+  static contextType = EmulationContext;
 
   constructor(props) {
     super(props);
+
+    this.state = {
+      run: true,
+    };
+  }
+
+  toggleState(state) {
+    this.setState({run: state});
+    if (state) this.context.getSystem().play();
+    else this.context.getSystem().pause();
   }
 
   render() {
@@ -25,11 +31,4 @@ export default class RunToggle extends Component {
       </Toggle>
     );
   }
-
-  toggleState(state) {
-    this.setState({run: state});
-    if (state) this.context.getSystem().play();
-    else this.context.getSystem().pause();
-  }
-
 }

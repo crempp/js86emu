@@ -58,7 +58,6 @@ function HomePage() {
 
         <MiddleRow>
           <Emulator />
-          {/*<Emulator config={CodeGolf} />*/}
         </MiddleRow>
 
         <BottomRow>
