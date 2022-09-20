@@ -7,6 +7,7 @@ export default class Clock {
 
     this.system = system;
     this.cycles = 0;
+    this.prevCycles = 0;
     this.prevTimeNS = 0; // nanoseconds
     this.hz = 0;
     this.cyclePeriodNS = 0; // nanoseconds
@@ -38,7 +39,9 @@ export default class Clock {
     this.prevTimeNS = nowNS;
 
     // Update cycle time
-    this.cyclePeriodNS = ((diff / this.cycles));
+    let cycleDiff = this.cycles - this.prevCycles;
+    this.cyclePeriodNS = ((diff / cycleDiff));
+    this.prevCycles = this.cycles;
 
     // update frequency
     this.hz = 1 / (this.cyclePeriodNS / 1e9);
@@ -48,7 +51,11 @@ export default class Clock {
       Math.round(this.hz / this.config.video.verticalSync),
       this.config.video.defaultCycleSync);
 
+
     this.timeScale = this.hz / this.config.cpu.frequency;
+    if (isNaN(this.timeScale)) {
+      debugger;
+    }
   }
 
   /**
@@ -65,6 +72,9 @@ export default class Clock {
   addTimer(triggerTimeNS, fn) {
     // Use nano second time as the key
     triggerTimeNS = Math.trunc(triggerTimeNS);
+    if (isNaN(triggerTimeNS)) {
+      debugger;
+    }
     this.timers.set(triggerTimeNS, {
       fn: fn,
       triggerTime: triggerTimeNS,

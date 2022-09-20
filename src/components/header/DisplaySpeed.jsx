@@ -16,7 +16,7 @@ export default class DisplaySpeed extends Component {
     let speed = emulationState.speed ? emulationState.speed : "-";
     return (
       <Container>
-        {(speed / 1000000).toFixed(2)} MHz
+        {(speed / 1000).toFixed(2)} MHz
       </Container>
     );
   }

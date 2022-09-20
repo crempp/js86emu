@@ -506,7 +506,7 @@ export default class PIT8253 extends Device {
     let count = fromCount ? this.channels[channel].counter : this.channels[channel].resetVal;
     let nsFromNow = this.timerPeriodNS * count;
     // Adjust for running speed
-    this.system.clock.sync();
+    // this.system.clock.sync();
     nsFromNow *= this.system.clock.timeScale;
     this.channels[channel].timerID = this.system.clock.addTimer(
       nowNS + nsFromNow,
