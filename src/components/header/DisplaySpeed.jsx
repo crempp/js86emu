@@ -11,10 +11,6 @@ const Container = styled("div", {
 export default class DisplaySpeed extends Component {
   static contextType = EmulationContext;
 
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     let emulationState = this.context.getSystemState();
     let speed = emulationState.speed ? emulationState.speed : "-";

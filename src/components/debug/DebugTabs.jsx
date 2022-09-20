@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import { styled } from "../../stitches.config";
+import {css, styled} from "../../stitches.config";
 
 import { TabRoot, TabList, TabTrigger, TabContent } from "../radix/Tabs";
 import RegisterTable from "./RegisterTable";
@@ -42,7 +42,7 @@ export default class DebugTabs extends Component {
         <TabsContainer>
           <TabContent value="debug">
             <ColumnTabContent>
-              <Column>
+              <Column className={css({padding: "4px",})}>
                 <CycleDisplay />
                 <OpcodeTable />
                 <RegisterTable />
