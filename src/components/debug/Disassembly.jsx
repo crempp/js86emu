@@ -1,5 +1,6 @@
 import React, {Component} from "react";
 import { styled } from "../../stitches.config";
+import {EmulationContext} from "../../Context";
 
 const Container = styled("div", {
   backgroundColor: "blue",
@@ -32,6 +33,8 @@ const Code = styled("span", {
 });
 
 export default class Disassembly extends Component {
+  static contextType = EmulationContext;
+
   constructor(props) {
     super(props);
   }

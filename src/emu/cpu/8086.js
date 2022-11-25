@@ -618,54 +618,9 @@ export default class CPU8086 extends CPU {
     this.inst[0xFF][7] = new inst(oper.notimp, 0, u                  );
   }
 
-  /**
-   * Decode the current instruction pointed to by the IP registerPort.
-   */
+
   decode () {
-    // noinspection JSCheckFunctionSignatures
-    let opcode_byte = this.mem8[segIP(this)];
 
-    // Retrieve the operation from the opcode table
-    let instruction = this.inst[opcode_byte];
-
-    this.opcode["opcode_byte"]     = opcode_byte;
-    this.opcode["addressing_byte"] = null;
-    this.opcode["prefix"]          = 0x00;  // Not supporting prefix opcodes yet
-    this.opcode["opcode"]          = (opcode_byte & 0xFC) >>> 2;
-    this.opcode["d"]               = (opcode_byte & 0x02) >>> 1;
-    this.opcode["w"]               = (opcode_byte & 0x01);
-    this.opcode["mod"]             = null;
-    this.opcode["reg"]             = null;
-    this.opcode["rm"]              = null;
-    this.opcode["inst"]            = instruction;
-    this.opcode["string"]          = "";
-    this.opcode["addrSize"]        = null;
-    this.opcode["isGroup"]         = (instruction instanceof Array);
-
-    // If this instruction has an addressing mode byte decode it
-    if (this.opcode.isGroup || this.opcode.inst.baseSize > 1) {
-      // noinspection JSCheckFunctionSignatures
-      this.opcode.addressing_byte = this.mem8[segIP(this) + 1];
-      this.opcode.mod = (this.opcode.addressing_byte & 0xC0) >>> 6;
-      this.opcode.reg = (this.opcode.addressing_byte & 0x38) >>> 3;
-      this.opcode.rm = (this.opcode.addressing_byte & 0x07);
-    }
-
-    // If the instruction is an array it's a group instruction and we need
-    // to extract further based on the registerPort component of the addressing
-    // byte
-    if (this.opcode.isGroup) {
-      this.opcode.inst = this.opcode.inst[this.opcode.reg];
-    }
-
-    this.opcode.addrSize = this.opcode.inst.addrSize;
-
-    if (this.config.debug || this.config.debugOpString) {
-      this.opcode.string = this.opcode.inst.toString();
-    }
-    else {
-      this.opcode.string = "DISABLED";
-    }
   }
 
   /**
@@ -740,8 +695,9 @@ export default class CPU8086 extends CPU {
     this.addrIPInc = 0;
 
     // Decode the instruction
-    this.decode();
+    this.opcode = this.decodeCache.decode();
 
+    if (this.opcode.inst === undefined) debugger;
     // Increase the instIPInc by the instruction base size
     if (this.prefixRepeatState === STATE_REP_NONE) {
       this.instIPInc += this.opcode.inst.baseSize;

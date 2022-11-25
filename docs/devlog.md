@@ -1,5 +1,9 @@
 # Dev Log
 ### Next
+* Working on dissasembly
+
+
+### Sept 20th 2022
 * Working on UI
 * Using Radix for headless components. Ok.
 * Tried emotion, SSR support sucked, switch to stitches because it works well with Radix. Like it so far

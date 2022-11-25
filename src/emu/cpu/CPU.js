@@ -1,4 +1,7 @@
+import DecodeCache from "../DecodeCache";
+
 export default class CPU {
+  decodeCache = new DecodeCache(this);
 
   /**
    * Assemble the current CPU state in an object and return it.
