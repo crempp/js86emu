@@ -66,4 +66,4 @@ jobs:
           host: ${{ vars.IP }}
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: service container-chadrempp redeploy 
+          script: service container-js86emu redeploy 
