@@ -39,7 +39,7 @@ export default class DecodeCache {
       oc = this._decode(ip);
     }
     if (oc.inst === undefined) {
-      debugger;
+      debugger; // eslint-disable-line no-debugger
       ip = segIP(this.cpu);
     }
 

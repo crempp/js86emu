@@ -697,7 +697,7 @@ export default class CPU8086 extends CPU {
     // Decode the instruction
     this.opcode = this.decodeCache.decode();
 
-    if (this.opcode.inst === undefined) debugger;
+    if (this.opcode.inst === undefined) debugger; // eslint-disable-line no-debugger
     // Increase the instIPInc by the instruction base size
     if (this.prefixRepeatState === STATE_REP_NONE) {
       this.instIPInc += this.opcode.inst.baseSize;

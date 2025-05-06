@@ -54,7 +54,7 @@ export default class Clock {
 
     this.timeScale = this.hz / this.config.cpu.frequency;
     if (isNaN(this.timeScale)) {
-      debugger;
+      debugger; // eslint-disable-line no-debugger
     }
   }
 
@@ -73,7 +73,7 @@ export default class Clock {
     // Use nano second time as the key
     triggerTimeNS = Math.trunc(triggerTimeNS);
     if (isNaN(triggerTimeNS)) {
-      debugger;
+      debugger; // eslint-disable-line no-debugger
     }
     this.timers.set(triggerTimeNS, {
       fn: fn,
