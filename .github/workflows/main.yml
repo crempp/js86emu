@@ -1,0 +1,70 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: 
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push production image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      # - name: Build and run tests
+      #   run: |
+      #     docker build -t test-image -f Dockerfile.test .
+      #     docker run --rm -v $(pwd)/coverage:/app/coverage test-image
+
+      # - name: Upload test coverage
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: coverage
+      #     path: coverage/
+      #     retention-days: 7
+
+  deploy:
+    needs: test-and-build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Deploy to Host
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ vars.IP }}
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: service container-chadrempp redeploy 
