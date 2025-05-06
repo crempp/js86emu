@@ -1,5 +1,42 @@
 # x86 Addressing
 
+## Overview
+TODO: Switch overview to this or something similar http://www.cs.loyola.edu/~binkley/371/Encoding_Real_x86_Instructions.html
+
+The following is taken from X86-64 Instruction Encoding on [OSDev.org](https://wiki.osdev.org/X86-64_Instruction_Encoding#ModR.2FM)
+
+The ModR/M byte is used to encode up to two operands of an instruction, each of which is a direct register or effective memory address.
+
+### ModR/M
+
+The ModR/M byte encodes a register or an opcode extension, and a register or a memory address. It has the following fields:
+
+```
+  7                           0
++---+---+---+---+---+---+---+---+
+|  mod  |    reg    |     rm    |
++---+---+---+---+---+---+---+---+
+```
+
+| Field      | Length | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 
+|------------|--------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| MODRM.mod  | 2 bits | In general, when this field is b11, then register-direct addressing mode is used; otherwise register-indirect addressing mode is used.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| MODRM.reg  | 3 bits | This field can have one of two values:<ul><li>A 3-bit opcode extension, which is used by some instructions but has no further meaning other than distinguishing the instruction from other instructions.</li><li>A 3-bit register reference, which can be used as the source or the destination of an instruction (depending on the instruction). The referenced register depends on the operand-size of the instruction and the instruction itself. See Registers for the values to use for each of the registers. The REX.R, VEX.~R or XOP.~R field can extend this field with 1 most-significant bit to 4 bits total.</li></ul> |
+| MODRM.rm   | 3 bits | Specifies a direct or indirect register operand, optionally with a displacement. The REX.B, VEX.~B or XOP.~B field can extend this field with 1 most-significant bit to 4 bits total.                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+
+### 16-bit addressing
+
+These are the meanings of the Mod (vertically) and REX/VEX/XOP.B and R/M bits (horizontally) for 16-bit addressing. B.R/M and Mod are in binary. The SIB-byte is not used in 16-bit addressing. In Long processing mode there is no way to specify 16-bit addresses.
+
+| Mod  | x.000<br />AX, R8W | x.001<br />CX, R9W | x.010<br />DX, R10W | x.011<br />BX, R11W | x.100<br />SP, R12W | x.101<br />BP, R13W | x.110<br />SI, R14W | x.111<br />DI, R15W |
+|------|--------------------|--------------------|---------------------|---------------------|---------------------|---------------------|---------------------|---------------------|
+| 00   | [BX + SI]          | [BX + DI]          | [BP + SI]           | [BP + DI]           | [SI]                | [DI]                | [disp16]            | [BX]                |
+| 01   | [BX + SI + disp8]  | [BX + DI + disp8]  | [BP + SI + disp8]   | [BP + DI + disp8]   | [SI + disp8]        | [DI + disp8]        | [BP + disp8]        | [BX + disp8]        |
+| 10   | [BX + SI + disp16] | [BX + DI + disp16] | [BP + SI + disp16]  | [BP + DI + disp16]  | [SI + disp16]       | [DI + disp16]       | [BP + disp16]       | [BX + disp16]       |
+| 11   | r/m                | r/m                | r/m                 | r/m                 | r/m                 | r/m                 | r/m                 | r/m                 |
+
+## Addressing Abbreviations
+
 ### A
 Direct Address. The instruction has no ModR/M byte; the address of the operand is encoded
 in the instruction; and no base register, index register, or scaling factor can be
@@ -10,7 +47,7 @@ The reg field of the ModR/M byte selects a control register (for example,
 MOV (0F20, 0F22)).
 
 ### D
-The reg field of the ModR/M byte selects a debug register (for example,
+The reg field of the ModR/M byte selects a logState register (for example,
 MOV (0F21,0F23)).
 
 ### E

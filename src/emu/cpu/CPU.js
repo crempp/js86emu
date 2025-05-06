@@ -1,4 +1,7 @@
+import DecodeCache from "../DecodeCache";
+
 export default class CPU {
+  decodeCache = new DecodeCache(this);
 
   /**
    * Assemble the current CPU state in an object and return it.
@@ -16,6 +19,7 @@ export default class CPU {
       "addrIPInc":          this.addrIPInc,
       "mem16":              this.mem16,
       "reg16":              this.reg16,
+      "reg8":               this.reg8,
       "opcode":             tmpOpcode,
       "state":              this.state,
       "prefixRepeatState":  this.prefixRepeatState,

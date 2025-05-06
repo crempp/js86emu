@@ -1,19 +1,31 @@
-import {seg2abs, segIP, signExtend} from "../utils/Utils";
 import {
-  regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
+  push16,
+  pop16,
+  seg2abs,
+  segIP,
+  signExtend16,
+  signExtend32,
+  twosComplement2IntWord,
+  twosComplement2IntByte,
+  intWord2TwosComplement,
+  intDouble2TwosComplement,
+  twosComplement2IntDouble
+} from "../utils/Utils";
+import {
+  regAH, regAL,
   regAX, regBX, regCX, regDX,
-  regSI, regDI, regBP, regSP, regIP,
+  regSI, regDI, regSP, regIP,
   regCS, regDS, regES, regSS,
   regFlags,
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
-  b, w, v, u,
+  b, w, v,
   PARITY, REP_INSTS,
   STATE_HALT,
   STATE_REP_Z, STATE_REP_NZ, STATE_REP_NONE, STATE_REP,
-  STATE_SEG_CS, STATE_SEG_DS, STATE_SEG_ES, STATE_SEG_SS,
-} from '../Constants';
-import { FeatureNotImplementedException } from "../utils/Exceptions";
+  STATE_SEG_CS, STATE_SEG_DS, STATE_SEG_ES, STATE_SEG_SS, USED_FLAG_MASK, STATE_WAIT, STATE_SEG_NONE,
+} from "../Constants";
+import {FeatureNotImplementedException, TemporaryInterruptException} from "../utils/Exceptions";
 
 export default class Operations {
   constructor(cpu) {
@@ -27,13 +39,24 @@ export default class Operations {
    * execution of AAA.
    *   - [1] p.2-35
    *
-   * Modifies flags: ?
+   * Modifies flags: AF, CF
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   aaa (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let lsb = this.cpu.reg8[regAL] & 0x0F;
+    if (lsb > 9 || (this.cpu.reg16[regFlags] & FLAG_AF_MASK)) {
+      this.cpu.reg8[regAL] += 6;
+      this.cpu.reg8[regAH] += 1;
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
+      this.cpu.reg16[regFlags] |= FLAG_AF_MASK;
+    }
+    else {
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
+      this.cpu.reg16[regFlags] &= ~FLAG_AF_MASK;
+    }
+    this.cpu.reg8[regAL] &= 0x0F;
   }
 
   /**
@@ -46,13 +69,15 @@ export default class Operations {
    * and OF is undefined following execution of AAD.
    *   - [1] p.2-37
    *
-   * Modifies flags: ?
+   * Modifies flags: None
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   aad (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    // Multiplies AH by 10 and adds it to AL and sets AH to 0
+    this.cpu.reg8[regAL] += this.cpu.reg8[regAH] * 10;
+    this.cpu.reg8[regAH] = 0x00;
   }
 
   /**
@@ -65,13 +90,14 @@ export default class Operations {
    * execution of AAM.
    *   - [1] p.2-37
    *
-   * Modifies flags: ?
+   * Modifies flags: None
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   aam (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.reg8[regAH] = ~~(this.cpu.reg8[regAL] / 10);
+    this.cpu.reg8[regAL] = this.cpu.reg8[regAL] % 10;
   }
 
   /**
@@ -83,16 +109,27 @@ export default class Operations {
    * undefined following execution of AAS.
    *   - [1] p.2-36
    *
-   * Modifies flags: ?
+   * Modifies flags: AF, CF
    *
    * http://service.scs.carleton.ca/sivarama/asm_book_web/Instructor_copies/ch11_bcd.pdf
    * https://stackoverflow.com/a/24093050/1436323
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   aas (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let lsb = this.cpu.reg8[regAL] & 0x0F;
+    if (lsb > 9 || (this.cpu.reg16[regFlags] & FLAG_AF_MASK)) {
+      this.cpu.reg8[regAL] -= 6;
+      this.cpu.reg8[regAH] -= 1;
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
+      this.cpu.reg16[regFlags] |= FLAG_AF_MASK;
+    }
+    else {
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
+      this.cpu.reg16[regFlags] &= ~FLAG_AF_MASK;
+    }
+    this.cpu.reg8[regAL] &= 0x0F;
   }
 
   /**
@@ -148,7 +185,7 @@ export default class Operations {
     result = this.correctAddition(result);
 
     dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr, result);
-  };
+  }
 
   /**
    * AND performs the logical "and" of the two operands (byte or word) and
@@ -229,26 +266,26 @@ export default class Operations {
     switch (this.cpu.opcode.opcode_byte) {
       case 0x9A:
         // CALL Ap (far)
-        this.push16(this.cpu.reg16[regCS]);
-        this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
+        push16(this.cpu, this.cpu.reg16[regCS]);
+        push16(this.cpu, this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
         this.cpu.reg16[regCS] = dstVal[0];
         this.cpu.reg16[regIP] = dstVal[1];
         break;
       case 0xE8:
         // CALL Jv (near)
-        this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
+        push16(this.cpu, this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
         this.cpu.reg16[regIP] = dstVal;
         break;
       case 0xFF:
         if (this.cpu.opcode.reg === 2) {
           // 0xFF (2) CALL Ev (near)
-          this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
+          push16(this.cpu, this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
           this.cpu.reg16[regIP] = dstVal;
         }
         else if (this.cpu.opcode.reg === 3) {
           // 0xFF (3) CALL Ep (far)
-          this.push16(this.cpu.reg16[regCS]);
-          this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
+          push16(this.cpu, this.cpu.reg16[regCS]);
+          push16(this.cpu, this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
           this.cpu.reg16[regCS] = dstVal[0];
           this.cpu.reg16[regIP] = dstVal[1];
         }
@@ -263,13 +300,13 @@ export default class Operations {
    * byte division.
    *   - [1] p.2-38
    *
-   * Modifies flags: ?
+   * Modifies flags: None
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   cbw (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.reg16[regAX] = signExtend16(this.cpu.reg8[regAL]);
   }
 
   /**
@@ -332,7 +369,7 @@ export default class Operations {
    */
   cmc (dst, src) {
     if ((this.cpu.reg16[regFlags] & FLAG_CF_MASK) === 0) {
-      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
     }
     else {
       this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
@@ -361,7 +398,7 @@ export default class Operations {
     let dstVal  = dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
     let srcVal  = src(this.cpu.reg16[this.cpu.addrSeg], srcAddr);
     if (this.cpu.opcode.addrSize === w || this.cpu.opcode.addrSize === v) {
-      srcVal = signExtend(srcVal);
+      srcVal = signExtend16(srcVal);
     }
     let result = dstVal - srcVal;
     result = this.correctSubtraction(result);
@@ -489,13 +526,18 @@ export default class Operations {
    * performing word division.
    *  - [1] p.2-38
    *
-   * Modifies flags: ?
+   * Modifies flags: None
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   cwd (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    if (this.cpu.reg16[regAX] >> 15 === 1) {
+      this.cpu.reg16[regDX] = 0xFFFF;
+    }
+    else {
+      this.cpu.reg16[regDX] = 0x0000;
+    }
   }
 
   /**
@@ -506,13 +548,31 @@ export default class Operations {
    * undefined following execution of DAA.
    *  - [1] p.2-36
    *
-   * Modifies flags: ?
+   * Modifies flags: AF, CF
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
    */
   daa (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let lsb = this.cpu.reg8[regAL] & 0x0F;
+    let msb = this.cpu.reg8[regAL] >> 4;
+    if (lsb > 9 || (this.cpu.reg16[regFlags] & FLAG_AF_MASK)) {
+      this.cpu.reg8[regAL] += 0x06;
+      this.cpu.reg16[regFlags] |= FLAG_AF_MASK;
+    }
+    else {
+      this.cpu.reg16[regFlags] &= ~FLAG_AF_MASK;
+    }
+
+    if (msb > 9 || (this.cpu.reg16[regFlags] & FLAG_CF_MASK)) {
+      this.cpu.reg8[regAL] += 0x60;
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
+    }
+    else {
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
+    }
+
+    this.cpu.reg8[regAL] &= 0xFF;
   }
 
   /**
@@ -523,13 +583,31 @@ export default class Operations {
    * ZF; the content of OF is undefined following execution of DAS.
    *  - [1] p.2-36
    *
-   * Modifies flags: ?
+   * Modifies flags: AF, CF
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   das (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let lsb = this.cpu.reg8[regAL] & 0x0F;
+    let msb = this.cpu.reg8[regAL] >> 4;
+    if (lsb > 9 || (this.cpu.reg16[regFlags] & FLAG_AF_MASK)) {
+      this.cpu.reg8[regAL] -= 0x06;
+      this.cpu.reg16[regFlags] |= FLAG_AF_MASK;
+    }
+    else {
+      this.cpu.reg16[regFlags] &= ~FLAG_AF_MASK;
+    }
+
+    if (msb > 9 || (this.cpu.reg16[regFlags] & FLAG_CF_MASK)) {
+      this.cpu.reg8[regAL] -= 0x60;
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
+    }
+    else {
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
+    }
+
+    this.cpu.reg8[regAL] &= 0xFF;
   }
 
   /**
@@ -561,12 +639,12 @@ export default class Operations {
    * divided into the double-length dividend assumed to be in registers AL and
    * AH. The single-length quotient is returned in AL, and the single-length
    * remainder is returned in AH. If the source operand is a word, it is
-   * divided into the doublelength dividend in registers AX and DX. The
+   * divided into the double length dividend in registers AX and DX. The
    * single-length quotient is returned in AX, and the single-length remainder
    * is returned in DX. If the quotient exceeds the capacity of its destination
    * registerPort (FFH for byte source, FFFFFH for word source), as when division
    * by zero is attempted, a type 0 interrupt is generated, and the quotient
-   * and remainder are undefined. Nonintegral quotients are truncated to
+   * and remainder are undefined. Non-integral quotients are truncated to
    * integers. The content of AF, CF, OF, PF, SF and ZF is undefined following
    * execution of DIV.
    *   - [1] p.2-37
@@ -577,7 +655,41 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   div (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
+    let dstVal  = dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
+    let quotient, dividend, divisor;
+
+    // TODO: Replace with actual interrupt call
+    if (dstVal === 0) throw new TemporaryInterruptException("Divide by zero");
+
+    // Determine if byte or word operation when size is 'v'
+    let addrSize = this.cpu.opcode.addrSize;
+    if (addrSize === v) addrSize = (this.cpu.opcode.w === 0) ? b : w;
+
+    if (addrSize === b) {
+      dividend = this.cpu.reg16[regAX];
+      quotient = Math.trunc(dividend / dstVal);
+      // TODO: Replace with actual interrupt call
+      if (quotient > 0xFF) {
+        throw new TemporaryInterruptException("Quotient out of range");
+      }
+      else {
+        this.cpu.reg8[regAL] = quotient;
+        this.cpu.reg8[regAH] = dividend % dstVal;
+      }
+    }
+    else if (addrSize === w) {
+      dividend = (this.cpu.reg16[regDX] << 16 | this.cpu.reg16[regAX]) >>> 0;
+      quotient = Math.trunc(dividend / dstVal);
+      // TODO: Replace with actual interrupt call
+      if (quotient > 0xFFFF) {
+        throw new TemporaryInterruptException("Quotient out of range");
+      }
+      else {
+        this.cpu.reg16[regAX] = quotient;
+        this.cpu.reg16[regDX] = dividend % dstVal;
+      }
+    }
   }
 
   /**
@@ -607,6 +719,23 @@ export default class Operations {
   }
 
   /**
+   * NOT IMPLEMENTED, part of multiprocessing.
+   *
+   * The ESC (escape) instruction provides a way for another processor to
+   * obtain an instruction and/or a memory operand from an 8086/8088 program.
+   * When used in conjunction with WAIT and TEST, ESC can initiate a
+   * "subroutine" that executes concurrently in another processor
+   *
+   * Modifies flags: NONE
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
+  esc (dst, src) {
+    throw new FeatureNotImplementedException("Operation not implemented");
+  }
+
+  /**
    * HLT (Halt) causes the 8086/8088 to enter the halt state. The processor
    * leaves the halt state upon activation of the RESET line, upon receipt of a
    * non-maskable interrupt request on NMI, or, if interrupts are enabled, upon
@@ -628,10 +757,10 @@ export default class Operations {
    * IDIV (Integer Divide) performs a signed division of the accumulator (and
    * its extension) by the source operand. If the source operand is a byte, it
    * is divided into the double-length dividend assumed to be in registers AL
-   * and AH; the singlelength quotient is returned in AL, and the singlelength
+   * and AH; the single length quotient is returned in AL, and the single length
    * remainder is returned in AH. For byte integer division, the maximum
    * positive quotient is +127 (7FH) and the minimum negative quotient is -127
-   * (SIH). If the source operand is a word, it is divided into the
+   * (80H). If the source operand is a word, it is divided into the
    * double-length dividend in registers AX and DX; the single-length quotient
    * is returned in AX, and the single-length remainder is returned in DX. For
    * word integer division, the maximum positive quotient is +32,767 (7FFFH)
@@ -639,18 +768,54 @@ export default class Operations {
    * positive and exceeds the maximum, or is negative and is less than the
    * minimum, the quotient and remainder are undefined, and a type 0 interrupt
    * is generated. In particular, this occurs if division by 0 is attempted.
-   * Nonintegral quotients are truncated (toward 0) to integers, and the
+   * Non-integral quotients are truncated (toward 0) to integers, and the
    * remainder has the same sign as the dividend. The content of AF, CF, OF,
    * PF, SF and ZF is undefined following IDIV.
    *   - [1] p.2-37
    *
-   * Modifies flags: ?
+   * Modifies flags: None
    *
    * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} src NOT USED
    */
   idiv (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
+    let dstVal  = dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
+    let quotient, dividend, divisor;
+
+    // TODO: Replace with actual interrupt call
+    if (dstVal === 0) throw new TemporaryInterruptException("Divide by zero");
+
+    // Determine if byte or word operation when size is 'v'
+    let addrSize = this.cpu.opcode.addrSize;
+    if (addrSize === v) addrSize = (this.cpu.opcode.w === 0) ? b : w;
+
+    if (addrSize === b) {
+      dividend = twosComplement2IntWord(this.cpu.reg16[regAX]);
+      divisor = twosComplement2IntByte(dstVal);
+      quotient = Math.trunc(dividend / divisor);
+      // TODO: Replace with actual interrupt call
+      if (quotient > 127 || quotient < -128) {
+        throw new TemporaryInterruptException("Quotient out of range");
+      }
+      else {
+        this.cpu.reg8[regAL] = intWord2TwosComplement(quotient);
+        this.cpu.reg8[regAH] = intWord2TwosComplement(dividend % divisor);
+      }
+    }
+    else if (addrSize === w) {
+      dividend = twosComplement2IntDouble(this.cpu.reg16[regDX] << 16 | this.cpu.reg16[regAX]);
+      divisor = twosComplement2IntWord(dstVal);
+      quotient = Math.trunc(dividend / divisor);
+      // TODO: Replace with actual interrupt call
+      if (quotient > 32767 || quotient < -32767) {
+        throw new TemporaryInterruptException("Quotient out of range");
+      }
+      else {
+        this.cpu.reg16[regAX] = intWord2TwosComplement(quotient);
+        this.cpu.reg16[regDX] = intWord2TwosComplement(dividend % divisor);
+      }
+    }
   }
 
   /**
@@ -666,13 +831,50 @@ export default class Operations {
    * and ZF is undefined following execution of IMUL.
    *   - [1] p.2-37
    *
-   * Modifies flags: ?
+   * Modifies flags: CF, OF
    *
    * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} src NOT USED
    */
   imul (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
+    let dstVal  = dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
+    let result;
+
+    // Determine if byte or word operation when size is 'v'
+    let addrSize = this.cpu.opcode.addrSize;
+    if (addrSize === v) addrSize = (this.cpu.opcode.w === 0) ? b : w;
+
+    if (addrSize === b) {
+      result = twosComplement2IntByte(this.cpu.reg8[regAL]) * twosComplement2IntByte(dstVal);
+      this.cpu.reg16[regAX] = intWord2TwosComplement(result);
+      if (this.cpu.reg8[regAL] === this.cpu.reg16[regAX]) {
+        // Clear
+        this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
+        this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
+      }
+      else {
+        // Set
+        this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
+        this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
+      }
+    }
+    else if (addrSize === w) {
+      result = twosComplement2IntWord(this.cpu.reg16[regAX]) * twosComplement2IntWord(dstVal);
+      result = intDouble2TwosComplement(result);
+      this.cpu.reg16[regAX] = result & 0x0000FFFF;
+      this.cpu.reg16[regDX] = result >> 16;
+      if (signExtend32(this.cpu.reg16[regAX]) === result) {
+        // Clear
+        this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
+        this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
+      }
+      else {
+        // Set
+        this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
+        this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
+      }
+    }
   }
 
   /**
@@ -696,7 +898,7 @@ export default class Operations {
 
     let size = this.cpu.opcode.addrSize;
 
-    let value = this.cpu.io.read(srcVal, size);
+    let value = this.cpu.system.io.read(srcVal, size);
     dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr, value);
   }
 
@@ -706,7 +908,7 @@ export default class Operations {
    * DAA). INC updates AF, OF, PF, SF and ZF; it does not affect CF.
    *   - [1] p.2-35
    *
-   * Modifies flags: ?
+   * Modifies flags: None
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src NOT USED
@@ -732,10 +934,10 @@ export default class Operations {
    * (IF) flags to disable single-step and maskable interrupts. The flags are
    * stored in the format used by the PUSHF instruction. SP is decremented
    * again by two, and the es registerPort is pushed onto the stack. The address of
-   * the inter- rupt pointer is calculated by multiplying interrupt-type by
-   * four; the second word of the in- terrupt pointer replaces CS. SP again is
+   * the interrupt pointer is calculated by multiplying interrupt-type by
+   * four; the second word of the interrupt pointer replaces CS. SP again is
    * decremented by two, and IP is pushed onto the stack and is replaced by the
-   * first word of the inter- rupt pointer. If interrupt-type = 3, the
+   * first word of the interrupt pointer. If interrupt-type = 3, the
    * assembler generates a short (1 byte) form of the instruction, known as the
    * breakpoint interrupt.
    *
@@ -756,11 +958,11 @@ export default class Operations {
     let dstVal  = dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
 
     // 1. Flag registerPort value is pushed on to the stack.
-    this.push16(this.cpu.reg16[regFlags]);
+    push16(this.cpu, this.cpu.reg16[regFlags]);
     // 2. CS value of the Return address and IP value of the Return address
-    //    are push edon to the stack.
-    this.push16(this.cpu.reg16[regCS]);
-    this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
+    //    are pushed on to the stack.
+    push16(this.cpu, this.cpu.reg16[regCS]);
+    push16(this.cpu, this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
     // 3. IP is loaded from the contents of the word location N x 4.
     this.cpu.reg16[regIP] = ((this.cpu.mem8[seg2abs(0x0000, dstVal * 4 + 1)] << 8) |
                               this.cpu.mem8[seg2abs(0x0000, dstVal * 4    )]);
@@ -771,7 +973,7 @@ export default class Operations {
     this.cpu.reg16[regFlags] &= ~FLAG_IF_MASK;
     this.cpu.reg16[regFlags] &= ~FLAG_TF_MASK;
 
-    // HACK! ... or is it?
+    // TODO: HACK! ... or is it?
     // The way the cycle code is structured we will end up with the IP being
     // incremented by the instruction base size if we don't reset it.
     this.cpu.instIPInc = this.cpu.addrIPInc = 0;
@@ -780,8 +982,8 @@ export default class Operations {
   /**
    * INTO (Interrupt on Overflow) generates a soft- ware interrupt if the
    * overflow flag (OF) is set; otherwise control proceeds to the following
-   * instruction without activating an interrupt pro- cedure. INTO addresses
-   * the target interrupt pro- cedure (its type is 4) through the interrupt
+   * instruction without activating an interrupt procedure. INTO addresses
+   * the target interrupt procedure (its type is 4) through the interrupt
    * pointer at location IOH; it clears the TF and IF flags and otherwise
    * operates like INT. INTO may be writ- ten following an arithmetic or
    * logical operation to activate an interrupt procedure if overflow occurs.
@@ -797,11 +999,11 @@ export default class Operations {
       let dstVal = 4;
 
       // 1. Flag registerPort value is pushed on to the stack.
-      this.push16(this.cpu.reg16[regFlags]);
+      push16(this.cpu, this.cpu.reg16[regFlags]);
       // 2. CS value of the Return address and IP value of the Return address
-      //    are push edon to the stack.
-      this.push16(this.cpu.reg16[regCS]);
-      this.push16(this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
+      //    are pushed on to the stack.
+      push16(this.cpu, this.cpu.reg16[regCS]);
+      push16(this.cpu, this.cpu.reg16[regIP] + this.cpu.instIPInc + this.cpu.addrIPInc);
       // 3. IP is loaded from the contents of the word location N x 4.
       this.cpu.reg16[regIP] = ((this.cpu.mem8[seg2abs(0x0000, dstVal * 4 + 1)] << 8) |
         this.cpu.mem8[seg2abs(0x0000, dstVal * 4)]);
@@ -833,9 +1035,17 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   iret (dst, src) {
-    this.cpu.reg16[regIP] = this.pop16();
-    this.cpu.reg16[regCS] = this.pop16();
-    this.cpu.reg16[regFlags] = this.pop16();
+    this.cpu.reg16[regIP] = pop16(this.cpu);
+    this.cpu.reg16[regCS] = pop16(this.cpu);
+    this.cpu.reg16[regFlags] = pop16(this.cpu);
+
+    // Restore cpu states
+    this.cpu.prefixRepeatState = this.cpu.savedPrefixRepeatState;
+    this.cpu.savedPrefixRepeatState = STATE_REP_NONE;
+    this.cpu.prefixSegmentState = this.cpu.savedPrefixSegmentState;
+    this.cpu.savedPrefixSegmentState = STATE_SEG_NONE;
+    this.cpu.addrSeg = this.cpu.savedAddrSeg;
+    this.cpu.savedAddrSeg = null;
 
     // HACK! ... or is it?
     // The way the cycle code is structured we will end up with the IP being
@@ -1138,7 +1348,8 @@ export default class Operations {
     switch (this.cpu.opcode.opcode_byte) {
       case 0xE9:
         // JMP Jv (near)
-        this.cpu.reg16[regIP] = oper;
+        // Near and short jumps reference IP after the jump instruction
+        this.cpu.reg16[regIP] = oper + this.cpu.instIPInc + this.cpu.addrIPInc;
         break;
       case 0xEA:
         // JMP Ap (far)
@@ -1146,8 +1357,9 @@ export default class Operations {
         this.cpu.reg16[regIP] = oper[1];
         break;
       case 0xEB:
-        // JMP Jb (short)
-        this.cpu.reg16[regIP] = oper;
+        // JMP Jb (short, relative)
+        // Near and short jumps reference IP after the jump instruction
+        this.cpu.reg16[regIP] = oper + this.cpu.instIPInc + this.cpu.addrIPInc;
         break;
       case 0xFF:
         if (this.cpu.opcode.reg === 4) {
@@ -1464,7 +1676,7 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   lahf (dst, src) {
-    this.cpu.reg8[regAH] = this.cpu.reg16[regFlags] & 0b11010111;
+    this.cpu.reg8[regAH] = this.cpu.reg16[regFlags] & USED_FLAG_MASK;
   }
 
   /**
@@ -1542,6 +1754,23 @@ export default class Operations {
     this.cpu.reg16[regES] = srcVal[0];
   }
 
+  /**
+   * NOT IMPLEMENTED, part of multiprocessing.
+   *
+   * When configured in maximum mode, the 8086 and 8088 provide the LOCK (bus
+   * lock) signal. The BIU activates LOCK when the EU executes the one-byte
+   * LOCK prefix instruction. The LOCK signal remains active throughout
+   * execution of the instruction that follows the LOCK prefix. Interrupts are
+   * not affected by the LOCK prefix. If another processor requests use of the
+   * bus (via the request! grant lines, which are discussed shortly), the CPU
+   * records the request, but does not honor it until execution of the locked
+   * instruction has been completed.
+   *
+   * Modifies flags: NONE
+   *
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
+   */
   lock (dst, src) {
     throw new FeatureNotImplementedException("Operation not implemented");
   }
@@ -1739,7 +1968,7 @@ export default class Operations {
    * MOVS (Move String) transfers a byte or a word from the source string
    * (addressed by SI) to the destination string (addressed by DI) and updates
    * SI and DI to point to the next string element. When used in conjunction
-   * with REP, MOYS performs a memory-to-memory block transfer.
+   * with REP, MOVS performs a memory-to-memory block transfer.
    *    - [1] p.2-42
    *
    * Modifies flags: NONE
@@ -1789,11 +2018,11 @@ export default class Operations {
   mul (dst, src) {
     let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
     let dstVal  = dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
-    let multipler, result;
+    let multiplier, result;
 
     if (this.cpu.opcode.addrSize === b) {
-      multipler = this.cpu.reg8[regAL];
-      result = multipler * dstVal;
+      multiplier = this.cpu.reg8[regAL];
+      result = multiplier * dstVal;
       this.cpu.reg16[regAX] = result;
 
       if ((result >> 8 & 0xFF) === 0) {
@@ -1808,8 +2037,8 @@ export default class Operations {
       }
     }
     else {
-      multipler = this.cpu.reg16[regAX];
-      result = multipler * dstVal;
+      multiplier = this.cpu.reg16[regAX];
+      result = multiplier * dstVal;
       this.cpu.reg16[regDX] = (result >> 16 & 0xFFFF);
       this.cpu.reg16[regAX] = (result & 0xFFFF);
 
@@ -1881,7 +2110,7 @@ export default class Operations {
    * operand.
    *   - [1] p.2-38
    *
-   * Modifies flags: ?
+   * Modifies flags: None
    *
    * @param {Function} dst Destination addressing function
    * @param {Function} src Source addressing function
@@ -1944,7 +2173,7 @@ export default class Operations {
 
     let size = this.cpu.opcode.addrSize;
 
-    this.cpu.io.write(dstVal, srcVal, size);
+    this.cpu.system.io.write(dstVal, srcVal, size);
   }
 
   /**
@@ -1962,7 +2191,7 @@ export default class Operations {
   pop (dst, src) {
     let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
 
-    dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr, this.pop16());
+    dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr, pop16(this.cpu));
   }
 
   /**
@@ -1982,7 +2211,7 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   popf (dst, src) {
-    this.cpu.reg16[regFlags] = this.pop16();
+    this.cpu.reg16[regFlags] = pop16(this.cpu);
   }
 
   /**
@@ -2002,7 +2231,7 @@ export default class Operations {
     let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
     let dstVal  = dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
 
-    this.push16(dstVal);
+    push16(this.cpu, dstVal);
   }
 
   /**
@@ -2017,7 +2246,7 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   pushf (dst, src) {
-    this.push16(this.cpu.reg16[regFlags]);
+    push16(this.cpu, this.cpu.reg16[regFlags]);
   }
 
   /**
@@ -2065,9 +2294,9 @@ export default class Operations {
     }
 
     if (cf === 1) {
-      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
     } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
     }
 
     if ( of === 1 ) {
@@ -2119,9 +2348,9 @@ export default class Operations {
     }
 
     if (cf === 1) {
-      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
     } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
     }
 
     if ( of === 1 ) {
@@ -2155,7 +2384,7 @@ export default class Operations {
    * instruction.
    *
    * Repeated string sequences are interruptable; the processor will recognize
-   * the interrupt before pro- cessing the next string element. System
+   * the interrupt before processing the next string element. System
    * interrupt processing is not affected in any way. Upon return from the
    * interrupt, the repeated operation is resumed from the point of
    * interruption. Note, however, that execution does not resume properly if a
@@ -2201,7 +2430,7 @@ export default class Operations {
    * instruction.
    *
    * Repeated string sequences are interruptable; the processor will recognize
-   * the interrupt before pro- cessing the next string element. System
+   * the interrupt before processing the next string element. System
    * interrupt processing is not affected in any way. Upon return from the
    * interrupt, the repeated operation is resumed from the point of
    * interruption. Note, however, that execution does not resume properly if a
@@ -2249,15 +2478,17 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   ret (dst, src) {
+    let dstAddr;
+
     switch (this.cpu.opcode.opcode_byte) {
       case 0xC2:
         // RET Iw
-        let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
-        this.cpu.reg16[regIP] = this.pop16() + dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
+        dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
+        this.cpu.reg16[regIP] = pop16(this.cpu) + dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
         break;
       case 0xC3:
         // RET
-        this.cpu.reg16[regIP] = this.pop16();
+        this.cpu.reg16[regIP] = pop16(this.cpu);
         break;
     }
 
@@ -2284,18 +2515,20 @@ export default class Operations {
    * @param {Function} src Source addressing function
    */
   retf (dst, src) {
+    let dstAddr;
+
     switch (this.cpu.opcode.opcode_byte) {
       case 0xCA:
         // RETF Iw
-        let dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
+        dstAddr = dst(this.cpu.reg16[this.cpu.addrSeg]);
 
-        this.cpu.reg16[regIP] = this.pop16() + dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
-        this.cpu.reg16[regCS] = this.pop16();
+        this.cpu.reg16[regIP] = pop16(this.cpu) + dst(this.cpu.reg16[this.cpu.addrSeg], dstAddr);
+        this.cpu.reg16[regCS] = pop16(this.cpu);
         break;
       case 0xCB:
         // RETF
-        this.cpu.reg16[regIP] = this.pop16();
-        this.cpu.reg16[regCS] = this.pop16();
+        this.cpu.reg16[regIP] = pop16(this.cpu);
+        this.cpu.reg16[regCS] = pop16(this.cpu);
         break;
     }
     // HACK! ... or is it?
@@ -2343,9 +2576,9 @@ export default class Operations {
     } else of = 0;
 
     if (cf === 1) {
-      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
     } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
     }
 
     if ( of === 1 ) {
@@ -2395,9 +2628,9 @@ export default class Operations {
     }
 
     if (cf === 1) {
-      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
     } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
     }
 
     if ( of === 1 ) {
@@ -2424,7 +2657,7 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   sahf (dst, src) {
-    this.cpu.reg16[regFlags] |= (this.cpu.reg8[regAH] & 0b11010111);
+    this.cpu.reg16[regFlags] = (this.cpu.reg16[regFlags] & 0xFF00) | ((this.cpu.reg8[regAH] & USED_FLAG_MASK) & 0xFF);
   }
 
   /**
@@ -2464,9 +2697,9 @@ export default class Operations {
 
     // Set CF if a '1' shifted out
     if (cf === 1) {
-      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
     } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
     }
 
     this.setPF_FLAG(dstVal);
@@ -2613,14 +2846,14 @@ export default class Operations {
     for (let shift = 1; shift <= srcVal; shift++) {
       if (dstVal & (size === b ? 0x80 : 0x8000)) cf = 1;
       else cf = 0;
-      dstVal = (dstVal << 1) & 0xFF;
+      dstVal = (dstVal << 1) & 0xFFFF;
     }
 
     // Set CF if a '1' shifted out
     if (cf === 1) {
-      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
     } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
     }
 
     // Clamp the shifted value
@@ -2663,10 +2896,10 @@ export default class Operations {
 
     // Set OF if the first operand changes sign
     if ( (srcVal === 1) && (dstVal & (size === b ? 0x80 : 0x8000)) ) {
-      this.cpu.reg16[regFlags] |= FLAG_OF_MASK
+      this.cpu.reg16[regFlags] |= FLAG_OF_MASK;
     }
     else {
-      this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK
+      this.cpu.reg16[regFlags] &= ~FLAG_OF_MASK;
     }
 
     for (let shift = 1; shift <= srcVal; shift++) {
@@ -2676,9 +2909,9 @@ export default class Operations {
 
     // Set CF if a '1' shifted out
     if (cf === 1) {
-      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
     } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
     }
 
     this.setPF_FLAG(dstVal);
@@ -2711,7 +2944,7 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   stc (dst, src) {
-    this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+    this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
   }
 
   /**
@@ -2726,7 +2959,7 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   std (dst, src) {
-    this.cpu.reg16[regFlags] |= FLAG_DF_MASK
+    this.cpu.reg16[regFlags] |= FLAG_DF_MASK;
   }
 
   /**
@@ -2743,7 +2976,7 @@ export default class Operations {
    * @param {Function} src NOT USED
    */
   sti (dst, src) {
-    this.cpu.reg16[regFlags] |= FLAG_IF_MASK
+    this.cpu.reg16[regFlags] |= FLAG_IF_MASK;
   }
 
   /**
@@ -2862,8 +3095,28 @@ export default class Operations {
     this.setZF_FLAG(result);
   }
 
+  /**
+   * WAIT causes the CPU to enter the wait state while its TEST line is not
+   * active. WAIT does not affect any flags. This instruction is described
+   * more completely in section 2.5.
+   *   - [1] p.2-36
+   *
+   * The 8086 and 8088 (in either maximum or minimum mode) can be synchronized
+   * to an external event with the WAIT (wait for TEST) instruction and the
+   * TEST input signal. When the EU executes WAIT instruction, the result
+   * depends on the state of the TEST input line. If TEST is inactive, the
+   * processor enters an idle state and repeatedly retests the TEST line at
+   * five-clock intervals. If TEST is active, execution continues with the
+   * instruction following the WAIT
+   *   - [1] p.2-18
+   *
+   * Modifies flags: None
+   *
+   * @param {Function} dst Destination addressing function
+   * @param {Function} src Source addressing function
+   */
   wait (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    this.cpu.state = STATE_WAIT;
   }
 
   /**
@@ -2900,13 +3153,15 @@ export default class Operations {
    * example being ASCII to EBCDIC or the reverse.
    *   - [1] p.2-32
    *
-   * Modifies flags: ?
+   * Modifies flags: None
    *
-   * @param {Function} dst Destination addressing function
-   * @param {Function} src Source addressing function
+   * @param {Function} dst NOT USED
+   * @param {Function} src NOT USED
    */
   xlat (dst, src) {
-    throw new FeatureNotImplementedException("Operation not implemented");
+    let tableAddr = seg2abs(this.cpu.reg16[regDS], this.cpu.reg16[regBX]);
+    let tableIndex = this.cpu.reg8[regAL];
+    this.cpu.reg8[regAL] = this.cpu.mem8[tableAddr + tableIndex];
   }
 
   /**
@@ -2938,42 +3193,18 @@ export default class Operations {
   notimp () {
     // console.log("Operations - Instruction not implemented");
     throw new FeatureNotImplementedException("Operation not implemented");
-  };
-
-  /**
-   * Push a value onto the stack. SP is decremented by two and the value is
-   * stored at regSS:regSP
-   *
-   * SP is decremented first
-   *   - [4] 4-508
-   *
-   * @param {number} value Word value to push onto the stack
-   */
-  push16 (value) {
-    this.cpu.reg16[regSP] -= 2;
-
-    this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP]    )] = (value & 0x00FF);
-    this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP] + 1)] = (value >> 8);
   }
 
-  /**
-   * Pop a value off the stack. SP is incremented by two and the value at
-   * regSS:regSP is returned.
-   *
-   * @return {number} Word value popped off the stack
-   */
+  push16 (value) {
+    throw new Error("Operation.push16 has moved to Utils");
+  }
   pop16 () {
-    let value = this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP] + 1)] << 8 |
-                this.cpu.mem8[seg2abs(this.cpu.reg16[regSS], this.cpu.reg16[regSP]    )];
-
-    this.cpu.reg16[regSP] += 2;
-
-    return value;
+    throw new Error("Operation.pop16 has moved to Utils");
   }
 
   /**
    * Correct for non-binary subtraction. To make things simple we subtract
-   * regular integers using the built-in javascript "-" opererator. This does
+   * regular integers using the built-in javascript "-" operator. This does
    * not result in a twos-complement result. This method converts a negative
    * number to twos-complement and clamps any over/underflow.
    *
@@ -3074,9 +3305,9 @@ export default class Operations {
     let size = this.cpu.opcode.addrSize;
 
     if ((sub && v1 < v2) || (result & (size === b ? 0xFF00 : 0xFFFF0000))) {
-      this.cpu.reg16[regFlags] |= FLAG_CF_MASK
+      this.cpu.reg16[regFlags] |= FLAG_CF_MASK;
     } else {
-      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK
+      this.cpu.reg16[regFlags] &= ~FLAG_CF_MASK;
     }
   }
 

@@ -1,25 +1,15 @@
-export default class NullDevice {
-  constructor (config) {
-    this.config = config;
+import Device from "./Device";
+
+export default class NullDevice extends Device{
+  constructor (config, system) {
+    super(config, system);
   }
 
-  write(port, value, size) {
-    if (this.config.debug) {
-      console.log(`  WRITE device: ${this.constructor.name} port: ${port}, value:${value}, size${size}`);
-    }
-  }
+  boot() {}
 
-  read(port, size){
-    let value = 0xFF;
-    if (this.config.debug) {
-      console.log(`  READ device: ${this.constructor.name} port: ${port}, value:${value}, size${size}`);
-    }
-    return value;
-  }
+  write(port, value, size) {}
 
-  deviceCycle(){
-    if (this.config.debug) {
-      console.log(`  CYCLE device: ${this.constructor.name}`);
-    }
-  }
+  read(port, size) {}
+
+  deviceCycle() {}
 }

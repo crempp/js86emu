@@ -1,9 +1,9 @@
-import CPU8086 from '../../../src/emu/cpu/8086';
-import Addressing from '../../../src/emu/cpu/Addressing';
-import SystemConfig from '../../../src/emu/config/SystemConfig';
+import CPU8086 from "../../../src/emu/cpu/8086";
+import Addressing from "../../../src/emu/cpu/Addressing";
+import SystemConfig from "../../../src/emu/config/SystemConfig";
 import Operations from "../../../src/emu/cpu/Operations";
 import IO from "../../../src/emu/IO";
-import { FeatureNotImplementedException } from "../../../src/emu/utils/Exceptions";
+import {FeatureNotImplementedException, TemporaryInterruptException} from "../../../src/emu/utils/Exceptions";
 import {
   regAH, regAL, regBH, regBL, regCH, regCL, regDH, regDL,
   regAX, regBX, regCX, regDX,
@@ -12,8 +12,10 @@ import {
   regFlags,
   FLAG_CF_MASK, FLAG_PF_MASK, FLAG_AF_MASK, FLAG_ZF_MASK, FLAG_SF_MASK,
   FLAG_TF_MASK, FLAG_IF_MASK, FLAG_DF_MASK, FLAG_OF_MASK,
-  STATE_HALT, STATE_REP_Z, STATE_REP, STATE_REP_NZ, STATE_SEG_CS, STATE_SEG_DS, STATE_SEG_ES, STATE_SEG_SS,
-} from '../../../src/emu/Constants';
+  STATE_HALT, STATE_REP_Z, STATE_REP, STATE_REP_NZ, STATE_SEG_CS, STATE_SEG_DS, STATE_SEG_ES, STATE_SEG_SS, STATE_WAIT,
+} from "../../../src/emu/Constants";
+import TestDevice from "../../../src/emu/devices/TestDevice";
+import Debug from "../../../src/emu/utils/Debug";
 
 let IVT = [
   /* INT   |   Offset   | Segment  */
@@ -74,8 +76,17 @@ function setMemory(cpu, value) {
   }
 }
 
-describe('Operation methods', () => {
-  let cpu, addr, oper, io;
+class MockSystem {
+  constructor (config) {
+    this.config = config;
+    this.debug = new Debug(this);
+    this.cpu = new CPU8086(config, this);
+    this.io = new IO(this.config, this,{"TestDevice": new TestDevice(config, this)});
+  }
+}
+
+describe("Operation methods", () => {
+  let system, cpu, addr, oper, io;
 
   beforeEach(() => {
     let config = new SystemConfig({
@@ -89,9 +100,10 @@ describe('Operation methods', () => {
       },
       debug: false
     });
-    cpu = new CPU8086(config);
-    io = new IO(config);
-    cpu.io = io;
+    system = new MockSystem(config);
+    cpu = system.cpu;
+    io = system.io;
+
     oper = new Operations(cpu);
     addr = new Addressing(cpu);
     cpu.reg16[regIP] = 0x00FF;
@@ -102,39 +114,195 @@ describe('Operation methods', () => {
     cpu.reg16[regFlags] = 0x0000;
   });
 
-  describe('aaa', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.aaa();
-      }).toThrowError(FeatureNotImplementedException);
+  describe("aaa", () => {
+    test("least significant >9", () => {
+      cpu.reg16[regAX] = 0x006D;
+      cpu.mem8[0x00FF] = 0x37;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aaa(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0103);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+    });
+    test("least significant <9", () => {
+      cpu.reg16[regAX] = 0x0068;
+      cpu.mem8[0x00FF] = 0x37;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aaa(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0008);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test("least significant =9", () => {
+      cpu.reg16[regAX] = 0x0069;
+      cpu.mem8[0x00FF] = 0x37;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aaa(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0009);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test("least significant <9 and AF set", () => {
+      cpu.reg16[regFlags] = 0x0010; // AF Set
+      cpu.reg16[regAX] = 0x0068;    // AL is < 9
+      cpu.mem8[0x00FF] = 0x37;      // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aaa(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x010E);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+    });
+    test("least significant <9 clears flags", () => {
+      cpu.reg16[regAX] = 0x0068;
+      cpu.mem8[0x00FF] = 0x37;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aaa(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0008);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
     });
   });
 
-  describe('aad', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.aad();
-      }).toThrowError(FeatureNotImplementedException);
-    });
-  });
-  describe('aam', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.aam();
-      }).toThrowError(FeatureNotImplementedException);
+  describe("aad", () => {
+    test("AX=0x0207", () => {
+      cpu.reg16[regAX] = 0x0207;
+      cpu.mem8[0x00FF] = 0xD5;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aad(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x001B);
     });
   });
 
-  describe.skip('aas', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.aas();
-      }).toThrowError(FeatureNotImplementedException);
+  describe("aam", () => {
+    test("AX=0x001B", () => {
+      cpu.reg16[regAX] = 0x001B;
+      cpu.mem8[0x00FF] = 0xD4;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aam(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0207);
     });
   });
 
-  describe('adc', () => {
-    test('+dst, +src no carry', () => {
+  describe("aas", () => {
+    test("positive result, least significant >9", () => {
+      cpu.reg16[regAX] = 0x006D;
+      cpu.mem8[0x00FF] = 0x3F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aas(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0xFF07);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+    });
+    test("positive result, least significant <9", () => {
+      cpu.reg16[regAX] = 0x0068;
+      cpu.mem8[0x00FF] = 0x3F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aas(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0008);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test("positive result, least significant =9", () => {
+      cpu.reg16[regAX] = 0x0069;
+      cpu.mem8[0x00FF] = 0x3F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aas(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0009);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test("positive result, least significant <9 and AF set", () => {
+      cpu.reg16[regFlags] = 0x0010; // AF Set
+      cpu.reg16[regAX] = 0x0068;    // AL is < 9
+      cpu.mem8[0x00FF] = 0x3F;      // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aas(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0xFF02);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+    });
+    test("negative result, least significant >9", () => {
+      cpu.reg16[regAX] = 0x00FA;
+      cpu.mem8[0x00FF] = 0x3F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aas(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0xFF04);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+    });
+    test("negative result, least significant <9", () => {
+      cpu.reg16[regAX] = 0x00F8;
+      cpu.mem8[0x00FF] = 0x3F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aas(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0008);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test("negative result, least significant =9", () => {
+      cpu.reg16[regAX] = 0x00F9;
+      cpu.mem8[0x00FF] = 0x3F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aas(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0009);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test("negative result, least significant <9 and AF set", () => {
+      cpu.reg16[regFlags] = 0x00F8; // AF Set
+      cpu.reg16[regAX] = 0x0068;    // AL is < 9
+      cpu.mem8[0x00FF] = 0x3F;      // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aas(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0xFF02);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+    });
+    test("least significant <9 clears flags", () => {
+      cpu.reg16[regAX] = 0x0068;
+      cpu.mem8[0x00FF] = 0x3F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.aas(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0008);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+  });
+
+  describe("adc", () => {
+    test("+dst, +src no carry", () => {
       cpu.reg16[regFlags] = 0b0000000000000010;
       cpu.reg16[regAX] = 0x1235;
       // ADD AX,iv
@@ -153,7 +321,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('+dst, +src with carry', () => {
+    test("+dst, +src with carry", () => {
       cpu.reg16[regFlags] = 0b0000000000000011;
       cpu.reg16[regAX] = 0x1235;
       // ADD AX,iv
@@ -172,7 +340,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('-dst, +src with carry', () => {
+    test("-dst, +src with carry", () => {
       cpu.reg16[regFlags] = 0b0000000000000011;
       cpu.reg16[regAX] = 0xFFFF;
       // ADD AX,iv
@@ -191,7 +359,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('+dst, -src with carry', () => {
+    test("+dst, -src with carry", () => {
       cpu.reg16[regFlags] = 0b0000000000000011;
       cpu.reg16[regAX] = 0x1235;
       // ADD AX,iv
@@ -210,7 +378,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('-dst, -src with carry', () => {
+    test("-dst, -src with carry", () => {
       cpu.reg16[regFlags] = 0b0000000000000011;
       cpu.reg16[regAX] = 0xFFFF;
       // ADD AX,iv
@@ -229,7 +397,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('Overflow with carry', () => {
+    test("Overflow with carry", () => {
       cpu.reg16[regFlags] = 0b0000000000000011;
       cpu.reg16[regAX] = 0x7FFF;
       // ADD AX,iv
@@ -259,10 +427,10 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('add', () => {
+  describe("add", () => {
     beforeEach(() => {});
 
-    test('+dst, +src', () => {
+    test("+dst, +src", () => {
       cpu.reg16[regAX] = 0x1235;
       // ADD AX,iv
       cpu.mem8[0x00FF] = 0x05;
@@ -280,7 +448,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('-dst, +src', () => {
+    test("-dst, +src", () => {
       cpu.reg16[regAX] = 0xFFFF;
       // ADD AX,iv
       cpu.mem8[0x00FF] = 0x05;
@@ -298,7 +466,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('+dst, -src', () => {
+    test("+dst, -src", () => {
       cpu.reg16[regAX] = 0x1235;
       // ADD AX,iv
       cpu.mem8[0x00FF] = 0x05;
@@ -316,7 +484,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('-dst, -src', () => {
+    test("-dst, -src", () => {
       cpu.reg16[regAX] = 0xFFFF;
       // ADD AX,iv
       cpu.mem8[0x00FF] = 0x05;
@@ -334,7 +502,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('Overflow', () => {
+    test("Overflow", () => {
       cpu.reg16[regAX] = 0x8000;
       // ADD AX,iv
       cpu.mem8[0x00FF] = 0x05;
@@ -352,7 +520,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
     });
-    test('[regression] add dx,ax', () => {
+    test("[regression] add dx,ax", () => {
       cpu.reg16[regAX] = 0x0090;
       cpu.reg16[regDX] = 0x0059;
       cpu.mem8[0x00FF] = 0x01; // inst
@@ -371,8 +539,8 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('and', () => {
-    test('AND AX Iv', () => {
+  describe("and", () => {
+    test("AND AX Iv", () => {
       cpu.reg16[regAX] = 0x1234;
       cpu.mem8[0x000FF] = 0x25; // inst (byte)
       cpu.mem8[0x00100] = 0x21; // oper low
@@ -391,12 +559,12 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('call', () => {
+  describe("call", () => {
     beforeEach(() => {
       setMemory(cpu, 0xAA);
     });
 
-    test('CALL Ap (far)', () => {
+    test("CALL Ap (far)", () => {
       cpu.mem8[0x000FF] = 0x9A; // inst (byte)
       cpu.mem8[0x00100] = 0x78; // v1 high
       cpu.mem8[0x00101] = 0x56; // v1 low
@@ -418,7 +586,7 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(1);
       expect(cpu.addrIPInc).toBe(4);
     });
-    test('CALL Jv (near) positive offset', () => {
+    test("CALL Jv (near) positive offset", () => {
       cpu.instIPInc = 1;
       cpu.mem8[0x000FF] = 0xE8; // inst (byte)
       cpu.mem8[0x00100] = 0x34; // segment byte high
@@ -436,7 +604,7 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(1);
       expect(cpu.addrIPInc).toBe(2);
     });
-    test('CALL Jv (near) negative offset', () => {
+    test("CALL Jv (near) negative offset", () => {
       cpu.instIPInc = 1;
       cpu.mem8[0x000FF] = 0xE8; // inst (byte)
       cpu.mem8[0x00100] = 0xF6; // segment byte high
@@ -454,7 +622,7 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(1);
       expect(cpu.addrIPInc).toBe(2);
     });
-    test('CALL Ev (near)', () => {
+    test("CALL Ev (near)", () => {
       cpu.mem8[0x000FF] = 0xFF; // inst (byte)
       cpu.mem8[0x00100] = 0b11010000; // addr mode
       cpu.reg16[regAX] = 0x1234;
@@ -469,7 +637,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regIP]).toBe(0x1234);
       expect(cpu.instIPInc).toBe(0);
     });
-    test('CALL Ep (far)', () => {
+    test("CALL Ep (far)", () => {
       cpu.mem8[0x000FF] = 0xFF; // inst (byte)
       cpu.mem8[0x00100] = 0b00011100; // addr mode
       cpu.reg16[regSI] = 0x1234;
@@ -493,16 +661,33 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('cbw', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.cbw();
-      }).toThrowError(FeatureNotImplementedException);
+  describe("cbw", () => {
+    test("has sign bit", () => {
+      cpu.reg16[regAL] = 0xB7;
+      cpu.mem8[0x00FF] = 0x98;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.cbw(null, null);
+
+      expect(cpu.reg8[regAL]).toBe(0xB7);
+      expect(cpu.reg8[regAH]).toBe(0xFF);
+      expect(cpu.reg16[regFlags]).toBe(0);
+    });
+    test("has no sign bit", () => {
+      cpu.reg16[regAX] = 0x37;
+      cpu.mem8[0x00FF] = 0x98;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.cbw(null, null);
+
+      expect(cpu.reg8[regAL]).toBe(0x37);
+      expect(cpu.reg8[regAH]).toBe(0x00);
+      expect(cpu.reg16[regFlags]).toBe(0);
     });
   });
 
-  describe('clc', () => {
-    test('CLC with CF set', () => {
+  describe("clc", () => {
+    test("CLC with CF set", () => {
       cpu.reg16[regFlags] = 0b1111111111111111;
       cpu.mem8[0x000FF] = 0xF8; // inst (byte)
       cpu.decode();
@@ -513,8 +698,8 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('cld', () => {
-    test('CLD with DF set', () => {
+  describe("cld", () => {
+    test("CLD with DF set", () => {
       cpu.reg16[regFlags] = 0b1111111111111111;
       cpu.mem8[0x000FF] = 0xFC; // inst (byte)
       cpu.decode();
@@ -525,8 +710,8 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('cli', () => {
-    test('CLI with IF set', () => {
+  describe("cli", () => {
+    test("CLI with IF set", () => {
       cpu.reg16[regFlags] = 0b1111111111111111;
       cpu.mem8[0x000FF] = 0xFA; // inst (byte)
       cpu.decode();
@@ -537,8 +722,8 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('cmc', () => {
-    test('CMC with CF set', () => {
+  describe("cmc", () => {
+    test("CMC with CF set", () => {
       cpu.reg16[regFlags] = 0b1111111111111111;
       cpu.mem8[0x000FF] = 0xF5; // inst (byte)
       cpu.decode();
@@ -547,7 +732,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regFlags]).toBe(0b1111111111111110);
     });
-    test('CMC with CF clear', () => {
+    test("CMC with CF clear", () => {
       cpu.reg16[regFlags] = 0b1111111111111110;
       cpu.mem8[0x000FF] = 0xF5; // inst (byte)
       cpu.decode();
@@ -558,13 +743,13 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('cmp', () => {
+  describe("cmp", () => {
     beforeEach(() => {
       // CMP AX,iv
       cpu.mem8[0x00FF] = 0x3D;
       cpu.instIPInc = 1;
     });
-    test('dst > src', () => {
+    test("dst > src", () => {
       //  0x1235 > 0x1234
       cpu.reg16[regAX] = 0x1235;
       cpu.mem8[0x0100] = 0x34;
@@ -579,7 +764,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('dst < src', () => {
+    test("dst < src", () => {
       // 0x1234 > 0x1235
       // 0x1234 - 0x1235 = 0xFFFF
 
@@ -596,7 +781,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('dst = src', () => {
+    test("dst = src", () => {
       // 0x1234 = 0x1234
       cpu.reg16[regAX] = 0x1234;
       cpu.mem8[0x0100] = 0x34;
@@ -611,7 +796,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('dst > src with overflow', () => {
+    test("dst > src with overflow", () => {
       // 0x8000 > 0x0001 (0x7FFF)
       cpu.reg16[regAX] = 0x8000;
       cpu.mem8[0x0100] = 0x01;
@@ -626,7 +811,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
     });
-    test('[regression] cmp ax, 9', () => {
+    test("[regression] cmp ax, 9", () => {
       cpu.reg16[regAX] = 0x0001;
       cpu.mem8[0x00FF] = 0x83;
       cpu.mem8[0x0100] = 0xF8; // 0b11 111 000
@@ -644,7 +829,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('cmpsb', () => {
+  describe("cmpsb", () => {
     beforeEach(() => {
       cpu.mem8[0x00FF] = 0xAF;
       // ES:DI = 0x1234 * 0x10 + 0x3456 = 0x15796
@@ -659,7 +844,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x279B8] = 0x56;
       cpu.instIPInc = 1;
     });
-    test('cmpsb increment', () => {
+    test("cmpsb increment", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.cmpsb();
@@ -674,7 +859,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('cmpsb decrement', () => {
+    test("cmpsb decrement", () => {
       cpu.reg16[regFlags] = 0b0000010000000000;
       cpu.decode();
       oper.cmpsb();
@@ -688,10 +873,10 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
-    })
+    });
   });
 
-  describe('cmpsw', () => {
+  describe("cmpsw", () => {
     beforeEach(() => {
       cpu.mem8[0x00FF] = 0xAF;
       // ES:DI = 0x1234 * 0x10 + 0x3456 = 0x15796
@@ -706,7 +891,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x279B8] = 0x56;
       cpu.instIPInc = 1;
     });
-    test('cmpsw increment', () => {
+    test("cmpsw increment", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.cmpsw();
@@ -722,7 +907,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('cmpsw decrement', () => {
+    test("cmpsw decrement", () => {
       cpu.reg16[regFlags] = 0b0000010000000000;
       cpu.decode();
       oper.cmpsw();
@@ -739,45 +924,188 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('cs', () => {
-    test('CS sets addrSeg', () => {
+  describe("cs", () => {
+    test("CS sets addrSeg", () => {
       oper.cs();
 
       expect(cpu.addrSeg).toBe(regCS);
       expect(cpu.prefixSegmentState).toBe(STATE_SEG_CS);
-    })
-  });
-
-  describe('cwd', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.cwd();
-      }).toThrowError(FeatureNotImplementedException);
     });
   });
 
-  describe('daa', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.daa();
-      }).toThrowError(FeatureNotImplementedException);
+  describe("cwd", () => {
+    test("has sign bit", () => {
+      cpu.reg16[regAX] = 0xB723;
+      cpu.mem8[0x00FF] = 0x99;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.cwd(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0xB723);
+      expect(cpu.reg16[regDX]).toBe(0xFFFF);
+      expect(cpu.reg16[regFlags]).toBe(0);
+    });
+    test("has no sign bit", () => {
+      cpu.reg16[regAX] = 0x3723;
+      cpu.mem8[0x00FF] = 0x99;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.cwd(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x3723);
+      expect(cpu.reg16[regDX]).toBe(0x0000);
+      expect(cpu.reg16[regFlags]).toBe(0);
     });
   });
 
-  describe('das', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.das();
-      }).toThrowError(FeatureNotImplementedException);
+  describe("daa", () => {
+    test("msb >9, lsb >9", () => {
+      cpu.reg16[regAX] = 0x00AD;
+      cpu.mem8[0x00FF] = 0x27;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.daa(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0013);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+    });
+    test("msb <=9, lsb >9", () => {
+      cpu.reg16[regAX] = 0x004B;
+      cpu.mem8[0x00FF] = 0x27;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.daa(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0051);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test("msb >9, lsb <=9", () => {
+      cpu.reg16[regAX] = 0x00B4;
+      cpu.mem8[0x00FF] = 0x27;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.daa(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0014);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+    });
+    test("msb <=9, lsb <=9", () => {
+      cpu.reg16[regAX] = 0x0044;
+      cpu.mem8[0x00FF] = 0x27;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.daa(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0044);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test("msb <=9, lsb <=9, AF set", () => {
+      cpu.reg16[regFlags] = 0x0010; // AF Set
+      cpu.reg16[regAX] = 0x0044;
+      cpu.mem8[0x00FF] = 0x27;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.daa(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x004A);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test("msb <=9, lsb <=9, CF set", () => {
+      cpu.reg16[regFlags] = 0x0001; // CF Set
+      cpu.reg16[regAX] = 0x0044;
+      cpu.mem8[0x00FF] = 0x27;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.daa(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x00A4);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
     });
   });
 
-  describe('dec', () => {
+  describe("das", () => {
+    test("msb >9, lsb >9", () => {
+      cpu.reg16[regAX] = 0x00AD;
+      cpu.mem8[0x00FF] = 0x2F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.das(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0047);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+    });
+    test("msb <=9, lsb >9", () => {
+      cpu.reg16[regAX] = 0x004B;
+      cpu.mem8[0x00FF] = 0x2F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.das(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0045);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test("msb >9, lsb <=9", () => {
+      cpu.reg16[regAX] = 0x00B4;
+      cpu.mem8[0x00FF] = 0x2F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.das(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0054);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+    });
+    test("msb <=9, lsb <=9", () => {
+      cpu.reg16[regAX] = 0x0044;
+      cpu.mem8[0x00FF] = 0x2F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.das(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0044);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test("msb <=9, lsb <=9, AF set", () => {
+      cpu.reg16[regFlags] = 0x0010; // AF Set
+      cpu.reg16[regAX] = 0x0044;
+      cpu.mem8[0x00FF] = 0x2F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.das(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x003E);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+    });
+    test("msb <=9, lsb <=9, CF set", () => {
+      cpu.reg16[regFlags] = 0x0001; // CF Set
+      cpu.reg16[regAX] = 0x0088;
+      cpu.mem8[0x00FF] = 0x2F;  // inst
+      cpu.instIPInc = 1;
+      cpu.decode();
+      oper.das(null, null);
+
+      expect(cpu.reg16[regAX]).toBe(0x0028);
+      expect(cpu.reg16[regFlags] & FLAG_AF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+    });
+  });
+
+  describe("dec", () => {
     beforeEach(() => {
       // DEC AX
       cpu.mem8[0x00FF] = 0x48;
     });
-    test('basic decrement', () => {
+    test("basic decrement", () => {
       cpu.reg16[regAX] = 0x1235;
       cpu.decode();
       oper.dec(addr.AX.bind(addr));
@@ -790,7 +1118,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
       expect(cpu.reg16[regAX]).toBe(0x1234);
     });
-    test('decrement top of value range', () => {
+    test("decrement top of value range", () => {
       cpu.reg16[regAX] = 0xFFFF;
       cpu.decode();
       oper.dec(addr.AX.bind(addr));
@@ -803,7 +1131,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
       expect(cpu.reg16[regAX]).toBe(0xFFFE);
     });
-    test('decrement to zero', () => {
+    test("decrement to zero", () => {
       cpu.reg16[regAX] = 0x0001;
       cpu.decode();
       oper.dec(addr.AX.bind(addr));
@@ -817,7 +1145,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regAX]).toBe(0x0000);
     });
 
-    test('decrement underflow', () => {
+    test("decrement underflow", () => {
       cpu.reg16[regAX] = 0x0000;
       cpu.decode();
       oper.dec(addr.AX.bind(addr));
@@ -832,58 +1160,470 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('div', () => {
-    test('NOT IMPLEMENTED', () => {
+  describe("div", () => {
+    test("8 bit divide accumulator (AL) by BL", () => {
+      // IMUL BL
+      cpu.mem8[0x00FF] = 0xF6;   // Inst
+      cpu.mem8[0x0100] = 0xF3;   // Addr byte
+      cpu.reg16[regAX] = 0x0030; // 48
+      cpu.reg8[regBL]  = 0x04;   // 4
+
+      cpu.decode();
+      oper.div(addr.Eb.bind(addr));
+
+      expect(cpu.reg8[regAL]).toBe(0x0C);     // 12 (quotient)
+      expect(cpu.reg8[regAH]).toBe(0x00);     // 0  (remainder)
+      expect(cpu.reg16[regDX]).toBe(0x0000);
+    });
+    test("8 bit divide accumulator (AL) by BL with remainder", () => {
+      // IMUL BL
+      cpu.mem8[0x00FF] = 0xF6;   // Inst
+      cpu.mem8[0x0100] = 0xF3;   // Addr byte
+      cpu.reg16[regAX] = 0x0030; // 48
+      cpu.reg8[regBL]  = 0x05;   // 5
+
+      cpu.decode();
+      oper.div(addr.Eb.bind(addr));
+
+      expect(cpu.reg8[regAL]).toBe(0x09);    // 9 (quotient)
+      expect(cpu.reg8[regAH]).toBe(0x03);    // 3  (remainder)
+      expect(cpu.reg16[regDX]).toBe(0x0000); // (DX not used in 8-bit division)
+    });
+    test("8 bit divide accumulator (AL, with sign bit) by CL with remainder", () => {
+      // IMUL BL
+      cpu.mem8[0x00FF] = 0xF6;   // Inst
+      cpu.mem8[0x0100] = 0xF1;   // Addr byte
+      cpu.reg16[regAX] = 0xCE08; // 52744
+      cpu.reg8[regCL]  = 0xFF;   // 255
+
+      cpu.decode();
+      oper.div(addr.Eb.bind(addr));
+
+      expect(cpu.reg8[regAL]).toBe(0xCE);    // 206 (quotient)
+      expect(cpu.reg8[regAH]).toBe(0xD6);    // 214 (remainder)
+      expect(cpu.reg16[regDX]).toBe(0x0000); // 0  (DX not used in 8-bit division)
+    });
+    test("8 bit divide by 0 should cause interrupt", () => {
+      // IMUL BL
+      cpu.mem8[0x00FF] = 0xF6;   // Inst
+      cpu.mem8[0x0100] = 0xF3;   // Addr byte
+      cpu.reg16[regAX] = 0x00D0; // -48
+      cpu.reg8[regBL]  = 0x00;   // 0
+
+      cpu.decode();
+
+      // TODO: Implement interrupt testing
       expect(() => {
-        oper.div();
-      }).toThrowError(FeatureNotImplementedException);
+        oper.div(addr.Eb.bind(addr));
+      }).toThrowError(TemporaryInterruptException);
+    });
+    test("8 bit quotient overflow", () => {
+      // IMUL BL
+      cpu.mem8[0x00FF] = 0xF6;   // Inst
+      cpu.mem8[0x0100] = 0xF3;   // Addr byte
+      cpu.reg16[regAX] = 0x7D00; // 32000
+      cpu.reg8[regBL]  = 0x02;   // 2
+
+      cpu.decode();
+
+      // TODO: Implement interrupt testing
+      expect(() => {
+        oper.div(addr.Eb.bind(addr));
+      }).toThrowError(TemporaryInterruptException);
+    });
+
+    test("16 bit divide accumulator (DX:AX) by BX", () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xF3;   // Addr byte
+      cpu.reg16[regDX] = 0x32E3; //
+      cpu.reg16[regAX] = 0x5800; // 853,760,000
+      cpu.reg16[regBX] = 0x7D00; // 32,000
+
+      cpu.decode();
+      oper.div(addr.Ev.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x6838); // 26,680 (quotient)
+      expect(cpu.reg16[regDX]).toBe(0x0000); // 0      (remainder)
+    });
+    test("16 bit divide accumulator (DX:AX) by BX with remainder", () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xF3;   // Addr byte
+      cpu.reg16[regDX] = 0x32E3; //
+      cpu.reg16[regAX] = 0x5800; // 853,760,000
+      cpu.reg16[regBX] = 0x7D01; // 32,001
+
+      cpu.decode();
+      oper.div(addr.Ev.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x6837); // 26,679 (quotient)
+      expect(cpu.reg16[regDX]).toBe(0x14C9); // 5,321    (remainder)
+    });
+    test("16 bit divide accumulator (DX:AX with sign bit) by BX", () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xF3;   // Addr byte
+      cpu.reg16[regDX] = 0x800C; //
+      cpu.reg16[regAX] = 0xA800; // 2,148,313,088
+      cpu.reg16[regBX] = 0xF230; // 62,000
+
+      cpu.decode();
+      oper.div(addr.Ev.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x875A); // 34650 (quotient)
+      expect(cpu.reg16[regDX]).toBe(0x3320); // 13088  (remainder)
+    });
+    test("16 bit divide by 0 should cause interrupt", () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xF3;   // Addr byte
+      cpu.reg16[regAX] = 0x12F0; // 4848
+      cpu.reg16[regDX] = 0x0000; // (sign extended into DX)
+      cpu.reg16[regBX] = 0x0000; // 0
+
+      cpu.decode();
+
+      // TODO: Implement interrupt testing
+      expect(() => {
+        oper.div(addr.Ev.bind(addr));
+      }).toThrowError(TemporaryInterruptException);
+    });
+    test("16 bit quotient overflow", () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xF3;   // Addr byte
+      cpu.reg16[regDX] = 0x32E3; //
+      cpu.reg16[regAX] = 0x5800; // 853,760,000
+      cpu.reg16[regBX] = 0x0002; // 2
+
+      cpu.decode();
+
+      // TODO: Implement interrupt testing
+      expect(() => {
+        oper.div(addr.Ev.bind(addr));
+      }).toThrowError(TemporaryInterruptException);
     });
   });
 
-  describe('ds', () => {
-    test('DS sets addrSeg', () => {
+  describe("ds", () => {
+    test("DS sets addrSeg", () => {
       oper.ds();
 
       expect(cpu.addrSeg).toBe(regDS);
       expect(cpu.prefixSegmentState).toBe(STATE_SEG_DS);
-    })
+    });
   });
 
-  describe('es', () => {
-    test('ES sets addrSeg', () => {
+  describe("es", () => {
+    test("ES sets addrSeg", () => {
       oper.es();
 
       expect(cpu.addrSeg).toBe(regES);
       expect(cpu.prefixSegmentState).toBe(STATE_SEG_ES);
-    })
+    });
   });
 
-  describe('hlt', () => {
-    test('sets halt state', () => {
+  describe("esc", () => {
+    test("NOT IMPLEMENTED", () => {
+      expect(() => {
+        oper.esc();
+      }).toThrowError(FeatureNotImplementedException);
+    });
+  });
+
+  describe("hlt", () => {
+    test("sets halt state", () => {
       oper.hlt();
       expect(cpu.state).toBe(STATE_HALT);
     });
   });
 
-  describe('idiv', () => {
-    test('NOT IMPLEMENTED', () => {
+  describe("idiv", () => {
+    test("8 bit divide accumulator (AL) by BL", () => {
+      // IMUL BL
+      cpu.mem8[0x00FF] = 0xF6;   // Inst
+      cpu.mem8[0x0100] = 0xFB;   // Addr byte
+      cpu.reg16[regAX] = 0x0030; // 48
+      cpu.reg8[regBL]  = 0x04;   // 4
+
+      cpu.decode();
+      oper.idiv(addr.Eb.bind(addr));
+
+      expect(cpu.reg8[regAL]).toBe(0x0C);     // 12 (quotient)
+      expect(cpu.reg8[regAH]).toBe(0x00);     // 0  (remainder)
+      expect(cpu.reg16[regDX]).toBe(0x0000);
+    });
+    test("8 bit divide accumulator (AL) by BL with remainder", () => {
+      // IMUL BL
+      cpu.mem8[0x00FF] = 0xF6;   // Inst
+      cpu.mem8[0x0100] = 0xFB;   // Addr byte
+      cpu.reg16[regAX] = 0x0030; // 48
+      cpu.reg8[regBL]  = 0x05;   // 5
+
+      cpu.decode();
+      oper.idiv(addr.Eb.bind(addr));
+
+      expect(cpu.reg8[regAL]).toBe(0x09);     // 9 (quotient)
+      expect(cpu.reg8[regAH]).toBe(0x03);     // 3  (remainder)
+      expect(cpu.reg16[regDX]).toBe(0x0000);  // (DX not used in 8-bit division)
+    });
+    test("8 bit negative divide accumulator (AL) by BL", () => {
+      // IMUL BL
+      cpu.mem8[0x00FF] = 0xF6;   // Inst
+      cpu.mem8[0x0100] = 0xFB;   // Addr byte
+      cpu.reg16[regAX] = 0xFFFC; // -4
+      cpu.reg8[regBL]  = 0x04;   // 4
+
+      cpu.decode();
+      oper.idiv(addr.Eb.bind(addr));
+
+      expect(cpu.reg8[regAL]).toBe(0xFF);    // -1 (quotient)
+      expect(cpu.reg8[regAH]).toBe(0x00);    // 0  (remainder)
+      expect(cpu.reg16[regDX]).toBe(0x0000); // 0  (DX not used in 8-bit division)
+    });
+    test("8 bit negative divide accumulator (AL) by BL with remainder", () => {
+      // IMUL BL
+      cpu.mem8[0x00FF] = 0xF6;   // Inst
+      cpu.mem8[0x0100] = 0xFB;   // Addr byte
+      cpu.reg16[regAX] = 0xFFD0; // -48
+      cpu.reg8[regBL]  = 0x05;   // 5
+
+      cpu.decode();
+      oper.idiv(addr.Eb.bind(addr));
+
+      expect(cpu.reg8[regAL]).toBe(0xF7);    // -9 (quotient)
+      expect(cpu.reg8[regAH]).toBe(0xFD);    // -3 (remainder)
+      expect(cpu.reg16[regDX]).toBe(0x0000); // 0  (DX not used in 8-bit division)
+    });
+    test("8 bit divide by 0 should cause interrupt", () => {
+      // IMUL BL
+      cpu.mem8[0x00FF] = 0xF6;   // Inst
+      cpu.mem8[0x0100] = 0xFB;   // Addr byte
+      cpu.reg16[regAX] = 0x00D0; // -48
+      cpu.reg8[regBL]  = 0x00;   // 0
+
+      cpu.decode();
+
+      // TODO: Implement interrupt testing
       expect(() => {
-        oper.idiv();
-      }).toThrowError(FeatureNotImplementedException);
+        oper.idiv(addr.Eb.bind(addr));
+      }).toThrowError(TemporaryInterruptException);
+    });
+    test("8 bit quotient overflow", () => {
+      // IMUL BL
+      cpu.mem8[0x00FF] = 0xF6;   // Inst
+      cpu.mem8[0x0100] = 0xFB;   // Addr byte
+      cpu.reg16[regAX] = 0x7D00; // 32000
+      cpu.reg8[regBL]  = 0x02;   // 2
+
+      cpu.decode();
+
+      // TODO: Implement interrupt testing
+      expect(() => {
+        oper.idiv(addr.Eb.bind(addr));
+      }).toThrowError(TemporaryInterruptException);
+    });
+    test("8 bit quotient underflow", () => {
+      // IMUL BL
+      cpu.mem8[0x00FF] = 0xF6;   // Inst
+      cpu.mem8[0x0100] = 0xFB;   // Addr byte
+      cpu.reg16[regAX] = 0x8300; // -32000
+      cpu.reg8[regBL]  = 0x02;   // 2
+
+      cpu.decode();
+
+      // TODO: Implement interrupt testing
+      expect(() => {
+        oper.idiv(addr.Eb.bind(addr));
+      }).toThrowError(TemporaryInterruptException);
+    });
+    test("16 bit divide accumulator (DX:AX) by BX", () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xFB;   // Addr byte
+      cpu.reg16[regDX] = 0x32E3; //
+      cpu.reg16[regAX] = 0x5800; // 853,760,000
+      cpu.reg16[regBX] = 0x7D00; // 32,000
+
+      cpu.decode();
+      oper.idiv(addr.Ev.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x6838); // 26,680 (quotient)
+      expect(cpu.reg16[regDX]).toBe(0x0000); // 0      (remainder)
+    });
+    test("16 bit divide accumulator (DX:AX) by BX with remainder", () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xFB;   // Addr byte
+      cpu.reg16[regDX] = 0x32E3; //
+      cpu.reg16[regAX] = 0x5800; // 853,760,000
+      cpu.reg16[regBX] = 0x7D01; // 32,001
+
+      cpu.decode();
+      oper.idiv(addr.Ev.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x6837); // 26,679 (quotient)
+      expect(cpu.reg16[regDX]).toBe(0x14C9); // 5,321    (remainder)
+    });
+    test("16 bit negative divide accumulator (DX:AX) by BX", () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xFB;   // Addr byte
+      cpu.reg16[regDX] = 0xCD1C; //
+      cpu.reg16[regAX] = 0xA800; // -853,760,000
+      cpu.reg16[regBX] = 0x7D00; // 32,000
+
+      cpu.decode();
+      oper.idiv(addr.Ev.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x97C8); // -26,680 (quotient)
+      expect(cpu.reg16[regDX]).toBe(0x0000); //  0      (remainder)
+    });
+    test("16 bit negative divide accumulator (DX:AX) by BX with remainder", () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xFB;   // Addr byte
+      cpu.reg16[regDX] = 0xCD1C; //
+      cpu.reg16[regAX] = 0xA800; // -853,760,000
+      cpu.reg16[regBX] = 0x7D01; // 32,001
+
+      cpu.decode();
+      oper.idiv(addr.Ev.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x97C9); // -26,679 (quotient)
+      expect(cpu.reg16[regDX]).toBe(0xEB37); // -5,321    (remainder)
+    });
+    test("16 bit divide by 0 should cause interrupt", () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xFB;   // Addr byte
+      cpu.reg16[regAX] = 0x12F0; // 4848
+      cpu.reg16[regDX] = 0x0000; // (sign extended into DX)
+      cpu.reg16[regBX] = 0x0000; // 0
+
+      cpu.decode();
+
+      // TODO: Implement interrupt testing
+      expect(() => {
+        oper.idiv(addr.Ev.bind(addr));
+      }).toThrowError(TemporaryInterruptException);
+    });
+    test("16 bit quotient overflow", () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xFB;   // Addr byte
+      cpu.reg16[regDX] = 0x32E3; //
+      cpu.reg16[regAX] = 0x5800; // 853,760,000
+      cpu.reg16[regBX] = 0x0002; // 2
+
+      cpu.decode();
+
+      // TODO: Implement interrupt testing
+      expect(() => {
+        oper.idiv(addr.Ev.bind(addr));
+      }).toThrowError(TemporaryInterruptException);
+    });
+    test("16 bit quotient underflow", () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xFB;   // Addr byte
+      cpu.reg16[regDX] = 0xCD1C; //
+      cpu.reg16[regAX] = 0xA800; // -853,760,000
+      cpu.reg16[regBX] = 0x0002; // 2
+
+      cpu.decode();
+
+      // TODO: Implement interrupt testing
+      expect(() => {
+        oper.idiv(addr.Ev.bind(addr));
+      }).toThrowError(TemporaryInterruptException);
     });
   });
 
-  describe('imul', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.imul();
-      }).toThrowError(FeatureNotImplementedException);
+  describe("imul", () => {
+    test("8 bit multiply BL by accumulator (AL)", () => {
+      // IMUL BL
+      cpu.mem8[0x00FF] = 0xF6; // Inst
+      cpu.mem8[0x0100] = 0xEB; // Addr byte
+      cpu.reg8[regAL] = 0x30;  // 48
+      cpu.reg8[regBL] = 0x04;  // 4
+
+      cpu.decode();
+      oper.imul(addr.Eb.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x00C0); // 192
+      expect(cpu.reg16[regDX]).toBe(0x0000);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+    test("8 bit negative multiply BL by accumulator (AL)", () => {
+      // IMUL BL
+      cpu.mem8[0x00FF] = 0xF6; // Inst
+      cpu.mem8[0x0100] = 0xEB; // Addr byte
+      cpu.reg8[regAL] = 0xFC;  // -4
+      cpu.reg8[regBL] = 0x04;  // 4
+
+      cpu.decode();
+      oper.imul(addr.Eb.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0xFFF0); // -16
+      expect(cpu.reg16[regDX]).toBe(0x0000);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
+    });
+    test("16 bit multiply BX by accumulator (AX)", () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xEB;   // Addr byte
+      cpu.reg16[regAX] = 0x0030; // 48
+      cpu.reg16[regBX] = 0x0004; // 4
+
+      cpu.decode();
+      oper.imul(addr.Ev.bind(addr));
+
+      expect(cpu.reg16[regAX]).toBe(0x00C0); // 192
+      expect(cpu.reg16[regDX]).toBe(0x0000);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
+    });
+    test("16 bit multiply CX by accumulator (AX) = 32 bit value", () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xE9;   // Addr byte
+      cpu.reg16[regAX] = 0x1234; // 4660
+      cpu.reg16[regCX] = 0x1234; // 4660
+
+      cpu.decode();
+      oper.imul(addr.Ev.bind(addr));
+
+      // Result = 21715600
+      expect(cpu.reg16[regAX]).toBe(0x5A90);
+      expect(cpu.reg16[regDX]).toBe(0x014B);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
+    });
+    test("16 bit negative multiply CX by accumulator (AX) = 32 bit value", () => {
+      // IMUL BX
+      cpu.mem8[0x00FF] = 0xF7;   // Inst
+      cpu.mem8[0x0100] = 0xE9;   // Addr byte
+      cpu.reg16[regAX] = 0x1234; // 4660
+      cpu.reg16[regCX] = 0xEDCC; // -4660
+
+      cpu.decode();
+      oper.imul(addr.Ev.bind(addr));
+
+      // Result = -21715600 (2's complement)
+      expect(cpu.reg16[regAX]).toBe(0xA570);
+      expect(cpu.reg16[regDX]).toBe(0xFEB4);
+      expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBeGreaterThan(0);
+      expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
     });
   });
 
-  describe('in', () => {
-    test('IN AL, 0xF8', () => {
-      io.devices[0].buffer8[0xF8] = 0xCC;
+  describe("in", () => {
+    test("IN AL, 0xF8", () => {
+      io.devices["TestDevice"].buffer8[0xF8] = 0xCC;
       cpu.mem8[0x00FF] = 0xE4;
       cpu.mem8[0x0100] = 0xF8;
       cpu.instIPInc = 1;
@@ -892,8 +1632,8 @@ describe('Operation methods', () => {
 
       expect(cpu.reg8[regAL]).toBe(0xCC);
     });
-    test('IN AX, 0x4D', () => {
-      io.devices[0].buffer16[0x4D] = 0xBBCC;
+    test("IN AX, 0x4D", () => {
+      io.devices["TestDevice"].buffer16[0x4D] = 0xBBCC;
       cpu.mem8[0x00FF] = 0xE5;
       cpu.mem8[0x0100] = 0x4D;
       cpu.instIPInc = 1;
@@ -902,8 +1642,8 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regAX]).toBe(0xBBCC);
     });
-    test('IN AL, DX', () => {
-      io.devices[0].buffer8[0xF84E] = 0xFF;
+    test("IN AL, DX", () => {
+      io.devices["TestDevice"].buffer8[0xF84E] = 0xFF;
       cpu.reg16[regDX] = 0xF84E;
       cpu.mem8[0x00FF] = 0xEC;
       cpu.instIPInc = 1;
@@ -912,8 +1652,8 @@ describe('Operation methods', () => {
 
       expect(cpu.reg8[regAL]).toBe(0xFF);
     });
-    test('IN AX, DX', () => {
-      io.devices[0].buffer16[0xF84E] = 0xBBCC;
+    test("IN AX, DX", () => {
+      io.devices["TestDevice"].buffer16[0xF84E] = 0xBBCC;
       cpu.reg16[regDX] = 0xF84E;
       cpu.mem8[0x00FF] = 0xED;
       cpu.instIPInc = 1;
@@ -924,12 +1664,12 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('inc', () => {
+  describe("inc", () => {
     beforeEach(() => {
       // INC AX
       cpu.mem8[0x00FF] = 0x40;
     });
-    test('basic increment', () => {
+    test("basic increment", () => {
       cpu.reg16[regAX] = 0x1234;
       cpu.decode();
       oper.inc(addr.AX.bind(addr));
@@ -942,7 +1682,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('increment to top of value range', () => {
+    test("increment to top of value range", () => {
       cpu.reg16[regAX] = 0xFFFE;
       cpu.decode();
       oper.inc(addr.AX.bind(addr));
@@ -955,7 +1695,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('increment from zero', () => {
+    test("increment from zero", () => {
       cpu.reg16[regAX] = 0x0000;
       cpu.decode();
       oper.inc(addr.AX.bind(addr));
@@ -969,7 +1709,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
 
-    test('increment overflow', () => {
+    test("increment overflow", () => {
       cpu.reg16[regAX] = 0xFFFF;
       cpu.decode();
       oper.inc(addr.AX.bind(addr));
@@ -984,14 +1724,14 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('int', () => {
+  describe("int", () => {
     beforeEach(() => {
       // setup a fake interupt vector table
       loadIVT(cpu);
       cpu.reg16[regFlags] = 0x55AA;
       cpu.reg16[regCS] = 0x0220;
     });
-    test('INT 0x13', () => {
+    test("INT 0x13", () => {
       cpu.mem8[0x022FF] = 0xCD; // inst (byte)
       cpu.mem8[0x02300] = 0x13; // arg
 
@@ -1016,14 +1756,14 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('into', () => {
+  describe("into", () => {
     beforeEach(() => {
       // setup a fake interupt vector table
       loadIVT(cpu);
       cpu.reg16[regFlags] = 0x55AA;
       cpu.reg16[regCS] = 0x0220;
     });
-    test('INTO no overflow', () => {
+    test("INTO no overflow", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.mem8[0x022FF] = 0xCE; // inst (byte)
 
@@ -1045,7 +1785,7 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(1);
       expect(cpu.addrIPInc).toBe(0);
     });
-    test('INTO overflow', () => {
+    test("INTO overflow", () => {
       cpu.reg16[regFlags] = 0b0101110110101010;
       cpu.mem8[0x022FF] = 0xCD; // inst (byte)
       cpu.mem8[0x02300] = 0x13; // arg
@@ -1071,8 +1811,8 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('iret', () => {
-    test('IRET', () => {
+  describe("iret", () => {
+    test("IRET", () => {
       cpu.mem8[0x022FF] = 0xCF; // inst (byte)
       cpu.reg16[regSP] = 0x01A;
 
@@ -1095,7 +1835,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('ja', () => {
+  describe("ja", () => {
     beforeEach(() => {
       // JA Jb
       cpu.mem8[0x00FF] = 0x77;
@@ -1103,7 +1843,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
 
-    test('jump executes if ZF = 0, CF = 0', () => {
+    test("jump executes if ZF = 0, CF = 0", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.ja(addr.Jb.bind(addr), null);
@@ -1112,7 +1852,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump does not execute if ZF = 0, CF = 1', () => {
+    test("jump does not execute if ZF = 0, CF = 1", () => {
       cpu.reg16[regFlags] = 0b0000000000000001;
       cpu.decode();
       oper.ja(addr.Jb.bind(addr), null);
@@ -1121,7 +1861,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump does not execute if ZF = 1, CF = 0', () => {
+    test("jump does not execute if ZF = 1, CF = 0", () => {
       cpu.reg16[regFlags] = 0b0000000001000000;
       cpu.decode();
       oper.ja(addr.Jb.bind(addr), null);
@@ -1130,7 +1870,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump does not execute if ZF = 1, CF = 1', () => {
+    test("jump does not execute if ZF = 1, CF = 1", () => {
       cpu.reg16[regFlags] = 0b0000000001000001;
       cpu.decode();
       oper.ja(addr.Jb.bind(addr), null);
@@ -1140,7 +1880,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('jb', () => {
+  describe("jb", () => {
     beforeEach(() => {
       // JB Jb
       cpu.mem8[0x00FF] = 0x72;
@@ -1148,7 +1888,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
 
-    test('jump executes if CF=1', () => {
+    test("jump executes if CF=1", () => {
       cpu.reg16[regFlags] = 0b0000000000000001;
       cpu.decode();
       oper.jb(addr.Jb.bind(addr));
@@ -1157,7 +1897,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump does not execute if CF=0', () => {
+    test("jump does not execute if CF=0", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.jb(addr.Jb.bind(addr));
@@ -1167,7 +1907,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('jbe', () => {
+  describe("jbe", () => {
     beforeEach(() => {
       // JA Jb
       cpu.mem8[0x00FF] = 0x76;
@@ -1175,7 +1915,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
 
-    test('jump does not execute if ZF = 0, CF = 0', () => {
+    test("jump does not execute if ZF = 0, CF = 0", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.jbe(addr.Jb.bind(addr), null);
@@ -1184,7 +1924,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump executes if ZF = 0, CF = 1', () => {
+    test("jump executes if ZF = 0, CF = 1", () => {
       cpu.reg16[regFlags] = 0b0000000000000001;
       cpu.decode();
       oper.jbe(addr.Jb.bind(addr), null);
@@ -1193,7 +1933,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump executes if ZF = 1, CF = 0', () => {
+    test("jump executes if ZF = 1, CF = 0", () => {
       cpu.reg16[regFlags] = 0b0000000001000000;
       cpu.decode();
       oper.jbe(addr.Jb.bind(addr), null);
@@ -1202,7 +1942,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump executes if ZF = 1, CF = 1', () => {
+    test("jump executes if ZF = 1, CF = 1", () => {
       cpu.reg16[regFlags] = 0b0000000001000001;
       cpu.decode();
       oper.jbe(addr.Jb.bind(addr), null);
@@ -1212,7 +1952,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('jcxz', () => {
+  describe("jcxz", () => {
     beforeEach(() => {
       // JCXZ Jb
       cpu.mem8[0x00FF] = 0xE3;
@@ -1220,7 +1960,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
 
-    test('jump executes if CX=1', () => {
+    test("jump executes if CX=1", () => {
       cpu.reg16[regCX] = 0x00;
       cpu.decode();
       oper.jcxz(addr.Jb.bind(addr));
@@ -1229,7 +1969,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump does not execute if CX<>0', () => {
+    test("jump does not execute if CX<>0", () => {
       cpu.reg16[regCX] = 0x01;
       cpu.decode();
       oper.jcxz(addr.Jb.bind(addr));
@@ -1239,7 +1979,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('jg', () => {
+  describe("jg", () => {
     beforeEach(() => {
       // JG Jb
       cpu.mem8[0x00FF] = 0x76;
@@ -1247,7 +1987,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
 
-    test('jump executes if OF=0, SF=0, ZF=0', () => {
+    test("jump executes if OF=0, SF=0, ZF=0", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.jg(addr.Jb.bind(addr), null);
@@ -1256,7 +1996,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump executes if OF=0, SF=0, ZF=1', () => {
+    test("jump executes if OF=0, SF=0, ZF=1", () => {
       cpu.reg16[regFlags] = 0b0000000001000000;
       cpu.decode();
       oper.jg(addr.Jb.bind(addr), null);
@@ -1265,7 +2005,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump executes if OF=0, SF=1, ZF=0', () => {
+    test("jump executes if OF=0, SF=1, ZF=0", () => {
       cpu.reg16[regFlags] = 0b0000000010000000;
       cpu.decode();
       oper.jg(addr.Jb.bind(addr), null);
@@ -1274,7 +2014,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump does not execute if OF=0, SF=1, ZF=1', () => {
+    test("jump does not execute if OF=0, SF=1, ZF=1", () => {
       cpu.reg16[regFlags] = 0b0000000011000000;
       cpu.decode();
       oper.jg(addr.Jb.bind(addr), null);
@@ -1283,7 +2023,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump executes if OF=1, SF=0, ZF=0', () => {
+    test("jump executes if OF=1, SF=0, ZF=0", () => {
       cpu.reg16[regFlags] = 0b0000100000000000;
       cpu.decode();
       oper.jg(addr.Jb.bind(addr), null);
@@ -1292,7 +2032,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump executes if OF=1, SF=1, ZF=0', () => {
+    test("jump executes if OF=1, SF=1, ZF=0", () => {
       cpu.reg16[regFlags] = 0b0000100010000000;
       cpu.decode();
       oper.jg(addr.Jb.bind(addr), null);
@@ -1301,7 +2041,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump executes if OF=1, SF=1, ZF=1', () => {
+    test("jump executes if OF=1, SF=1, ZF=1", () => {
       cpu.reg16[regFlags] = 0b0000100011000000;
       cpu.decode();
       oper.jg(addr.Jb.bind(addr), null);
@@ -1311,7 +2051,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('jge', () => {
+  describe("jge", () => {
     beforeEach(() => {
       // JGE Jb
       cpu.mem8[0x00FF] = 0x7D;
@@ -1319,7 +2059,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
 
-    test('jump executes if SF=0, OF=0', () => {
+    test("jump executes if SF=0, OF=0", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.jge(addr.Jb.bind(addr), null);
@@ -1328,7 +2068,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump does not execute if SF=0, OF=1', () => {
+    test("jump does not execute if SF=0, OF=1", () => {
       cpu.reg16[regFlags] = 0b0000100000000000;
       cpu.decode();
       oper.jge(addr.Jb.bind(addr), null);
@@ -1337,7 +2077,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump does not execute if SF=1, OF=0', () => {
+    test("jump does not execute if SF=1, OF=0", () => {
       cpu.reg16[regFlags] = 0b0000000010000000;
       cpu.decode();
       oper.jge(addr.Jb.bind(addr), null);
@@ -1346,7 +2086,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump executes if SF=1, OF=1', () => {
+    test("jump executes if SF=1, OF=1", () => {
       cpu.reg16[regFlags] = 0b0000100010000000;
       cpu.decode();
       oper.jge(addr.Jb.bind(addr), null);
@@ -1356,7 +2096,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('jl', () => {
+  describe("jl", () => {
     beforeEach(() => {
       // JL Jb
       cpu.mem8[0x00FF] = 0x7C;
@@ -1364,7 +2104,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
 
-    test('jump does not execute if SF=0, OF=0', () => {
+    test("jump does not execute if SF=0, OF=0", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.jl(addr.Jb.bind(addr), null);
@@ -1373,7 +2113,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump executes if SF=0, OF=1', () => {
+    test("jump executes if SF=0, OF=1", () => {
       cpu.reg16[regFlags] = 0b0000100000000000;
       cpu.decode();
       oper.jl(addr.Jb.bind(addr), null);
@@ -1382,7 +2122,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump executes if SF=1, OF=0', () => {
+    test("jump executes if SF=1, OF=0", () => {
       cpu.reg16[regFlags] = 0b0000000010000000;
       cpu.decode();
       oper.jl(addr.Jb.bind(addr), null);
@@ -1391,7 +2131,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump does not execute if SF=1, OF=1', () => {
+    test("jump does not execute if SF=1, OF=1", () => {
       cpu.reg16[regFlags] = 0b0000100010000000;
       cpu.decode();
       oper.jl(addr.Jb.bind(addr), null);
@@ -1401,7 +2141,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('jle', () => {
+  describe("jle", () => {
     beforeEach(() => {
       // JLE Jb
       cpu.mem8[0x00FF] = 0x7E;
@@ -1409,7 +2149,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
 
-    test('jump does not execute if OF=0, SF=0, ZF=0', () => {
+    test("jump does not execute if OF=0, SF=0, ZF=0", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.jle(addr.Jb.bind(addr), null);
@@ -1418,7 +2158,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump executes if OF=0, SF=0, ZF=1', () => {
+    test("jump executes if OF=0, SF=0, ZF=1", () => {
       cpu.reg16[regFlags] = 0b0000000001000000;
       cpu.decode();
       oper.jle(addr.Jb.bind(addr), null);
@@ -1427,7 +2167,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump executes if OF=0, SF=1, ZF=0', () => {
+    test("jump executes if OF=0, SF=1, ZF=0", () => {
       cpu.reg16[regFlags] = 0b0000000010000000;
       cpu.decode();
       oper.jle(addr.Jb.bind(addr), null);
@@ -1436,7 +2176,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump executes if OF=0, SF=1, ZF=1', () => {
+    test("jump executes if OF=0, SF=1, ZF=1", () => {
       cpu.reg16[regFlags] = 0b0000000011000000;
       cpu.decode();
       oper.jle(addr.Jb.bind(addr), null);
@@ -1445,7 +2185,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump executes if OF=1, SF=0, ZF=0', () => {
+    test("jump executes if OF=1, SF=0, ZF=0", () => {
       cpu.reg16[regFlags] = 0b0000100000000000;
       cpu.decode();
       oper.jle(addr.Jb.bind(addr), null);
@@ -1454,7 +2194,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump does not execute if OF=1, SF=1, ZF=0', () => {
+    test("jump does not execute if OF=1, SF=1, ZF=0", () => {
       cpu.reg16[regFlags] = 0b0000100010000000;
       cpu.decode();
       oper.jle(addr.Jb.bind(addr), null);
@@ -1463,7 +2203,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump executes if OF=1, SF=1, ZF=1', () => {
+    test("jump executes if OF=1, SF=1, ZF=1", () => {
       cpu.reg16[regFlags] = 0b0000100011000000;
       cpu.decode();
       oper.jle(addr.Jb.bind(addr), null);
@@ -1473,8 +2213,8 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('jmp', () => {
-    test('JMP Jv (near) positive offset', () => {
+  describe("jmp", () => {
+    test("JMP Jv (near) positive offset", () => {
       cpu.instIPInc = 1;
       cpu.mem8[0x000FF] = 0xE9; // inst (byte)
       cpu.mem8[0x00100] = 0x34; // segment byte high
@@ -1483,11 +2223,13 @@ describe('Operation methods', () => {
       oper.jmp(addr.Jv.bind(addr), null);
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
-      expect(cpu.reg16[regIP]).toBe(0xFF + 0x1234);
+      // Near and short jumps reference IP after the jump instruction so
+      // we add 3 (size of the instruction) to the expected result
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x1234 + 3);
       expect(cpu.instIPInc).toBe(0);
       expect(cpu.addrIPInc).toBe(0);
     });
-    test('JMP Jv (near) negative offset', () => {
+    test("JMP Jv (near) negative offset", () => {
       cpu.instIPInc = 1;
       cpu.mem8[0x000FF] = 0xE9; // inst (byte)
       cpu.mem8[0x00100] = 0xF6; // segment byte high
@@ -1496,11 +2238,13 @@ describe('Operation methods', () => {
       oper.jmp(addr.Jv.bind(addr), null);
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
-      expect(cpu.reg16[regIP]).toBe(0xFF - 0x0A);
+      // Near and short jumps reference IP after the jump instruction so
+      // we add 3 (size of the instruction) to the expected result
+      expect(cpu.reg16[regIP]).toBe(0xFF - 0x0A + 3);
       expect(cpu.instIPInc).toBe(0);
       expect(cpu.addrIPInc).toBe(0);
     });
-    test('JMP Ap (far)', () => {
+    test("JMP Ap (far)", () => {
       cpu.instIPInc = 1;
       cpu.mem8[0x000FF] = 0xEA; // inst (byte)
       cpu.mem8[0x00100] = 0x78; // v1 high
@@ -1515,7 +2259,7 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(0);
       expect(cpu.addrIPInc).toBe(0);
     });
-    test('JMP Jb (short) positive offset', () => {
+    test("JMP Jb (short) positive offset", () => {
       cpu.instIPInc = 1;
       cpu.mem8[0x000FF] = 0xEB; // inst (byte)
       cpu.mem8[0x00100] = 0x56; // v1 low
@@ -1523,11 +2267,13 @@ describe('Operation methods', () => {
       oper.jmp(addr.Jb.bind(addr), null);
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
-      expect(cpu.reg16[regIP]).toBe(0xFF + 0x56);
+      // Near and short jumps reference IP after the jump instruction so
+      // we add 2 (size of the instruction) to the expected result
+      expect(cpu.reg16[regIP]).toBe(0xFF + 0x56 + 2);
       expect(cpu.instIPInc).toBe(0);
       expect(cpu.addrIPInc).toBe(0);
     });
-    test('JMP Jb (short) negative offset', () => {
+    test("JMP Jb (short) negative offset", () => {
       cpu.instIPInc = 1;
       cpu.mem8[0x000FF] = 0xEB; // inst (byte)
       cpu.mem8[0x00100] = 0xF6; // v1 low
@@ -1535,11 +2281,13 @@ describe('Operation methods', () => {
       oper.jmp(addr.Jb.bind(addr), null);
 
       expect(cpu.reg16[regCS]).toBe(0x0000);
-      expect(cpu.reg16[regIP]).toBe(0xFF - 0x0A);
+      // Near and short jumps reference IP after the jump instruction so
+      // we add 2 (size of the instruction) to the expected result
+      expect(cpu.reg16[regIP]).toBe(0xFF - 0x0A + 2);
       expect(cpu.instIPInc).toBe(0);
       expect(cpu.addrIPInc).toBe(0);
     });
-    test('JMP Ev (near)', () => {
+    test("JMP Ev (near)", () => {
       cpu.instIPInc = 2;
       cpu.mem8[0x000FF] = 0xFF; // inst (byte)
       cpu.mem8[0x00100] = 0b11100000; // addr mode
@@ -1552,7 +2300,7 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(0);
       expect(cpu.addrIPInc).toBe(0);
     });
-    test('JMP Mp (far)', () => {
+    test("JMP Mp (far)", () => {
       cpu.instIPInc = 2;
       cpu.mem8[0x000FF] = 0xFF; // inst (byte)
       cpu.mem8[0x00100] = 0b00101100; // addr mode
@@ -1571,7 +2319,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('jnb', () => {
+  describe("jnb", () => {
     beforeEach(() => {
       // JNB Jb
       cpu.mem8[0x00FF] = 0x73;
@@ -1579,7 +2327,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
 
-    test('jump executes CF=0', () => {
+    test("jump executes CF=0", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.jnb(addr.Jb.bind(addr));
@@ -1588,7 +2336,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump does not execute if CF=1', () => {
+    test("jump does not execute if CF=1", () => {
       cpu.reg16[regFlags] = 0b0000000000000001;
       cpu.decode();
       oper.jnb(addr.Jb.bind(addr));
@@ -1598,7 +2346,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('jno', () => {
+  describe("jno", () => {
     beforeEach(() => {
       // JNO Jb
       cpu.mem8[0x00FF] = 0x71;
@@ -1606,7 +2354,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
 
-    test('jump executes OF=0', () => {
+    test("jump executes OF=0", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.jno(addr.Jb.bind(addr));
@@ -1615,7 +2363,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump does not execute if OF=1', () => {
+    test("jump does not execute if OF=1", () => {
       cpu.reg16[regFlags] = 0b0000100000000000;
       cpu.decode();
       oper.jno(addr.Jb.bind(addr));
@@ -1625,7 +2373,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('jns', () => {
+  describe("jns", () => {
     beforeEach(() => {
       // JNS Jb
       cpu.mem8[0x00FF] = 0x79;
@@ -1633,7 +2381,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
 
-    test('jump executes SF=0', () => {
+    test("jump executes SF=0", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.jns(addr.Jb.bind(addr));
@@ -1642,7 +2390,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump does not execute if SF=1', () => {
+    test("jump does not execute if SF=1", () => {
       cpu.reg16[regFlags] = 0b0000000010000000;
       cpu.decode();
       oper.jns(addr.Jb.bind(addr));
@@ -1652,7 +2400,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('jnz', () => {
+  describe("jnz", () => {
     beforeEach(() => {
       // JNZ Jb
       cpu.mem8[0x00FF] = 0x75;
@@ -1660,7 +2408,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
 
-    test('jump executes ZF=0', () => {
+    test("jump executes ZF=0", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.jnz(addr.Jb.bind(addr));
@@ -1669,7 +2417,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump does not execute if ZF=1', () => {
+    test("jump does not execute if ZF=1", () => {
       cpu.reg16[regFlags] = 0b0000000001000000;
       cpu.decode();
       oper.jnz(addr.Jb.bind(addr));
@@ -1679,7 +2427,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('jo', () => {
+  describe("jo", () => {
     beforeEach(() => {
       // JO Jb
       cpu.mem8[0x00FF] = 0x70;
@@ -1687,7 +2435,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
 
-    test('jump executes OF=1', () => {
+    test("jump executes OF=1", () => {
       cpu.reg16[regFlags] = 0b0000100000000000;
       cpu.decode();
       oper.jo(addr.Jb.bind(addr));
@@ -1696,7 +2444,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump does not execute if OF=0', () => {
+    test("jump does not execute if OF=0", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.jo(addr.Jb.bind(addr));
@@ -1706,7 +2454,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('jpe', () => {
+  describe("jpe", () => {
     beforeEach(() => {
       // JPE Jb
       cpu.mem8[0x00FF] = 0x7A;
@@ -1714,7 +2462,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
 
-    test('jump executes PF=1', () => {
+    test("jump executes PF=1", () => {
       cpu.reg16[regFlags] = 0b0000000000000100;
       cpu.decode();
       oper.jpe(addr.Jb.bind(addr));
@@ -1723,7 +2471,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump does not execute if PF=0', () => {
+    test("jump does not execute if PF=0", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.jpe(addr.Jb.bind(addr));
@@ -1733,7 +2481,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('jpo', () => {
+  describe("jpo", () => {
     beforeEach(() => {
       // JPO Jb
       cpu.mem8[0x00FF] = 0x7B;
@@ -1741,7 +2489,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
 
-    test('jump executes PF=0', () => {
+    test("jump executes PF=0", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.jpo(addr.Jb.bind(addr));
@@ -1750,7 +2498,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump does not execute if PF=1', () => {
+    test("jump does not execute if PF=1", () => {
       cpu.reg16[regFlags] = 0b0000000000000100;
       cpu.decode();
       oper.jpo(addr.Jb.bind(addr));
@@ -1760,7 +2508,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('js', () => {
+  describe("js", () => {
     beforeEach(() => {
       // JS Jb
       cpu.mem8[0x00FF] = 0x78;
@@ -1768,7 +2516,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
 
-    test('jump executes SF=1', () => {
+    test("jump executes SF=1", () => {
       cpu.reg16[regFlags] = 0b0000000010000000;
       cpu.decode();
       oper.js(addr.Jb.bind(addr));
@@ -1777,7 +2525,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump does not execute if SF=0', () => {
+    test("jump does not execute if SF=0", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.js(addr.Jb.bind(addr));
@@ -1787,7 +2535,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('jz', () => {
+  describe("jz", () => {
     beforeEach(() => {
       // JZ Jb
       cpu.mem8[0x00FF] = 0x74;
@@ -1795,7 +2543,7 @@ describe('Operation methods', () => {
       cpu.instIPInc = 1;
     });
 
-    test('jump executes if ZF=0', () => {
+    test("jump executes if ZF=0", () => {
       cpu.reg16[regFlags] = 0b0000000001000000;
       cpu.decode();
       oper.jz(addr.Jb.bind(addr));
@@ -1804,7 +2552,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(1);
     });
 
-    test('jump does not execute if if ZF=1', () => {
+    test("jump does not execute if if ZF=1", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.jz(addr.Jb.bind(addr));
@@ -1814,27 +2562,34 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('lahf', () => {
+  describe("lahf", () => {
     beforeEach(() => {
       cpu.mem8[0x00FF] = 0x9F; // inst
       cpu.instIPInc = 1;
       cpu.decode();
     });
 
-    test('load flags', () => {
-      cpu.reg16[regFlags] = 0b0101010101111111;
+    test("load flags", () => {
+      cpu.reg16[regFlags] = 0b0000000010010100;
       oper.lahf(null, null);
 
-      expect(cpu.reg8[regAH]).toBe(0b01010111)
+      expect(cpu.reg8[regAH]).toBe(0b10010100);
+    });
+
+    test("load flags with unused bits set", () => {
+      cpu.reg16[regFlags] = 0b0000000010111110;
+      oper.lahf(null, null);
+
+      expect(cpu.reg8[regAH]).toBe(0b10010100);
     });
   });
 
-  describe('lds', () => {
+  describe("lds", () => {
     beforeEach(() => {
       cpu.mem8[0x00FF] = 0xC5; // inst
     });
 
-    test(' LDS Gv Mp', () => {
+    test(" LDS Gv Mp", () => {
       cpu.mem8[0x0100] = 0b00000110; // addr mode
       cpu.mem8[0x0101] = 0x34; // segment byte high
       cpu.mem8[0x0102] = 0x12; // segment byte low
@@ -1855,12 +2610,12 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('lea', () => {
+  describe("lea", () => {
     beforeEach(() => {
       cpu.mem8[0x00FF] = 0x8D; // inst
     });
 
-    test(' LEA Gv M', () => {
+    test(" LEA Gv M", () => {
       cpu.reg16[regBX] = 0x1234;
       cpu.mem8[0x0100] = 0b10010111; // addr
       cpu.mem8[0x0101] = 0x11; // oper high
@@ -1875,12 +2630,12 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('les', () => {
+  describe("les", () => {
     beforeEach(() => {
       cpu.mem8[0x00FF] = 0xC4; // inst
     });
 
-    test(' LES Gv Mp', () => {
+    test(" LES Gv Mp", () => {
       cpu.mem8[0x0100] = 0b00000110; // addr mode
       cpu.mem8[0x0101] = 0x34; // segment byte high
       cpu.mem8[0x0102] = 0x12; // segment byte low
@@ -1901,16 +2656,16 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('lock', () => {
-    test('NOT IMPLEMENTED', () => {
+  describe("lock", () => {
+    test("NOT IMPLEMENTED", () => {
       expect(() => {
         oper.lock();
       }).toThrowError(FeatureNotImplementedException);
     });
   });
 
-  describe('lodsb', () => {
-    test('lodsb increment', () => {
+  describe("lodsb", () => {
+    test("lodsb increment", () => {
       // 0x2345 * 0x10 + 0x5678
       cpu.mem8[0x28AC8] = 0x12;
       cpu.reg16[regDS] = 0x2345;
@@ -1923,7 +2678,7 @@ describe('Operation methods', () => {
       expect(cpu.reg8[regAL]).toBe(0x12);
       expect(cpu.reg16[regSI]).toBe(0x5679);
     });
-    test('lodsb decrement', () => {
+    test("lodsb decrement", () => {
       // 0x2345 * 0x10 + 0x5678
       cpu.mem8[0x28AC8] = 0x12;
       cpu.reg16[regDS] = 0x2345;
@@ -1938,8 +2693,8 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('lodsw', () => {
-    test('lodsw increment', () => {
+  describe("lodsw", () => {
+    test("lodsw increment", () => {
       // 0x2345 * 0x10 + 0x5678
       cpu.mem8[0x28AC8] = 0x34;
       cpu.mem8[0x28AC9] = 0x12;
@@ -1953,7 +2708,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regAX]).toBe(0x1234);
       expect(cpu.reg16[regSI]).toBe(0x567A);
     });
-    test('lodsw decrement', () => {
+    test("lodsw decrement", () => {
       // 0x2345 * 0x10 + 0x5678
       cpu.mem8[0x28AC8] = 0x34;
       cpu.mem8[0x28AC9] = 0x12;
@@ -1969,14 +2724,14 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('loopnz', () => {
+  describe("loopnz", () => {
     beforeEach(() => {
       // LOOPNZ Jb
       cpu.mem8[0x00FF] = 0xE0;
       cpu.instIPInc = 1;
     });
 
-    test('LOOPNZ repeats positive offset', () => {
+    test("LOOPNZ repeats positive offset", () => {
       cpu.reg16[regCX] = 0x0009;
       cpu.mem8[0x0100] = 0x12;
       cpu.reg16[regFlags] = 0b0000000000000000;
@@ -1988,7 +2743,7 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(1);
       expect(cpu.addrIPInc).toBe(1);
     });
-    test('LOOPNZ repeats negative offset', () => {
+    test("LOOPNZ repeats negative offset", () => {
       cpu.reg16[regCX] = 0x0009;
       cpu.mem8[0x0100] = 0xF6;
       cpu.reg16[regFlags] = 0b0000000000000000;
@@ -2000,7 +2755,7 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(1);
       expect(cpu.addrIPInc).toBe(1);
     });
-    test('LOOPNZ stops repeating if CX reaches 0', () => {
+    test("LOOPNZ stops repeating if CX reaches 0", () => {
       cpu.reg16[regCX] = 0x0001;
       cpu.mem8[0x0100] = 0x12;
       cpu.reg16[regFlags] = 0b0000000000000000;
@@ -2012,7 +2767,7 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(1);
       expect(cpu.addrIPInc).toBe(1);
     });
-    test('LOOPNZ stops repeating if ZF is set', () => {
+    test("LOOPNZ stops repeating if ZF is set", () => {
       cpu.reg16[regCX] = 0x0001;
       cpu.mem8[0x0100] = 0x12;
       cpu.reg16[regFlags] = 0b0000000001000000;
@@ -2026,14 +2781,14 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('loopz', () => {
+  describe("loopz", () => {
     beforeEach(() => {
       // LOOPZ Jb
       cpu.mem8[0x00FF] = 0xE1;
       cpu.instIPInc = 1;
     });
 
-    test('LOOPZ repeats positive offset', () => {
+    test("LOOPZ repeats positive offset", () => {
       cpu.reg16[regCX] = 0x0009;
       cpu.mem8[0x0100] = 0x12;
       cpu.reg16[regFlags] = 0b0000000001000000;
@@ -2045,7 +2800,7 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(1);
       expect(cpu.addrIPInc).toBe(1);
     });
-    test('LOOPZ repeats negative offset', () => {
+    test("LOOPZ repeats negative offset", () => {
       cpu.reg16[regCX] = 0x0009;
       cpu.mem8[0x0100] = 0xF6;
       cpu.reg16[regFlags] = 0b0000000001000000;
@@ -2057,7 +2812,7 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(1);
       expect(cpu.addrIPInc).toBe(1);
     });
-    test('LOOPZ stops repeating if CX reaches 0', () => {
+    test("LOOPZ stops repeating if CX reaches 0", () => {
       cpu.reg16[regCX] = 0x0001;
       cpu.mem8[0x0100] = 0x12;
       cpu.reg16[regFlags] = 0b0000000001000000;
@@ -2069,7 +2824,7 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(1);
       expect(cpu.addrIPInc).toBe(1);
     });
-    test('LOOPZ stops repeating if ZF is not set', () => {
+    test("LOOPZ stops repeating if ZF is not set", () => {
       cpu.reg16[regCX] = 0x0001;
       cpu.mem8[0x0100] = 0x12;
       cpu.reg16[regFlags] = 0b0000000000000000;
@@ -2083,14 +2838,14 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('loop', () => {
+  describe("loop", () => {
     beforeEach(() => {
       // LOOP Jb
       cpu.mem8[0x00FF] = 0xE2;
       cpu.instIPInc = 1;
     });
 
-    test('LOOP repeats positive offset', () => {
+    test("LOOP repeats positive offset", () => {
       cpu.reg16[regCX] = 0x0009;
       cpu.mem8[0x0100] = 0x12;
       cpu.decode();
@@ -2101,7 +2856,7 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(1);
       expect(cpu.addrIPInc).toBe(1);
     });
-    test('LOOP repeats negative offset', () => {
+    test("LOOP repeats negative offset", () => {
       cpu.reg16[regCX] = 0x0009;
       cpu.mem8[0x0100] = 0xF6;
       cpu.decode();
@@ -2112,7 +2867,7 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(1);
       expect(cpu.addrIPInc).toBe(1);
     });
-    test('LOOP stops repeating', () => {
+    test("LOOP stops repeating", () => {
       cpu.reg16[regCX] = 0x0001;
       cpu.mem8[0x0100] = 0x12;
       cpu.decode();
@@ -2125,10 +2880,10 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('mov', () => {
+  describe("mov", () => {
     beforeEach(() => {});
 
-    test('MOV AX, iv', () => {
+    test("MOV AX, iv", () => {
       cpu.instIPInc = 1;
       cpu.mem8[0x00FF] = 0xB8; // Inst
       cpu.mem8[0x0100] = 0x34; // Operand low
@@ -2138,7 +2893,7 @@ describe('Operation methods', () => {
 
       expect(cpu.reg16[regAX]).toBe(0x1234);
     });
-    test('[regression] mov di, WORD PTR ds:0x1D3', () => {
+    test("[regression] mov di, WORD PTR ds:0x1D3", () => {
       cpu.instIPInc = 2;
       cpu.mem8[0x00FF] = 0x8B; // Instruction
       cpu.mem8[0x0100] = 0x3E; // Addressing
@@ -2155,7 +2910,7 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(2);
       expect(cpu.addrIPInc).toBe(2);
     });
-    test('[regression] mov WORD [cursor], 80 * 5', () => {
+    test("[regression] mov WORD [cursor], 80 * 5", () => {
       cpu.instIPInc = 2;
       cpu.mem8[0x00FF] = 0xC7; // Instruction
       cpu.mem8[0x0100] = 0x06; // Addressing
@@ -2172,7 +2927,7 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(2);
       expect(cpu.addrIPInc).toBe(4);
     });
-    test('[regression] mov ES AX - where ES is Sw and Ax is Ew', () => {
+    test("[regression] mov ES AX - where ES is Sw and Ax is Ew", () => {
       cpu.instIPInc = 2;
       cpu.mem8[0x00FF] = 0x8E; // Instruction
       cpu.mem8[0x0100] = 0xC0; // Addressing
@@ -2188,7 +2943,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('movsb', () => {
+  describe("movsb", () => {
     beforeEach(() => {
       cpu.mem8[0x00FF] = 0xAF;
       // ES:DI = 0x1234 * 0x10 + 0x3456 = 0x15796
@@ -2203,7 +2958,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x279B8] = 0x56;
       cpu.instIPInc = 1;
     });
-    test('movsb increment', () => {
+    test("movsb increment", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.movsb();
@@ -2212,7 +2967,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regDI]).toBe(0x3457);
       expect(cpu.reg16[regSI]).toBe(0x4568);
     });
-    test('movsb decrement', () => {
+    test("movsb decrement", () => {
       cpu.reg16[regFlags] = 0b0000010000000000;
       cpu.decode();
       oper.movsb();
@@ -2220,10 +2975,10 @@ describe('Operation methods', () => {
       expect(cpu.mem8[0x15796]).toBe(0x78);
       expect(cpu.reg16[regDI]).toBe(0x3455);
       expect(cpu.reg16[regSI]).toBe(0x4566);
-    })
+    });
   });
 
-  describe('movsw', () => {
+  describe("movsw", () => {
     beforeEach(() => {
       cpu.mem8[0x00FF] = 0xAF;
       // ES:DI = 0x1234 * 0x10 + 0x3456 = 0x15796
@@ -2238,7 +2993,7 @@ describe('Operation methods', () => {
       cpu.mem8[0x279B8] = 0x56;
       cpu.instIPInc = 1;
     });
-    test('movsw increment', () => {
+    test("movsw increment", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.movsw();
@@ -2248,7 +3003,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regDI]).toBe(0x3458);
       expect(cpu.reg16[regSI]).toBe(0x4569);
     });
-    test('movsw decrement', () => {
+    test("movsw decrement", () => {
       cpu.reg16[regFlags] = 0b0000010000000000;
       cpu.decode();
       oper.movsw();
@@ -2257,11 +3012,11 @@ describe('Operation methods', () => {
       expect(cpu.mem8[0x15797]).toBe(0x56);
       expect(cpu.reg16[regDI]).toBe(0x3454);
       expect(cpu.reg16[regSI]).toBe(0x4565);
-    })
+    });
   });
 
-  describe('mul', () => {
-    test('multiply by zero', () => {
+  describe("mul", () => {
+    test("multiply by zero", () => {
       // MUL BX
       cpu.reg16[regFlags] = 0xFFFF;
       cpu.mem8[0x00FF] = 0xF7; // Inst
@@ -2278,7 +3033,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_CF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('unsigned multiply', () => {
+    test("unsigned multiply", () => {
       // MUL BX
       cpu.reg16[regFlags] = 0x0000;
       cpu.mem8[0x00FF] = 0xF7; // Inst
@@ -2299,14 +3054,14 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('neg', () => {
+  describe("neg", () => {
     beforeEach(() => {
       // NEG Ev
       cpu.mem8[0x00FF] = 0xF7; // Inst
       cpu.mem8[0x0100] = 0b00011101; // Addr byte
       cpu.reg16[regDI] = 0x0222;
     });
-    test('negate a positive number', () => {
+    test("negate a positive number", () => {
       cpu.mem8[0x3222] = 0x34;
       cpu.mem8[0x3223] = 0x12;
       cpu.decode();
@@ -2321,7 +3076,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('negate a negative number', () => {
+    test("negate a negative number", () => {
       cpu.mem8[0x3222] = 0xCC;
       cpu.mem8[0x3223] = 0xED;
       cpu.decode();
@@ -2336,7 +3091,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('If the operand is zero, its sign is not changed', () => {
+    test("If the operand is zero, its sign is not changed", () => {
       cpu.mem8[0x3222] = 0x00;
       cpu.mem8[0x3223] = 0x00;
       cpu.decode();
@@ -2351,7 +3106,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('negate a byte -128 causes no change to operand and sets OF', () => {
+    test("negate a byte -128 causes no change to operand and sets OF", () => {
       cpu.mem8[0x00FF] = 0xF6; // Change instruction to NEG Eb
 
       cpu.mem8[0x3222] = 0x80;
@@ -2367,7 +3122,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
     });
-    test('negate a word -32,768 causes no change to operand and sets OF', () => {
+    test("negate a word -32,768 causes no change to operand and sets OF", () => {
       cpu.mem8[0x3222] = 0x00;
       cpu.mem8[0x3223] = 0x80;
       cpu.decode();
@@ -2384,8 +3139,8 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('nop', () => {
-    test('NOP changes nothing', () => {
+  describe("nop", () => {
+    test("NOP changes nothing", () => {
       cpu.mem8[0x000FF] = 0x90; // inst (byte)
       cpu.instIPInc = 1;
       cpu.decode();
@@ -2401,8 +3156,8 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('not', () => {
-    test('NOT Ev', () => {
+  describe("not", () => {
+    test("NOT Ev", () => {
       cpu.reg16[regAX] = 0x1234;
       cpu.mem8[0x000FF] = 0xF7; // inst (byte)
       cpu.mem8[0x00100] = 0b11010000; // addr
@@ -2414,8 +3169,8 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(0);
     });
   });
-  describe('or', () => {
-    test('OR AX Iv', () => {
+  describe("or", () => {
+    test("OR AX Iv", () => {
       cpu.reg16[regAX] = 0x1234;
       cpu.mem8[0x000FF] = 0x0D; // inst (byte)
       cpu.mem8[0x00100] = 0x21; // oper low
@@ -2434,8 +3189,8 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('out', () => {
-    test('OUT 0xF8, AL', () => {
+  describe("out", () => {
+    test("OUT 0xF8, AL", () => {
       cpu.reg8[regAL] = 0xBB;
       cpu.mem8[0x00FF] = 0xE6;
       cpu.mem8[0x0100] = 0xF8;
@@ -2443,9 +3198,9 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.out(addr.Ib.bind(addr), addr.AL.bind(addr));
 
-      expect(io.devices[0].buffer8[0xF8]).toBe(0xBB);
+      expect(io.devices["TestDevice"].buffer8[0xF8]).toBe(0xBB);
     });
-    test('OUT 0xF8, AX', () => {
+    test("OUT 0xF8, AX", () => {
       cpu.reg16[regAX] = 0xBBCC;
       cpu.mem8[0x00FF] = 0xE7;
       cpu.mem8[0x0100] = 0xF8;
@@ -2453,9 +3208,9 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.out(addr.Ib.bind(addr), addr.AX.bind(addr));
 
-      expect(io.devices[0].buffer16[0xF8]).toBe(0xBBCC);
+      expect(io.devices["TestDevice"].buffer16[0xF8]).toBe(0xBBCC);
     });
-    test('OUT DX, AL', () => {
+    test("OUT DX, AL", () => {
       cpu.reg8[regAL] = 0xBB;
       cpu.reg16[regDX] = 0xF84E;
       cpu.mem8[0x00FF] = 0xEE;
@@ -2463,9 +3218,9 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.out(addr.DX.bind(addr), addr.AL.bind(addr));
 
-      expect(io.devices[0].buffer8[0xF84E]).toBe(0xBB);
+      expect(io.devices["TestDevice"].buffer8[0xF84E]).toBe(0xBB);
     });
-    test('OUT DX, AX', () => {
+    test("OUT DX, AX", () => {
       cpu.reg16[regAX] = 0xBBCC;
       cpu.reg16[regDX] = 0xF84E;
       cpu.mem8[0x00FF] = 0xEF;
@@ -2473,16 +3228,16 @@ describe('Operation methods', () => {
       cpu.decode();
       oper.out(addr.DX.bind(addr), addr.AX.bind(addr));
 
-      expect(io.devices[0].buffer16[0xF84E]).toBe(0xBBCC);
+      expect(io.devices["TestDevice"].buffer16[0xF84E]).toBe(0xBBCC);
     });
   });
 
-  describe('pop', () => {
+  describe("pop", () => {
     beforeEach(() => {
       setMemory(cpu, 0xAA);
     });
 
-    test('POP AX', () => {
+    test("POP AX", () => {
       cpu.reg16[regSP] = 0x001E;
       cpu.mem8[0x000FF] = 0x58; // inst (byte)
       cpu.mem8[0x401E] = 0x34;
@@ -2496,12 +3251,12 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('popf', () => {
+  describe("popf", () => {
     beforeEach(() => {
       setMemory(cpu, 0xAA);
     });
 
-    test('POPF', () => {
+    test("POPF", () => {
       cpu.reg16[regSP] = 0x001E;
       cpu.mem8[0x000FF] = 0x9D; // inst (byte)
       cpu.mem8[0x401E] = 0xDC;
@@ -2515,12 +3270,12 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('push', () => {
+  describe("push", () => {
     beforeEach(() => {
       setMemory(cpu, 0xAA);
     });
 
-    test('PUSH AX', () => {
+    test("PUSH AX", () => {
       cpu.mem8[0x000FF] = 0x50; // inst (byte)
       cpu.reg16[regAX] = 0x1234;
       cpu.decode();
@@ -2533,12 +3288,12 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('pushf', () => {
+  describe("pushf", () => {
     beforeEach(() => {
       setMemory(cpu, 0xAA);
     });
 
-    test('PUSHF', () => {
+    test("PUSHF", () => {
       cpu.mem8[0x000FF] = 0x9C; // inst (byte)
       cpu.reg16[regFlags] = 0xFEDC;
       cpu.decode();
@@ -2551,8 +3306,8 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('rcl', () => {
-    test('RCL Eb 1 no carry', () => {
+  describe("rcl", () => {
+    test("RCL Eb 1 no carry", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.reg8[regAL] = 0b11100011; // 0xE3
       cpu.mem8[0x000FF] = 0xD0; // inst (byte)
@@ -2567,7 +3322,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
       expect(cpu.instIPInc).toBe(2);
     });
-    test('RCL Eb 1 with carry', () => {
+    test("RCL Eb 1 with carry", () => {
       cpu.reg16[regFlags] = 0b0000000000000001;
       cpu.reg8[regAL] = 0b11100011; // 0xE3
       cpu.mem8[0x000FF] = 0xD0; // inst (byte)
@@ -2584,8 +3339,8 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('rcr', () => {
-    test('RCR Eb 1 no carry', () => {
+  describe("rcr", () => {
+    test("RCR Eb 1 no carry", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.reg8[regAL] = 0b11100011; // 0xE3
       cpu.mem8[0x000FF] = 0xD0; // inst (byte)
@@ -2600,7 +3355,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
       expect(cpu.instIPInc).toBe(2);
     });
-    test('RCR Eb 1 with carry', () => {
+    test("RCR Eb 1 with carry", () => {
       cpu.reg16[regFlags] = 0b0000000000000001;
       cpu.reg8[regAL] = 0b11100011; // 0xE3
       cpu.mem8[0x000FF] = 0xD0; // inst (byte)
@@ -2617,16 +3372,16 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('repnz', () => {
-    test('repnz', () => {
+  describe("repnz", () => {
+    test("repnz", () => {
       oper.repnz();
 
       expect(cpu.prefixRepeatState).toBe(STATE_REP_NZ);
     });
   });
 
-  describe('repz', () => {
-    test('repz - rep instruction', () => {
+  describe("repz", () => {
+    test("repz - rep instruction", () => {
       cpu.mem8[0x000FF] = 0xF3; // REP
       cpu.mem8[0x00100] = 0xAB; // STOSW
       cpu.decode();
@@ -2634,7 +3389,7 @@ describe('Operation methods', () => {
 
       expect(cpu.prefixRepeatState).toBe(STATE_REP);
     });
-    test('repz - repz instruction', () => {
+    test("repz - repz instruction", () => {
       cpu.mem8[0x000FF] = 0xF3; // REP
       cpu.mem8[0x00100] = 0xA6; // CMPSB
       cpu.decode();
@@ -2644,12 +3399,12 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('ret', () => {
+  describe("ret", () => {
     beforeEach(() => {
       setMemory(cpu, 0xAA);
     });
 
-    test('RET Iw', () => {
+    test("RET Iw", () => {
       cpu.instIPInc = 1;
       cpu.mem8[0x000FF] = 0xC2; // inst (byte)
       cpu.mem8[0x00100] = 0x01; // v1 high
@@ -2665,7 +3420,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regCS]).toBe(0x0000);
       expect(cpu.instIPInc).toBe(0);
     });
-    test('RET', () => {
+    test("RET", () => {
       cpu.mem8[0x000FF] = 0xC3; // inst (byte)
       cpu.reg16[regSP] = 0x001E;
       cpu.mem8[0x401E] = 0x34; // Stack IP high
@@ -2679,12 +3434,12 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('retf', () => {
+  describe("retf", () => {
     beforeEach(() => {
       setMemory(cpu, 0xAA);
     });
 
-    test('RETF Iw', () => {
+    test("RETF Iw", () => {
       cpu.instIPInc = 1;
       cpu.mem8[0x000FF] = 0xCA; // inst (byte)
       cpu.mem8[0x00100] = 0x01; // v1 high
@@ -2704,7 +3459,7 @@ describe('Operation methods', () => {
       expect(cpu.addrIPInc).toBe(0);
     });
 
-    test('RETF', () => {
+    test("RETF", () => {
       cpu.mem8[0x000FF] = 0xCB; // inst (byte)
 
       cpu.reg16[regSP] = 0x001C;
@@ -2721,8 +3476,8 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('rol', () => {
-    test('ROL Eb 1', () => {
+  describe("rol", () => {
+    test("ROL Eb 1", () => {
       cpu.reg8[regAL] = 0b11100011; // 0xE3
       cpu.mem8[0x000FF] = 0xD0; // inst (byte)
       cpu.mem8[0x00100] = 0b11000000; // addr
@@ -2738,8 +3493,8 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('ror', () => {
-    test('ROR Eb 1', () => {
+  describe("ror", () => {
+    test("ROR Eb 1", () => {
       cpu.reg8[regAL] = 0b11100011; // 0xE3
       cpu.mem8[0x000FF] = 0xD0; // inst (byte)
       cpu.mem8[0x00100] = 0b11001000; // addr
@@ -2754,24 +3509,32 @@ describe('Operation methods', () => {
       expect(cpu.instIPInc).toBe(2);
     });
   });
-  describe('sahf', () => {
+  describe("sahf", () => {
     beforeEach(() => {
       cpu.mem8[0x00FF] = 0x9E; // inst
       cpu.instIPInc = 1;
       cpu.decode();
     });
 
-    test('set flags', () => {
-      cpu.reg16[regFlags] = 0b0000000000000010;
-      cpu.reg8[regAH] = 0b01111101;
+    test("set flags", () => {
+      cpu.reg16[regFlags] = 0b0000000010010100; // 148 (0x94)
+      cpu.reg8[regAH] = 0b00111101;             // 61 (0x3D)
       oper.sahf(null, null);
 
-      expect(cpu.reg16[regFlags]).toBe(0b01010111)
+      expect(cpu.reg16[regFlags]).toBe(0b00010101);  // 149 (0x95)
+    });
+
+    test("set flags to zero", () => {
+      cpu.reg16[regFlags] = 0b0000100001010100;
+      cpu.reg8[regAH] = 0b00000000;
+      oper.sahf(null, null);
+
+      expect(cpu.reg16[regFlags]).toBe(0b0000100000000000);  // 149 (0x95)
     });
   });
 
-  describe('sar', () => {
-    test('SAR Eb 1', () => {
+  describe("sar", () => {
+    test("SAR Eb 1", () => {
       cpu.reg8[regAL] = 0xE3;
       cpu.mem8[0x000FF] = 0xD0; // inst (byte)
       cpu.mem8[0x00100] = 0b11111000; // addr
@@ -2790,13 +3553,13 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('sbb', () => {
+  describe("sbb", () => {
     beforeEach(() => {
       // SBB AX,iv
       cpu.mem8[0x00FF] = 0x1D;
       cpu.instIPInc = 1;
     });
-    test('dst > src', () => {
+    test("dst > src", () => {
       //  0x1235 > 0x1234
       cpu.reg16[regAX] = 0x1235;
       cpu.mem8[0x0100] = 0x34;
@@ -2810,9 +3573,9 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
-      expect(cpu.reg16[regAX]).toBe(0x0001)
+      expect(cpu.reg16[regAX]).toBe(0x0001);
     });
-    test('dst < src', () => {
+    test("dst < src", () => {
       // 0x1234 > 0x1235
       cpu.reg16[regAX] = 0x1234;
       cpu.mem8[0x0100] = 0x35;
@@ -2826,9 +3589,9 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
-      expect(cpu.reg16[regAX]).toBe(0xFFFF)
+      expect(cpu.reg16[regAX]).toBe(0xFFFF);
     });
-    test('dst = src', () => {
+    test("dst = src", () => {
       // 0x1234 = 0x1234
       cpu.reg16[regAX] = 0x1234;
       cpu.mem8[0x0100] = 0x34;
@@ -2842,9 +3605,9 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_ZF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBe(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
-      expect(cpu.reg16[regAX]).toBe(0x0000)
+      expect(cpu.reg16[regAX]).toBe(0x0000);
     });
-    test('dst > src with overflow', () => {
+    test("dst > src with overflow", () => {
       // 0x8000 > 0x0001
       cpu.reg16[regAX] = 0x8000;
       cpu.mem8[0x0100] = 0x01;
@@ -2860,7 +3623,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regAX]).toBe(0x7FFF);
     });
-    test('subtract with cf set', () => {
+    test("subtract with cf set", () => {
       // 0x8000 > 0x0001
       cpu.reg16[regAX] = 0x8000;
       cpu.mem8[0x0100] = 0x01;
@@ -2879,7 +3642,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('scasb', () => {
+  describe("scasb", () => {
     beforeEach(() => {
       cpu.mem8[0x00FF] = 0xAE;
       // 0x2345 * 0x10 + 0x5678
@@ -2889,7 +3652,7 @@ describe('Operation methods', () => {
       cpu.reg16[regDI] = 0x5678;
       cpu.instIPInc = 1;
     });
-    test('scasb increment', () => {
+    test("scasb increment", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.scasb();
@@ -2903,7 +3666,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('stosb decrement', () => {
+    test("stosb decrement", () => {
       cpu.reg16[regFlags] = 0b0000010000000000;
       cpu.decode();
       oper.scasb();
@@ -2919,7 +3682,7 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('scasw', () => {
+  describe("scasw", () => {
     beforeEach(() => {
       cpu.mem8[0x00FF] = 0xAF;
       // 0x2345 * 0x10 + 0x5678
@@ -2930,7 +3693,7 @@ describe('Operation methods', () => {
       cpu.reg16[regDI] = 0x5678;
       cpu.instIPInc = 1;
     });
-    test('scasw increment', () => {
+    test("scasw increment", () => {
       cpu.reg16[regFlags] = 0b0000000000000000;
       cpu.decode();
       oper.scasw();
@@ -2944,7 +3707,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_SF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
     });
-    test('scasw decrement', () => {
+    test("scasw decrement", () => {
       cpu.reg16[regFlags] = 0b0000010000000000;
       cpu.decode();
       oper.scasw();
@@ -2960,8 +3723,8 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('shl', () => {
-    test('SHL Eb 1', () => {
+  describe("shl", () => {
+    test("SHL Eb 1", () => {
       cpu.reg8[regAL] = 0xE2;
       cpu.mem8[0x000FF] = 0xD0; // inst (byte)
       cpu.mem8[0x00100] = 0b11100000; // addr
@@ -2980,8 +3743,8 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('shr', () => {
-    test('SHR Eb 1', () => {
+  describe("shr", () => {
+    test("SHR Eb 1", () => {
       cpu.reg8[regAL] = 0xE3;
       cpu.mem8[0x000FF] = 0xD0; // inst (byte)
       cpu.mem8[0x00100] = 0b11101000; // addr
@@ -3000,17 +3763,17 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('ss', () => {
-    test('SS sets addrSeg', () => {
+  describe("ss", () => {
+    test("SS sets addrSeg", () => {
       oper.ss();
 
       expect(cpu.addrSeg).toBe(regSS);
       expect(cpu.prefixSegmentState).toBe(STATE_SEG_SS);
-    })
+    });
   });
 
-  describe('stc', () => {
-    test('STC with CF clear', () => {
+  describe("stc", () => {
+    test("STC with CF clear", () => {
       cpu.reg16[regFlags] = 0b1111111111111110;
       cpu.mem8[0x000FF] = 0xF9; // inst (byte)
       cpu.decode();
@@ -3021,8 +3784,8 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('std', () => {
-    test('STD with DF clear', () => {
+  describe("std", () => {
+    test("STD with DF clear", () => {
       cpu.reg16[regFlags] = 0b1111101111111111;
       cpu.mem8[0x000FF] = 0xFD; // inst (byte)
       cpu.decode();
@@ -3033,8 +3796,8 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('sti', () => {
-    test('STIC with IF clear', () => {
+  describe("sti", () => {
+    test("STIC with IF clear", () => {
       cpu.reg16[regFlags] = 0b1111110111111111;
       cpu.mem8[0x000FF] = 0xF9; // inst (byte)
       cpu.decode();
@@ -3045,8 +3808,8 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('stosb', () => {
-    test('stosb increment', () => {
+  describe("stosb", () => {
+    test("stosb increment", () => {
       cpu.reg8[regAL] = 0x12;
       cpu.reg16[regES] = 0x2345;
       cpu.reg16[regDI] = 0x5678;
@@ -3059,7 +3822,7 @@ describe('Operation methods', () => {
       expect(cpu.mem8[0x28AC8]).toBe(0x12);
       expect(cpu.reg16[regDI]).toBe(0x5679);
     });
-    test('stosb decrement', () => {
+    test("stosb decrement", () => {
       cpu.reg8[regAL] = 0x12;
       cpu.reg16[regES] = 0x2345;
       cpu.reg16[regDI] = 0x5678;
@@ -3074,8 +3837,8 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('stosw', () => {
-    test('stosw increment', () => {
+  describe("stosw", () => {
+    test("stosw increment", () => {
       cpu.reg16[regAX] = 0x1234;
       cpu.reg16[regES] = 0x2345;
       cpu.reg16[regDI] = 0x5678;
@@ -3089,7 +3852,7 @@ describe('Operation methods', () => {
       expect(cpu.mem8[0x28AC9]).toBe(0x12);
       expect(cpu.reg16[regDI]).toBe(0x567A);
     });
-    test('stosw decrement', () => {
+    test("stosw decrement", () => {
       cpu.reg16[regAX] = 0x1234;
       cpu.reg16[regES] = 0x2345;
       cpu.reg16[regDI] = 0x5678;
@@ -3105,14 +3868,14 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('sub', () => {
+  describe("sub", () => {
     beforeEach(() => {
       // SUB AX,iv
       cpu.mem8[0x00FF] = 0x2D;
       cpu.instIPInc = 1;
     });
 
-    test('dst > src', () => {
+    test("dst > src", () => {
       //  0x1235 > 0x1234
       cpu.reg16[regAX] = 0x1235;
       cpu.mem8[0x0100] = 0x34;
@@ -3128,7 +3891,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
       expect(cpu.reg16[regAX]).toBe(0x0001);
     });
-    test('dst < src', () => {
+    test("dst < src", () => {
       // 0x1234 > 0x1235
       cpu.reg16[regAX] = 0x1234;
       cpu.mem8[0x0100] = 0x35;
@@ -3144,7 +3907,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
       expect(cpu.reg16[regAX]).toBe(0xFFFF);
     });
-    test('dst = src', () => {
+    test("dst = src", () => {
       // 0x1234 = 0x1234
       cpu.reg16[regAX] = 0x1234;
       cpu.mem8[0x0100] = 0x34;
@@ -3160,7 +3923,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBe(0);
       expect(cpu.reg16[regAX]).toBe(0x0000);
     });
-    test('dst > src with overflow', () => {
+    test("dst > src with overflow", () => {
       // 0x8000 > 0x0001
       cpu.reg16[regAX] = 0x8000;
       cpu.mem8[0x0100] = 0x01;
@@ -3176,7 +3939,7 @@ describe('Operation methods', () => {
       expect(cpu.reg16[regFlags] & FLAG_OF_MASK).toBeGreaterThan(0);
       expect(cpu.reg16[regAX]).toBe(0x7FFF);
     });
-    test('[regression] immediate value for dst doesn\'t double count IP increments', () => {
+    test("[regression] immediate value for dst doesn't double count IP increments", () => {
       // Data (dst)
       cpu.mem8[0x31D3] = 0x78;
       cpu.mem8[0x31D4] = 0x56;
@@ -3206,8 +3969,8 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('test', () => {
-    test('TEST AX Iv', () => {
+  describe("test", () => {
+    test("TEST AX Iv", () => {
       cpu.reg16[regAX] = 0x1234;
       cpu.mem8[0x000FF] = 0xA9; // inst (byte)
       cpu.mem8[0x00100] = 0x21; // oper low
@@ -3226,19 +3989,18 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('wait', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.wait();
-      }).toThrowError(FeatureNotImplementedException);
+  describe("wait", () => {
+    test("sets halt state", () => {
+      oper.wait();
+      expect(cpu.state).toBe(STATE_WAIT);
     });
   });
 
-  describe('xchg', () => {
+  describe("xchg", () => {
     beforeEach(() => {
       cpu.instIPInc = 1;
     });
-    test('exchange CX AX', () => {
+    test("exchange CX AX", () => {
       cpu.mem8[0x00FF] = 0x91; // addr
       cpu.reg16[regCX] = 0x1234;
       cpu.reg16[regAX] = 0x5678;
@@ -3251,15 +4013,50 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('xlat', () => {
-    test('NOT IMPLEMENTED', () => {
-      expect(() => {
-        oper.xlat();
-      }).toThrowError(FeatureNotImplementedException);
+  describe("xlat", () => {
+    beforeEach(() => {
+      // DS: 0x0300; 0x0300:0x0200 = 0x3200
+      cpu.mem8[0x3200] = 0x01;
+      cpu.mem8[0x3201] = 0x02;
+      cpu.mem8[0x3202] = 0x03;
+      cpu.mem8[0x3203] = 0x04;
+      cpu.mem8[0x3204] = 0x05;
+      cpu.mem8[0x3205] = 0x06;
+      cpu.mem8[0x3206] = 0x07;
+      cpu.mem8[0x3207] = 0x08;
+      cpu.mem8[0x3208] = 0x09;
+      cpu.mem8[0x3209] = 0x0A;
+      cpu.mem8[0x320A] = 0x0B;
+      cpu.mem8[0x320B] = 0x0C;
+      cpu.mem8[0x320C] = 0x0D;
+      cpu.mem8[0x320D] = 0x0E;
+      cpu.mem8[0x320E] = 0x0F;
+    });
+
+    test("lookup first item", () => {
+      cpu.reg8[regAL]   = 0x00;   // table index
+      cpu.reg16[regBX]  = 0x0200; // beginning of table
+      cpu.mem8[0x000FF] = 0xD7;   // inst (byte)
+
+      cpu.decode();
+      oper.xlat(null, null);
+
+      expect(cpu.reg8[regAL]).toBe(0x01);
+    });
+    test("lookup last item", () => {
+      cpu.reg8[regAL]   = 0x0E;   // table index
+      cpu.reg16[regBX]  = 0x0200; // beginning of table
+      cpu.mem8[0x000FF] = 0xD7;   // inst (byte)
+
+      cpu.decode();
+      oper.xlat(null, null);
+
+      expect(cpu.reg8[regAL]).toBe(0x0F);
     });
   });
-  describe('xor', () => {
-    test('XOR AX Iv', () => {
+
+  describe("xor", () => {
+    test("XOR AX Iv", () => {
       cpu.reg16[regAX] = 0x1234;
       cpu.mem8[0x000FF] = 0x35; // inst (byte)
       cpu.mem8[0x00100] = 0x21; // oper low
@@ -3278,8 +4075,8 @@ describe('Operation methods', () => {
     });
   });
 
-  describe('notimp', () => {
-    test('not implemented throws', () => {
+  describe("notimp", () => {
+    test("not implemented throws", () => {
       // Not sure if I want this to throw or just move to the next instruction
       // For now it's more helpful to thow. Replace with the lower commented
       // section to switch behavior.
@@ -3295,7 +4092,7 @@ describe('Operation methods', () => {
   });
 });
 
-describe('Utility methods', () => {
+describe("Utility methods", () => {
   let cpu, oper;
 
   beforeEach(() => {
@@ -3312,48 +4109,11 @@ describe('Utility methods', () => {
     setMemory(cpu, 0xAA);
   });
 
-  test('push16()', () => {
-    oper.push16(0x1234);
-
-    expect(cpu.mem8[0x0401E]).toBe(0x34);
-    expect(cpu.mem8[0x0401F]).toBe(0x12);
-    expect(cpu.reg16[regSP]).toBe(0x001E);
-  });
-  test('pop16()', () => {
-    cpu.mem8[0x0401E] = 0x34;
-    cpu.mem8[0x0401F] = 0x12;
-    cpu.reg16[regSP] = 0x001E;
-
-    expect(oper.pop16()).toBe(0x1234);
-    expect(cpu.reg16[regSP]).toBe(0x0020);
-  });
-
-  test.skip('pop16()', () => {});
-  test.skip('correctSubtraction()', () => {});
-  test.skip('correctAddition()', () => {});
-  test.skip('setPF_FLAG()', () => {});
-  test.skip('setSF_FLAG()', () => {});
-  test.skip('setZF_FLAG()', () => {});
-  test.skip('flagAdd()', () => {});
-  test.skip('flagSub()', () => {});
-
-});
-
-describe('Regressions', () => {
-  let cpu, addr, oper;
-
-  beforeEach(() => {
-    cpu = new CPU8086(new SystemConfig({
-      memorySize: 2 ** 20,
-      debug: false,
-    }));
-    oper = new Operations(cpu);
-    addr = new Addressing(cpu);
-    cpu.reg16[regIP] = 0x00FF;
-    cpu.reg16[regCS] = 0x0000;
-    cpu.reg16[regDS] = 0x0300;
-    cpu.reg16[regSS] = 0x0400;
-    cpu.reg16[regSP] = 0x0020;
-    cpu.reg16[regFlags] = 0x0000;
-  });
+  test.skip("correctSubtraction()", () => {});
+  test.skip("correctAddition()", () => {});
+  test.skip("setPF_FLAG()", () => {});
+  test.skip("setSF_FLAG()", () => {});
+  test.skip("setZF_FLAG()", () => {});
+  test.skip("flagAdd()", () => {});
+  test.skip("flagSub()", () => {});
 });

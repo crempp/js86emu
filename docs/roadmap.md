@@ -85,69 +85,70 @@ Investigate using Electron for running natively
 
 
 # Functionality
+
 ----
 
 ## Instruction TODO List
 
-## Data Transfer [2-31]
+## √ Data Transfer [2-31]
 
-* general
+* √ general
 	* √ MOV
 	* √ PUSH
 	* √ POP
 	* √ XCHG
-	*   XLAT
+	* √ XLAT
 	* √ IN
 	* √ OUT
-* address object
+* √ address object
 	* √ LEA
 	* √ LDS
 	* √ LES
-* flag
+* √ flag
 	* √ LAHF
 	* √ SAHF
 	* √ PUSHF
 	* √ POPF
 
-### Arithmetic [2-33]
+### √ Arithmetic [2-33]
 
-* addition
+* √ addition
 	* √ ADD
 	* √ ADC
 	* √ INC
-	*   AAA
-	*   DAA
-* subtraction
+	* √ AAA
+	* √ DAA
+* √ subtraction
 	* √ SUB
 	* √ SBB
 	* √ DEC
 	* √ NEG
 	* √ CMP
-	*   AAS
-	*   DAS
-* multiplication
+	* √ AAS
+	* √ DAS
+* √ multiplication
 	* √ MUL
-	*   IMUL
-	*   AAM
-* division
-	*   DIV
-	*   IDIV
-	*   AAD
-	*   CBW
-	*   CWD
+	* √ IMUL
+	* √ AAM
+* √ division
+	* √ DIV
+	* √ IDIV
+	* √ AAD
+	* √ CBW
+	* √ CWD
 
 ### √ Bit Manipulation [2-38]
-* logical
+* √ logical
 	* √ NOT
 	* √ AND
 	* √ OR
 	* √ XOR
 	* √ TEST
-* shifts
+* √ shifts
 	* √ SHL/SAL
 	* √ SHR
 	* √ SAR
-* rotates
+* √ rotates
 	* √ ROL
 	* √ ROR
 	* √ RCL
@@ -155,7 +156,7 @@ Investigate using Electron for running natively
 
 ### √ String [2-40]
 
-* String
+* √ String
 	* √ REP/REPE/REPZ/REPNE/REPNZ
 	* √ MOVS
 	* √ MOVSB/MOVSW
@@ -166,25 +167,25 @@ Investigate using Electron for running natively
 
 ### √ Program Transfer [2-43]
 
-* unconditional
+* √ unconditional
 	* √ CALL
 	* √ RET
 	* √ JMP
-* conditional
+* √ conditional
 	* √ J*
-* iteration control
+* √ iteration control
 	* √ LOOP
 	* √ LOOPE/LOOPZ
 	* √ LOOPNE/LOOPNZ
 	* √ JCXZ
-* interrupt
+* √ interrupt
 	* √ INT
 	* √ INTO
 	* √ IRET
 
 ### Processor Control [2-47]
 
-* √flag
+* √ flag
 	* √ CLC
 	* √ CMC
 	* √ STC
@@ -193,10 +194,10 @@ Investigate using Electron for running natively
 	* √ CLI
 	* √ STI
 * external sync
-	* o HLT
-	*   WAIT
-	*   ESC
-	*   LOCK
+	* √ HLT
+	* √ WAIT
+	*   ESC (won't implement now)
+	*   LOCK (won't implement now)
 * no operation
 	* √ NOP
 
@@ -243,9 +244,3 @@ Investigate using Electron for running natively
 
 
 ## Feature TODO List
-* Auto generated documentation from code
-* Render markdown docs and serve from site
-* Reactify debug view
-* Build library of systems (5150, 5160, etc)
-* Build library of disk images/software/games
-* Build interface for debug, docs, library, etc.
