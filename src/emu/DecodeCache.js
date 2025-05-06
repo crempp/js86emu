@@ -46,6 +46,17 @@ export default class DecodeCache {
     return oc;
   }
 
+  src(val) {
+    let ip = segIP(this.cpu);
+    console.log("SRC ", ip, ": ", val);
+  }
+
+  dst(val) {
+    let ip = segIP(this.cpu);
+    console.log(ip, ": ", val);
+    console.log("DST ", ip, ": ", val);
+  }
+
   _decode(ip) {
     let opcode = {};
 
@@ -93,7 +104,6 @@ export default class DecodeCache {
     }
 
     this.cache.set(ip, opcode);
-
 
     return opcode;
   }
